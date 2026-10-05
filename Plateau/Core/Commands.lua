@@ -420,6 +420,204 @@ local function DebugProbeClear()
     Say("probe log cleared.")
 end
 
+local LAYER_TICK = 0.1
+local LAYER_FRONT_LEVEL = 9000
+local LAYER_COLORS = { front = { 0.9, 0.15, 0.15, 0.9 }, other = { 0.2, 0.45, 0.95, 0.9 } }
+
+local layers = { mode = nil, boxes = {}, seen = {}, ticker = nil }
+
+local function LayerStats()
+    return {
+        started = date("%H:%M:%S"), mode = layers.mode, ticks = 0, plates = 0,
+        baseLevelChanges = 0, baseStrataChanges = 0, baseLevelChangesInCombat = 0,
+        levelChangeOnTarget = 0, boxUndone = 0, setFailures = 0, setFailuresInCombat = 0,
+        secretScale = 0, strata = {}, levelMin = nil, levelMax = nil, fixedApi = false,
+    }
+end
+
+local function TrySet(box, method, ...)
+    local fn = box[method]
+    if not fn then return false end
+    local ok = pcall(fn, box, ...)
+    if not ok then
+        local stats = layers.stats
+        stats.setFailures = stats.setFailures + 1
+        if InCombatLockdown() then
+            stats.setFailuresInCombat = stats.setFailuresInCombat + 1
+        end
+        ProbeStore({ kind = "layers set failed", method = method, combat = InCombatLockdown(), context = ProbeContext() })
+    end
+    return ok
+end
+
+local function LayerBox(base)
+    local box = layers.boxes[base]
+    if box then return box end
+    box = CreateFrame("Frame", nil, base)
+    box:SetSize(200, 60)
+    box:SetPoint("CENTER", base, "CENTER", 0, 10)
+    box.fill = box:CreateTexture(nil, "ARTWORK")
+    box.fill:SetAllPoints()
+    box.label = box:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    box.label:SetPoint("CENTER")
+    layers.boxes[base] = box
+    return box
+end
+
+local function PaintBox(box, front, base)
+    local color = front and LAYER_COLORS.front or LAYER_COLORS.other
+    box.fill:SetColorTexture(color[1], color[2], color[3], color[4])
+    local baseStrata = base:GetFrameStrata()
+    local baseLevel = base:GetFrameLevel()
+    if issecretvalue(baseStrata) or issecretvalue(baseLevel) then
+        baseStrata, baseLevel = "BACKGROUND", 1
+    end
+    local strata, level
+    if layers.mode == "strata" then
+        strata = front and "HIGH" or baseStrata
+        level = baseLevel + 1
+    else
+        strata = baseStrata
+        level = front and LAYER_FRONT_LEVEL or baseLevel + 1
+    end
+    if box.wantStrata and (box:GetFrameStrata() ~= box.wantStrata or box:GetFrameLevel() ~= box.wantLevel) then
+        layers.stats.boxUndone = layers.stats.boxUndone + 1
+        ProbeStore({ kind = "layers box undone", want = box.wantStrata .. " " .. box.wantLevel, got = box:GetFrameStrata() .. " " .. box:GetFrameLevel(), combat = InCombatLockdown() })
+    end
+    if box.wantStrata ~= strata or box.wantLevel ~= level then
+        TrySet(box, "SetFixedFrameStrata", false)
+        TrySet(box, "SetFixedFrameLevel", false)
+        TrySet(box, "SetFrameStrata", strata)
+        TrySet(box, "SetFrameLevel", level)
+        TrySet(box, "SetFixedFrameStrata", true)
+        TrySet(box, "SetFixedFrameLevel", true)
+    end
+    box.wantStrata, box.wantLevel = box:GetFrameStrata(), box:GetFrameLevel()
+    box.label:SetText(("%s  %s %d"):format(front and "TARGET" or "other", box.wantStrata, box.wantLevel))
+    box:Show()
+end
+
+local function LayerTick(targetChanged)
+    local stats = layers.stats
+    stats.ticks = stats.ticks + 1
+    local targetBase = C_NamePlate.GetNamePlateForUnit("target")
+    local active = {}
+    local plates = C_NamePlate.GetNamePlates() or {}
+    if #plates > stats.plates then
+        stats.plates = #plates
+    end
+    for _, base in ipairs(plates) do
+        active[base] = true
+        local level, strata = base:GetFrameLevel(), base:GetFrameStrata()
+        if issecretvalue(level) or issecretvalue(strata) then
+            stats.secretLevel = (stats.secretLevel or 0) + 1
+            level, strata = 0, "secret"
+        end
+        stats.strata[strata] = true
+        stats.levelMin = math.min(stats.levelMin or level, level)
+        stats.levelMax = math.max(stats.levelMax or level, level)
+        local scale = base:GetEffectiveScale()
+        if issecretvalue(scale) then
+            stats.secretScale = stats.secretScale + 1
+        end
+        local last = layers.seen[base]
+        if last then
+            if last.level ~= level then
+                stats.baseLevelChanges = stats.baseLevelChanges + 1
+                if InCombatLockdown() then
+                    stats.baseLevelChangesInCombat = stats.baseLevelChangesInCombat + 1
+                end
+                if targetChanged then
+                    stats.levelChangeOnTarget = stats.levelChangeOnTarget + 1
+                end
+                ProbeStore({ kind = "layers base level", from = last.level, to = level, target = base == targetBase, combat = InCombatLockdown(), targetChanged = targetChanged == true })
+            end
+            if last.strata ~= strata then
+                stats.baseStrataChanges = stats.baseStrataChanges + 1
+                ProbeStore({ kind = "layers base strata", from = last.strata, to = strata, target = base == targetBase, combat = InCombatLockdown() })
+            end
+        end
+        layers.seen[base] = { level = level, strata = strata }
+        PaintBox(LayerBox(base), base == targetBase, base)
+    end
+    for base, box in pairs(layers.boxes) do
+        if not active[base] then
+            box:Hide()
+            box.wantStrata, box.wantLevel = nil, nil
+            layers.seen[base] = nil
+        end
+    end
+end
+
+local layerEvents = CreateFrame("Frame")
+layerEvents:SetScript("OnEvent", function()
+    if layers.mode then
+        LayerTick(true)
+    end
+end)
+
+local function LayerSummary(stats)
+    local strata = {}
+    for name in pairs(stats.strata) do
+        strata[#strata + 1] = name
+    end
+    table.sort(strata)
+    Say(("layers test (%s mode) results:"):format(stats.mode))
+    print(("  most plates at once: %d, checks: %d"):format(stats.plates, stats.ticks))
+    print(("  Blizzard plate strata seen: %s, levels %s to %s"):format(#strata > 0 and table.concat(strata, ", ") or "none", tostring(stats.levelMin), tostring(stats.levelMax)))
+    print(("  Blizzard plate level changes: %d (%d in combat, %d right after a target change), strata changes: %d"):format(stats.baseLevelChanges, stats.baseLevelChangesInCombat, stats.levelChangeOnTarget, stats.baseStrataChanges))
+    print(("  test boxes undone by the game: %d, refused changes: %d (%d in combat), secret scale reads: %d, secret level reads: %d"):format(stats.boxUndone, stats.setFailures, stats.setFailuresInCombat, stats.secretScale, stats.secretLevel or 0))
+    print("  Most important: did the red box draw over the blue boxes where they overlapped? Note yes or no for each mode.")
+end
+
+local function StopLayers()
+    if layers.ticker then
+        layers.ticker:Cancel()
+        layers.ticker = nil
+    end
+    layerEvents:UnregisterAllEvents()
+    for _, box in pairs(layers.boxes) do
+        box:Hide()
+        box.wantStrata, box.wantLevel = nil, nil
+    end
+    wipe(layers.seen)
+    if layers.stats then
+        ProbeStore({ kind = "layers summary", stats = layers.stats, context = ProbeContext() })
+        LayerSummary(layers.stats)
+    end
+    layers.mode, layers.stats = nil, nil
+end
+
+local function DebugLayers(arg)
+    if arg == "off" then
+        if not layers.mode then
+            Say("the layers test isn't running.")
+            return
+        end
+        StopLayers()
+        Say("layers test stopped. /reload to save the log.")
+        return
+    end
+    local mode = arg == "level" and "level" or "strata"
+    if layers.mode then
+        StopLayers()
+    end
+    layers.mode = mode
+    layers.stats = LayerStats()
+    layers.stats.fixedApi = UIParent.SetFixedFrameStrata ~= nil
+    layerEvents:RegisterEvent("PLAYER_TARGET_CHANGED")
+    layerEvents:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+    layers.ticker = C_Timer.NewTicker(LAYER_TICK, function() LayerTick(false) end)
+    LayerTick(false)
+    if mode == "strata" then
+        Say("layers test on (strata mode): your target's box is red and set to HIGH strata; every other plate's box is blue in Blizzard's strata.")
+    else
+        Say("layers test on (level mode): every box stays in Blizzard's strata; your target's red box gets frame level 9000, the blue boxes sit just above their own plate.")
+    end
+    print("  Stand near a pack so plates overlap, target one in the middle, and check whether the red box covers the blue boxes next to it. Retarget, move and pull a few times.")
+    print("  /pl debug layers level and /pl debug layers strata switch modes; /pl debug layers off stops and prints the results.")
+end
+
 local CONFLICTS = {
     { name = "Platynator", title = "Platynator" },
     { name = "Plater", title = "Plater" },
@@ -537,6 +735,7 @@ local function Help()
     print("  /pl debug reset - start counting slow frames from now")
     print("  /pl debug probe - what the game hides about your target, focus, mouseover and bosses right now")
     print("  /pl debug probe watch [off] - log every enemy plate, pull and boss encounter; /pl debug probe clear empties the log")
+    print("  /pl debug layers [level|off] - test whether a plate can draw in front of its neighbours (red box = target)")
     print("  /pl reset - put every setting in this profile back to its default")
     print("  /pl cvars restore - undo every game nameplate setting Plateau changed")
 end
@@ -712,6 +911,8 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
         Say("slow-frame counts reset. Run /pl debug later to see how many happened since.")
+    elseif command == "debug" and path == "layers" then
+        DebugLayers(words[3])
     elseif command == "debug" and path == "probe" and words[3] == "watch" then
         DebugProbeWatch(words[4])
     elseif command == "debug" and path == "probe" and words[3] == "clear" then
