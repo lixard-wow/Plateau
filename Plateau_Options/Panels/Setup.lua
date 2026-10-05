@@ -20,9 +20,9 @@ local function KickLabel()
     local id = Plateau.InterruptSpell and Plateau.InterruptSpell()
     local name = id and C_Spell.GetSpellName(id)
     if name then
-        return ("Plateau found your interrupt: |cff45d1c2%s|r. Cast bars color themselves by whether it's ready, so you can tell at a glance whether to interrupt. These colors also live on the Cast bar page in /pl."):format(name)
+        return ("Plateau found your interrupt: |cff45d1c2%s|r. Cast bars color themselves by whether it's ready, so you can tell at a glance whether to interrupt. These colors also live on the Cast bar page in /plt."):format(name)
     end
-    return "No interrupt found for this spec. Cast bars use the plain kickable colors until you switch to a spec that has one. The cast bar colors live on the Cast bar page in /pl."
+    return "No interrupt found for this spec. Cast bars use the plain kickable colors until you switch to a spec that has one. The cast bar colors live on the Cast bar page in /plt."
 end
 
 local PET_CVARS = { "nameplateShowEnemyPets", "nameplateShowEnemyGuardians", "nameplateShowEnemyMinions", "nameplateShowEnemyTotems" }
@@ -97,7 +97,7 @@ end
 local STEPS = {
     {
         title = "Pick a look",
-        intro = "Each look is a ready-made profile. Using one switches to it and makes it your default; some also set enemy colors. Every part can be changed later with /pl, and your changes are saved in that profile.",
+        intro = "Each look is a ready-made profile. Using one switches to it and makes it your default; some also set enemy colors. Every part can be changed later with /plt, and your changes are saved in that profile.",
         controls = function()
             return {
                 { type = "LookCards", presets = ns.AllLooks(), width = CONTENT_WIDTH, wide = true, mode = "profile" },
@@ -106,7 +106,7 @@ local STEPS = {
     },
     {
         title = "Which plates show",
-        intro = "These are Blizzard's own nameplate settings. Plateau remembers what they were before, so you can always put them back with /pl cvars restore.",
+        intro = "These are Blizzard's own nameplate settings. Plateau remembers what they were before, so you can always put them back with /plt cvars restore.",
         controls = function()
             return {
                 { type = "Header", label = "Enemies", first = true },
@@ -146,13 +146,13 @@ local STEPS = {
                       ns.PromptReload()
                   end,
                   tooltip = "The game adds (*) to players from other realms. Takes effect after a /reload." },
-                { type = "Note", label = "Everything else about which plates show, like names over heads, is on the Game settings page in /pl, and fading behind walls is on the Fading page.", height = 32 },
+                { type = "Note", label = "Everything else about which plates show, like names over heads, is on the Game settings page in /plt, and fading behind walls is on the Fading page.", height = 32 },
             }
         end,
     },
     {
         title = "What shows on a plate",
-        intro = "Switch each part on or off and watch the plate above change. Every one of these has its own page in /pl with more options.",
+        intro = "Switch each part on or off and watch the plate above change. Every one of these has its own page in /plt with more options.",
         controls = function()
             local function Show(path, label, tooltip)
                 return { type = "Toggle", half = true, path = path, label = label, tooltip = tooltip }
@@ -179,7 +179,7 @@ local STEPS = {
     },
     {
         title = "Colors",
-        intro = "How health bars are colored. Tapped, reaction and the rest are on the Health bar page in /pl.",
+        intro = "How health bars are colored. Tapped, reaction and the rest are on the Health bar page in /plt.",
         controls = function()
             local function Type(key, label, tooltip)
                 return { type = "ToggleColor", half = true, path = "look.colors." .. key, colorPath = "look.colors." .. key .. "Color", label = label, tooltip = tooltip }
@@ -227,7 +227,7 @@ local STEPS = {
                   tooltip = "When your interrupt is on cooldown but will be ready before the cast ends, a line marks the moment." },
                 { type = "ToggleColor", half = true, path = "look.castbar.showInterrupter", colorPath = "look.castbar.interruptedColor", label = "Show who interrupted",
                   tooltip = "Shows the interrupter's name on the cast bar after a cast gets interrupted." },
-                { type = "Note", label = "The important-cast glow, the channel colors and the no-interrupt colors are on the Cast bar page in /pl.", height = 32 },
+                { type = "Note", label = "The important-cast glow, the channel colors and the no-interrupt colors are on the Cast bar page in /plt.", height = 32 },
             }
         end,
     },
@@ -236,12 +236,12 @@ local STEPS = {
         intro = "Plateau is ready. A few things worth knowing:",
         controls = function()
             return {
-                { type = "Note", label = "|cff45d1c2/pl|r opens every setting, with a live preview you can click and drag to move things.", height = 32 },
-                { type = "Note", label = "|cff45d1c2/pl setup|r brings this walkthrough back anytime.", height = 24 },
-                { type = "Note", label = "Different layouts per spec or per content (dungeons, raids, arena)? Make a profile for each, then open the profile button at the bottom left of /pl, pick Manage profiles and set them under Switch automatically.", height = 44 },
-                { type = "Note", label = "Your target, focus and the plate under your cursor can stand out in their own way: open /pl and look under States in the left menu.", height = 44 },
+                { type = "Note", label = "|cff45d1c2/plt|r opens every setting, with a live preview you can click and drag to move things.", height = 32 },
+                { type = "Note", label = "|cff45d1c2/plt setup|r brings this walkthrough back anytime.", height = 24 },
+                { type = "Note", label = "Different layouts per spec or per content (dungeons, raids, arena)? Make a profile for each, then open the profile button at the bottom left of /plt, pick Manage profiles and set them under Switch automatically.", height = 44 },
+                { type = "Note", label = "Your target, focus and the plate under your cursor can stand out in their own way: open /plt and look under States in the left menu.", height = 44 },
                 { type = "Note", label = "Auras (your debuffs, crowd control, enemy buffs) and Icons (raid markers, quest, enemy forces, class resource) each have their own group in the left menu, with sizes, positions and more.", height = 44 },
-                { type = "Note", label = "Minimize shrinks /pl to a small bar showing your active profile, so you can watch the game while you tweak.", height = 32 },
+                { type = "Note", label = "Minimize shrinks /plt to a small bar showing your active profile, so you can watch the game while you tweak.", height = 32 },
             }
         end,
     },

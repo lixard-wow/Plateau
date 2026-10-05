@@ -106,9 +106,9 @@ local function Debug()
     print(("  Plates: %d showing, %d drawn by Plateau"):format(total, claimed))
     local now = GetTime()
     if lastEventTime and now > lastEventTime then
-        print(("  Plate events: %.1f per second since the last /pl debug"):format((ns.Driver.eventCount - lastEventCount) / (now - lastEventTime)))
+        print(("  Plate events: %.1f per second since the last /plt debug"):format((ns.Driver.eventCount - lastEventCount) / (now - lastEventTime)))
     else
-        print("  Plate events: run /pl debug again in a few seconds for a rate")
+        print("  Plate events: run /plt debug again in a few seconds for a rate")
     end
     lastEventCount, lastEventTime = ns.Driver.eventCount, now
     for _, line in ipairs(ns.PerformanceLines()) do
@@ -259,7 +259,7 @@ local function DebugProbe()
     if not any then
         print("  No target, focus, mouseover or boss units. Target an enemy and run it again.")
     end
-    print(("  Saved to the probe log (%d entries). /pl debug probe watch logs every enemy plate as it appears."):format(#ProbeLog()))
+    print(("  Saved to the probe log (%d entries). /plt debug probe watch logs every enemy plate as it appears."):format(#ProbeLog()))
 end
 
 local function Shown(value)
@@ -400,7 +400,7 @@ local function DebugProbeWatch(arg)
     SetProbeWatch(on)
     ns.DB.saved.global.probeWatch = on or nil
     if on then
-        Say("probe watch on: every enemy plate that appears (what the game hides, and how Plateau drew it), every pull and every boss encounter is logged. It stays on through reloads and logouts until /pl debug probe watch off. /reload to save the log and any errors.")
+        Say("probe watch on: every enemy plate that appears (what the game hides, and how Plateau drew it), every pull and every boss encounter is logged. It stays on through reloads and logouts until /plt debug probe watch off. /reload to save the log and any errors.")
     else
         Say(("probe watch off. %d entries in the log; /reload to save them."):format(#ProbeLog()))
     end
@@ -411,7 +411,7 @@ probeResume:RegisterEvent("PLAYER_LOGIN")
 probeResume:SetScript("OnEvent", function()
     if ns.DB.saved and ns.DB.saved.global.probeWatch then
         SetProbeWatch(true)
-        Say("probe watch is still on and logging. /pl debug probe watch off to stop.")
+        Say("probe watch is still on and logging. /plt debug probe watch off to stop.")
     end
 end)
 
@@ -615,7 +615,7 @@ local function DebugLayers(arg)
         Say("layers test on (level mode): every box stays in Blizzard's strata; your target's red box gets frame level 9000, the blue boxes sit just above their own plate.")
     end
     print("  Stand near a pack so plates overlap, target one in the middle, and check whether the red box covers the blue boxes next to it. Retarget, move and pull a few times.")
-    print("  /pl debug layers level and /pl debug layers strata switch modes; /pl debug layers off stops and prints the results.")
+    print("  /plt debug layers level and /plt debug layers strata switch modes; /plt debug layers off stops and prints the results.")
 end
 
 local CONFLICTS = {
@@ -728,16 +728,16 @@ end)
 
 local function Help()
     Say("commands:")
-    print("  /pl - open the settings")
-    print("  /pl setup - the first-time walkthrough")
-    print("  /pl minimap - show or hide the minimap button")
-    print("  /pl debug - version, restrictions and memory, for bug reports")
-    print("  /pl debug reset - start counting slow frames from now")
-    print("  /pl debug probe - what the game hides about your target, focus, mouseover and bosses right now")
-    print("  /pl debug probe watch [off] - log every enemy plate, pull and boss encounter; /pl debug probe clear empties the log")
-    print("  /pl debug layers [level|off] - test whether a plate can draw in front of its neighbours (red box = target)")
-    print("  /pl reset - put every setting in this profile back to its default")
-    print("  /pl cvars restore - undo every game nameplate setting Plateau changed")
+    print("  /plt - open the settings")
+    print("  /plt setup - the first-time walkthrough")
+    print("  /plt minimap - show or hide the minimap button")
+    print("  /plt debug - version, restrictions and memory, for bug reports")
+    print("  /plt debug reset - start counting slow frames from now")
+    print("  /plt debug probe - what the game hides about your target, focus, mouseover and bosses right now")
+    print("  /plt debug probe watch [off] - log every enemy plate, pull and boss encounter; /plt debug probe clear empties the log")
+    print("  /plt debug layers [level|off] - test whether a plate can draw in front of its neighbours (red box = target)")
+    print("  /plt reset - put every setting in this profile back to its default")
+    print("  /plt cvars restore - undo every game nameplate setting Plateau changed")
 end
 
 local function OpenOptions()
@@ -891,8 +891,7 @@ resetFrame:SetScript("OnEvent", function(self)
 end)
 
 SLASH_PLATEAU1 = "/plateau"
-SLASH_PLATEAU2 = "/pl"
-SLASH_PLATEAU3 = "/sl"
+SLASH_PLATEAU2 = "/plt"
 SlashCmdList.PLATEAU = function(input)
     local words = {}
     for word in input:gmatch("%S+") do
@@ -907,10 +906,10 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "minimap" and ns.Minimap then
         local shown = not ns.Minimap:IsShown()
         ns.Minimap:SetShown(shown)
-        Say(shown and "minimap button shown." or "minimap button hidden. /pl minimap brings it back.")
+        Say(shown and "minimap button shown." or "minimap button hidden. /plt minimap brings it back.")
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
-        Say("slow-frame counts reset. Run /pl debug later to see how many happened since.")
+        Say("slow-frame counts reset. Run /plt debug later to see how many happened since.")
     elseif command == "debug" and path == "layers" then
         DebugLayers(words[3])
     elseif command == "debug" and path == "probe" and words[3] == "watch" then

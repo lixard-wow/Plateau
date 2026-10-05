@@ -14,6 +14,7 @@ Plateau's nameplates are now part of the game's nameplates instead of floating i
 - **Size, distance scaling, showing, hiding and fading come straight from the game**, so they always match Blizzard's own nameplate settings, with no catch-up delay. Plateau's own sizes (target, focus, casting, mouseover, enemy type and combat) are applied on top.
 - **Layering still works:** Layer by enemy type and Mouseover in front keep their order, and plates of the same rank keep the game's nearest-in-front order.
 - Fade hidden nameplates for: turning it off for a type now makes those plates ignore the game's fading entirely.
+- **The short command is now /plt** (was /pl), so it no longer clashes with PilotLight. /plateau still works; /sl was removed for the same reason.
 
 #### Removed
 - The background check that copied the game's nameplate size and fade every tenth of a second, and the size Plateau used to learn and remember between sessions.
@@ -34,12 +35,12 @@ Every settings page was reviewed: controls that do nothing in the current setup 
 - **States:** pulse glow and border and animate arrows for target and focus, an above-and-below arrow placement, mouseover glow, skip friendly plates on mouseover, out-of-combat cast bar and only in dungeons and raids.
 - **Auras (per group):** icon shape (square or wide), cooldown swipe, icon border thickness and color, timer and stack count positions.
 - **Icons:** marker-colored plate border, quest objective progress, class resource hide when empty and glow at maximum.
-- **Minimap button** (LibDBIcon, draggable, tooltip with the active profile) and, on retail, an entry in the addon list next to the minimap. Both have switches on the Plateau settings page (gear button); `/pl minimap` shows or hides the button.
+- **Minimap button** (LibDBIcon, draggable, tooltip with the active profile) and, on retail, an entry in the addon list next to the minimap. Both have switches on the Plateau settings page (gear button); `/plt minimap` shows or hides the button.
 - **Plateau settings page** behind the gear button in the title bar (not in the sidebar, but searchable): window theme, settings window scale (0.60 to 1.40, applies instantly; dropdown lists scale with it), text and heading fonts for the settings window (the bundled fonts plus any LibSharedMedia font; asks for a reload), settings tooltips, game menu button and minimap buttons. These moved off the Game settings page. Artisan Ledger also rounds text boxes and dropdown checkboxes.
 - **Three settings themes** (Plateau settings, gear button): Workbench (flat charcoal, green accent, Barlow), Artisan Ledger (walnut and brass, Cinzel headings) and Lixard Classic (near-black, square, gold). Workbench is the default on retail and Artisan Ledger on WoW Forever; switching asks for a reload. Buttons and dropdowns follow the theme's button colors and corners, and the title bar has icon buttons for settings (opens Plateau settings), minimize and close, like PKT. Fonts are bundled under their open font licences.
 - **Rounded settings window and pop-ups** with no drop shadows: the setup walkthrough, other-addon warning, tour callouts, profile dialogs, reload prompt, dropdown lists and search results all use the same rounded corners.
-- **Renamed to Plateau**, with a new icon: a gradient P. Commands are /plateau and /pl (/sl still works).
-- **Critter and companion names on for new installs**: a brand-new install turns on Blizzard's Show critter and companion names once (undo with right-click or /pl cvars restore), and the setup walkthrough has the switch.
+- **Renamed to Plateau**, with a new icon: a gradient P. Commands are /plateau and /plt.
+- **Critter and companion names on for new installs**: a brand-new install turns on Blizzard's Show critter and companion names once (undo with right-click or /plt cvars restore), and the setup walkthrough has the switch.
 - **Include other players' debuffs** (Your debuffs page, off by default): shows debuffs from other players after your own, like Blizzard's nameplates.
 - **Show nameplate-only auras** (each aura page, Extras): choose per group whether auras the game shows only on nameplates appear; the preview shows them as a question-mark icon.
 - **Fade hidden nameplates for** (Fading page, under Behind walls): enemies and friendly, enemies only, or friendly only take the game's fading.
@@ -50,7 +51,7 @@ Every settings page was reviewed: controls that do nothing in the current setup 
 - **Friendly:** hide friendly plates in combat, group member name color, realm names on Plateau's friendly plates; Plateau's friendly plates follow Blizzard's Simplify friendly players and NPCs.
 - **Game settings:** always show your target's name, always show names on Blizzard's plates, all auras on the personal resource display, soft target icons and size, debuffs on Blizzard's friendly plates.
 - **Look picker** restyled as large accent cards with live previews.
-- **Probe:** `/pl debug probe` reports which unit calls the game hides; `/pl debug probe watch` logs every enemy plate, pull and boss encounter (with how Plateau drew each plate) and stays on through reloads until turned off.
+- **Probe:** `/plt debug probe` reports which unit calls the game hides; `/plt debug probe watch` logs every enemy plate, pull and boss encounter (with how Plateau drew each plate) and stays on through reloads until turned off.
 
 #### Changed
 - Four built-in looks: Big & bold, Normal (the new default), Slim and Compact.
@@ -77,7 +78,7 @@ Every settings page was reviewed: controls that do nothing in the current setup 
 #### Removed
 - The Preview scenarios menu and Reset preview.
 - The Plateau and Classic built-in looks (saved profiles with those names are kept).
-- Finished debug commands: `/pl debug layers`, `watch`, `front`, `unit` and `names`.
+- Finished debug commands: `/plt debug layers`, `watch`, `front`, `unit` and `names`.
 
 ### Added
 
@@ -147,7 +148,7 @@ Every settings page was reviewed: controls that do nothing in the current setup 
 - A first-time setup walkthrough in six fixed-size steps: look, which plates show, which parts show on a plate (switches that update a larger live preview), colors, interrupts and a short summary. A first-open tour of the window, and a Help page with 44 topics.
 - **Friendly pets and minions.** A switch on the Friendly page, off by default, for the pets, totems and minions of friendly players. Follower dungeon companions are not affected.
 - Friendly player name shortening is shown only on flavors where players have a surname.
-- `/pl debug unit` and `/pl debug names` report how Plateau reads your target and whether enemy names can be shortened. `/pl debug` also counts aura buttons built in combat, and `/pl debug flatten` is a measuring experiment.
+- `/plt debug unit` and `/plt debug names` report how Plateau reads your target and whether enemy names can be shortened. `/plt debug` also counts aura buttons built in combat, and `/plt debug flatten` is a measuring experiment.
 - A game menu button just above AddOns (with a switch to hide it), the (*) other-realm marker removed from player names even on plates the game draws, a Name height slider for names-only plates, a gradient name in the addon list, a new addon icon, and a Performance readout (CPU, slow frames, memory) from the game's addon profiler.
 - Settings that depend on information the game can hide are marked with a warning icon and a tooltip that says what happens.
 - **Settings regrouped by topic.** A Behavior group holds Size (every scale, plus Blizzard's size and size by distance), Fading (range fading, plates you are not targeting, behind walls, by distance), Layering and stacking (layering order, stacking, spacing, movement) and Clickable area. Target, Focus, Mouseover and a new Out of combat page sit under States. The options for the nameplates the game draws itself moved to Friendly, and Game settings keeps names over heads, which nameplates show and keeping plates on screen. No setting changed; only where it is shown.
@@ -167,7 +168,7 @@ Every settings page was reviewed: controls that do nothing in the current setup 
 
 ### Removed during development
 - Aura sound cues: the game supports them only for auras on the player, so they do not fit a nameplate addon.
-- `/pl get`, `/pl set`, `/pl status` and drag debugging: developer tools. `/pl debug` covers bug reports.
+- `/plt get`, `/plt set`, `/plt status` and drag debugging: developer tools. `/plt debug` covers bug reports.
 
 ### Known limitations
 - Friendly plates are locked in dungeons, raids and arenas, so Blizzard draws them there.

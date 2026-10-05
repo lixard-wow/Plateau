@@ -23,7 +23,7 @@ ns.helpTopics = {
         category = "Getting started",
         title = "Looks: ready-made starting points",
         keywords = "looks cards presets layouts styles normal slim big bold compact name inside setup",
-        text = "The first-time setup walkthrough shows a card for each of the four ready-made looks (Big & bold, Normal, Slim and Compact), each with a small live nameplate. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /pl setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
+        text = "The first-time setup walkthrough shows a card for each of the four ready-made looks (Big & bold, Normal, Slim and Compact), each with a small live nameplate. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
     },
     {
         category = "Getting started",
@@ -209,7 +209,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Game settings page",
         keywords = "game settings cvar blizzard names over heads which nameplates show off-screen preferences",
-        text = "These are Blizzard's own nameplate settings that don't belong to a Plateau page. Plateau saves the previous value of any you change here, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset the page, or type /pl cvars restore.\n\nOther nameplate addons lists any that could conflict. Each can be turned off from there, or you can turn off Plateau instead if you prefer the other one. Names over heads sets which names float over characters. Which nameplates show decides who gets a plate. Keeping nameplates on screen starts collapsed; click its heading to open it, or search for a setting inside it and it opens for you.\n\nBlizzard settings that belong with a Plateau page live on that page instead: size and size by distance on Size, opacity behind walls and by distance on Fading, stacking and movement on Layering and stacking, and the options for the nameplates the game draws itself on Friendly.\n\nPlateau's own settings (window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window, so restoring Blizzard settings does not touch them. The performance numbers are under Diagnostics on the Help page. These settings are shared by every profile.",
+        text = "These are Blizzard's own nameplate settings that don't belong to a Plateau page. Plateau saves the previous value of any you change here, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset the page, or type /plt cvars restore.\n\nOther nameplate addons lists any that could conflict. Each can be turned off from there, or you can turn off Plateau instead if you prefer the other one. Names over heads sets which names float over characters. Which nameplates show decides who gets a plate. Keeping nameplates on screen starts collapsed; click its heading to open it, or search for a setting inside it and it opens for you.\n\nBlizzard settings that belong with a Plateau page live on that page instead: size and size by distance on Size, opacity behind walls and by distance on Fading, stacking and movement on Layering and stacking, and the options for the nameplates the game draws itself on Friendly.\n\nPlateau's own settings (window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window, so restoring Blizzard settings does not touch them. The performance numbers are under Diagnostics on the Help page. These settings are shared by every profile.",
     },
     {
         category = "Pages",
@@ -251,13 +251,13 @@ ns.helpTopics = {
         category = "How do I",
         title = "Go back to how it was",
         keywords = "revert restore undo lost broke fix reset old",
-        text = "For a recent mistake, use Undo. To reset one setting, right-click it. To reset a page, use Reset this section. To put a ready-made look back the way it shipped, use Restore built-in on the Profiles page. For the game's own nameplate settings, type /pl cvars restore.\n\nIf you are still not happy, /pl setup opens the first-time walkthrough again.",
+        text = "For a recent mistake, use Undo. To reset one setting, right-click it. To reset a page, use Reset this section. To put a ready-made look back the way it shipped, use Restore built-in on the Profiles page. For the game's own nameplate settings, type /plt cvars restore.\n\nIf you are still not happy, /plt setup opens the first-time walkthrough again.",
     },
     {
         category = "Commands",
         title = "Slash commands",
         keywords = "slash commands sl debug setup reset cvars",
-        text = "/pl opens the settings window.\n/pl setup opens the first-time walkthrough.\n/pl minimap shows or hides the minimap button.\n/pl debug shows the version, restrictions, CPU and memory, and how Plateau reads your target. Paste it when you report a bug.\n/pl reset puts every setting in the current profile back to its default.\n/pl cvars restore undoes every game nameplate setting Plateau changed.",
+        text = "/plt opens the settings window.\n/plt setup opens the first-time walkthrough.\n/plt minimap shows or hides the minimap button.\n/plt debug shows the version, restrictions, CPU and memory, and how Plateau reads your target. Paste it when you report a bug.\n/plt reset puts every setting in the current profile back to its default.\n/plt cvars restore undoes every game nameplate setting Plateau changed.",
     },
 }
 

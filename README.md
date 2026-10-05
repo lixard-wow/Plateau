@@ -30,7 +30,7 @@ Plateau replaces the enemy nameplates with its own, and gives you a settings win
 Copy the `Plateau` and `Plateau_Options` folders into your `Interface\AddOns` folder, then restart the game. `Plateau_Options` loads only when you open the settings, so it costs nothing while you play.
 
 ## First run
-The first time you log in, a short setup walkthrough opens. It lets you pick a look, choose which plates show (including friendly plates and player pets), and see a live preview of each choice. After it, the settings window opens with a short tour of its parts. You can skip both, and replay them any time: `/pl setup` for the walkthrough, or the buttons at the top of the **Help** page for the tour.
+The first time you log in, a short setup walkthrough opens. It lets you pick a look, choose which plates show (including friendly plates and player pets), and see a live preview of each choice. After it, the settings window opens with a short tour of its parts. You can skip both, and replay them any time: `/plt setup` for the walkthrough, or the buttons at the top of the **Help** page for the tour.
 
 ## What you get
 
@@ -89,10 +89,10 @@ Combo points, holy power, soul shards, chi, arcane charges, essence or runes, dr
 - Fade for enemies out of your interrupt's range.
 
 ### Blizzard's own nameplate settings
-A page gathers the game's nameplate settings (which nameplates show, names over heads, off-screen plates, distance scaling and more). Plateau changes only the ones you change, remembers what they were, and puts them back on request: right-click a setting, reset the page, or type `/pl cvars restore`.
+A page gathers the game's nameplate settings (which nameplates show, names over heads, off-screen plates, distance scaling and more). Plateau changes only the ones you change, remembers what they were, and puts them back on request: right-click a setting, reset the page, or type `/plt cvars restore`.
 
 ## The settings window
-Open it with `/pl`, or the **Plateau Nameplates** button in the game menu (Escape), just above **AddOns**, or the minimap button (on retail Plateau is also in the addon list next to the minimap). Switches on the Game settings page hide each of these.
+Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Escape), just above **AddOns**, or the minimap button (on retail Plateau is also in the addon list next to the minimap). Switches on the Game settings page hide each of these.
 
 - **Live preview.** A sample plate updates as you change things. Click any part to jump to that part's settings: the page opens and the exact control flashes, or the page title flashes when the part is the whole section (the cast bar, for example). Drag a part to move it: it snaps to spots that make sense and leaves a one pixel space. Hold Shift to place it anywhere, or turn **Snap** off.
 - **Nameplate types.** Enemy, Enemy player, Friendly, My target and My focus are stacked down the left. Enemy is the base. The others follow it and only differ where you change them, and the window takes the color of the type you pick.
@@ -122,13 +122,13 @@ Since patch 12.0 the game hides some information from addons during combat and i
 - Nothing runs on each nameplate every frame, and updates avoid creating tables, so memory churn stays low. The **Performance** section on the Game settings page shows the real numbers from the game's own profiler.
 
 ## Commands
-- `/pl` opens the settings.
-- `/pl setup` opens the first-time walkthrough.
-- `/pl minimap` shows or hides the minimap button.
-- `/pl debug` prints the version, restrictions, memory and CPU numbers. Paste it when you report a bug.
-- `/pl debug probe` shows what the game hides about your target and bosses right now; `/pl debug probe watch` logs it through a whole dungeon (it stays on through reloads until `/pl debug probe watch off`).
-- `/pl reset` puts every setting in the current profile back to its default.
-- `/pl cvars restore` undoes every game nameplate setting Plateau changed.
+- `/plt` opens the settings.
+- `/plt setup` opens the first-time walkthrough.
+- `/plt minimap` shows or hides the minimap button.
+- `/plt debug` prints the version, restrictions, memory and CPU numbers. Paste it when you report a bug.
+- `/plt debug probe` shows what the game hides about your target and bosses right now; `/plt debug probe watch` logs it through a whole dungeon (it stays on through reloads until `/plt debug probe watch off`).
+- `/plt reset` puts every setting in the current profile back to its default.
+- `/plt cvars restore` undoes every game nameplate setting Plateau changed.
 
 ## Compatibility
 - Plateau replaces Blizzard's enemy nameplates. If another nameplate addon is loaded, a dialog on first run offers to disable the other one, since two would fight over the same plates.
@@ -137,8 +137,8 @@ Since patch 12.0 the game hides some information from addons during combat and i
 ## Troubleshooting
 - **Something looks wrong after an update:** `/reload`. New files need a full game restart.
 - **A plate is the wrong color:** the colors on the Health bar page are checked top to bottom, and your target and focus colors win over all of them. Threat and tagged colors win over enemy type colors. Some settings are overridden for one nameplate type only. A dot in the left menu marks a page that differs from the default.
-- **An error appears:** copy it from BugSack (or the game's error window) and `/pl debug` output when you report it.
-- **Everything is a mess:** `/pl reset` for the current profile, or `/pl cvars restore` for the game's own settings.
+- **An error appears:** copy it from BugSack (or the game's error window) and `/plt debug` output when you report it.
+- **Everything is a mess:** `/plt reset` for the current profile, or `/plt cvars restore` for the game's own settings.
 
 ## For developers
 Layout:

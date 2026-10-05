@@ -1409,7 +1409,7 @@ ns.sections = {
             CVars:ReleaseAll()
         end,
         controls = Join(List(
-            { type = "Note", label = "Adjust Blizzard's nameplate settings. Plateau saves the previous values of settings you change here so they can be restored. Right-click a setting to restore its saved value. Reset this section or type /pl cvars restore to restore every setting Plateau changed. This puts back the values from before Plateau changed them, not Blizzard's defaults.", height = 44 },
+            { type = "Note", label = "Adjust Blizzard's nameplate settings. Plateau saves the previous values of settings you change here so they can be restored. Right-click a setting to restore its saved value. Reset this section or type /plt cvars restore to restore every setting Plateau changed. This puts back the values from before Plateau changed them, not Blizzard's defaults.", height = 44 },
 
             { type = "Header", label = "Other nameplate addons" },
             { type = "Conflicts" },
@@ -2710,11 +2710,11 @@ ns.sections = {
             { type = "Toggle", label = "Show Plateau in game menu",
               get = function() return not Plateau.DB.saved.global.hideMenuButton end,
               set = function(value) Plateau.DB.saved.global.hideMenuButton = not value end,
-              tooltip = "The button above AddOns in the Escape menu. Turn it off if you would rather open the settings with /pl. Takes effect the next time the menu opens." },
+              tooltip = "The button above AddOns in the Escape menu. Turn it off if you would rather open the settings with /plt. Takes effect the next time the menu opens." },
             { type = "Toggle", label = "Show minimap button", visibleIf = function() return Plateau.Minimap ~= nil end,
               get = function() return Plateau.Minimap ~= nil and Plateau.Minimap:IsShown() end,
               set = function(value) Plateau.Minimap:SetShown(value == true) end,
-              tooltip = "A Plateau button on the edge of the minimap that opens the settings. Drag it to move it around the minimap. /pl minimap also shows or hides it." },
+              tooltip = "A Plateau button on the edge of the minimap that opens the settings. Drag it to move it around the minimap. /plt minimap also shows or hides it." },
             { type = "Toggle", label = "Show in the addon list by the minimap", visibleIf = function() return Plateau.Minimap ~= nil and Plateau.Minimap:HasCompartment() end,
               get = function() return Plateau.Minimap ~= nil and Plateau.Minimap:InCompartment() end,
               set = function(value) Plateau.Minimap:SetCompartment(value == true) end,
