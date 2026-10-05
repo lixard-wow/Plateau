@@ -1,0 +1,12 @@
+.release/
+*.zip
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+Plateau/Libs/*/
+
+docs/
+HANDOFF.md
+scripts/
+tests/

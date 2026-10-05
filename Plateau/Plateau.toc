@@ -1,0 +1,54 @@
+## Interface: 120100, 120105, 16001
+## Title: |cff45d1c2P|r|cff51c8c8l|r|cff5cbfcfa|r|cff68b6d6t|r|cff74addce|r|cff7fa4e3a|r|cff8b9be9u|r |cffa289f7N|r|cffad88efa|r|cffb78edam|r|cffc094c5e|r|cffca9ab0p|r|cffd3a09bl|r|cffdda686a|r|cffe7ac71t|r|cfff0b25ce|r|cfffab847s|r
+## Notes: Fast, readable nameplates built for Midnight's addon rules.
+## Author: lixard-wow
+## Version: 0.1.0
+## OptionalDeps: SharedMedia
+## SavedVariables: PlateauDB
+## IconTexture: Interface\AddOns\Plateau\Art\icon
+## X-Category: Nameplates
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibSharedMedia-3.0\lib.xml
+Libs\LibDeflate\lib.xml
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\lib.xml
+
+Core\Init.lua
+Core\Defaults.lua
+Core\Database.lua
+Core\Share.lua
+Core\Media.lua
+Core\Border.lua
+Core\Layout.lua
+Core\Presets.lua
+Core\CVars.lua
+Core\AutoProfile.lua
+Core\Commands.lua
+Core\Minimap.lua
+Driver\PlateDriver.lua
+Features\InterruptReady.lua
+Features\UnitColors.lua
+Features\Scaling.lua
+Features\Idle.lua
+Features\Range.lua
+Features\OccludedFade.lua
+Elements\Health.lua
+Elements\HealthText.lua
+Elements\EnemyTarget.lua
+Elements\Execute.lua
+Elements\BossPhases.lua
+Elements\EnemyPower.lua
+Elements\Level.lua
+Elements\RaidMarker.lua
+Elements\Classification.lua
+Elements\Quest.lua
+Elements\Forces.lua
+Elements\ClassPower.lua
+Elements\Name.lua
+Elements\Highlight.lua
+Elements\Mouseover.lua
+Elements\Castbar.lua
+Elements\Auras.lua
+Elements\Shield.lua
