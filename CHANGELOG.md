@@ -6,6 +6,18 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-05 nameplates attach to the game's own
+
+Plateau's nameplates are now part of the game's nameplates instead of floating in a separate layer above them.
+
+#### Changed
+- **Size, distance scaling, showing, hiding and fading come straight from the game**, so they always match Blizzard's own nameplate settings, with no catch-up delay. Plateau's own sizes (target, focus, casting, mouseover, enemy type and combat) are applied on top.
+- **Layering still works:** Layer by enemy type and Mouseover in front keep their order, and plates of the same rank keep the game's nearest-in-front order.
+- Fade hidden nameplates for: turning it off for a type now makes those plates ignore the game's fading entirely.
+
+#### Removed
+- The background check that copied the game's nameplate size and fade every tenth of a second, and the size Plateau used to learn and remember between sessions.
+
 ### 2026-10-03 settings pass
 
 Every settings page was reviewed: controls that do nothing in the current setup are greyed out with the reason on hover, and new options were added under an Extras heading at the bottom of each page.

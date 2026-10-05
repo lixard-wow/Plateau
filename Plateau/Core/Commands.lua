@@ -310,13 +310,13 @@ local function PlateState(unit, kind)
         base = base and ("visible %s, alpha %s, scale %s"):format(Shown(base:IsVisible()), Shown(base:GetEffectiveAlpha()), Shown(base:GetEffectiveScale())) or "none",
     }
     if plate then
-        state.plate = ("active %s, shown %s, visible %s, alpha %s (applied %s, game %s, range %s, idle %s), scale %s (distance %s, reference %s), level %s band %s"):format(
+        state.plate = ("active %s, shown %s, visible %s, alpha %s (applied %s, game %s, range %s, idle %s), scale %s (effective %s, ignores game fade %s), level %s band %s"):format(
             Shown(plate.active), Shown(plate:IsShown()), Shown(plate:IsVisible()), Shown(plate:GetEffectiveAlpha()),
-            Shown(plate.appliedAlpha), Shown(plate.baseAlpha), Shown(plate.rangeAlpha), Shown(plate.idleAlpha),
-            Shown(plate.appliedScale), Shown(plate.distanceFactor), Shown(ns.Scaling:Reference()), Shown(plate.appliedLevel), Shown(plate.band))
-        state.flags = ("state %s, friendly %s, player %s, type %s, target %s, casting %s, nameOnly %s, appearing %s"):format(
+            Shown(plate.appliedAlpha), Shown(plate.base and plate.base:GetEffectiveAlpha()), Shown(plate.rangeAlpha), Shown(plate.idleAlpha),
+            Shown(plate.appliedScale), Shown(plate:GetEffectiveScale()), Shown(plate.ignoresGameFade), Shown(plate:GetFrameLevel()), Shown(plate.band))
+        state.flags = ("state %s, friendly %s, player %s, type %s, target %s, casting %s, nameOnly %s, attached %s"):format(
             Shown(plate.state), Shown(plate.isFriendly), Shown(plate.isPlayer), Shown(plate.mobType), Shown(plate.isTarget),
-            Shown(plate.casting), Shown(plate.nameOnly), Shown(plate.appearing))
+            Shown(plate.casting), Shown(plate.nameOnly), Shown(plate:GetParent() == plate.base))
         local lines = 0
         for _, line in ipairs(plate.phaseLines or {}) do
             if line:IsShown() then lines = lines + 1 end

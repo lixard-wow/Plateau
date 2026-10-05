@@ -27,15 +27,13 @@ end
 local BAND = 200
 
 local function PlaceLevel(plate)
-    local level = plate.base:GetFrameLevel() + plate.band * BAND
-    if plate.appliedLevel ~= level then
-        plate.appliedLevel = level
+    local level = plate.base:GetFrameLevel() + 1 + (plate.band or 0) * BAND
+    if plate:GetFrameLevel() ~= level then
         plate:SetFrameLevel(level)
     end
 end
 
 local function SetBand(plate, band)
-    if plate.band == band then return end
     plate.band = band
     PlaceLevel(plate)
 end
@@ -111,55 +109,8 @@ function Scaling:RefreshBlizzardScale()
     selectedScale = tonumber(C_CVar.GetCVar("nameplateSelectedScale")) or 1
 end
 
-local reference
-local provisional = false
-local floorRatio = 1
-local PROVISIONAL_DROP = 0.5
-local MIN_FACTOR = 0.1
-local TARGET_SETTLE = 1
 local smoothScale = false
 
-local function ReadFloorRatio()
-    local minScale = tonumber(C_CVar.GetCVar("nameplateMinScale"))
-    local maxScale = tonumber(C_CVar.GetCVar("nameplateMaxScale"))
-    if minScale and maxScale and maxScale > 0 then
-        return math.min(1, minScale / maxScale)
-    end
-    return 0.8
-end
-
-local function SavedReference()
-    local saved = ns.DB and ns.DB.saved and ns.DB.saved.global
-    return saved and tonumber(saved.scaleReference)
-end
-
-local function SaveReference()
-    local saved = ns.DB and ns.DB.saved and ns.DB.saved.global
-    if saved then
-        saved.scaleReference = reference
-    end
-end
-
-function Scaling:ResetReference()
-    reference = reference or SavedReference()
-    provisional = reference ~= nil
-    floorRatio = ReadFloorRatio()
-end
-
-local function Learn(measured)
-    if provisional then
-        if measured < reference * PROVISIONAL_DROP then return end
-        reference, provisional = measured, false
-        SaveReference()
-    elseif not reference or measured > reference then
-        reference = measured
-        SaveReference()
-    end
-end
-
-function Scaling:Reference()
-    return reference
-end
 local animating = {}
 local animator = CreateFrame("Frame")
 animator:Hide()
@@ -168,16 +119,20 @@ animator:SetScript("OnUpdate", function(self, elapsed)
     local any = false
     for plate in pairs(animating) do
         local goal = plate.appliedScale
-        local current = plate.shownScale or goal
-        current = current + (goal - current) * step
-        if math.abs(goal - current) < 0.002 or not plate.active then
-            current = goal
+        if not goal then
             animating[plate] = nil
         else
-            any = true
+            local current = plate.shownScale or goal
+            current = current + (goal - current) * step
+            if math.abs(goal - current) < 0.002 or not plate.active then
+                current = goal
+                animating[plate] = nil
+            else
+                any = true
+            end
+            plate.shownScale = current
+            plate:SetScale(current)
         end
-        plate.shownScale = current
-        plate:SetScale(current)
     end
     if not any then
         self:Hide()
@@ -185,7 +140,7 @@ animator:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 local function SetPlateScale(plate, net)
-    if smoothScale and not plate.preview and not plate.appearing and plate.shownScale then
+    if smoothScale and not plate.preview and plate.shownScale then
         animating[plate] = true
         animator:Show()
         return
@@ -227,17 +182,14 @@ function Scaling:Apply(plate)
     if s and plate.isFriendly then
         scale = scale * (s.friendlyScale or 1)
     end
-    local net = plate.preview and 1 or scale * (plate.distanceFactor or reference or 1)
+    local net = plate.preview and 1 or scale / blizzard
     if plate.appliedScale ~= net then
         plate.appliedScale = net
         SetPlateScale(plate, net)
     end
-    if not plate.preview then
-        local stack = scale / blizzard
-        if plate.appliedStack ~= stack then
-            plate.appliedStack = stack
-            plate.stackRegion:SetScale(stack)
-        end
+    if not plate.preview and plate.appliedStack ~= net then
+        plate.appliedStack = net
+        plate.stackRegion:SetScale(net)
     end
 
     if plate.preview or not plate.base then
@@ -252,50 +204,14 @@ function Scaling:Apply(plate)
     SetBand(plate, band)
 end
 
-local function Measure(plate, container, divisor)
-    local distance = plate.base:GetEffectiveScale() / container:GetEffectiveScale() / divisor
-    if distance >= MIN_FACTOR then
-        return distance
-    end
+function Scaling:Attach(plate)
+    plate.band = nil
+    PlaceLevel(plate)
 end
 
-local function Clamp(distance)
-    if not reference then
-        return distance
-    end
-    return math.max(reference * floorRatio, math.min(reference, distance or reference))
-end
-
-function Scaling:Follow(plate, container)
-    local distance
-    local now = GetTime()
-    if plate.isTarget then
-        plate.targetSeen = now
-    end
-    if plate.appearing then
-        distance = nil
-    elseif plate.isTarget then
-        distance = reference or Measure(plate, container, selectedScale)
-    else
-        local measured = Measure(plate, container, 1)
-        local settled = not plate.targetSeen or now - plate.targetSeen > TARGET_SETTLE
-        if measured and settled and plate.mobType ~= "boss" then
-            Learn(measured)
-        end
-        distance = Clamp(measured)
-    end
-    local changed = false
-    if distance and plate.distanceFactor ~= distance then
-        plate.distanceFactor = distance
-        self:Apply(plate)
-        changed = true
-    end
-    if plate.band then
-        local before = plate.appliedLevel
-        PlaceLevel(plate)
-        changed = changed or before ~= plate.appliedLevel
-    end
-    return changed
+function Scaling:Reset(plate)
+    animating[plate] = nil
+    plate.appliedScale, plate.appliedStack, plate.shownScale = nil, nil, nil
 end
 
 function Scaling:Create()
@@ -332,6 +248,7 @@ function Scaling:Style()
 end
 
 function Scaling:Enable(plate)
+    self:Apply(plate)
 end
 
 function Scaling:RankOf(plate)
@@ -362,18 +279,10 @@ function Scaling:Configured()
     follow = ns.DB.views.enemy.plate.followBlizzardSize == true
 end
 
-local REFERENCE_CVARS = { nameplateSize = true, nameplateMinScale = true, nameplateMaxScale = true, nameplateGlobalScale = true, uiScale = true, useUiScale = true }
-
 local watcher = CreateFrame("Frame")
 watcher:RegisterEvent("PLAYER_LOGIN")
 watcher:RegisterEvent("CVAR_UPDATE")
-watcher:RegisterEvent("UI_SCALE_CHANGED")
-watcher:RegisterEvent("DISPLAY_SIZE_CHANGED")
 watcher:SetScript("OnEvent", function(_, event, name)
-    if event ~= "CVAR_UPDATE" or REFERENCE_CVARS[name] then
-        Scaling:ResetReference()
-    end
-    if event == "UI_SCALE_CHANGED" or event == "DISPLAY_SIZE_CHANGED" then return end
     if event == "CVAR_UPDATE" and name ~= "nameplateSize" and name ~= "nameplateAuraScale" and name ~= "nameplateSelectedScale" then return end
     local plate, aura = ReadBlizzardSizes()
     local selected = tonumber(C_CVar.GetCVar("nameplateSelectedScale")) or 1

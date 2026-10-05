@@ -159,9 +159,6 @@ end
 local hider = CreateFrame("Frame")
 hider:Hide()
 
-local container = CreateFrame("Frame", nil, WorldFrame)
-container:SetAllPoints(WorldFrame)
-
 local function HideBlizzardPlate(base)
     local unitFrame = base.UnitFrame
     if not unitFrame then return end
@@ -377,13 +374,7 @@ end
 
 function Driver:RefreshAlpha(plate)
     local range = (mouseoverFull and plate.isMouseover) and 1 or (plate.rangeAlpha or 1)
-    local game = 1
-    if plate.waitForSize then
-        game = 0
-    elseif plate.isFriendly and gameFadeFriendly or not plate.isFriendly and gameFadeEnemy then
-        game = plate.baseAlpha or 1
-    end
-    local alpha = range * (plate.idleAlpha or 1) * game
+    local alpha = range * (plate.idleAlpha or 1)
     if plate.preview then
         alpha = alpha * ((plate.preview.isOther and Dims(plate)) and dimAlpha or 1)
     else
@@ -392,6 +383,11 @@ function Driver:RefreshAlpha(plate)
         end
         if hideFriendlyCombat and inCombat and plate.isFriendly then
             alpha = 0
+        end
+        local ignoreGame = not (plate.isFriendly and gameFadeFriendly or not plate.isFriendly and gameFadeEnemy)
+        if plate.ignoresGameFade ~= ignoreGame and plate.SetIgnoreParentAlpha then
+            plate.ignoresGameFade = ignoreGame
+            plate:SetIgnoreParentAlpha(ignoreGame)
         end
     end
     if plate.appliedAlpha ~= alpha then
@@ -457,74 +453,6 @@ local function ApplyIfChanged(plate, oldTarget, oldFocus)
         ApplyEmphasis(plate)
     end
 end
-
-local FOLLOW_INTERVAL = 0.1
-local follower = CreateFrame("Frame")
-follower:Hide()
-
-local settling = {}
-local APPEAR_LIMIT = 1
-
-local function FollowLook(plate)
-    local base = plate.base
-    if plate.appearing then
-        if GetTime() - plate.appearSince < APPEAR_LIMIT then
-            local alpha = base:GetEffectiveAlpha()
-            if plate.baseAlpha ~= alpha then
-                plate.baseAlpha = alpha
-                Driver:RefreshAlpha(plate)
-            end
-            return true
-        end
-        plate.appearing = nil
-        if plate.waitForSize then
-            plate.waitForSize = nil
-            Driver:RefreshAlpha(plate)
-        end
-    end
-    local changed = false
-    local shown = base:IsVisible()
-    if plate.baseShown ~= shown then
-        plate.baseShown = shown
-        plate:SetShown(shown)
-        changed = true
-    end
-    local alpha = base:GetEffectiveAlpha()
-    if plate.baseAlpha ~= alpha then
-        plate.baseAlpha = alpha
-        Driver:RefreshAlpha(plate)
-        changed = true
-    end
-    return ns.Scaling:Follow(plate, container) or changed
-end
-
-local function Follow(plate)
-    if FollowLook(plate) then
-        settling[plate] = true
-    end
-end
-
-local sinceFollow = 0
-follower:SetScript("OnUpdate", function(self, elapsed)
-    for plate in pairs(settling) do
-        if not (plate.active and FollowLook(plate)) then
-            settling[plate] = nil
-        end
-    end
-    sinceFollow = sinceFollow + elapsed
-    if sinceFollow < FOLLOW_INTERVAL then return end
-    sinceFollow = 0
-    local any = false
-    for _, plate in pairs(platesByUnit) do
-        if plate.active then
-            any = true
-            Follow(plate)
-        end
-    end
-    if not any then
-        self:Hide()
-    end
-end)
 
 local function UpdateEmphasis()
     local oldTarget, oldFocus = targetPlate, focusPlate
@@ -604,23 +532,13 @@ local function Claim(plate, unit)
     plate:Show()
     UpdateEmphasis()
     ApplyEmphasis(plate)
-    if plate.baseAlpha == nil then
-        plate.appearing = true
-        plate.appearSince = GetTime()
-        plate.baseAlpha = plate.base:GetEffectiveAlpha()
-        plate.waitForSize = ns.Scaling:Reference() == nil
-        Driver:RefreshAlpha(plate)
-    end
-    settling[plate] = true
-    follower:Show()
     ns.Fire("PLATE_ADDED", unit, plate)
 end
 
 local function Watch(plate, unit)
     plate.active = false
     plate:Hide()
-    plate.appliedScale, plate.appliedStack, plate.distanceFactor = nil, nil, nil
-    plate.baseAlpha, plate.baseShown = nil, nil
+    ns.Scaling:Reset(plate)
     plate.stackRegion:SetScale(1)
     plate:RegisterUnitEvent("UNIT_FACTION", unit)
     plate:RegisterUnitEvent("UNIT_FLAGS", unit)
@@ -750,10 +668,16 @@ local function AnchorPlate(plate, base)
 end
 
 local function AssignBase(plate, base)
-    plate:SetParent(container)
+    plate:SetParent(base)
     AnchorPlate(plate, base)
     plate.base = base
-    plate.stackRegion:SetParent(base)
+    ns.Scaling:Attach(plate)
+    local stackRegion = plate.stackRegion
+    stackRegion:SetParent(base)
+    if stackRegion.width then
+        stackRegion:ClearAllPoints()
+        stackRegion:SetPoint("BOTTOMLEFT", base, "CENTER", -stackRegion.width / 2, stackRegion.base)
+    end
     platesByBase[base] = plate
     ApplyStackBox(plate)
 end
@@ -835,7 +759,7 @@ local function OnUnitRemoved(unit)
     plate.clickArea.border:Hide()
     plate:SetAlpha(1)
     plate.appliedAlpha = 1
-    plate.baseAlpha, plate.baseShown, plate.distanceFactor, plate.waitForSize = nil, nil, nil, nil
+    ns.Scaling:Reset(plate)
     plate:Hide()
 
     if plate == targetPlate or plate == focusPlate then
