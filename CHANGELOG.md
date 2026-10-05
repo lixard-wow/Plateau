@@ -2,7 +2,7 @@
 
 All notable changes to Plateau Nameplates are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
-## [0.1.0] - Unreleased
+## [0.1.0-beta] - Unreleased
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 

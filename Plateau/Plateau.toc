@@ -2,7 +2,7 @@
 ## Title: |cff36c2c9Plateau Nameplates|r
 ## Notes: Fast, readable nameplates built for Midnight's addon rules.
 ## Author: lixard-wow
-## Version: 0.1.0
+## Version: 0.1.0-beta
 ## OptionalDeps: SharedMedia
 ## SavedVariables: PlateauDB
 ## IconTexture: Interface\AddOns\Plateau\Art\icon

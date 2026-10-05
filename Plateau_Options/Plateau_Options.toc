@@ -2,7 +2,7 @@
 ## Title: |cff36c2c9Plateau Nameplates Options|r
 ## Notes: Settings for Plateau Nameplates. Loads only when opened.
 ## Author: lixard-wow
-## Version: 0.1.0
+## Version: 0.1.0-beta
 ## Dependencies: Plateau
 ## LoadOnDemand: 1
 ## IconTexture: Interface\AddOns\Plateau\Art\icon
