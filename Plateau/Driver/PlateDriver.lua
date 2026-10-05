@@ -196,14 +196,14 @@ end
 
 local function StackSpace(look, space)
     local above, below = 0, 0
-    if space ~= "bar" and look.name.enabled then
+    if space ~= "bar" and space ~= "barcast" and look.name.enabled then
         if look.name.position == "TOP" then
             above = look.name.size + look.name.gap
         elseif look.name.position == "BOTTOM" then
             below = look.name.size + look.name.gap
         end
     end
-    if space == "cast" or space == "all" then
+    if space == "cast" or space == "barcast" or space == "all" then
         local cast = look.castbar
         local height = (cast.height and cast.height > 0) and cast.height or look.plate.height
         below = below + height + cast.gap + cast.borderSize * 2

@@ -10,6 +10,9 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
 Plateau's nameplates are now part of the game's nameplates instead of floating in a separate layer above them.
 
+#### Added
+- **Stacking bounds: Health bar and cast bar.** Counts the cast bar but not the name, for looks that hide names or put them inside the bar.
+
 #### Changed
 - **Size, distance scaling, showing, hiding and fading come straight from the game**, so they always match Blizzard's own nameplate settings, with no catch-up delay. Plateau's own sizes (target, focus, casting, mouseover, enemy type and combat) are applied on top.
 - **Layering still works:** Layer by enemy type and Mouseover in front keep their order, and plates of the same rank keep the game's nearest-in-front order.

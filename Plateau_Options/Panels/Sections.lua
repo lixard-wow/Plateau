@@ -779,6 +779,7 @@ local RADIAL = {
 local STACK_SPACES = {
     { value = "bar", label = "Health bar only (tightest)" },
     { value = "name", label = "Health bar and name" },
+    { value = "barcast", label = "Health bar and cast bar" },
     { value = "cast", label = "Health bar, name and cast bar" },
     { value = "all", label = "Everything, including buffs and debuffs" },
 }
@@ -1589,7 +1590,7 @@ ns.sections = {
         Gate({ type = "Dropdown", label = "Stacking bounds", options = STACK_SPACES,
           get = function() return Plateau.DB:Get("look.plate.stackSpace") end,
           set = function(value) Plateau.DB:Set("look.plate.stackSpace", value) end,
-          tooltip = "How much of each nameplate counts as its size when stacking: the health bar only, the bar and name, the bar, name and cast bar, or everything including buffs and debuffs. Bigger bounds keep more space between neighbors, but big pulls spread further up the screen." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+          tooltip = "How much of each nameplate counts as its size when stacking: the health bar only, the bar and name, the bar and cast bar, the bar, name and cast bar, or everything including buffs and debuffs. Bigger bounds keep more space between neighbors, but big pulls spread further up the screen." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
         Gate(CVarSlider("nameplateOverlapV", "Vertical spacing", 0.3, 2, 0.05, "The vertical space kept between stacked nameplates, as a multiplier. Higher spreads them further apart; lower brings them closer together."), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
         Gate(CVarSlider("nameplateOverlapH", "Horizontal spacing", 0.3, 2, 0.05, "The side-to-side space kept between stacked nameplates, as a multiplier. Higher spreads them further apart; lower brings them closer together."), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
 
