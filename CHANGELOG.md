@@ -11,6 +11,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 Plateau's nameplates are now part of the game's nameplates instead of floating in a separate layer above them.
 
 #### Added
+- **Hide friendly pets in dungeons and raids** (Friendly nameplates page, off by default): inside dungeons and raids, other players' pets, totems and minions lose their nameplates and floating names; your own settings come back when you leave.
 - **Stacking bounds: Health bar and cast bar.** Counts the cast bar but not the name, for looks that hide names or put them inside the bar.
 
 #### Changed
