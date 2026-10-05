@@ -38,58 +38,7 @@ local function SetBand(plate, band)
     PlaceLevel(plate)
 end
 
-local TIER_KEYS = { "boss", "target", "focus", "casting", "caster", "lieutenant", "higher", "melee", "trivial" }
-local TIER_COUNT = #TIER_KEYS
-local VALID_TIER = {}
-for _, key in ipairs(TIER_KEYS) do
-    VALID_TIER[key] = true
-end
-local MOB_TIER = { boss = "boss", lieutenant = "lieutenant", higher = "higher", caster = "caster", elite = "melee" }
-
-local function Ranks(text)
-    local list, seen = {}, {}
-    for key in text:gmatch("%a+") do
-        if VALID_TIER[key] and not seen[key] then
-            seen[key] = true
-            list[#list + 1] = key
-        end
-    end
-    for index, key in ipairs(TIER_KEYS) do
-        if not seen[key] then
-            seen[key] = true
-            local position = 1
-            local previous = TIER_KEYS[index - 1]
-            if previous then
-                for i = 1, #list do
-                    if list[i] == previous then
-                        position = i + 1
-                        break
-                    end
-                end
-            end
-            table.insert(list, position, key)
-        end
-    end
-    local ranks = {}
-    for rank, key in ipairs(list) do
-        ranks[key] = rank
-    end
-    return ranks
-end
-
-local function PriorityRank(plate, ranks)
-    local best = ranks[MOB_TIER[plate.mobType] or "trivial"]
-    if plate.isTarget and ranks.target < best then
-        best = ranks.target
-    end
-    if plate.isFocus and ranks.focus < best then
-        best = ranks.focus
-    end
-    if plate.casting == true and ranks.casting < best then
-        best = ranks.casting
-    end
-    return best
-end
+local BAND_CASTING, BAND_TARGET, BAND_MOUSEOVER = 1, 2, 3
 
 local Scaling = {
     key = "scaling",
@@ -196,10 +145,16 @@ function Scaling:Apply(plate)
         return
     end
     local band = 0
-    if s and plate.active and s.mouseoverFront and plate.isMouseover then
-        band = TIER_COUNT + 1
-    elseif s and plate.active and s.layerByType and not plate.isFriendly and not plate.isPlayer then
-        band = TIER_COUNT - PriorityRank(plate, s.ranks)
+    if s and plate.active then
+        if s.mouseoverFront and plate.isMouseover then
+            band = BAND_MOUSEOVER
+        elseif s.castFront and not plate.isFriendly then
+            if plate.isTarget then
+                band = BAND_TARGET
+            elseif plate.casting == true then
+                band = BAND_CASTING
+            end
+        end
     end
     SetBand(plate, band)
 end
@@ -230,8 +185,7 @@ function Scaling:Configure(db, state)
     s.focusScale = db.focusScale
     s.castPop = db.castPop
     s.castScale = db.castScale
-    s.layerByType = db.layerByType
-    s.ranks = Ranks(db.layerOrder)
+    s.castFront = db.castFront == true
     s.combatEnabled = db.combatEnabled
     s.combatScale = db.combatScale
     s.idleScale = db.idleScale
@@ -249,14 +203,6 @@ end
 
 function Scaling:Enable(plate)
     self:Apply(plate)
-end
-
-function Scaling:RankOf(plate)
-    local s = settings[plate.state]
-    if not (s and s.layerByType) or plate.isFriendly or plate.isPlayer then
-        return nil
-    end
-    return PriorityRank(plate, s.ranks)
 end
 
 function Scaling:UsesCombat(state)

@@ -1,6 +1,6 @@
 local _, ns = ...
 
-local SCHEMA_VERSION = 15
+local SCHEMA_VERSION = 16
 local DEFAULT_PROFILE = "Default"
 
 local DB = {}
@@ -41,7 +41,26 @@ local function NameScaleLevel(size, base)
     return best
 end
 
+local function MigrateLayering(look)
+    local scaling = type(look) == "table" and look.scaling
+    if type(scaling) ~= "table" then return end
+    if scaling.layerByType == true then
+        scaling.castFront = true
+    end
+    scaling.layerByType, scaling.layerOrder = nil, nil
+end
+
 local migrations = {
+    [16] = function(db)
+        for _, profile in pairs(db.profiles or {}) do
+            if type(profile) == "table" then
+                MigrateLayering(profile.look)
+                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
+                    MigrateLayering(override)
+                end
+            end
+        end
+    end,
     [15] = function(db)
         for _, profile in pairs(db.profiles or {}) do
             local look = type(profile) == "table" and profile.look

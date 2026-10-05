@@ -1391,7 +1391,7 @@ local SIZE_PATHS = {
 local SIZE_CVARS = { "nameplateSize", "nameplateAuraScale", "nameplateMinScale", "nameplateMaxScale" }
 local FADING_PATHS = { "look.range", "look.target.dimOthers", "look.target.dimCombatOnly", "look.target.dimSkipFriendly" }
 local FADING_CVARS = { "nameplateOccludedAlphaMult", "nameplateMinAlpha", "nameplatePlayRemovalAnimation" }
-local LAYERING_PATHS = { "look.scaling.layerByType", "look.scaling.layerOrder", "look.plate.stackSpace", "look.scaling.mouseoverFront", "look.plate.offsetY" }
+local LAYERING_PATHS = { "look.scaling.castFront", "look.plate.stackSpace", "look.scaling.mouseoverFront", "look.plate.offsetY" }
 local LAYERING_CVARS = { "nameplateStackingTypes", "nameplateOverlapV", "nameplateOverlapH", "nameplateMotionSpeed", "nameplateOtherAtBase" }
 local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
 local COMBAT_PATHS = { "look.scaling.combatEnabled", "look.scaling.combatScale", "look.scaling.idleScale", "look.idle" }
@@ -1564,13 +1564,9 @@ ns.sections = {
 
     Page("layering", "Layering and stacking", LAYERING_PATHS, LAYERING_CVARS, List(
         { type = "Header", label = "Nameplate layering", first = true },
-        { type = "Toggle", path = "look.scaling.layerByType", label = "Use priority-based layering", wide = true,
-          tooltip = "On: the Layering order list below decides which plate is in front where plates overlap, and plates of the same rank keep the game's own order, nearer ones over farther ones. Off: the game's own order alone, nearer plates over farther ones with your target on top. Nothing is moved or resized." },
-        { type = "PriorityList", path = "look.scaling.layerOrder", label = "Layering order",
-          keys = { "boss", "target", "focus", "casting", "caster", "lieutenant", "higher", "melee", "trivial" },
-          names = { boss = "Bosses", target = "Your target", focus = "Your focus", casting = "Casting right now", caster = "Casters", lieutenant = "Lieutenants", higher = "Elites", melee = "Melee enemies", trivial = "Minor enemies" },
-          visibleIf = On("look.scaling.layerByType"),
-          tooltip = "Which plate is in front where plates overlap, top to bottom. A plate takes the highest rank that applies to it: a targeted boss uses whichever of Bosses and Your target is higher, and an enemy that starts casting moves up to Casting right now until the cast ends. Casters are enemies that use mana, whether or not they are casting. Casters, lieutenants, elites, melee and minor enemies are the enemy types from the Health bar page. Plates of the same rank keep the game's order, nearer over farther. Drag a row to move it, or use Up and Down; right-click to reset." },
+        { type = "Toggle", path = "look.scaling.castFront", label = "Casting enemies in front", wide = true,
+          keywords = "layering priority order caster casters cast in front draw over overlap",
+          tooltip = "An enemy that is casting right now draws over the plates around it, so you can see the cast in a stack. Your target stays above casting enemies. Off: the game's own order, nearer plates over farther ones with your target on top. Mouseover in front (under Extras) beats both." },
 
         { type = "Header", label = "Stacking" },
         Gate({ type = "Presets", presets = STACK_PRESETS, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack",
@@ -1601,7 +1597,7 @@ ns.sections = {
 
         { type = "Header", label = "Extras" },
         { type = "Toggle", path = "look.scaling.mouseoverFront", label = "Mouseover in front",
-          tooltip = "The plate under your mouse is drawn above every other plate, so you can read it in a stack. Beats the Layering order list." },
+          tooltip = "The plate under your mouse is drawn above every other plate, so you can read it in a stack. Beats Casting enemies in front and your target." },
         BaseSpec({ type = "Slider", path = "look.plate.offsetY", label = "Nameplate height (up or down)", min = -60, max = 60,
           tooltip = "Draws Plateau's nameplates higher (positive) or lower (negative) than where the game places them over each unit. The click area moves with them. Stacking still uses the game's position, so plates keep the same spacing between each other. Blizzard's own plates, like friendly plates in dungeons, don't move." })
     )),

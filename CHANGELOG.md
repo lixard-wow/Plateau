@@ -16,11 +16,12 @@ Plateau's nameplates are now part of the game's nameplates instead of floating i
 
 #### Changed
 - **Size, distance scaling, showing, hiding and fading come straight from the game**, so they always match Blizzard's own nameplate settings, with no catch-up delay. Plateau's own sizes (target, focus, casting, mouseover, enemy type and combat) are applied on top.
-- **Layering still works:** Layer by enemy type and Mouseover in front keep their order, and plates of the same rank keep the game's nearest-in-front order.
+- **Layering is now one switch, Casting enemies in front.** An enemy that is casting draws over its neighbors, your target stays above casting enemies, and Mouseover in front beats both. Everything else keeps the game's nearest-in-front order. Profiles that had priority-based layering on get the new switch turned on.
 - Fade hidden nameplates for: turning it off for a type now makes those plates ignore the game's fading entirely.
 - **The short command is now /plt** (was /pl), so it no longer clashes with PilotLight. /plateau still works; /sl was removed for the same reason.
 
 #### Removed
+- **Use priority-based layering and the Layering order list** (bosses, target, focus, casting, casters, lieutenants, elites, melee, minor enemies), replaced by Casting enemies in front.
 - The background check that copied the game's nameplate size and fade every tenth of a second, and the size Plateau used to learn and remember between sessions.
 
 ### 2026-10-03 settings pass
