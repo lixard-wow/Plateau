@@ -1,5 +1,5 @@
 ## Interface: 120100, 120105, 16001
-## Title: |cff45d1c2P|r|cff4dcbc6l|r|cff55c5cba|r|cff5dbfcft|r|cff65b9d4e|r|cff6db3d8a|r|cff75acddu|r |cff84a0e6N|r|cff8c9aeaa|r|cff9494efm|r|cff9c8ef3e|r|cffa488f8p|r|cffac87f3l|r|cffb28be4a|r|cffb98fd6t|r|cffbf93c8e|r|cffc697bas|r |cffd39f9dO|r|cffd9a38fp|r|cffe0a781t|r|cffe6ab72i|r|cffedaf64o|r|cfff3b456n|r|cfffab847s|r
+## Title: |cff36c2c9Plateau Nameplates Options|r
 ## Notes: Settings for Plateau Nameplates. Loads only when opened.
 ## Author: lixard-wow
 ## Version: 0.1.0

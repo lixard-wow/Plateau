@@ -17,7 +17,7 @@ local broker = LDB:NewDataObject(NAME, {
         ns.OpenOptions()
     end,
     OnTooltipShow = function(tooltip)
-        tooltip:AddDoubleLine(ns.GradientText(NAME), ("v%s"):format(ns.version or ""))
+        tooltip:AddDoubleLine(ns.Brand:Text(NAME), ("v%s"):format(ns.version or ""))
         local db = ns.DB
         if db and db.profileName and ns.AutoProfile then
             local status = ns.AutoProfile:Status()
@@ -28,6 +28,11 @@ local broker = LDB:NewDataObject(NAME, {
         tooltip:AddLine("Drag to move this button.", 0.6, 0.8, 1)
     end,
 })
+
+ns.Brand:OnChange(function(r, g, b)
+    broker.iconG, broker.iconB = g, b
+    broker.iconR = r
+end)
 
 local function Settings()
     local global = ns.DB.saved.global

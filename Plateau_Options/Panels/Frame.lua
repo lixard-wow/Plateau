@@ -75,7 +75,7 @@ logo:SetTexture("Interface\\AddOns\\Plateau\\Art\\icon")
 
 local titleName = Style.Text(titleBar, 18, C.text)
 titleName:SetPoint("LEFT", logo, "RIGHT", 10, 0)
-titleName:SetText(Style.GradientText("Plateau"))
+titleName:SetText("Plateau")
 
 local titleVersion = Style.Text(titleBar, 11, C.muted)
 titleVersion:SetPoint("LEFT", titleName, "RIGHT", 8, -1)
@@ -197,7 +197,14 @@ Draggable(miniHit)
 
 local miniName = Style.Text(miniHit, 13, C.text)
 miniName:SetPoint("LEFT", miniBar, "TOPLEFT", 32, BAR_ROW)
-miniName:SetText(Style.GradientText("Plateau"))
+miniName:SetText("Plateau")
+
+Plateau.Brand:OnChange(function(r, g, b)
+    logo:SetVertexColor(r, g, b)
+    miniIcon:SetVertexColor(r, g, b)
+    titleName:SetTextColor(r, g, b)
+    miniName:SetTextColor(r, g, b)
+end)
 
 local miniDot = Style.Text(miniBar, 11, C.muted)
 miniDot:SetPoint("LEFT", miniName, "RIGHT", 6, 0)

@@ -2666,6 +2666,12 @@ ns.sections = {
                   end
               end,
               tooltip = "The look of Plateau's settings window and pop-ups. Workbench is flat charcoal with a green accent; Artisan Ledger is walnut and brass with a serif title face; Lixard Classic is near-black, square and gold. Your nameplates don't change. Takes effect after a reload." },
+            { type = "Dropdown", label = "Brand colour", keywords = "color colour brand icon minimap class rainbow cycle random logo",
+              options = { { value = "class", label = "Class colour" }, { value = "cycle", label = "Colour cycle" }, { value = "random", label = "Random each login" } },
+              get = function() return Plateau.Brand:Mode() end,
+              set = function(value) Plateau.Brand:SetMode(value) end,
+              reset = function() Plateau.Brand:SetMode("class") end,
+              tooltip = "The colour of Plateau's P icon and name: the minimap button, this window's title, the game menu button and Plateau's chat messages. Class colour follows the character you're playing; Colour cycle slowly shifts through the rainbow; Random each login picks a new colour every time you log in. The icon in the game's addon list can't change colour." },
             { type = "Slider", label = "Settings window scale", min = Style.SCALE_MIN, max = Style.SCALE_MAX, step = 0.05, applyOnRelease = true, keywords = "size zoom bigger smaller options window ui scale",
               get = function() return Style.Scale() end,
               set = function(value)

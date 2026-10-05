@@ -1,5 +1,5 @@
 ## Interface: 120100, 120105, 16001
-## Title: |cff45d1c2P|r|cff51c8c8l|r|cff5cbfcfa|r|cff68b6d6t|r|cff74addce|r|cff7fa4e3a|r|cff8b9be9u|r |cffa289f7N|r|cffad88efa|r|cffb78edam|r|cffc094c5e|r|cffca9ab0p|r|cffd3a09bl|r|cffdda686a|r|cffe7ac71t|r|cfff0b25ce|r|cfffab847s|r
+## Title: |cff36c2c9Plateau Nameplates|r
 ## Notes: Fast, readable nameplates built for Midnight's addon rules.
 ## Author: lixard-wow
 ## Version: 0.1.0

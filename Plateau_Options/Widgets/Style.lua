@@ -49,7 +49,6 @@ Style.THEMES = {
         buttonRadius = 4,
         settingsIcon = "icon_sliders",
         groups = { look = Hex("#4fbf8f"), casts = Hex("#a98cf0"), highlights = Hex("#e0a03a"), setup = Hex("#6fa8e8") },
-        brand = { Hex("#4fbf8f"), Hex("#6fa8e8"), Hex("#a98cf0") },
     },
     ledger = {
         name = "Artisan Ledger",
@@ -78,7 +77,6 @@ Style.THEMES = {
         roundFields = true,
         settingsIcon = "icon_gear",
         groups = { look = Hex("#c9a35a"), casts = Hex("#b9825a"), highlights = Hex("#9fc58a"), setup = Hex("#8fa3b0") },
-        brand = { Hex("#e2c07a"), Hex("#c9a35a"), Hex("#a8834a") },
     },
     classic = {
         name = "Lixard Classic",
@@ -107,7 +105,6 @@ Style.THEMES = {
         settingsIcon = "icon_gear",
         roundClose = true,
         groups = { look = { 0.78, 0.66, 0.22, 1 }, casts = { 0.88, 0.76, 0.40, 1 }, highlights = { 0.68, 0.56, 0.18, 1 }, setup = { 0.62, 0.62, 0.62, 1 } },
-        brand = { { 0.95, 0.84, 0.45, 1 }, { 0.78, 0.66, 0.22, 1 } },
     },
 }
 
@@ -139,10 +136,6 @@ end
 Style.groupColors = Style.theme.groups
 Style.RADIUS = Style.theme.radius
 Style.BUTTON_RADIUS = Style.theme.buttonRadius
-
-function Style.GradientText(text)
-    return Plateau.GradientText(text, Style.theme.brand)
-end
 
 function Style.DropArrow(button)
     local arrow = button:CreateTexture(nil, "OVERLAY")

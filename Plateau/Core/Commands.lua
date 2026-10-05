@@ -1,9 +1,7 @@
 local _, ns = ...
 
-local PREFIX = "|cff7fb2e5Plateau|r "
-
 local function Say(message)
-    print(PREFIX .. message)
+    print(ns.Brand:Text("Plateau") .. " " .. message)
 end
 
 local function Metric(profiler, metric)
@@ -821,7 +819,12 @@ end
 local function HookGameMenu()
     local button = CreateFrame("Button", "PlateauGameMenuButton", GameMenuFrame, "MainMenuFrameButtonTemplate")
     local SetFlat = BuildFlatLook(button)
-    button:SetText(ns.GradientText("Plateau"))
+    button:SetText(ns.Brand:Text("Plateau"))
+    ns.Brand:OnChange(function()
+        if button:IsShown() then
+            button:SetText(ns.Brand:Text("Plateau"))
+        end
+    end)
     local fontString = button:GetFontString()
     if fontString then
         local path, size, flags = fontString:GetFont()
@@ -860,6 +863,7 @@ local function HookGameMenu()
         end
         ShiftDown(addOns:GetTop(), extra)
         button:SetPoint(point, relative, relativePoint, x, y)
+        button:SetText(ns.Brand:Text("Plateau"))
         button:Show()
         GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + extra)
     end
@@ -953,7 +957,7 @@ Plateau = {
     ResetPerformanceCounts = function()
         ns.ResetPerformanceCounts()
     end,
-    GradientText = ns.GradientText,
+    Brand = ns.Brand,
     Builtins = ns.Builtins,
     AutoProfile = ns.AutoProfile,
     CONTENT_TYPES = ns.CONTENT_TYPES,
