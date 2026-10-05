@@ -492,8 +492,6 @@ footerLine:SetPoint("BOTTOMRIGHT", -1, FOOTER)
 footerLine:SetHeight(1)
 footerLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
 
-local MINIMIZED_WIDTH = 240
-
 local closeButton = Widgets.Button(frame, "Close", 100, function() frame:Hide() end)
 closeButton:SetPoint("BOTTOMRIGHT", -PAD, 11)
 
@@ -1176,11 +1174,6 @@ function ns.FlashTitle()
 end
 
 local index = {}
-
-local function Plain(text)
-    if type(text) ~= "string" then return "" end
-    return text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):lower()
-end
 
 local helpIndex = {}
 

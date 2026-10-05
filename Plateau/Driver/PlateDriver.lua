@@ -145,17 +145,6 @@ local function Claimable(unit)
     return friendly.npcs
 end
 
-local function IsHiddenMinion(unit)
-    local friendly = views and views.enemy.friendly
-    if not friendly or not friendly.enabled or friendly.minions then
-        return false
-    end
-    if UnitCanAttack("player", unit) or UnitIsPlayer(unit) then
-        return false
-    end
-    return IsMinion(unit)
-end
-
 local hider = CreateFrame("Frame")
 hider:Hide()
 
