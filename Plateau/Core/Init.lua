@@ -28,14 +28,46 @@ function ns.ApplyRealmMarker()
     end
 end
 
+local function StartDatabase()
+    local ok, problem = pcall(ns.DB.Init, ns.DB)
+    if ok then return true end
+    local broken = PlateauDB
+    PlateauDB = { recovered = { at = date("%Y-%m-%d %H:%M"), error = tostring(problem), data = broken } }
+    ns.recovered = tostring(problem)
+    ok, problem = pcall(ns.DB.Init, ns.DB)
+    if ok then return true end
+    ns.disabled = tostring(problem)
+    return false
+end
+
+local function ReportStartup()
+    local failures = ns.DB.migrationFailures
+    if ns.disabled then
+        print("|cffff5555Plateau couldn't start:|r " .. ns.disabled)
+    elseif ns.recovered then
+        print("|cffffd200Plateau:|r your saved settings were damaged and couldn't be read, so Plateau started with its default settings. The old data is kept in the saved file under 'recovered'. Error: " .. ns.recovered)
+    elseif failures and #failures > 0 then
+        print("|cffffd200Plateau:|r some saved settings couldn't be updated to this version: " .. table.concat(failures, "; "))
+    end
+end
+
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("ADDON_LOADED")
 loader:RegisterEvent("PLAYER_LOGOUT")
 loader:RegisterEvent("PLAYER_LOGIN")
 loader:RegisterEvent("PLAYER_ENTERING_WORLD")
 loader:SetScript("OnEvent", function(self, event, name)
-    if event == "PLAYER_LOGIN" and ns.WarmThemeFonts then
-        ns.WarmThemeFonts()
+    if ns.disabled then
+        if event == "PLAYER_LOGIN" then
+            ReportStartup()
+        end
+        return
+    end
+    if event == "PLAYER_LOGIN" then
+        C_Timer.After(5, ReportStartup)
+        if ns.WarmThemeFonts then
+            ns.WarmThemeFonts()
+        end
     end
     if event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
         ns.DB:ResolveCharacter()
@@ -48,7 +80,10 @@ loader:SetScript("OnEvent", function(self, event, name)
         ns.DB:Shutdown()
     elseif name == addonName then
         self:UnregisterEvent("ADDON_LOADED")
-        ns.DB:Init()
+        if not StartDatabase() then
+            ns.Driver:UnregisterAllEvents()
+            return
+        end
         ns.ApplyRealmMarker()
         ns.Driver:Restyle()
     end

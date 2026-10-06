@@ -1,7 +1,8 @@
 local _, ns = ...
 
-local SCHEMA_VERSION = 16
+local SCHEMA_VERSION = 17
 local DEFAULT_PROFILE = "Default"
+local NAME_LIMIT = 32
 
 local DB = {}
 ns.DB = DB
@@ -51,6 +52,11 @@ local function MigrateLayering(look)
 end
 
 local migrations = {
+    [17] = function(db)
+        if type(db.global) == "table" then
+            db.global.probe, db.global.probeWatch = nil, nil
+        end
+    end,
     [16] = function(db)
         for _, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" then
@@ -435,16 +441,51 @@ local function Clear(tbl, skip)
     end
 end
 
+local TOP_TABLES = { "global", "profiles", "profileKeys", "assignments" }
+
+local function Repair(db)
+    for _, key in ipairs(TOP_TABLES) do
+        if db[key] ~= nil and type(db[key]) ~= "table" then
+            db[key] = nil
+        end
+    end
+    if db.version ~= nil and type(db.version) ~= "number" then
+        db.version = nil
+    end
+    for name, profile in pairs(db.profiles or {}) do
+        if type(name) ~= "string" or type(profile) ~= "table" then
+            db.profiles[name] = nil
+        else
+            if profile.look ~= nil and type(profile.look) ~= "table" then
+                profile.look = nil
+            end
+            if profile.states ~= nil and type(profile.states) ~= "table" then
+                profile.states = nil
+            end
+        end
+    end
+    for key, name in pairs(db.profileKeys or {}) do
+        if type(key) ~= "string" or type(name) ~= "string" then
+            db.profileKeys[key] = nil
+        end
+    end
+end
+
 local function Migrate(db)
     local version = db.version or SCHEMA_VERSION
+    local failures = {}
     while version < SCHEMA_VERSION do
         version = version + 1
         local step = migrations[version]
         if step then
-            step(db)
+            local ok, problem = pcall(step, db)
+            if not ok then
+                failures[#failures + 1] = ("v%d: %s"):format(version, tostring(problem))
+            end
         end
     end
     db.version = SCHEMA_VERSION
+    return failures
 end
 
 local function IsUnknownName(name)
@@ -469,9 +510,25 @@ local function DropUnknownKeys(map)
 end
 
 function DB:Init()
-    PlateauDB = PlateauDB or {}
+    if type(PlateauDB) ~= "table" then
+        PlateauDB = {}
+    end
     local db = PlateauDB
-    Migrate(db)
+    Repair(db)
+    self.migrationFailures = Migrate(db)
+    local Sanitize = ns.Share and ns.Share.Sanitize
+    if Sanitize then
+        for _, profile in pairs(db.profiles or {}) do
+            if type(profile.look) == "table" then
+                profile.look = Sanitize(profile.look, ns.defaults.look, "look")
+            end
+            if type(profile.states) == "table" then
+                for state, override in pairs(profile.states) do
+                    profile.states[state] = type(override) == "table" and Sanitize(override, ns.defaults.look, "look") or nil
+                end
+            end
+        end
+    end
     db.global = db.global or {}
     db.profiles = db.profiles or {}
     db.profileKeys = db.profileKeys or {}
@@ -545,7 +602,7 @@ end
 function DB:UseProfile(name, temporary)
     local db = self.saved
     db.profiles[name] = db.profiles[name] or {}
-    if not temporary then
+    if not temporary and self.charKey then
         db.profileKeys[self.charKey] = name
     end
     self.profileName = name
@@ -836,11 +893,27 @@ function DB:ImportProfile(name, text, activate)
         look = type(payload.look) == "table" and payload.look or {},
         states = type(payload.states) == "table" and payload.states or nil,
     } } }
-    if not pcall(Migrate, holder) then
+    local migrated, failures = pcall(Migrate, holder)
+    if not migrated or #failures > 0 then
         return false, "that profile string is damaged"
     end
     local imported = holder.profiles.import
     local profile = { look = ns.Share.Sanitize(imported.look or {}, ns.defaults.look), specSpells = CleanSpecSpells(payload.specSpells) }
+    if type(name) == "string" then
+        name = name:gsub("|", ""):match("^%s*(.-)%s*$"):sub(1, NAME_LIMIT)
+    end
+    if type(name) == "string" and name:find("%S") then
+        if self.saved.profiles[name] then
+            return false, "a profile called " .. name .. " already exists"
+        end
+    else
+        name = "Imported"
+        local number = 1
+        while self.saved.profiles[name] do
+            number = number + 1
+            name = "Imported " .. number
+        end
+    end
     local bossPhases = CleanBossPhases(payload.bossPhases)
     if bossPhases then
         local global = self.saved.global
@@ -857,19 +930,6 @@ function DB:ImportProfile(name, text, activate)
             if not global.bossesSeen[id] then
                 global.bossesSeen[id] = name
             end
-        end
-    end
-    if type(name) == "string" and name:find("%S") then
-        name = name:match("^%s*(.-)%s*$")
-        if self.saved.profiles[name] then
-            return false, "a profile called " .. name .. " already exists"
-        end
-    else
-        name = "Imported"
-        local number = 1
-        while self.saved.profiles[name] do
-            number = number + 1
-            name = "Imported " .. number
         end
     end
     self.saved.profiles[name] = profile

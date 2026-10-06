@@ -74,7 +74,7 @@ end
 
 local function Paint(text, s, class, isMe)
     local r, g, b, a = BaseColor(s, class)
-    if s.meColor and isMe ~= nil then
+    if s.meColor and (issecretvalue(isMe) or isMe ~= nil) then
         local me = s.meColorValue
         r = EvaluateColorValueFromBoolean(isMe, me[1], r)
         g = EvaluateColorValueFromBoolean(isMe, me[2], g)

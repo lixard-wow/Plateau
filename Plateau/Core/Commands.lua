@@ -144,7 +144,9 @@ local function Debug()
     end
 end
 
-local PROBE_LIMIT = 1500
+local PROBE_LIMIT = 300
+local PROBE_WATCH_HOURS = 4
+local PROBE_PRIVATE = { name = true, nameUnmodified = true, guid = true, creatureID = true }
 
 local PROBE_CALLS = {
     { "name", function(u) return UnitName(u) end },
@@ -217,7 +219,7 @@ local function ProbeLog()
     return global.probe
 end
 
-local PROBE_TRIM = 300
+local PROBE_TRIM = 60
 
 local function ProbeStore(entry)
     local log = ProbeLog()
@@ -240,7 +242,7 @@ local function ProbeUnit(unit, context, kind)
     local readable, hidden = {}, {}
     for _, call in ipairs(PROBE_CALLS) do
         local state, value = ProbeValue(call[2], unit)
-        entry.results[call[1]] = value and (state .. ": " .. value) or state
+        entry.results[call[1]] = (value and not PROBE_PRIVATE[call[1]]) and (state .. ": " .. value) or state
         if state == "readable" then
             readable[#readable + 1] = call[1] .. "=" .. value
         elseif state == "hidden" then
@@ -405,9 +407,9 @@ end
 local function DebugProbeWatch(arg)
     local on = arg ~= "off"
     SetProbeWatch(on)
-    ns.DB.saved.global.probeWatch = on or nil
+    ns.DB.saved.global.probeWatch = on and (time() + PROBE_WATCH_HOURS * 3600) or nil
     if on then
-        Say("probe watch on: every enemy plate that appears (what the game hides, and how Plateau drew it), every pull and every boss encounter is logged. It stays on through reloads and logouts until /plt debug probe watch off. /reload to save the log and any errors.")
+        Say(("probe watch on: every enemy plate that appears (what the game hides, and how Plateau drew it), every pull and every boss encounter is logged. It stays on through reloads for %d hours, or until /plt debug probe watch off. Names and GUIDs are not stored. /reload to save the log and any errors."):format(PROBE_WATCH_HOURS))
     else
         Say(("probe watch off. %d entries in the log; /reload to save them."):format(#ProbeLog()))
     end
@@ -416,9 +418,18 @@ end
 local probeResume = CreateFrame("Frame")
 probeResume:RegisterEvent("PLAYER_LOGIN")
 probeResume:SetScript("OnEvent", function()
-    if ns.DB.saved and ns.DB.saved.global.probeWatch then
+    local global = ns.DB.saved and ns.DB.saved.global
+    if not global then return end
+    if global.probeVersion ~= ns.version then
+        global.probe, global.probeWatch = nil, nil
+        global.probeVersion = ns.version
+    end
+    local untilTime = global.probeWatch
+    if type(untilTime) == "number" and time() < untilTime then
         SetProbeWatch(true)
         Say("probe watch is still on and logging. /plt debug probe watch off to stop.")
+    else
+        global.probeWatch = nil
     end
 end)
 

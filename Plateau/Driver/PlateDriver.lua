@@ -148,12 +148,33 @@ end
 local hider = CreateFrame("Frame")
 hider:Hide()
 
+local BLIZZARD_FRAME_EVENTS = {
+    "VARIABLES_LOADED", "CVAR_UPDATE", "PLAYER_ENTERING_WORLD", "PLAYER_TARGET_CHANGED", "PLAYER_SOFT_FRIEND_CHANGED",
+    "PLAYER_SOFT_ENEMY_CHANGED", "UPDATE_MOUSEOVER_UNIT", "PLAYER_LEVEL_UP", "PLAYER_ROLES_ASSIGNED", "PLAYER_LEVEL_CHANGED",
+    "UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE", "READY_CHECK", "READY_CHECK_FINISHED", "READY_CHECK_CONFIRM",
+    "PARTY_MEMBER_DISABLE", "PARTY_MEMBER_ENABLE", "INCOMING_RESURRECT_CHANGED", "GROUP_JOINED", "GROUP_LEFT",
+    "INCOMING_SUMMON_CHANGED",
+}
+
+local function RestoreBlizzardPlate(base)
+    local unitFrame = base.UnitFrame
+    if not (unitFrame and unitFrame.plateauStripped) then return end
+    unitFrame.plateauStripped = nil
+    local valid = C_EventUtils and C_EventUtils.IsEventValid
+    for _, event in ipairs(BLIZZARD_FRAME_EVENTS) do
+        if not valid or valid(event) then
+            pcall(unitFrame.RegisterEvent, unitFrame, event)
+        end
+    end
+end
+
 local function HideBlizzardPlate(base)
     local unitFrame = base.UnitFrame
     if not unitFrame then return end
 
     unitFrame:SetParent(hider)
     unitFrame:UnregisterAllEvents()
+    unitFrame.plateauStripped = true
 
     local castBar = unitFrame.castBar or (unitFrame.CastBarsContainer and unitFrame.CastBarsContainer.castBar)
     if castBar then
@@ -724,6 +745,8 @@ local function OnUnitAdded(unit)
         Watch(plate, unit)
         if hiddenMinion then
             HideBlizzardPlate(base)
+        else
+            RestoreBlizzardPlate(base)
         end
     end
 end

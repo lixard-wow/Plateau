@@ -6,6 +6,19 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-05 release hardening
+
+#### Fixed
+- **Enemy target name in your color no longer errors in dungeons and raids.** The game hides whether a mob is targeting you there; Plateau now passes that hidden answer straight to the color instead of checking it.
+- **Blizzard's own friendly nameplates keep working.** Plateau switched off some events on Blizzard's shared plate frames, so friendly plates drawn by the game slowly lost mouseover highlights and soft-target updates. Plateau now gives those events back whenever the game reuses one of those frames for a plate Plateau doesn't draw.
+- **Damaged saved settings no longer break Plateau.** Wrong-type data is repaired at login, each settings upgrade step runs on its own, and if the file still can't be read Plateau starts with its defaults, keeps the old data under 'recovered' and says so in chat.
+- **Settings are checked at login and on import:** text alignments must be left, center or right, and every scale stays between 0.1 and 5, so a bad value can't cause errors on every nameplate.
+- **A refused import no longer changes your boss phase lines**, imported profile names lose color codes and are cut to 32 letters, and profile strings over 20,000 characters are refused before unpacking.
+- **Switching profile before the game knows your character** (WoW Forever) no longer errors.
+
+#### Changed
+- **Probe log is smaller and private:** it keeps at most 300 entries, never stores names, GUIDs or creature IDs, probe watch turns itself off after 4 hours, and the log is cleared when Plateau updates. The existing log is cleared once.
+
 ### 2026-10-05 nameplates attach to the game's own
 
 Plateau's nameplates are now part of the game's nameplates instead of floating in a separate layer above them.

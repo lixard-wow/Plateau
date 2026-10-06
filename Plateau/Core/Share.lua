@@ -1,7 +1,7 @@
 local _, ns = ...
 
 local PREFIX = "!SL1!"
-local MAX_TEXT = 60000
+local MAX_TEXT = 20000
 local MAX_SERIALIZED = 1000000
 local MAX_NODES = 20000
 local MAX_STRING = 200
@@ -114,13 +114,22 @@ function Share.Deserialize(text)
     return value
 end
 
-local function Sanitize(data, defaults)
+local JUSTIFY_KEYS = { justify = true, textJustify = true }
+local JUSTIFY = { LEFT = true, CENTER = true, RIGHT = true }
+local TYPE_SCALES = { boss = true, lieutenant = true, higher = true, caster = true, elite = true, trivial = true }
+local MIN_SCALE, MAX_SCALE = 0.1, 5
+
+local function IsScale(key, parent)
+    return type(key) == "string" and (key:find("[Ss]cale$") ~= nil or (parent == "scaling" and TYPE_SCALES[key] == true))
+end
+
+local function Sanitize(data, defaults, parent)
     local clean = {}
     for key, value in pairs(data) do
         local default = defaults[key]
         if type(default) == "table" and default[1] == nil then
             if type(value) == "table" then
-                clean[key] = Sanitize(value, default)
+                clean[key] = Sanitize(value, default, key)
             end
         elseif type(default) == "table" then
             if type(value) == "table" then
@@ -135,10 +144,13 @@ local function Sanitize(data, defaults)
         elseif default ~= nil and type(value) == type(default) then
             if type(value) == "number" then
                 if value == value and value >= -MAX_NUMBER and value <= MAX_NUMBER then
+                    if IsScale(key, parent) then
+                        value = math.max(MIN_SCALE, math.min(MAX_SCALE, value))
+                    end
                     clean[key] = value
                 end
             elseif type(value) == "string" then
-                if #value <= MAX_STRING then
+                if #value <= MAX_STRING and (not JUSTIFY_KEYS[key] or JUSTIFY[value]) then
                     clean[key] = value
                 end
             else
