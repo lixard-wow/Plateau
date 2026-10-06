@@ -1,6 +1,6 @@
 local _, ns = ...
 
-local SCHEMA_VERSION = 20
+local SCHEMA_VERSION = 21
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -77,6 +77,22 @@ local function RenameProfile(db, OLD, NEW)
 end
 
 local migrations = {
+    [21] = function(db)
+        local function Clear(look)
+            local castbar = type(look) == "table" and look.castbar
+            if type(castbar) == "table" then
+                castbar.interruptible, castbar.channelColor = nil, nil
+            end
+        end
+        for _, profile in pairs(db.profiles or {}) do
+            if type(profile) == "table" then
+                Clear(profile.look)
+                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
+                    Clear(override)
+                end
+            end
+        end
+    end,
     [20] = function(db)
         RenameProfile(db, "Z-Perl", "Z-Perl-style")
     end,

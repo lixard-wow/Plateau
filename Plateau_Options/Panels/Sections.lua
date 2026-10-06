@@ -1088,8 +1088,6 @@ local PREVIEW_CASTS = {
     { value = "cantInterrupt", label = "Uninterruptible cast" },
     { value = "importantStop", label = "Important, uninterruptible (CC required)" },
     { value = "kickCooldown", label = "Interrupt on cooldown" },
-    { value = "noInterrupt", label = "No interrupt ability" },
-    { value = "channel", label = "Channel, no interrupt ability" },
     { value = "interrupted", label = "Interrupted" },
 }
 
@@ -2193,7 +2191,7 @@ ns.sections = {
           tooltip = "How long the interrupted-cast bar and message stay up before clearing." }, On("look.castbar.showInterrupter"), "Turn on Show interrupter name to use this."),
 
         { type = "Header", label = "Cast bar colors" },
-        { type = "Note", label = "Cast bar colors reflect your interrupt's cooldown and whether the cast can be interrupted. Casts flagged as important by Blizzard use separate colors, including important casts that can only be stopped with crowd control.", height = 32 },
+        { type = "Note", label = "Cast bar colors reflect your interrupt's cooldown and whether the cast can be interrupted. Casts flagged as important by Blizzard use separate colors, including important casts that can only be stopped with crowd control. If your spec has no interrupt, casts that can be interrupted show the Interrupt ready colors, so you can call them out.", height = 44 },
         { type = "Color", path = "look.castbar.readyColor", label = "Interrupt ready",
           tooltip = "Cast bar color when your interrupt is off cooldown. This only checks cooldown - it doesn't know if you're in range or otherwise able to actually use it right now." },
         { type = "Color", path = "look.castbar.notReadyColor", label = "Interrupt on cooldown",
@@ -2206,10 +2204,6 @@ ns.sections = {
           tooltip = "The game says this cast can't be interrupted. Tints the bar over the interrupt colors and your bar texture, so a shielded cast always looks the same no matter your interrupt. This color's own opacity sets how strongly the tint shows - lower it to let more of your bar texture show through." },
         { type = "Color", path = "look.castbar.importantUninterruptible", label = "Important cast: uninterruptible, CC required",
           tooltip = "Blizzard flags the cast as important and the game says it can't be interrupted. Both come straight from the game. This cast needs crowd control: stun, incapacitate or knockback it, break line of sight, or use a defensive. The game doesn't say whether CC will work on this enemy. Has its own opacity too, independent of Uninterruptible cast above." },
-        { type = "Color", path = "look.castbar.interruptible", label = "Interruptible cast (no interrupt ability)",
-          tooltip = "Used when Plateau can't currently find an interrupt spell you know - usually your spec or class doesn't have one, or (for some classes) your current shapeshift form or summoned pet doesn't. This is separate from an interrupt being on cooldown; it can change if you respec, reform, or resummon." },
-        { type = "Color", path = "look.castbar.channelColor", label = "Interruptible channel (no interrupt ability)",
-          tooltip = "Same as Interruptible cast, but for a channeled cast instead of a normal one." },
 
         { type = "Header", label = "Text" },
         { type = "Dropdown", path = "look.castbar.textJustify", label = "Spell name alignment", options = ALIGN,

@@ -102,7 +102,7 @@ local function ApplyFill(bar)
     if color then
         nr, ng, nb, na = color.r, color.g, color.b, color.a
     else
-        local plain = readiness and s.ready or (bar.channel and s.channel or s.interruptible)
+        local plain = s.ready
         nr, ng, nb, na = plain[1], plain[2], plain[3], plain[4] or 1
     end
     local flag = bar.isImportant
@@ -511,8 +511,6 @@ function Castbar:Configure(db, state)
     local s = settings[state] or { formatter = NewFormatter() }
     settings[state] = s
     s.formatter:SetMillisecondsThreshold(db.timerDecimalsBelow)
-    s.interruptible = db.interruptible
-    s.channel = db.channelColor
     s.showSpark = db.showSpark
     s.ready = db.readyColor
     s.notReady = db.notReadyColor
@@ -929,9 +927,7 @@ function Castbar:Preview(plate, state)
 
     local texture = bar:GetStatusBarTexture()
     local fill
-    if cast.noInterrupt then
-        fill = cast.channel and s.channel or s.interruptible
-    elseif cast.important then
+    if cast.important then
         fill = cast.onCooldown and s.importantNotReady or s.importantReady
     else
         fill = cast.onCooldown and s.notReady or s.ready
@@ -942,7 +938,7 @@ function Castbar:Preview(plate, state)
     bar.mustStop:SetAlpha(cast.important and 1 or 0)
     bar.mustStop.fill:SetColorTexture(s.importantUninterruptible[1], s.importantUninterruptible[2], s.importantUninterruptible[3], 1)
     bar.mustStop.fill:SetAlpha(cast.notInterruptible and (s.importantUninterruptible[4] or 1) or 0)
-    if s.showKickMarker and not cast.notInterruptible and not cast.noInterrupt then
+    if s.showKickMarker and not cast.notInterruptible then
         bar.kickClip:Show()
         bar.kickLine:SetAlpha(1)
         PointMarker(bar, false)

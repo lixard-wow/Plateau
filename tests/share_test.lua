@@ -15,7 +15,7 @@ check(Share.Deserialize("{s1^") == nil and Share.Deserialize("x") == nil, "malfo
 PlateauDB = nil
 DB:Init()
 DB:Set("look.castbar.height", 18)
-DB:Set("look.castbar.interruptible", { 0, 1, 0 })
+DB:Set("look.castbar.readyColor", { 0, 1, 0 })
 local text = DB:ExportProfile()
 local exported = ns.Share.Decode(text)
 check(exported.look.colors.elite ~= nil and exported.look.colors.eliteColor ~= nil, "export carries every setting, not just changes")
@@ -23,16 +23,16 @@ check(type(text) == "string" and text:sub(1, 5) == "!SL1!" and not text:find("[^
 
 check(DB:ImportProfile("Shared", text, true), "import creates a profile")
 check(DB.profileName == "Shared", "import switches to it")
-check(DB.views.enemy.castbar.height == 18 and DB.views.enemy.castbar.interruptible[2] == 1, "base look imported")
+check(DB.views.enemy.castbar.height == 18 and DB.views.enemy.castbar.readyColor[2] == 1, "base look imported")
 check(DB.views.friendly.castbar.height == 18, "friendly reads the same imported look, since there's no override layer anymore")
 check(not DB:ImportProfile("Shared", text), "existing name rejected")
 check(not DB:ImportProfile("Bad", "hello"), "non-Plateau string rejected")
 check(not DB:ImportProfile("Bad", "!SL1!zzzz"), "damaged string rejected")
 
 local hostile = LibDeflate:EncodeForPrint(LibDeflate:CompressDeflate(Share.Serialize({
-    version = 4, look = { castbar = { height = "tall", nope = 1, interruptible = { "a" } }, junk = { x = 1 } } })))
+    version = 4, look = { castbar = { height = "tall", nope = 1, readyColor = { "a" } }, junk = { x = 1 } } })))
 check(DB:ImportProfile("Hostile", "!SL1!" .. hostile, true), "import with wrong types still succeeds")
-check(DB.views.enemy.castbar.height == 10 and DB.views.enemy.castbar.interruptible[1] == 1, "wrong types dropped, defaults used")
+check(DB.views.enemy.castbar.height == 10 and DB.views.enemy.castbar.readyColor[1] == ns.defaults.look.castbar.readyColor[1], "wrong types dropped, defaults used")
 check(rawget(DB.saved.profiles.Hostile.look, "junk") == nil, "unknown groups dropped")
 
 local old = LibDeflate:EncodeForPrint(LibDeflate:CompressDeflate(Share.Serialize({
@@ -55,7 +55,7 @@ check(DB.saved.profiles.V5 == nil, "refused import creates nothing")
 
 check(DB:ImportProfile("Big1", raw("{sversion^n7^slook^{scastbar^{sheight^n1e999^}}}"), true) and DB.views.enemy.castbar.height == 10, "infinite number dropped")
 check(DB:ImportProfile("Big2", pack({ version = 7, look = { castbar = { height = 5e9 } } }), true) and DB.views.enemy.castbar.height == 10, "out of range number dropped")
-check(DB:ImportProfile("Big3", raw("{sversion^n7^slook^{scastbar^{sinterruptible^{n1^n1e999^n2^n0.5^n3^n0.5^n4^n1^}}}}"), true) and DB.views.enemy.castbar.interruptible[1] == 1, "infinite colour channel replaced with the default")
+check(DB:ImportProfile("Big3", raw("{sversion^n7^slook^{scastbar^{sreadyColor^{n1^n1e999^n2^n0.5^n3^n0.5^n4^n1^}}}}"), true) and DB.views.enemy.castbar.readyColor[1] == ns.defaults.look.castbar.readyColor[1], "infinite colour channel replaced with the default")
 check(DB:ImportProfile("Long1", pack({ version = 7, look = { castbar = { font = string.rep("a", 5000) } } }), true) and #tostring(DB.views.enemy.castbar.font) < 300, "overlong string dropped")
 
 local wide = {}

@@ -8,7 +8,7 @@ local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 PlateauDB = { version = 1, profiles = { Default = { look = { highlight = { color = { 1, 0, 0, 1 }, size = 3 }, castbar = { height = 14 } } } }, profileKeys = {} }
 ns.DB:Init()
 local t = ns.DB.profile.look.target
-check(PlateauDB.version == 20, "schema bumped to the latest version")
+check(PlateauDB.version == 21, "schema bumped to the latest version")
 check(t.ringColor[1] == 1 and t.ringColor[2] == 0, "v1 ring color ends up in target.ringColor")
 check(t.ringSize == 3, "v1 ring size ends up in target.ringSize")
 check(rawget(ns.DB.profile.look, "highlight") == nil, "highlight group removed")
@@ -19,7 +19,7 @@ check(PlateauDB.profiles.Default.look.target.ringSize == 3, "migrated value surv
 
 PlateauDB = nil
 ns.DB:Init()
-check(PlateauDB.version == 20 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
+check(PlateauDB.version == 21 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
 
 PlateauDB = { version = 1, profiles = { Default = { look = { health = { tapped = { 0.2, 0.2, 0.9, 1 }, borderSize = 2 } } } }, profileKeys = {} }
 ns.DB:Init()
@@ -81,10 +81,11 @@ PlateauDB = { version = 7, profiles = { Default = { look = { name = { mode = "la
 ns.DB:Init()
 check(ns.DB.views.enemy.name.npcMode == "full", "v8: an explicit npcMode is never overwritten")
 
-PlateauDB = { version = 8, profiles = { Default = { look = { castbar = { interruptible = { [2] = 1 } } } } }, profileKeys = {} }
+PlateauDB = { version = 8, profiles = { Default = { look = { castbar = { readyColor = { [2] = 1 } } } } }, profileKeys = {} }
 ns.DB:Init()
-local repaired = ns.DB.profile.look.castbar.interruptible
-check(repaired[1] == 1 and repaired[2] == 1 and repaired[3] == 0 and repaired[4] == 1,
+local repaired = ns.DB.profile.look.castbar.readyColor
+local base = ns.defaults.look.castbar.readyColor
+check(repaired[1] == base[1] and repaired[2] == 1 and repaired[3] == base[3] and repaired[4] == 1,
     "v9: a color array left holey by the old per-channel strip is repaired from defaults, keeping the channel that was actually set")
 
 PlateauDB = { version = 9, profiles = {
@@ -201,7 +202,7 @@ PlateauDB = { version = 15, profiles = {
 }, profileKeys = { ["Stalador - Iridikron"] = "On" } }
 ns.DB:Init()
 local on = PlateauDB.profiles.On.look.scaling
-check(PlateauDB.version == 20 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
+check(PlateauDB.version == 21 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
 check(on.layerByType == nil and on.layerOrder == nil and on.boss == 1.3, "v16: the old layering keys are removed and other scaling settings kept")
 check(PlateauDB.profiles.On.states.friendly.scaling.castFront == true and PlateauDB.profiles.On.states.friendly.scaling.layerByType == nil, "v16: state overrides are converted too")
 local off = PlateauDB.profiles.Off.look.scaling
@@ -237,4 +238,12 @@ ns.DB:Init()
 check(PlateauDB.profiles["Z-Perl"] == nil and PlateauDB.profiles["Z-Perl-style"].look.plate.width == 99, "v20: the Z-Perl profile is renamed Z-Perl-style, keeping its settings")
 check(PlateauDB.profileKeys["Stalador - Iridikron"] == "Z-Perl-style" and PlateauDB.assignments["Stalador - Iridikron"].content.raid == "Z-Perl-style", "v20: characters and automatic switching follow the rename")
 check(PlateauDB.global.builtins["Z-Perl-style"] == true and PlateauDB.global.builtins["Z-Perl"] == nil, "v20: the built-in flag moves too, so it isn't created twice")
+ns.DB:Shutdown()
+
+PlateauDB = { version = 20, profiles = { Default = { look = { castbar = { interruptible = { 1, 0, 0, 1 }, channelColor = { 0, 0, 1, 1 }, height = 14 } },
+    states = { target = { castbar = { interruptible = { 0, 1, 0, 1 } } } } } }, profileKeys = {} }
+ns.DB:Init()
+local cleaned = PlateauDB.profiles.Default
+check(cleaned.look.castbar.interruptible == nil and cleaned.look.castbar.channelColor == nil and cleaned.look.castbar.height == 14, "v21: the removed no-interrupt cast colors are cleared, other cast bar settings kept")
+check(cleaned.states.target.castbar.interruptible == nil, "v21: they are cleared from state overrides too")
 ns.DB:Shutdown()

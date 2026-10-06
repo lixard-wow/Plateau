@@ -74,7 +74,6 @@ check(#problems == 0, "the sidebar order lists every page exactly once" .. (#pro
 local castPaths = {
     "look.castbar.readyColor", "look.castbar.notReadyColor", "look.castbar.importantReadyColor",
     "look.castbar.importantNotReadyColor", "look.castbar.uninterruptible", "look.castbar.importantUninterruptible",
-    "look.castbar.interruptible", "look.castbar.channelColor",
 }
 local onCast, onHealth = paths(byKey.castbar), paths(byKey.health)
 for _, path in ipairs(castPaths) do

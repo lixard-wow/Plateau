@@ -45,7 +45,7 @@ The first time you log in, Plateau asks you to pick a look from six ready-made s
 - **Boss phase lines:** lines on boss health bars where the fight changes phase. Plateau knows which boss you are fighting and uses that boss's percentages; this season's bosses come built in, every boss can be edited, and bosses you fight are added on their own.
 
 ### The cast bar
-- Colors that follow **your own interrupt**: one color while it is ready, another while it is on cooldown, and separate pairs for casts Blizzard flags as important. Uninterruptible casts and channels have their own colors, and so does a spec with no interrupt.
+- Colors that follow **your own interrupt**: one color while it is ready, another while it is on cooldown, and separate pairs for casts Blizzard flags as important. Uninterruptible casts have their own colors. A spec with no interrupt sees the ready colors on casts that can be interrupted, so healers can call them out.
 - A **line on the cast bar** showing where your interrupt comes back during the cast.
 - **Glow around important casts**, spell icon (beside the bar or one tall icon spanning the health and cast bars), timer that switches to tenths near the end, who the cast is aimed at, and who interrupted it.
 

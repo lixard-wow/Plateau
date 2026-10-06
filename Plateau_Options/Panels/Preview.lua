@@ -515,8 +515,6 @@ local function ApplySample()
     cast.important = kind == "important" or kind == "importantStop"
     cast.onCooldown = kind == "kickCooldown"
     cast.notInterruptible = kind == "cantInterrupt" or kind == "importantStop"
-    cast.noInterrupt = kind == "noInterrupt" or kind == "channel"
-    cast.channel = kind == "channel"
     cast.interrupted = kind == "interrupted"
     sample.cast = cast
     local executeOn = On("look.execute.highlight") or On("look.execute.lines")
