@@ -1,0 +1,32 @@
+Plateau Nameplates
+Copyright (c) 2026 lixard-wow. All rights reserved.
+
+This software, including its source code, artwork and icons, is the property
+of the copyright holder.
+
+You may download Plateau Nameplates from an official source and use it, unmodified,
+to play World of Warcraft.
+
+You may not, without prior written permission from the copyright holder:
+  - copy, reproduce or redistribute this software or any part of it, in original
+    or modified form, by any means or on any site or service;
+  - modify, translate, adapt, or create derivative works based on it;
+  - include it, or any part of its code or artwork, in another addon, compilation,
+    pack or product;
+  - sell, sublicense, rent or otherwise commercially exploit it;
+  - remove or alter this notice or any copyright notice.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+
+Third-party components
+----------------------
+The following components are included under their own licenses, not this one.
+Their license texts are distributed with them.
+
+  - Fonts in Plateau_Options/Media/Fonts (Barlow, Barlow Condensed, Cinzel,
+    Source Sans 3): SIL Open Font License 1.1, see the OFL-*.txt files there.
+  - Libraries in Plateau/Libs (LibStub, CallbackHandler-1.0, LibSharedMedia-3.0,
+    LibDataBroker-1.1, LibDBIcon-1.0, LibDeflate): each under its own license as
+    published by its authors.

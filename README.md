@@ -148,6 +148,9 @@ Plateau_Options/   settings UI (load on demand)
 ```
 Releases are packaged with the [BigWigs packager](https://github.com/BigWigsMods/packager); libraries are pulled in as externals by `.pkgmeta`.
 
+## License
+All rights reserved. You may use Plateau to play World of Warcraft, but not copy, modify or redistribute it. See [LICENSE](LICENSE). The bundled fonts and libraries keep their own licenses.
+
 ## Credits
 - Libraries: LibStub, CallbackHandler, LibSharedMedia-3.0, LibDeflate.
 - Icons and atlases used in the preview and quest markers are Blizzard's.

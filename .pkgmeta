@@ -1,5 +1,9 @@
 package-as: Plateau
 
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
 move-folders:
   Plateau/Plateau: Plateau
   Plateau/Plateau_Options: Plateau_Options
@@ -13,6 +17,7 @@ externals:
     tag: latest
   Plateau/Libs/LibSharedMedia-3.0:
     url: https://repos.curseforge.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
+    tag: latest
   Plateau/Libs/LibDataBroker-1.1:
     url: https://github.com/tekkub/libdatabroker-1-1
   Plateau/Libs/LibDBIcon-1.0:
@@ -24,4 +29,16 @@ externals:
 
 ignore:
   - .github
+  - .gitattributes
   - .luacheckrc
+  - tests
+  - Plateau/Libs/.gitkeep
+  - Plateau/Libs/LibDeflate/tests
+  - Plateau/Libs/LibDeflate/examples
+  - Plateau/Libs/LibDeflate/docs
+  - Plateau/Libs/LibDeflate/.appveyor
+  - Plateau/Libs/LibDeflate/.travis
+  - Plateau/Libs/LibDeflate/*.yml
+  - Plateau/Libs/LibDeflate/*.rockspec
+  - Plateau/Libs/LibDeflate/.luacov
+  - Plateau/Libs/LibDeflate/.luacheckrc
