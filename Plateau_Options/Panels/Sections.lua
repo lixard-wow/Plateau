@@ -639,10 +639,10 @@ local function EnsureReloadPrompt()
     text:SetWordWrap(true)
     text:SetText("This change only fully takes effect after a UI reload. Reload now?")
 
-    local later = ns.Widgets.Button(prompt, "Later", 100, function() prompt:Hide() end)
-    later:SetPoint("BOTTOMRIGHT", -16, 16)
+    local later = ns.Widgets.Button(prompt, "Later", 120, function() prompt:Hide() end)
+    later:SetPoint("BOTTOMLEFT", 16, 16)
     local reload = ns.Widgets.Button(prompt, "Reload Now", 120, function() ReloadUI() end)
-    reload:SetPoint("RIGHT", later, "LEFT", -8, 0)
+    reload:SetPoint("BOTTOMRIGHT", -16, 16)
 
     reloadPrompt = prompt
     return prompt
