@@ -87,17 +87,22 @@ local function PlaceText(text, button, point)
     text:SetPoint(CORNER_OFFSETS[point] and point or "CENTER", button, CORNER_OFFSETS[point] and point or "CENTER", offset[1], offset[2])
 end
 
+local SHAPE_HEIGHTS = { square = 1, wide = 0.75, flat = 0.62 }
+
+local function Shape(db)
+    local height = SHAPE_HEIGHTS[db.shape] or 1
+    local crop = 0.42 * height
+    return height, 0.5 - crop, 0.5 + crop
+end
+ns.AuraShape = Shape
+
 local function StyleButton(button, group, container)
     local config = configs[container.plate.state]
     local db = config[group.key]
     local size = db.size * ns.Scaling:AuraFactor()
-    local wide = db.shape == "wide"
-    button:SetSize(size, wide and size * 0.75 or size)
-    if wide then
-        button.iconTexture:SetTexCoord(0.08, 0.92, 0.185, 0.815)
-    else
-        button.iconTexture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    end
+    local height, top, bottom = Shape(db)
+    button:SetSize(size, size * height)
+    button.iconTexture:SetTexCoord(0.08, 0.92, top, bottom)
     button.cooldownFrame:SetDrawSwipe(db.swipe ~= false)
     PlaceText(button.timer, button, db.timerPosition)
     PlaceText(button.stacks, button, db.stackPosition or "BOTTOMRIGHT")
@@ -693,13 +698,16 @@ function Auras:Preview(plate, state)
         if db.enabled and count > 0 then
             local point, relative, horizontal, vertical, axis, anchor = Placement(db)
             local perRow = math.max(1, db.perRow)
+            local height, top, bottom = Shape(db)
+            local iconHeight = db.size * height
             local step = db.size + db.spacing
+            local lineStep = iconHeight + db.spacing
             local across = math.min(count, perRow)
             local lines = math.ceil(count / perRow)
             if axis == VERTICAL then
                 across, lines = lines, across
             end
-            fake:SetSize(across * step - db.spacing, lines * step - db.spacing)
+            fake:SetSize(across * step - db.spacing, lines * lineStep - db.spacing)
             fake:ClearAllPoints()
             fake:SetPoint(anchor, plate, relative, db.offsetX, db.offsetY)
             local samples = SAMPLE_ICONS[key]
@@ -734,9 +742,10 @@ function Auras:Preview(plate, state)
                     if axis == VERTICAL then
                         column, row = row, column
                     end
-                    icon:SetSize(db.size, db.size)
+                    icon:SetSize(db.size, iconHeight)
+                    icon.texture:SetTexCoord(0.08, 0.92, top, bottom)
                     icon:ClearAllPoints()
-                    icon:SetPoint(point, fake, point, column * step * horizontal, row * step * vertical)
+                    icon:SetPoint(point, fake, point, column * step * horizontal, row * lineStep * vertical)
                     if others and i == count - (extra and 1 or 0) then
                         icon.texture:SetTexture(OTHERS_SAMPLE)
                     elseif extra and i == count then

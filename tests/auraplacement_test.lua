@@ -62,4 +62,11 @@ local _, _, _, _, _, attachCenter = Placement({ side = "TOP", align = "CENTER", 
 check(attachCenter == "BOTTOM", "centered above the plate stays centered")
 local _, relUp, _, _, _, attachUp = Placement({ side = "LEFT", align = "LEFT", grow = "up-left" })
 check(relUp == "BOTTOMLEFT" and attachUp == "BOTTOMRIGHT", "on the left with rows growing up, the group starts at the plate's bottom")
+local squareHeight, squareTop = ns.AuraShape({ shape = "square" })
+local wideHeight, wideTop, wideBottom = ns.AuraShape({ shape = "wide" })
+local flatHeight, flatTop, flatBottom = ns.AuraShape({ shape = "flat" })
+check(squareHeight == 1 and math.abs(squareTop - 0.08) < 1e-6, "square icons show the whole art")
+check(wideHeight == 0.75 and math.abs(wideTop - 0.185) < 1e-6 and math.abs(wideBottom - 0.815) < 1e-6, "wide icons keep their 4 by 3 crop")
+check(flatHeight < wideHeight and math.abs((flatBottom - flatTop) / 0.84 - flatHeight) < 1e-6, "extra wide icons are flatter and crop the art to match, so it isn't squashed")
+check(ns.AuraShape({}) == 1, "an unknown shape falls back to square")
 for _, f in ipairs(failures) do print("  " .. f) end

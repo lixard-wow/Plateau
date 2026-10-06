@@ -1294,6 +1294,7 @@ end
 local AURA_SHAPES = {
     { value = "square", label = "Square" },
     { value = "wide", label = "Wide" },
+    { value = "flat", label = "Extra wide" },
 }
 
 local AURA_TEXT_POINTS = {
@@ -1310,7 +1311,7 @@ local function AuraExtraControls(path)
     return List(
         { type = "Header", label = "Extras" },
         { type = "Dropdown", path = path .. ".shape", label = "Icon shape", options = AURA_SHAPES,
-          tooltip = "Square shows the whole icon. Wide makes icons shorter and crops the top and bottom of the art, saving vertical space." },
+          tooltip = "Square shows the whole icon. Wide makes icons shorter (4 by 3) and Extra wide shorter still (about 8 by 5, like Plater), cropping the top and bottom of the art to save vertical space." },
         { type = "Toggle", path = path .. ".swipe", label = "Cooldown swipe",
           tooltip = "The dark clock-wipe over each icon as it runs out. Off leaves just the timer text." },
         { type = "Slider", path = path .. ".borderSize", label = "Icon border thickness", min = 0, max = 3,
