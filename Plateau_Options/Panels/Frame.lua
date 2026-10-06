@@ -517,7 +517,7 @@ profileButton:SetPoint("BOTTOMLEFT", RAIL + PAD, 11)
 Style.DropArrow(profileButton)
 local profile = profileButton.label
 profileButton:SetScript("OnClick", function(self)
-    local options = { { title = true, label = "SWITCH ACTIVE PROFILE (ALSO SETS IT AS DEFAULT)" } }
+    local options = {}
     for _, name in ipairs(Plateau.DB:ListProfiles()) do
         options[#options + 1] = { value = name, label = Plateau.Builtins.Label(name) }
     end
