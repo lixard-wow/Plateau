@@ -387,9 +387,7 @@ end
 function Driver:RefreshAlpha(plate)
     local range = (mouseoverFull and plate.isMouseover) and 1 or (plate.rangeAlpha or 1)
     local alpha = range * (plate.idleAlpha or 1)
-    if plate.preview then
-        alpha = alpha * ((plate.preview.isOther and Dims(plate)) and dimAlpha or 1)
-    else
+    if not plate.preview then
         if targetPlate and not plate.isTarget and Dims(plate) then
             alpha = alpha * dimAlpha
         end
