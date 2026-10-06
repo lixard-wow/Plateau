@@ -16,6 +16,7 @@ end
 local FONTS = "Interface\\AddOns\\" .. addonName .. "\\Media\\Fonts\\"
 local BARLOW = FONTS .. "Barlow-Regular.ttf"
 local BARLOW_COND = FONTS .. "BarlowCondensed-Bold.ttf"
+local BARLOW_SEMI = FONTS .. "Barlow-SemiBold.ttf"
 local CINZEL = FONTS .. "Cinzel-Bold.ttf"
 local SOURCE = FONTS .. "SourceSans3-Regular.ttf"
 local SOURCE_BOLD = FONTS .. "SourceSans3-Bold.ttf"
@@ -39,6 +40,18 @@ Style.THEMES = {
             text = Hex("#e8ebee"),
             muted = Hex("#9aa3ad"),
             title = Hex("#e8ebee"),
+            heading = Hex("#e8ebee"),
+            line = Hex("#2c323a"),
+            surface = Hex("#1d2127"),
+            surfaceBorder = Hex("#2c323a"),
+            header = Hex("#1d2127"),
+            buttonText = Hex("#e8ebee"),
+            primary = Hex("#2f8f68"),
+            primaryBorder = Hex("#2f8f68"),
+            primaryHover = Hex("#36a377"),
+            primaryText = Hex("#ffffff"),
+            iconButton = Hex("#262b32"),
+            iconButtonBorder = Hex("#262b32"),
             warn = Hex("#e0913a"),
             button = Hex("#262b32"),
             buttonBorder = Hex("#30363f"),
@@ -47,6 +60,14 @@ Style.THEMES = {
             iconHover = Hex("#ffffff"),
         },
         buttonRadius = 4,
+        titleFont = { BARLOW_COND, 17 },
+        sectionFont = { BARLOW_SEMI, 12 },
+        buttonFont = { BARLOW_SEMI, 13 },
+        headerHeight = 46,
+        iconButton = 28,
+        headerFill = true,
+        uppercaseTitle = true,
+        stripe = true,
         settingsIcon = "icon_sliders",
         groups = { look = Hex("#4fbf8f"), casts = Hex("#a98cf0"), highlights = Hex("#e0a03a"), setup = Hex("#6fa8e8") },
     },
@@ -66,6 +87,17 @@ Style.THEMES = {
             text = Hex("#efe6d6"),
             muted = Hex("#bfb19e"),
             title = Hex("#e9d9b4"),
+            heading = Hex("#f3e6c8"),
+            line = Hex("#3a2e22"),
+            surface = Hex("#241c15"),
+            surfaceBorder = Hex("#3a2e22"),
+            buttonText = Hex("#e9d9b4"),
+            primary = Hex("#c9a35a"),
+            primaryBorder = Hex("#e2c07a"),
+            primaryHover = Hex("#d6b06a"),
+            primaryText = Hex("#1c1611"),
+            iconButton = Hex("#241c15"),
+            iconButtonBorder = Hex("#3a2e22"),
             warn = Hex("#d0614a"),
             button = Hex("#241c15"),
             buttonBorder = Hex("#5a4630"),
@@ -74,6 +106,12 @@ Style.THEMES = {
             iconHover = Hex("#e9d9b4"),
         },
         buttonRadius = 4,
+        titleFont = { CINZEL, 14 },
+        sectionFont = { CINZEL, 12 },
+        buttonFont = { SOURCE_BOLD, 12 },
+        headerHeight = 42,
+        iconButton = 26,
+        brackets = true,
         roundFields = true,
         settingsIcon = "icon_gear",
         groups = { look = Hex("#c9a35a"), casts = Hex("#b9825a"), highlights = Hex("#9fc58a"), setup = Hex("#8fa3b0") },
@@ -94,6 +132,17 @@ Style.THEMES = {
             text = { 0.92, 0.91, 0.86, 1 },
             muted = { 0.70, 0.70, 0.70, 1 },
             title = { 0.92, 0.91, 0.86, 1 },
+            heading = { 0.92, 0.91, 0.86, 1 },
+            line = { 0.29, 0.29, 0.29, 1 },
+            surface = Hex("#161616"),
+            surfaceBorder = { 0.22, 0.22, 0.22, 1 },
+            buttonText = { 0.92, 0.91, 0.86, 1 },
+            primary = Hex("#161616"),
+            primaryBorder = { 0.78, 0.66, 0.22, 1 },
+            primaryHover = Hex("#202020"),
+            primaryText = { 0.92, 0.91, 0.86, 1 },
+            iconButton = Hex("#161616"),
+            iconButtonBorder = { 0.22, 0.22, 0.22, 1 },
             warn = Hex("#d0614a"),
             button = Hex("#161616"),
             buttonBorder = { 0.22, 0.22, 0.22, 1 },
@@ -102,6 +151,11 @@ Style.THEMES = {
             iconHover = { 0.92, 0.91, 0.86, 1 },
         },
         buttonRadius = 0,
+        titleFont = { SOURCE_BOLD, 15 },
+        sectionFont = { SOURCE_BOLD, 12 },
+        buttonFont = { SOURCE, 12 },
+        headerHeight = 42,
+        iconButton = 24,
         settingsIcon = "icon_gear",
         roundClose = true,
         groups = { look = { 0.78, 0.66, 0.22, 1 }, casts = { 0.88, 0.76, 0.40, 1 }, highlights = { 0.68, 0.56, 0.18, 1 }, setup = { 0.62, 0.62, 0.62, 1 } },
@@ -180,6 +234,14 @@ end
 
 Style.font = ChosenFont("optionsFont", Style.theme.body)
 Style.headingFont = ChosenFont("optionsHeadingFont", Style.theme.heading)
+Style.titleFont = ChosenFont("optionsHeadingFont", Style.theme.titleFont[1])
+Style.TITLE_SIZE = Style.theme.titleFont[2]
+Style.sectionFont = ChosenFont("optionsHeadingFont", Style.theme.sectionFont[1])
+Style.SECTION_SIZE = Style.theme.sectionFont[2]
+Style.buttonFont = ChosenFont("optionsFont", Style.theme.buttonFont[1])
+Style.BUTTON_SIZE = Style.theme.buttonFont[2]
+Style.HEADER_HEIGHT = Style.theme.headerHeight
+Style.ICON_BUTTON = Style.theme.iconButton
 Style.HEADING_SIZE = 14
 
 local FONT_RETRY_DELAY = 0.1
@@ -397,13 +459,15 @@ function Style.Panel(frame, fill, border, radius)
     return inner, edge
 end
 
-function Style.ButtonBox(button, fill, radius)
+function Style.ButtonBox(button, fill, radius, border, hover)
     local C = Style.colors
     fill = fill or C.button
-    local inner = Style.Panel(button, fill, C.buttonBorder, radius or Style.BUTTON_RADIUS)
-    button.restBorder = C.buttonBorder
+    border = border or C.buttonBorder
+    hover = hover or C.buttonHover
+    local inner = Style.Panel(button, fill, border, radius or Style.BUTTON_RADIUS)
+    button.restBorder = border
     button:HookScript("OnEnter", function()
-        inner:SetVertexColor(C.buttonHover[1], C.buttonHover[2], C.buttonHover[3], 1)
+        inner:SetVertexColor(hover[1], hover[2], hover[3], 1)
     end)
     button:HookScript("OnLeave", function()
         inner:SetVertexColor(fill[1], fill[2], fill[3], fill[4] or 1)
@@ -415,7 +479,7 @@ function Style.IconButton(parent, icon, size, onClick, tooltip, round)
     local C = Style.colors
     local button = CreateFrame("Button", nil, parent)
     button:SetSize(size, size)
-    Style.ButtonBox(button, C.button, round and "circle" or Style.BUTTON_RADIUS)
+    Style.ButtonBox(button, C.iconButton, round and "circle" or Style.BUTTON_RADIUS, C.iconButtonBorder, C.hover)
     button.icon = button:CreateTexture(nil, "ARTWORK")
     button.icon:SetTexture(ICONS .. icon)
     button.icon:SetSize(math.floor(size * 0.5 + 0.5), math.floor(size * 0.5 + 0.5))
@@ -451,6 +515,36 @@ function Style.SquareCorners(frame, color, corners, layer, sublevel)
         texture:SetColorTexture(color[1], color[2], color[3], color[4] or 1)
         texture:SetSize(Style.RADIUS, Style.RADIUS)
         texture:SetPoint(point)
+    end
+end
+
+function Style.Brackets(frame, color, size, thickness)
+    size, thickness = size or 10, thickness or 2
+    color = color or Style.colors.accent
+    for _, point in ipairs({ "TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT" }) do
+        local x = point:find("LEFT") and -1 or 1
+        local y = point:find("TOP") and 1 or -1
+        local across = frame:CreateTexture(nil, "OVERLAY")
+        across:SetColorTexture(color[1], color[2], color[3], color[4] or 1)
+        across:SetSize(size, thickness)
+        across:SetPoint(point, frame, point, x, y)
+        local down = frame:CreateTexture(nil, "OVERLAY")
+        down:SetColorTexture(color[1], color[2], color[3], color[4] or 1)
+        down:SetSize(thickness, size)
+        down:SetPoint(point, frame, point, x, y)
+    end
+end
+
+function Style.Card(frame, size)
+    local C = Style.colors
+    if Style.theme.brackets then
+        Style.Brackets(frame, C.accent, size or 10, 2)
+    elseif Style.theme.stripe then
+        local stripe = frame:CreateTexture(nil, "ARTWORK")
+        stripe:SetColorTexture(C.accent[1], C.accent[2], C.accent[3], 1)
+        stripe:SetHeight(3)
+        stripe:SetPoint("TOPLEFT", 10, -1)
+        stripe:SetPoint("TOPRIGHT", -10, -1)
     end
 end
 

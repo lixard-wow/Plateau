@@ -64,6 +64,7 @@ callout:SetClampedToScreen(true)
 callout:EnableMouse(true)
 callout:Hide()
 Style.Panel(callout, C.window, C.accent)
+Style.Card(callout)
 
 local outline = CreateFrame("Frame", nil, UIParent)
 outline:SetFrameStrata("FULLSCREEN_DIALOG")
@@ -159,7 +160,7 @@ backButton = ns.Widgets.Button(callout, "Back", 70, function()
 end)
 backButton:SetPoint("BOTTOMLEFT", PAD, PAD)
 
-nextButton = ns.Widgets.Button(callout, "Next", 80, function()
+nextButton = ns.Widgets.PrimaryButton(callout, "Next", 80, function()
     if index >= #STEPS then
         Finish()
     else

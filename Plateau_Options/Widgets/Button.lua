@@ -3,19 +3,30 @@ local _, ns = ...
 local Style = ns.Style
 local C = Style.colors
 
-function ns.Widgets.Button(parent, text, width, onClick)
+function ns.Widgets.Button(parent, text, width, onClick, primary)
     local button = CreateFrame("Button", nil, parent)
     button:SetSize(width or 120, 22)
-    Style.ButtonBox(button)
+    if primary then
+        Style.ButtonBox(button, C.primary, nil, C.primaryBorder, C.primaryHover)
+    else
+        Style.ButtonBox(button)
+    end
 
-    button.label = Style.Text(button, 11, C.text, "CENTER")
+    local color = primary and C.primaryText or C.buttonText
+    button.label = Style.Text(button, 11, color, "CENTER")
+    Style.SetFont(button.label, Style.buttonFont, Style.BUTTON_SIZE, "")
     button.label:SetPoint("LEFT", 6, 0)
     button.label:SetPoint("RIGHT", -6, 0)
     button.label:SetText(text)
+    button:HookScript("OnMouseDown", function(self) self.label:SetPoint("LEFT", 6, -1) self.label:SetPoint("RIGHT", -6, -1) end)
+    button:HookScript("OnMouseUp", function(self) self.label:SetPoint("LEFT", 6, 0) self.label:SetPoint("RIGHT", -6, 0) end)
 
     button:SetScript("OnClick", onClick)
-    Style.HoverBorder(button, button)
     return button
+end
+
+function ns.Widgets.PrimaryButton(parent, text, width, onClick)
+    return ns.Widgets.Button(parent, text, width, onClick, true)
 end
 
 function ns.Widgets.Header(parent, spec)
@@ -28,7 +39,8 @@ function ns.Widgets.Header(parent, spec)
     local tint = Style.StateColor()
     tick:SetColorTexture(tint[1], tint[2], tint[3], 1)
 
-    local text = Style.Text(row, 13, tint)
+    local text = Style.Text(row, 13, C.heading)
+    Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE + 1, "")
     text:SetPoint("BOTTOMLEFT", tick, "BOTTOMRIGHT", 8, -1)
     text:SetText(spec.label)
 
@@ -36,7 +48,7 @@ function ns.Widgets.Header(parent, spec)
     line:SetPoint("BOTTOMLEFT")
     line:SetPoint("BOTTOMRIGHT")
     line:SetHeight(1)
-    line:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+    line:SetColorTexture(C.line[1], C.line[2], C.line[3], 1)
 
     if spec.collapsible then
         row:EnableMouse(true)
@@ -506,6 +518,9 @@ function ns.Widgets.LookCards(parent, spec)
         card:EnableMouse(true)
         Style.Fill(card, C.field)
         Style.Border(card, C.border)
+        if Style.theme.brackets then
+            Style.Brackets(card, accent, 7, 2)
+        end
 
         card.tag = Style.Text(strip, 10, accent, "CENTER")
         card.tag:SetPoint("BOTTOM", card, "TOP", 0, 5)

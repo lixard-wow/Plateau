@@ -629,6 +629,7 @@ local function EnsureReloadPrompt()
     prompt:SetToplevel(true)
     prompt:EnableMouse(true)
     Style.Panel(prompt, Style.colors.window, Style.colors.border)
+    Style.Card(prompt)
     prompt:Hide()
     tinsert(UISpecialFrames, "PlateauReloadPrompt")
 
@@ -641,7 +642,7 @@ local function EnsureReloadPrompt()
 
     local later = ns.Widgets.Button(prompt, "Later", 120, function() prompt:Hide() end)
     later:SetPoint("BOTTOMLEFT", 16, 16)
-    local reload = ns.Widgets.Button(prompt, "Reload Now", 120, function() ReloadUI() end)
+    local reload = ns.Widgets.Button(prompt, "Reload Now", 120, function() ReloadUI() end, true)
     reload:SetPoint("BOTTOMRIGHT", -16, 16)
 
     reloadPrompt = prompt

@@ -8,7 +8,7 @@ local WIDTH, HEIGHT = 1150, 856
 local RAIL = 168
 local RAIL_TOP = 8
 local PAD = 16
-local TITLE = 46
+local TITLE = Style.HEADER_HEIGHT
 local PREVIEW = 196
 local FOOTER = 44
 local SPACING = 4
@@ -54,30 +54,33 @@ titleBar:RegisterForDrag("LeftButton")
 titleBar:SetScript("OnDragStart", function() frame:StartMoving() end)
 titleBar:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
 
-local titleCap = Style.Rounded(titleBar, C.hover, "BACKGROUND", -1)
-titleCap:SetPoint("TOPLEFT", 1, -1)
-titleCap:SetPoint("TOPRIGHT", -1, -1)
-titleCap:SetHeight(Style.RADIUS * 2)
-local titleShade = titleBar:CreateTexture(nil, "BACKGROUND")
-titleShade:SetPoint("TOPLEFT", 1, -(1 + Style.RADIUS))
-titleShade:SetPoint("BOTTOMRIGHT", -1, 0)
-titleShade:SetColorTexture(1, 1, 1, 1)
-titleShade:SetGradient("VERTICAL", CreateColor(C.window[1], C.window[2], C.window[3], 1), CreateColor(C.hover[1], C.hover[2], C.hover[3], 1))
+if Style.theme.headerFill then
+    local titleCap = Style.Rounded(titleBar, C.header, "BACKGROUND", -1)
+    titleCap:SetPoint("TOPLEFT", 1, -1)
+    titleCap:SetPoint("TOPRIGHT", -1, -1)
+    titleCap:SetHeight(Style.RADIUS * 2)
+    local titleFill = titleBar:CreateTexture(nil, "BACKGROUND")
+    titleFill:SetPoint("TOPLEFT", 1, -(1 + Style.RADIUS))
+    titleFill:SetPoint("BOTTOMRIGHT", -1, 0)
+    titleFill:SetColorTexture(C.header[1], C.header[2], C.header[3], 1)
+end
 
 local logo = titleBar:CreateTexture(nil, "ARTWORK")
 logo:SetSize(32, 32)
 logo:SetPoint("LEFT", PAD, 0)
 logo:SetTexture("Interface\\AddOns\\Plateau\\Art\\icon")
 
-local titleName = Style.Text(titleBar, 18, C.text)
+local TITLE_TEXT = Style.theme.uppercaseTitle and "PLATEAU" or "Plateau"
+local titleName = Style.Text(titleBar, 18, C.title)
+Style.SetFont(titleName, Style.titleFont, Style.TITLE_SIZE + 4, "")
 titleName:SetPoint("LEFT", logo, "RIGHT", 10, 0)
-titleName:SetText("Plateau")
+titleName:SetText(TITLE_TEXT)
 
 local titleVersion = Style.Text(titleBar, 11, C.muted)
 titleVersion:SetPoint("LEFT", titleName, "RIGHT", 8, -1)
 titleVersion:SetText(("v%s"):format(Plateau.version))
 
-local ICON_BUTTON = 24
+local ICON_BUTTON = Style.ICON_BUTTON
 local closeX = Style.IconButton(titleBar, "icon_close", ICON_BUTTON, function() frame:Hide() end, "Close", Style.theme.roundClose)
 closeX:SetPoint("RIGHT", titleBar, "RIGHT", -8, 0)
 
@@ -191,14 +194,15 @@ miniHit:SetPoint("TOPLEFT", 0, 0)
 miniHit:SetSize(96, BAR_HEIGHT)
 Draggable(miniHit)
 
-local miniName = Style.Text(miniHit, 13, C.text)
+local miniName = Style.Text(miniHit, 13, C.title)
+Style.SetFont(miniName, Style.titleFont, Style.TITLE_SIZE, "")
 miniName:SetPoint("LEFT", miniBar, "TOPLEFT", 32, BAR_ROW)
-miniName:SetText("Plateau")
+miniName:SetText(TITLE_TEXT)
 
-logo:SetVertexColor(C.title[1], C.title[2], C.title[3])
-miniIcon:SetVertexColor(C.title[1], C.title[2], C.title[3])
-titleName:SetTextColor(C.title[1], C.title[2], C.title[3])
-miniName:SetTextColor(C.title[1], C.title[2], C.title[3])
+Plateau.Brand:OnChange(function(r, g, b)
+    logo:SetVertexColor(r, g, b)
+    miniIcon:SetVertexColor(r, g, b)
+end)
 
 local miniDot = Style.Text(miniBar, 11, C.muted)
 miniDot:SetPoint("LEFT", miniName, "RIGHT", 6, 0)
@@ -303,8 +307,7 @@ screenWatcher:SetScript("OnEvent", function()
     end
 end)
 
-local G = Style.groupColors
-local titleLine = Style.GradientLine(titleBar, { G.look, G.casts, G.highlights }, 2)
+local titleLine = Style.GradientLine(titleBar, { C.line, C.line }, 1)
 titleLine:SetPoint("BOTTOMLEFT", 1, 0)
 titleLine:SetPoint("BOTTOMRIGHT", -1, 0)
 

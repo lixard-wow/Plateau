@@ -257,6 +257,7 @@ frame:SetClampedToScreen(true)
 frame:EnableMouse(true)
 frame:Hide()
 Style.Panel(frame, C.window, C.border)
+Style.Card(frame)
 tinsert(UISpecialFrames, "PlateauSetup")
 
 local titleBar = CreateFrame("Frame", nil, frame)
@@ -401,7 +402,7 @@ end
 skipButton = Widgets.Button(frame, "Skip setup", 110, function() Done(false) end)
 skipButton:SetPoint("BOTTOMLEFT", PAD, 14)
 
-nextButton = Widgets.Button(frame, "Next", 110, function()
+nextButton = Widgets.PrimaryButton(frame, "Next", 110, function()
     if current == #STEPS then
         Done(true)
     else
@@ -450,6 +451,7 @@ conflicts:SetToplevel(true)
 conflicts:EnableMouse(true)
 conflicts:Hide()
 Style.Panel(conflicts, C.window, C.border)
+Style.Card(conflicts)
 
 local conflictLogo = conflicts:CreateTexture(nil, "ARTWORK")
 conflictLogo:SetSize(22, 22)
@@ -499,7 +501,7 @@ local function FinishConflicts()
     end
 end
 
-local disableButton = Widgets.Button(conflicts, "Turn off ticked and reload", 190, function()
+local disableButton = Widgets.PrimaryButton(conflicts, "Turn off ticked and reload", 190, function()
     local any = false
     for _, entry in ipairs(conflictList) do
         if entry.checked then

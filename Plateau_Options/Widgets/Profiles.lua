@@ -145,8 +145,9 @@ function ns.Widgets.NamePrompt()
     box:EnableMouse(true)
     box:Hide()
     Style.Panel(box, C.window, C.border)
+    Style.Card(box)
 
-    local title = Style.Text(box, 15, C.text)
+    local title = Style.Text(box, 15, C.heading)
     title:SetPoint("TOPLEFT", 20, -16)
 
     local text = Style.Text(box, 11, C.muted)
@@ -182,7 +183,7 @@ function ns.Widgets.NamePrompt()
         end
     end
 
-    local create = ns.Widgets.Button(box, "Create", 110, Submit)
+    local create = ns.Widgets.Button(box, "Create", 110, Submit, true)
     create:SetPoint("BOTTOMRIGHT", -20, 14)
     local cancel = ns.Widgets.Button(box, "Cancel", 100, function() box:Hide() end)
     cancel:SetPoint("RIGHT", create, "LEFT", -8, 0)
@@ -224,8 +225,9 @@ function ns.Widgets.ConfirmPrompt()
     box:EnableMouse(true)
     box:Hide()
     Style.Panel(box, C.window, C.border)
+    Style.Card(box)
 
-    local title = Style.Text(box, 15, C.text)
+    local title = Style.Text(box, 15, C.heading)
     title:SetPoint("TOPLEFT", 20, -16)
 
     local text = Style.Text(box, 11, C.muted)
@@ -234,7 +236,7 @@ function ns.Widgets.ConfirmPrompt()
     text:SetWordWrap(true)
 
     local onConfirm
-    local confirm = ns.Widgets.Button(box, "Confirm", 150, function()
+    local confirm = ns.Widgets.PrimaryButton(box, "Confirm", 150, function()
         box:Hide()
         if onConfirm then
             onConfirm()
@@ -686,7 +688,7 @@ function ns.Widgets.ShareProfile(parent)
         set = function(value) activate = value == true end,
     })
 
-    local import = ns.Widgets.Button(frame, "Import profile", SHARE_BUTTON, function()
+    local import = ns.Widgets.PrimaryButton(frame, "Import profile", SHARE_BUTTON, function()
         local ok, name, state = Plateau.DB:ImportProfile(nameBox:GetText(), importEdit:GetText(), activate)
         if ok then
             local color = C.muted
