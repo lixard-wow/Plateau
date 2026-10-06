@@ -34,7 +34,7 @@ check(DB:UseBuiltin("Z-Perl") and DB.profileName == "Z-Perl" and has("Z-Perl"), 
 PlateauDB = { version = 7, profiles = { Default = { look = { plate = { width = 170 } } } }, profileKeys = { ["Stalador - Iridikron"] = "Default" } }
 DB:Init()
 check(DB.profileName == "Default" and DB:Get("look.plate.width") == 170, "existing players keep their profile")
-check(has("Big & bold") and has("Normal") and has("Z-Perl") and has("Compact") and not has("Plateau") and not has("Classic"), "existing players get the four built-ins added")
+check(has("Plater-style") and has("Normal") and has("Z-Perl") and has("Compact") and not has("Plateau") and not has("Classic"), "existing players get the four built-ins added")
 
 PlateauDB = { version = 15, profiles = { Plateau = { look = { plate = { width = 170 } } }, Classic = {} }, profileKeys = { ["Stalador - Iridikron"] = "Plateau" },
     global = { builtins = { Plateau = true, Classic = true } } }

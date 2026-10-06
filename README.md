@@ -107,7 +107,7 @@ Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Esca
 ## Profiles and looks
 A profile holds every look setting, including your per-type changes. Each character remembers which profile it uses.
 
-- **Looks** are four ready-made profiles shown as live cards: Big and bold, Normal, Z-Perl, and Compact. Press Use this look on a card to switch to it. **Restore a built-in profile** puts one back to how it shipped.
+- **Looks** are four ready-made profiles shown as live cards: Plater-style, Normal, Z-Perl, and Compact. Press Use this look on a card to switch to it. **Restore a built-in profile** puts one back to how it shipped.
 - **Switch automatically.** Choose a profile for the open world, dungeons, raids, and delves and scenarios, or per specialization. Content-specific profiles beat specialization profiles, your default profile is the fallback, and automatic switches wait until combat ends.
 - **Manage** them from the button at the bottom left of the window, or the Profiles page: start fresh, copy the current one, copy another into this one, delete.
 

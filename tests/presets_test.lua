@@ -18,9 +18,9 @@ local looks = {}
 for _, look in ipairs(ns.presets.looks) do
     looks[look.key] = look
 end
-DB:SetMany(looks.big.values)
-check(DB.views.friendly.plate.width == 170 and DB.views.enemy.plate.width == 170, "preset applies to both views alike, since friendly and enemy share the same settings now")
-DB:SetMany(looks.big.values)
+DB:SetMany(looks.plater.values)
+check(DB.views.friendly.plate.width == 120 and DB.views.enemy.plate.width == 120, "preset applies to both views alike, since friendly and enemy share the same settings now")
+DB:SetMany(looks.plater.values)
 DB:SetMany(looks.zperl.values)
 check(DB.views.enemy.name.outline == "" and DB.views.enemy.health.borderSize == 1 and DB.views.enemy.plate.height == 12 and DB.views.enemy.healthText.size == ns.defaults.look.healthText.size, "switching looks clears the previous look's settings")
 DB:SetMany(looks.normal.values)

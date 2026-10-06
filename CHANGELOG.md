@@ -6,9 +6,10 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
-### 2026-10-05 Z-Perl look
+### 2026-10-05 Z-Perl and Plater-style looks
 
 #### Changed
+- **Big & bold is replaced by a new built-in look, Plater-style,** laid out like Plater's default plates: a small flat bar, the name below it in Arial Narrow (hidden while casting), health value and percent centered, a faded level above the right end, a cast bar right under the bar with icon, centered spell name and timer, a blue glow and silver corner brackets on your target, other plates dimmed in combat and faded out of range, your debuffs and enemy buffs in a row above the bar and crowd control on the right. Players who already have a Big & bold profile keep it as an ordinary profile.
 - **Slim is replaced by a new built-in look, Z-Perl,** styled after Z-Perl unit frames: a glossy bar in a thin grey tooltip border on black, plain shadowed text, percent health centered and colored green, yellow and red as health drops, the raid marker on the top-left corner, a soft yellow glow on your target and a matching cast bar with icon. Players who already have a Slim profile keep it as an ordinary profile.
 - **Show nameplate-only auras is now off by default** for your debuffs, crowd control and enemy buffs, on every built-in look. Important auras keep it on, since that group is made only of them. Profiles you made yourself keep the setting they had.
 - **The class resource and enemy power bars are now off by default**, including on the Z-Perl look. Turn them on from their pages. Profiles you made yourself keep the setting they had.
