@@ -606,7 +606,7 @@ local function OnPlateEvent(plate, event, ...)
 end
 
 local pools = { enemy = {}, friendly = {} }
-local POOL_TARGET = { enemy = 30, friendly = 10 }
+local POOL_TARGET = { enemy = 16, friendly = 4 }
 local POOL_BUFFER = { enemy = 8, friendly = 2 }
 local built = { enemy = 0, friendly = 0 }
 

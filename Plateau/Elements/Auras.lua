@@ -515,7 +515,7 @@ function Auras:Style(plate, db)
         local nameplateOnly = groupDb.nameplateOnly ~= false and NAMEPLATE_ONLY or ""
         local added = false
         for index, key in ipairs(container.keys) do
-            local count = PartCount(group, index, groupDb, allBuffs)
+            local count = plate.preview and 0 or PartCount(group, index, groupDb, allBuffs)
             if count > 0 and not container.added[index] then
                 local part = group.parts[index]
                 local filter = part.filter .. nameplateOnly
