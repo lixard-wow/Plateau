@@ -157,6 +157,7 @@ Style.THEMES = {
         buttonFont = { SOURCE, 12 },
         headerHeight = 42,
         iconButton = 24,
+        classAccent = true,
         settingsIcon = "icon_gear",
         roundClose = true,
         groups = { look = { 0.78, 0.66, 0.22, 1 }, casts = { 0.88, 0.76, 0.40, 1 }, highlights = { 0.68, 0.56, 0.18, 1 }, setup = { 0.62, 0.62, 0.62, 1 } },
@@ -189,6 +190,23 @@ for key, value in pairs(Style.theme.colors) do
     Style.colors[key] = value
 end
 Style.groupColors = Style.theme.groups
+
+local function PlayerClassColor()
+    local class = UnitClassBase and UnitClassBase("player")
+    local color = class and ((C_ClassColor and C_ClassColor.GetClassColor(class)) or (RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]))
+    if color then
+        return { color.r, color.g, color.b, 1 }
+    end
+end
+
+if Style.theme.classAccent then
+    local class = PlayerClassColor()
+    if class then
+        Style.colors.accent = class
+        Style.colors.primaryBorder = class
+        Style.groupColors = { look = class, casts = class, highlights = class, setup = class }
+    end
+end
 Style.RADIUS = Style.theme.radius
 Style.BUTTON_RADIUS = Style.theme.buttonRadius
 

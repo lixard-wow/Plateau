@@ -11,6 +11,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 Plateau's nameplates are now part of the game's nameplates instead of floating in a separate layer above them.
 
 #### Added
+- **Lixard Classic highlights in your class color:** the selected menu item, toggles, sliders, section colors and main-button outline use the class color of the character you're on (gold when no class is known).
 - **Closer to PKT, less washed out:** PKT's own corner textures (rounder buttons and boxes), Artisan Ledger's fine inner frame line, solid gold slider fills, borderless filled buttons on Workbench, and larger text (labels 13, notes, dropdowns and the side menu 12 to 13).
 - **Settings window themes now match PKT's.** Each theme uses PKT's full palette and fonts: its own title font and size (Workbench in capitals), cream section headings, button text and font, a plain title bar (a flat filled header on Workbench), a 1 pixel line under it, PKT's icon button colors, and filled main-action buttons (Reload Now, Next, Confirm, Import profile). Pop-ups and look cards get Artisan Ledger's engraved corner brackets or Workbench's accent stripe. The P icon keeps the brand color.
 - **Easier-to-read settings window, matching PKT.** The wood-grain texture behind the Artisan Ledger window is gone, descriptions use the brighter Ledger body color, and the window title and P logo use each theme's own title color (Ledger gold, as in PKT). The brand color still colors the minimap button, game menu button and chat.
