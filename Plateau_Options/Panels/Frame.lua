@@ -451,6 +451,8 @@ local function Scrollbar(scroller, parent, gap)
         dragging = false
         self:SetScript("OnUpdate", nil)
     end)
+    track:Hide()
+    scroller:HookScript("OnSizeChanged", function() Update() end)
     track:EnableMouse(true)
     track:SetScript("OnMouseDown", function(self, button)
         if dragging or thumb:IsMouseOver() then return end
@@ -474,13 +476,13 @@ local function Scrollbar(scroller, parent, gap)
             track:Hide()
             return
         end
+        local view = scroller:GetHeight()
         local range = Range(scroller)
-        if range <= 8 then
+        if issecretvalue(view) or issecretvalue(range) or not view or view <= 0 or range <= 8 then
             thumb:Hide()
             track:Hide()
             return
         end
-        local view = scroller:GetHeight()
         local size = math.max(24, view * view / (view + range))
         thumb:SetHeight(size)
         thumb:ClearAllPoints()
