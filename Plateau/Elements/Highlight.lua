@@ -287,7 +287,7 @@ function Highlight:Configure(db, state)
         if CVars:IsManaged(SELECTED_SCALE) and CVars:Get(SELECTED_SCALE) == "1" then
             CVars:Release(SELECTED_SCALE)
         end
-        if not CVars:IsManaged(SELECTED_SCALE) and CVars:Get(SELECTED_SCALE) == "1" then
+        if not InCombatLockdown() and not CVars:IsManaged(SELECTED_SCALE) and CVars:Get(SELECTED_SCALE) == "1" then
             C_CVar.SetCVar(SELECTED_SCALE, C_CVar.GetCVarDefault(SELECTED_SCALE))
         end
     elseif CVars:Get(SELECTED_SCALE) ~= "1" then

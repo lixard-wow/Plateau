@@ -19,6 +19,7 @@ local function PurgeKey(options, key)
         filler = filler + 1
         tries = tries + 1
     until issecurevariable(options, key) or tries > PURGE_KEY_LIMIT
+    ns.realmPurgeFailed = not issecurevariable(options, key) or nil
 end
 
 function ns.ApplyRealmMarker()

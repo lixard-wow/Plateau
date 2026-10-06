@@ -102,6 +102,13 @@ local function Debug()
     end
     print(("  Restrictions active: %s"):format(#active > 0 and table.concat(active, ", ") or "none"))
     print(("  Plates: %d showing, %d drawn by Plateau"):format(total, claimed))
+    if ns.realmPurgeFailed then
+        print("  Realm marker cleanup didn't finish: Blizzard's friendly plates may show errors. Report this with your BugSack log.")
+    end
+    local failures = ns.DB.migrationFailures
+    if ns.recovered or (failures and #failures > 0) then
+        print(("  Saved settings: %s"):format(ns.recovered and ("recovered from damage (" .. ns.recovered .. ")") or ("upgrade problems: " .. table.concat(failures, "; "))))
+    end
     local now = GetTime()
     if lastEventTime and now > lastEventTime then
         print(("  Plate events: %.1f per second since the last /plt debug"):format((ns.Driver.eventCount - lastEventCount) / (now - lastEventTime)))

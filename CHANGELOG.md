@@ -15,6 +15,9 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - **Settings are checked at login and on import:** text alignments must be left, center or right, and every scale stays between 0.1 and 5, so a bad value can't cause errors on every nameplate.
 - **A refused import no longer changes your boss phase lines**, imported profile names lose color codes and are cut to 32 letters, and profile strings over 20,000 characters are refused before unpacking.
 - **Switching profile before the game knows your character** (WoW Forever) no longer errors.
+- **Click-through friendly plates updates when a unit turns hostile** (a duel starting, an NPC turning on you), so the enemy plate can be clicked straight away.
+- **A /reload in combat no longer loses your Blizzard settings.** Settings Plateau changes for dungeons and raids are put back only once combat allows it, are restored at logout too, and are only forgotten once the game confirms your value is back.
+- Smaller safety fixes: Plateau no longer changes Blizzard's target size setting in combat, frame levels the game hides are left alone, and /plt debug reports a failed realm-marker cleanup or damaged saved settings.
 
 #### Changed
 - **Probe log is smaller and private:** it keeps at most 300 entries, never stores names, GUIDs or creature IDs, probe watch turns itself off after 4 hours, and the log is cleared when Plateau updates. The existing log is cleared once.

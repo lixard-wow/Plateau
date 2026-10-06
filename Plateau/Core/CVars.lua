@@ -210,17 +210,25 @@ function CVars:Adopt(name)
     end
 end
 
-local function RestoreOverrides()
+local function RestoreOverrides(forget)
+    if InCombatLockdown() or not (ns.DB and ns.DB.saved) then return end
     local store = Store()
     for name, override in pairs(store.override) do
-        if type(override) == "table" and override.user ~= nil and not ValuesEqual(GetCVar(name), override.user) then
-            SetCVar(name, override.user)
+        if type(override) ~= "table" or override.user == nil then
+            store.override[name] = nil
+        else
+            if not ValuesEqual(GetCVar(name), override.user) then
+                SetCVar(name, override.user)
+            end
+            if forget and ValuesEqual(GetCVar(name), override.user) then
+                store.override[name] = nil
+            end
         end
-        store.override[name] = nil
     end
 end
 
 CVars:RegisterEvent("PLAYER_LOGIN")
+CVars:RegisterEvent("PLAYER_LOGOUT")
 CVars:RegisterEvent("PLAYER_REGEN_ENABLED")
 CVars:RegisterEvent("CVAR_UPDATE")
 CVars:SetScript("OnEvent", function(self, event, name)
@@ -228,8 +236,12 @@ CVars:SetScript("OnEvent", function(self, event, name)
         self:Adopt(name)
         return
     end
+    if event == "PLAYER_LOGOUT" then
+        RestoreOverrides(false)
+        return
+    end
     if event == "PLAYER_LOGIN" then
-        RestoreOverrides()
+        RestoreOverrides(true)
     end
     if event == "PLAYER_LOGIN" or pending then
         self:Apply()

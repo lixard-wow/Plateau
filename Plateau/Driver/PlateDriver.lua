@@ -589,6 +589,7 @@ local function OnPlateEvent(plate, event, ...)
         local isFriendly = not UnitCanAttack("player", unit)
         if isFriendly ~= plate.isFriendly then
             plate.isFriendly = isFriendly
+            ApplyHitTest(plate)
             ApplyEmphasis(plate)
         end
     end

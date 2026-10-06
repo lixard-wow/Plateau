@@ -27,8 +27,10 @@ end
 local BAND = 200
 
 local function PlaceLevel(plate)
-    local level = plate.base:GetFrameLevel() + 1 + (plate.band or 0) * BAND
-    if plate:GetFrameLevel() ~= level then
+    local baseLevel, current = plate.base:GetFrameLevel(), plate:GetFrameLevel()
+    if issecretvalue(baseLevel) or issecretvalue(current) then return end
+    local level = baseLevel + 1 + (plate.band or 0) * BAND
+    if current ~= level then
         plate:SetFrameLevel(level)
     end
 end
