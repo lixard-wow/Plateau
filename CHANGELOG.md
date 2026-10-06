@@ -6,6 +6,11 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-06 fixes
+
+#### Fixed
+- **Friendly names are all the same size.** In name-only mode some friendly player and NPC names showed smaller until you targeted or hovered them, because their plate never got its size set when it appeared.
+
 ### 2026-10-06 lower memory
 
 #### Changed

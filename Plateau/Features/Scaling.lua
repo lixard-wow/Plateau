@@ -44,6 +44,7 @@ local BAND_CASTING, BAND_TARGET, BAND_MOUSEOVER = 1, 2, 3
 
 local Scaling = {
     key = "scaling",
+    nameOnly = true,
     events = {},
 }
 ns.Scaling = Scaling

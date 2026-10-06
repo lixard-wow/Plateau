@@ -343,6 +343,7 @@ local function ApplyEmphasis(plate)
             StylePlate(plate)
         end
         EnableElements(plate, plate.unit)
+        ns.Scaling:Apply(plate)
     end
     UpdateSimplified(plate)
 
@@ -571,6 +572,7 @@ local function Claim(plate, unit)
         StylePlate(plate)
     end
     EnableElements(plate, unit)
+    ns.Scaling:Apply(plate)
     UpdateClickArea(plate)
     plate:Show()
     UpdateEmphasis()
