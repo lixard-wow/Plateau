@@ -15,6 +15,7 @@ local IsSpellImportant = C_Spell.IsSpellImportant
 local EvaluateColorValueFromBoolean = C_CurveUtil.EvaluateColorValueFromBoolean
 local FLAT = "Interface\\Buttons\\WHITE8X8"
 local SPARK = "Interface\\CastingBar\\UI-CastingBar-Spark"
+local SHIELD = "Interface\\CastingBar\\UI-CastingBar-Small-Shield"
 local issecretvalue = issecretvalue
 local CreateDurationTextBinding = C_DurationUtil.CreateDurationTextBinding
 local UnitNameFromGUID = UnitNameFromGUID
@@ -25,6 +26,7 @@ local InterruptReady = ns.InterruptReady
 
 local TIMER_WIDTH = 30
 local READY_TICK = 0.1
+local TWIN_LEVEL = 1000
 
 local settings = {}
 
@@ -103,10 +105,10 @@ local function ApplyFill(bar)
         nr, ng, nb, na = plain[1], plain[2], plain[3], plain[4] or 1
     end
     local flag = bar.isImportant
-    if not issecretvalue(flag) and not flag then
-        texture:SetVertexColor(nr, ng, nb, na)
-    else
-        local ir, ig, ib, ia
+    local twin = bar.twin
+    local twinOn = twin.enabled == true
+    local ir, ig, ib, ia
+    if twinOn or issecretvalue(flag) or flag then
         local important = readiness and InterruptReady:GetColor(state, "important")
         if important then
             ir, ig, ib, ia = important.r, important.g, important.b, important.a
@@ -114,6 +116,10 @@ local function ApplyFill(bar)
             local plain = s.importantReady
             ir, ig, ib, ia = plain[1], plain[2], plain[3], plain[4] or 1
         end
+    end
+    if not issecretvalue(flag) and not flag then
+        texture:SetVertexColor(nr, ng, nb, na)
+    else
         texture:SetVertexColor(
             EvaluateColorValueFromBoolean(flag, ir, nr),
             EvaluateColorValueFromBoolean(flag, ig, ng),
@@ -137,6 +143,44 @@ local function ApplyFill(bar)
     else
         bar.shieldIcon:SetAlpha(0)
     end
+    if not twinOn then
+        if s.showCasts == "interruptible" then
+            bar:SetAlphaFromBoolean(stop, 0, 1)
+        elseif s.showCasts == "important" then
+            bar:SetAlphaFromBoolean(flag, 1, 0)
+        else
+            bar:SetAlpha(1)
+        end
+        return
+    end
+    twin:GetStatusBarTexture():SetVertexColor(ir, ig, ib, ia)
+    twin.mustStop:SetAlphaFromBoolean(stop, s.importantUninterruptible[4] or 1, 0)
+    if s.shieldIcon then
+        twin.shieldIcon:SetAlphaFromBoolean(stop, 1, 0)
+    else
+        twin.shieldIcon:SetAlpha(0)
+    end
+    if s.showCasts == "interruptible" then
+        local allowed = EvaluateColorValueFromBoolean(stop, 0, 1)
+        bar:SetAlpha(EvaluateColorValueFromBoolean(flag, 0, allowed))
+        twin:SetAlpha(EvaluateColorValueFromBoolean(flag, allowed, 0))
+    elseif s.showCasts == "important" then
+        bar:SetAlpha(0)
+        twin:SetAlphaFromBoolean(flag, 1, 0)
+    else
+        bar:SetAlphaFromBoolean(flag, 0, 1)
+        twin:SetAlphaFromBoolean(flag, 1, 0)
+    end
+end
+
+local function NormalVisibility(bar, s)
+    local flag, stop = bar.isImportant, bar.notInterruptible
+    if not issecretvalue(flag) then
+        flag = flag == true
+    end
+    if not issecretvalue(stop) then
+        stop = stop == true
+    end
     if s.showCasts == "interruptible" then
         bar:SetAlphaFromBoolean(stop, 0, 1)
     elseif s.showCasts == "important" then
@@ -144,6 +188,13 @@ local function ApplyFill(bar)
     else
         bar:SetAlpha(1)
     end
+end
+
+local function StopTwin(bar)
+    local twin = bar.twin
+    twin:SetScript("OnUpdate", nil)
+    twin.timerBinding:SetEnabled(false)
+    twin:Hide()
 end
 
 local function PointMarker(bar, channel)
@@ -286,7 +337,7 @@ function Castbar:Create(plate)
     bar.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
     bar.shieldIcon = textLayer:CreateTexture(nil, "OVERLAY", nil, 3)
-    bar.shieldIcon:SetTexture("Interface\\CastingBar\\UI-CastingBar-Small-Shield")
+    bar.shieldIcon:SetTexture(SHIELD)
     bar.shieldIcon:SetAlpha(0)
     bar.iconBorder = ns.CreateBorder(bar, bar.icon, "BACKGROUND", -7)
 
@@ -311,7 +362,140 @@ function Castbar:Create(plate)
     timerBinding:SetEnabled(false)
     bar.timerBinding = timerBinding
 
+    bar.twin = Castbar:CreateTwin(plate)
     plate.castbar = bar
+end
+
+function Castbar:CreateTwin(plate)
+    local twin = CreateFrame("StatusBar", nil, plate)
+    twin:Hide()
+    twin:SetFrameLevel(plate:GetFrameLevel() + TWIN_LEVEL)
+    twin.glow = ns.CreateBorder(twin, twin, "BACKGROUND", -8)
+    local borderLayer = CreateFrame("Frame", nil, twin)
+    borderLayer:SetAllPoints()
+    borderLayer:SetFrameLevel(twin:GetFrameLevel() + 1)
+    twin.border = ns.CreateBorder(borderLayer, twin, "BACKGROUND", -7)
+    twin.background = twin:CreateTexture(nil, "BACKGROUND")
+    twin.background:SetAllPoints()
+
+    local textLayer = CreateFrame("Frame", nil, twin)
+    textLayer:SetAllPoints()
+    textLayer:SetFrameLevel(twin:GetFrameLevel() + 4)
+
+    twin.spark = textLayer:CreateTexture(nil, "OVERLAY", nil, 2)
+    twin.spark:SetTexture(SPARK)
+    twin.spark:SetBlendMode("ADD")
+    twin.spark:Hide()
+
+    twin.mustStop = twin:CreateTexture(nil, "ARTWORK", nil, 7)
+    twin.mustStop:SetAlpha(0)
+
+    twin.icon = twin:CreateTexture(nil, "ARTWORK")
+    twin.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    twin.iconBorder = ns.CreateBorder(twin, twin.icon, "BACKGROUND", -7)
+
+    twin.shieldIcon = textLayer:CreateTexture(nil, "OVERLAY", nil, 3)
+    twin.shieldIcon:SetTexture(SHIELD)
+    twin.shieldIcon:SetAlpha(0)
+
+    twin.timer = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    twin.timer:SetJustifyH("RIGHT")
+    twin.text = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    twin.text:SetJustifyH("LEFT")
+    twin.text:SetWordWrap(false)
+    twin.target = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    twin.target:SetJustifyH("CENTER")
+    twin.target:SetWordWrap(false)
+
+    local timerBinding = CreateDurationTextBinding()
+    timerBinding:SetFontString(twin.timer)
+    timerBinding:SetUpdateInterval(0.1)
+    timerBinding:SetEnabled(false)
+    twin.timerBinding = timerBinding
+    return twin
+end
+
+local function StyleTexts(bar, db)
+    ns.ApplyFont(bar.timer, db.font, db.size, db.outline)
+    ns.ApplyShadow(bar.timer, db.shadow)
+    ns.ApplyShadow(bar.text, db.shadow)
+    ns.ApplyShadow(bar.target, db.shadow)
+    ns.PlaceIcon(bar.timer, bar, db.timerPosition, 3, db.timerOffsetX, db.timerOffsetY)
+
+    ns.ApplyFont(bar.text, db.font, db.size, db.outline)
+    bar.text:SetJustifyH(db.textJustify)
+    bar.text:ClearAllPoints()
+    local textRightInset = db.showTimer and TIMER_WIDTH or 3
+    if db.textJustify == "RIGHT" then
+        bar.text:SetPoint("RIGHT", -textRightInset, 0)
+    elseif db.textJustify == "CENTER" then
+        bar.text:SetPoint("CENTER", (3 - textRightInset) / 2, 0)
+    else
+        bar.text:SetPoint("LEFT", 3, 0)
+    end
+
+    ns.ApplyFont(bar.target, db.font, db.targetSize, db.outline)
+    bar.target:SetTextColor(db.targetColor[1], db.targetColor[2], db.targetColor[3], db.targetColor[4])
+    ns.PlaceIcon(bar.target, bar, db.targetPosition, 2, db.targetOffsetX, db.targetOffsetY)
+    return textRightInset
+end
+
+local function StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight)
+    local twin = bar.twin
+    twin.enabled = db.importantEnlarge == true and plate.state ~= "friendly"
+    if not twin.enabled then
+        StopTwin(bar)
+        return
+    end
+    twin:ClearAllPoints()
+    twin:SetSize(barWidth, height)
+    twin:SetPoint("CENTER", bar, "CENTER")
+    twin:SetScale(db.importantScale or 1.3)
+    ns.SetBarTexture(twin, db.texture)
+    ns.SetBarOverlay(twin, db.overlayPattern ~= "" and db.overlayPattern or nil, db.overlayAlpha, db.overlayContrast)
+    twin.timerBinding:SetFormatter(settings[plate.state].formatter)
+    twin.mustStop:ClearAllPoints()
+    twin.mustStop:SetAllPoints(twin:GetStatusBarTexture())
+    twin.mustStop:SetColorTexture(db.importantUninterruptible[1], db.importantUninterruptible[2], db.importantUninterruptible[3], 1)
+
+    twin.border:SetStyle(db.borderStyle, twin)
+    twin.border:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
+    twin.border:Layout(size, 0, db.borderInside)
+    twin.background:SetColorTexture(db.background[1], db.background[2], db.background[3], db.background[4])
+    twin.glow:Layout(db.glowSize, db.borderInside and 0 or size)
+    twin.glow:SetColor(db.importantColor[1], db.importantColor[2], db.importantColor[3], db.importantColor[4])
+    twin.glow:SetAlpha(db.importantGlow and 1 or 0)
+
+    twin.icon:ClearAllPoints()
+    twin.icon:SetSize(height, height)
+    if iconRight then
+        twin.icon:SetPoint("LEFT", twin, "RIGHT", gap, 0)
+    else
+        twin.icon:SetPoint("RIGHT", twin, "LEFT", -gap, 0)
+    end
+    if db.cropIcon == false then
+        twin.icon:SetTexCoord(0, 1, 0, 1)
+    else
+        twin.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    end
+    twin.icon:SetShown(db.showIcon)
+    twin.iconBorder:Layout(size)
+    twin.iconBorder:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
+    twin.iconBorder:SetShown(db.showIcon)
+
+    twin.spark:ClearAllPoints()
+    twin.spark:SetPoint("CENTER", twin:GetStatusBarTexture(), "RIGHT", 0, 0)
+    twin.spark:SetSize(math.max(8, height), height * 2.2)
+    twin.spark:SetVertexColor(db.sparkColor[1], db.sparkColor[2], db.sparkColor[3], db.sparkColor[4])
+
+    twin.shieldIcon:ClearAllPoints()
+    twin.shieldIcon:SetSize(height + 8, height + 8)
+    if db.showIcon then
+        twin.shieldIcon:SetPoint("CENTER", twin.icon, "CENTER")
+    else
+        twin.shieldIcon:SetPoint("CENTER", twin, iconRight and "RIGHT" or "LEFT")
+    end
+    StyleTexts(twin, db)
 end
 
 function Castbar:Configure(db, state)
@@ -431,27 +615,8 @@ function Castbar:Style(plate, db)
     bar.iconBorder:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
     bar.iconBorder:SetShown(db.showIcon)
 
-    ns.ApplyFont(bar.timer, db.font, db.size, db.outline)
-    ns.ApplyShadow(bar.timer, db.shadow)
-    ns.ApplyShadow(bar.text, db.shadow)
-    ns.ApplyShadow(bar.target, db.shadow)
-    ns.PlaceIcon(bar.timer, bar, db.timerPosition, 3, db.timerOffsetX, db.timerOffsetY)
-
-    ns.ApplyFont(bar.text, db.font, db.size, db.outline)
-    bar.text:SetJustifyH(db.textJustify)
-    bar.text:ClearAllPoints()
-    local textRightInset = db.showTimer and TIMER_WIDTH or 3
-    if db.textJustify == "RIGHT" then
-        bar.text:SetPoint("RIGHT", -textRightInset, 0)
-    elseif db.textJustify == "CENTER" then
-        bar.text:SetPoint("CENTER", (3 - textRightInset) / 2, 0)
-    else
-        bar.text:SetPoint("LEFT", 3, 0)
-    end
-
-    ns.ApplyFont(bar.target, db.font, db.targetSize, db.outline)
-    bar.target:SetTextColor(db.targetColor[1], db.targetColor[2], db.targetColor[3], db.targetColor[4])
-    ns.PlaceIcon(bar.target, bar, db.targetPosition, 2, db.targetOffsetX, db.targetOffsetY)
+    local textRightInset = StyleTexts(bar, db)
+    StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight)
 
     local interruptText = bar.interruptText
     ns.ApplyFont(interruptText, db.font, db.interruptSize or db.size, db.outline)
@@ -503,6 +668,7 @@ function Castbar:Disable(plate)
     bar.duration = nil
     bar.kickClip:Hide()
     bar.mustStop:SetAlpha(0)
+    StopTwin(bar)
     TrackCasting(bar, false)
     if plate.casting then
         plate.casting = false
@@ -553,6 +719,8 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
     bar.spark:Hide()
     bar.kickClip:Hide()
     bar.glow:SetAlpha(0)
+    StopTwin(bar)
+    NormalVisibility(bar, s)
     bar.interrupted:Show()
     bar:Show()
     if not s.interruptKeepName then
@@ -688,6 +856,33 @@ function Castbar:Refresh(plate, unit, ending)
     end
 
     bar.spark:SetShown(s.showSpark)
+    local twin = bar.twin
+    if twin.enabled then
+        twin.icon:SetTexture(texture)
+        twin.text:SetText(s.showSpellName and name or "")
+        if bar.target:IsShown() then
+            twin.target:SetText(UnitSpellTargetName(unit))
+            twin.target:SetTextColor(TargetTextColor(s, unit))
+            twin.target:Show()
+        else
+            twin.target:Hide()
+        end
+        if bar.duration then
+            twin:SetScript("OnUpdate", nil)
+            twin:SetTimerDuration(bar.duration, nil, direction)
+            twin.timerBinding:SetDuration(bar.duration)
+            twin.timerBinding:SetEnabled(s.showTimer)
+            twin.timer:SetShown(s.showTimer)
+        else
+            twin:SetMinMaxValues(startMs, endMs)
+            twin:SetValue(GetTime() * 1000)
+            twin:SetScript("OnUpdate", FallbackOnUpdate)
+            twin.timerBinding:SetEnabled(false)
+            twin.timer:Hide()
+        end
+        twin.spark:SetShown(s.showSpark)
+        twin:Show()
+    end
     TrackCasting(bar, true)
     if not plate.casting then
         ns.Fire("CAST_START", unit, plate)
@@ -784,6 +979,27 @@ function Castbar:Preview(plate, state)
         bar.target:Hide()
     end
 
+    local twin = bar.twin
+    if twin.enabled and cast.important and not interrupted then
+        twin:SetMinMaxValues(0, 1)
+        twin:SetValue((s.drain and not cast.channel) and (1 - cast.progress) or cast.progress)
+        SetColor(twin:GetStatusBarTexture(), cast.onCooldown and s.importantNotReady or s.importantReady)
+        twin.mustStop:SetAlpha(cast.notInterruptible and (s.importantUninterruptible[4] or 1) or 0)
+        twin.shieldIcon:SetAlpha((s.shieldIcon and cast.notInterruptible) and 1 or 0)
+        twin.icon:SetTexture(cast.icon)
+        twin.text:SetText(s.showSpellName and cast.name or "")
+        twin.timer:SetText(cast.timer)
+        twin.timer:SetShown(s.showTimer)
+        twin.target:SetShown(bar.target:IsShown())
+        twin.target:SetText(bar.target:GetText() or "")
+        twin.target:SetTextColor(bar.target:GetTextColor())
+        twin.spark:SetShown(s.showSpark)
+        twin:SetAlpha(bar:GetAlpha())
+        bar:SetAlpha(0)
+        twin:Show()
+    else
+        StopTwin(bar)
+    end
     bar:Show()
 end
 

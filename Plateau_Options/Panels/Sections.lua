@@ -2155,6 +2155,10 @@ ns.sections = {
           tooltip = "Adds a glow around the cast bar for casts the game itself flags as important - usually the ones that wipe the group if they land. This includes important casts that can't be interrupted." },
         Gate({ type = "Slider", path = "look.castbar.glowSize", label = "Glow size", min = 0, max = 6,
           tooltip = "How big the glow around an important cast is." }, On("look.castbar.importantGlow"), "Turn on Highlight important casts to use this."),
+        { type = "Toggle", path = "look.castbar.importantEnlarge", label = "Enlarge important casts", keywords = "important big bigger scale size enlarge front cast",
+          tooltip = "Casts the game flags as important get a bigger cast bar, drawn in front of every other nameplate. The game hides which casts are important from addons, so Plateau keeps a second, bigger bar ready and the game itself picks which one shows. The kick marker stays on the normal-size bar." },
+        Gate({ type = "Slider", path = "look.castbar.importantScale", label = "Important cast size", min = 1.1, max = 2, step = 0.05,
+          tooltip = "How much bigger an important cast bar is. 1.30 is 30% bigger. It grows from the middle of the normal bar." }, On("look.castbar.importantEnlarge"), "Turn on Enlarge important casts to use this."),
 
         { type = "Header", label = "Interrupted casts" },
         { type = "ToggleColor", path = "look.castbar.showInterrupter", colorPath = "look.castbar.interruptedColor", label = "Show interrupter name",
