@@ -12,6 +12,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - **Aura groups that can't show anything no longer build icons.** The game builds a batch of 10 icons for every aura group on every nameplate, even unused ones. Groups you have switched off, other players' debuffs while that option is off, and hidden enemy buff types are now only added to a nameplate once they are turned on.
 - **Fewer spare nameplates at login:** Plateau now prepares 16 enemy and 4 friendly plates ahead of time instead of 30 and 10, and still adds more out of combat when a crowd appears.
 - **Settings previews no longer build real aura icons**; they draw their own sample icons.
+- **Nameplates only build the parts you have switched on.** Turning a part on later adds it to every nameplate the next time they restyle. /plt debug also shows how long one nameplate takes to build.
 
 ### 2026-10-05 new built-in looks
 

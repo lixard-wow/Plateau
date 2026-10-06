@@ -95,7 +95,7 @@ local NO_EVENTS = {}
 
 local function Runs(element, plate)
     local key = element.key
-    return element.enabledIn[plate.state] and (element.nameOnly or not plate.nameOnly)
+    return plate.built[element] and element.enabledIn[plate.state] and (element.nameOnly or not plate.nameOnly)
         and not (plate.hidden and plate.hidden[key]) and not (plate.simplifiedHidden and plate.simplifiedHidden[key])
 end
 ns.Runs = Runs
@@ -251,7 +251,28 @@ local function SizePlate(plate, look)
     end
 end
 
+local function DisableElement(element, plate)
+    if plate.built[element] then
+        element:Disable(plate)
+    end
+end
+
+local AddHandlers
+
+local function BuildMissing(plate)
+    for i = 1, #elements do
+        local element = elements[i]
+        if element.enabled ~= false and not plate.built[element] then
+            element:Create(plate)
+            AddHandlers(plate, element, element.events)
+            AddHandlers(plate, element, element.globalEvents)
+            plate.built[element] = true
+        end
+    end
+end
+
 local function StylePlate(plate)
+    BuildMissing(plate)
     local look = views[plate.state]
     plate.styledAs = styleOf[plate.state]
     plate.styleVersion = styleVersion
@@ -274,7 +295,7 @@ local function StylePlate(plate)
     UpdateClickArea(plate)
     for i = 1, #elements do
         local element = elements[i]
-        if element.enabledIn[plate.state] then
+        if plate.built[element] and element.enabledIn[plate.state] then
             element:Style(plate, look[element.key])
         end
     end
@@ -286,7 +307,7 @@ local function EnableElements(plate, unit)
         if Runs(element, plate) then
             element:Enable(plate, unit)
         else
-            element:Disable(plate)
+            DisableElement(element, plate)
         end
     end
 end
@@ -331,7 +352,7 @@ function Driver:ResizeNow(plate)
     SizePlate(plate, look)
     for i = 1, #elements do
         local element = elements[i]
-        if element.sizeDependent and element.enabledIn[plate.state] then
+        if element.sizeDependent and plate.built[element] and element.enabledIn[plate.state] then
             element:Style(plate, look[element.key])
         end
     end
@@ -349,7 +370,7 @@ local function ApplyHidden(plate, field, hide)
             if Runs(element, plate) then
                 element:Enable(plate, unit)
             else
-                element:Disable(plate)
+                DisableElement(element, plate)
             end
         end
     end
@@ -562,7 +583,7 @@ local function RecheckWatched()
     end
 end
 
-local function AddHandlers(plate, element, events)
+function AddHandlers(plate, element, events)
     if not events then return end
     for j = 1, #events do
         local event = events[j]
@@ -627,6 +648,7 @@ local function StartBuild(state)
     local plate = CreateFrame("Frame", nil, hider)
     plate:Hide()
     plate.handlers = {}
+    plate.built = {}
     AddOverlay(plate)
     plate.state = state
     return { plate = plate, state = state, index = 1, spent = debugprofilestop() - started }
@@ -636,9 +658,12 @@ local function RunBuild(job, deadline)
     local plate = job.plate
     while job.index <= #elements do
         local element = elements[job.index]
-        element:Create(plate)
-        AddHandlers(plate, element, element.events)
-        AddHandlers(plate, element, element.globalEvents)
+        if element.enabled ~= false then
+            element:Create(plate)
+            AddHandlers(plate, element, element.events)
+            AddHandlers(plate, element, element.globalEvents)
+            plate.built[element] = true
+        end
         job.index = job.index + 1
         if deadline and debugprofilestop() > deadline then
             return false
@@ -801,7 +826,7 @@ local function OnUnitRemoved(unit)
     plate.active = false
     plate.isTarget, plate.isFocus, plate.isPlayer, plate.isFriendly = false, false, false, false
     for i = 1, #elements do
-        elements[i]:Disable(plate)
+        DisableElement(elements[i], plate)
     end
     if plate.simplifiedSize then
         plate.styledAs = nil
@@ -837,7 +862,7 @@ local function RenderPreview(plate)
         if Runs(element, plate) and element.Preview then
             element:Preview(plate, state)
         else
-            element:Disable(plate)
+            DisableElement(element, plate)
         end
     end
     local range = ns.DB.views[plate.state].range
@@ -873,12 +898,14 @@ end
 function Driver:CreatePreview(parent, state, sample)
     local plate = CreateFrame("Frame", nil, parent)
     plate.handlers = {}
+    plate.built = {}
     plate.preview = state
     plate.sample = sample
     AddOverlay(plate)
     plate.state = sample or PreviewState(state)
     for i = 1, #elements do
         elements[i]:Create(plate)
+        plate.built[elements[i]] = true
     end
     previews[#previews + 1] = plate
     DrawPreview(plate)

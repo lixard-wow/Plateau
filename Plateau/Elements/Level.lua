@@ -58,7 +58,7 @@ function Level:Style(plate, db)
     ns.ApplyShadow(text, db.shadow)
     if db.anchor == "NAME" then
         text:ClearAllPoints()
-        text:SetPoint("RIGHT", plate.name, "LEFT", -3 + db.offsetX, db.offsetY)
+        text:SetPoint("RIGHT", plate.name or plate.health, "LEFT", -3 + db.offsetX, db.offsetY)
     else
         ns.PlaceText(text, plate.health, db.anchor, 3, db.offsetX, db.offsetY)
     end

@@ -256,7 +256,7 @@ listener:SetScript("OnEvent", function(_, event, unit, powerToken)
         Arm()
     end
     local plate = ns.Driver:GetPlate("target")
-    if plate then
+    if plate and plate.built[ClassPower] then
         ClassPower:Update(plate)
     end
 end)

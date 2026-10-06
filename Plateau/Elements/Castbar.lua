@@ -650,6 +650,7 @@ function Castbar:Style(plate, db)
 end
 
 function Castbar:Reposition(plate)
+    if not plate.castbar then return end
     local db = ns.DB.views[plate.state].castbar
     self:Style(plate, db)
 end
