@@ -82,6 +82,10 @@ function ns.PerformanceLines()
     if ns.auraButtons then
         lines[#lines + 1] = ("Aura buttons built: %d (%d of them in combat)"):format(ns.auraButtons.built, ns.auraButtons.combat)
     end
+    if ns.Driver.PoolStats then
+        local builtTotal, attached, spare, on, all = ns.Driver:PoolStats()
+        lines[#lines + 1] = ("Plates built: %d (%d on game nameplates, %d spare); elements on: %d of %d"):format(builtTotal, attached, spare, on, all)
+    end
     lines[#lines + 1] = ("Visible nameplates: %d"):format(total)
     lines[#lines + 1] = ("Nameplates styled by Plateau: %d"):format(claimed)
     return lines
@@ -698,6 +702,7 @@ local function OpenConflicts(onDone)
     if #pending == 0 or InCombatLockdown() then
         return false
     end
+    ns.WarmThemeFonts()
     local loaded = C_AddOns.LoadAddOn("Plateau_Options")
     if loaded and PlateauConflicts and PlateauConflicts.Open then
         PlateauConflicts:Open(pending, onDone)
@@ -714,6 +719,7 @@ local function OpenSetup()
         return
     end
     setupWatcher:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    ns.WarmThemeFonts()
     local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
     if loaded and PlateauSetup and PlateauSetup.Open then
         PlateauSetup:Open()
@@ -769,6 +775,7 @@ local function Help()
 end
 
 local function OpenOptions()
+    ns.WarmThemeFonts()
     local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
     if loaded and PlateauOptions and PlateauOptions.Toggle then
         PlateauOptions:Toggle()

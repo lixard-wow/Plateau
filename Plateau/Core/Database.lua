@@ -611,7 +611,16 @@ function DB:UseProfile(name, temporary)
     self.views = { enemy = profile.look, friendly = FriendlyView(profile.look) }
 end
 
+local function Empty(value)
+    return type(value) ~= "table" or next(value) == nil
+end
+
 function DB:Shutdown()
+    for key, byCharacter in pairs(self.saved.assignments or {}) do
+        if type(byCharacter) ~= "table" or (Empty(byCharacter.content) and Empty(byCharacter.spec)) then
+            self.saved.assignments[key] = nil
+        end
+    end
     for _, profile in pairs(self.saved.profiles) do
         local specSpells = CleanSpecSpells(rawget(profile, "specSpells"))
         profile.states = nil

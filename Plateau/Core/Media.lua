@@ -256,7 +256,11 @@ local MAX_TRIES = 10
 local FALLBACK = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
 
 local THEME_FONTS = { "Barlow-Regular", "Barlow-SemiBold", "BarlowCondensed-Bold", "Cinzel-Bold", "SourceSans3-Regular", "SourceSans3-Bold" }
+local fontsWarmed = false
+
 function ns.WarmThemeFonts()
+    if fontsWarmed then return end
+    fontsWarmed = true
     local warmer = CreateFrame("Frame", nil, UIParent)
     warmer:SetSize(40, 40)
     warmer:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)

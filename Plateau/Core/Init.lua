@@ -66,9 +66,6 @@ loader:SetScript("OnEvent", function(self, event, name)
     end
     if event == "PLAYER_LOGIN" then
         C_Timer.After(5, ReportStartup)
-        if ns.WarmThemeFonts then
-            ns.WarmThemeFonts()
-        end
     end
     if event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
         ns.DB:ResolveCharacter()

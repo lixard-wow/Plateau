@@ -280,7 +280,7 @@ watcher:SetScript("OnEvent", function(_, event, id, name)
             else
                 encounterID = id
                 local global = Global()
-                if global and not issecretvalue(name) and type(name) == "string" then
+                if global and BossPhases.enabled and not issecretvalue(name) and type(name) == "string" then
                     global.bossesSeen = global.bossesSeen or {}
                     global.bossesSeen[id] = name
                 end

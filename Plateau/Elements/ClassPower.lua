@@ -221,9 +221,27 @@ function ClassPower:Preview(plate, state)
 end
 
 local listener = CreateFrame("Frame")
-listener:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
-listener:RegisterUnitEvent("UNIT_MAXPOWER", "player")
-listener:RegisterEvent("RUNE_POWER_UPDATE")
+local armed = false
+
+local function Arm()
+    local want = ClassPower.enabled == true and resource ~= nil
+    if want == armed then return end
+    armed = want
+    if want then
+        listener:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
+        listener:RegisterUnitEvent("UNIT_MAXPOWER", "player")
+        listener:RegisterEvent("RUNE_POWER_UPDATE")
+    else
+        listener:UnregisterEvent("UNIT_POWER_UPDATE")
+        listener:UnregisterEvent("UNIT_MAXPOWER")
+        listener:UnregisterEvent("RUNE_POWER_UPDATE")
+    end
+end
+
+function ClassPower:Configured()
+    Arm()
+end
+
 listener:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 listener:RegisterEvent("PLAYER_TALENT_UPDATE")
 listener:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -235,6 +253,7 @@ listener:SetScript("OnEvent", function(_, event, unit, powerToken)
         end
     elseif event ~= "RUNE_POWER_UPDATE" then
         Detect()
+        Arm()
     end
     local plate = ns.Driver:GetPlate("target")
     if plate then

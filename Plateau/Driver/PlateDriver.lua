@@ -274,7 +274,9 @@ local function StylePlate(plate)
     UpdateClickArea(plate)
     for i = 1, #elements do
         local element = elements[i]
-        element:Style(plate, look[element.key])
+        if element.enabledIn[plate.state] then
+            element:Style(plate, look[element.key])
+        end
     end
 end
 
@@ -329,7 +331,7 @@ function Driver:ResizeNow(plate)
     SizePlate(plate, look)
     for i = 1, #elements do
         local element = elements[i]
-        if element.sizeDependent then
+        if element.sizeDependent and element.enabledIn[plate.state] then
             element:Style(plate, look[element.key])
         end
     end
@@ -607,6 +609,13 @@ end
 
 local pools = { enemy = {}, friendly = {} }
 local POOL_TARGET = { enemy = 30, friendly = 10 }
+local POOL_BUFFER = { enemy = 8, friendly = 2 }
+local built = { enemy = 0, friendly = 0 }
+
+local function PoolWanted(state)
+    local target = built[state] < POOL_TARGET[state] and POOL_TARGET[state] or POOL_BUFFER[state]
+    return #pools[state] < target
+end
 local POOL_ORDER = { "enemy", "friendly" }
 local BUILD_BUDGET_MS = 3
 local WARM_DELAY = 2
@@ -614,6 +623,7 @@ local building
 local stale = {}
 
 local function StartBuild(state)
+    built[state] = built[state] + 1
     local plate = CreateFrame("Frame", nil, hider)
     plate:Hide()
     plate.handlers = {}
@@ -726,7 +736,7 @@ poolWarmer:SetScript("OnUpdate", function(self)
     end
     if not building then
         for _, state in ipairs(POOL_ORDER) do
-            if #pools[state] < POOL_TARGET[state] then
+            if PoolWanted(state) then
                 building = StartBuild(state)
                 break
             end
@@ -1051,6 +1061,19 @@ function Driver:GetPlate(unit)
         return plate
     end
     return FindPlate(unit)
+end
+
+function Driver:PoolStats()
+    local attached, off = 0, 0
+    for _ in pairs(platesByBase) do
+        attached = attached + 1
+    end
+    for i = 1, #elements do
+        if not elements[i].enabled then
+            off = off + 1
+        end
+    end
+    return built.enemy + built.friendly, attached, #pools.enemy + #pools.friendly, #elements - off, #elements
 end
 
 function Driver:CountActive()
