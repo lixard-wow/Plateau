@@ -217,11 +217,20 @@ local function ProbeLog()
     return global.probe
 end
 
+local PROBE_TRIM = 300
+
 local function ProbeStore(entry)
     local log = ProbeLog()
     log[#log + 1] = entry
-    while #log > PROBE_LIMIT do
-        table.remove(log, 1)
+    local count = #log
+    if count > PROBE_LIMIT + PROBE_TRIM then
+        local drop = count - PROBE_LIMIT
+        for i = 1, PROBE_LIMIT do
+            log[i] = log[i + drop]
+        end
+        for i = PROBE_LIMIT + 1, count do
+            log[i] = nil
+        end
     end
 end
 

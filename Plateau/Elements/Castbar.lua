@@ -27,6 +27,7 @@ local InterruptReady = ns.InterruptReady
 local TIMER_WIDTH = 30
 local READY_TICK = 0.1
 local TWIN_LEVEL = 1000
+local NO_TWIN = { enabled = false }
 
 local settings = {}
 
@@ -192,6 +193,7 @@ end
 
 local function StopTwin(bar)
     local twin = bar.twin
+    if twin == NO_TWIN then return end
     twin:SetScript("OnUpdate", nil)
     twin.timerBinding:SetEnabled(false)
     twin:Hide()
@@ -362,7 +364,7 @@ function Castbar:Create(plate)
     timerBinding:SetEnabled(false)
     bar.timerBinding = timerBinding
 
-    bar.twin = Castbar:CreateTwin(plate)
+    bar.twin = NO_TWIN
     plate.castbar = bar
 end
 
@@ -441,12 +443,19 @@ local function StyleTexts(bar, db)
 end
 
 local function StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight)
-    local twin = bar.twin
-    twin.enabled = db.importantEnlarge == true and plate.state ~= "friendly"
-    if not twin.enabled then
+    local wanted = db.importantEnlarge == true and plate.state ~= "friendly"
+    if not wanted then
         StopTwin(bar)
+        if bar.twin ~= NO_TWIN then
+            bar.twin.enabled = false
+        end
         return
     end
+    if bar.twin == NO_TWIN then
+        bar.twin = Castbar:CreateTwin(plate)
+    end
+    local twin = bar.twin
+    twin.enabled = true
     twin:ClearAllPoints()
     twin:SetSize(barWidth, height)
     twin:SetPoint("CENTER", bar, "CENTER")
