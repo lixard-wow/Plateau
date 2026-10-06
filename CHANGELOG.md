@@ -17,6 +17,7 @@ Plateau's nameplates are now part of the game's nameplates instead of floating i
 - **Stacking bounds: Health bar and cast bar.** Counts the cast bar but not the name, for looks that hide names or put them inside the bar.
 
 #### Changed
+- **The four ready-made looks were redesigned as one family:** raid marker and quest icon on top, important buffs above the bar, cast bars without a gap. Big & bold and Compact are the author's own setups; Normal is now a 150 by 14 bar with smooth health and animated target arrows; Slim is an 8 pixel bar with small icons tucked beside it. Existing profiles don't change; Restore built-in on the Profiles page applies the new version.
 - **Size, distance scaling, showing, hiding and fading come straight from the game**, so they always match Blizzard's own nameplate settings, with no catch-up delay. Plateau's own sizes (target, focus, casting, mouseover, enemy type and combat) are applied on top.
 - **Layering is now one switch, Casting enemies in front.** An enemy that is casting draws over its neighbors, your target stays above casting enemies, and Mouseover in front beats both. Everything else keeps the game's nearest-in-front order. Profiles that had priority-based layering on get the new switch turned on.
 - Fade hidden nameplates for: turning it off for a type now makes those plates ignore the game's fading entirely.
