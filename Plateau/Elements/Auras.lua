@@ -466,6 +466,37 @@ local function Candidates(base, db, groupKey)
     return filters
 end
 
+local DISPELS = {
+    { { 370 }, { 378773 }, { 528 }, { 30449 }, { 278326 }, { 19801 }, { 19505, true } },
+    { { 2908 }, { 19801 }, { 5938 } },
+}
+local canDispel = { true, true }
+
+local function KnowsAny(list)
+    if not ns.FindKnownSpell then return true end
+    local banks = Enum.SpellBookSpellBank
+    for _, entry in ipairs(list) do
+        if ns.FindKnownSpell(entry[1], entry[2] and banks.Pet or banks.Player) then
+            return true
+        end
+    end
+    return false
+end
+
+local function DetectDispels()
+    local changed = false
+    for i, list in ipairs(DISPELS) do
+        local known = KnowsAny(list)
+        if canDispel[i] ~= known then
+            canDispel[i] = known
+            changed = true
+        end
+    end
+    return changed
+end
+Auras.DetectDispels = DetectDispels
+Auras.canDispel = canDispel
+
 local function PartCount(group, index, groupDb, allBuffs)
     if groupDb.enabled ~= true then
         return 0
@@ -478,6 +509,9 @@ local function PartCount(group, index, groupDb, allBuffs)
     end
     if group.key == "purge" and not allBuffs then
         if (index == 1 and groupDb.showMagic == false) or (index == 2 and groupDb.showEnrage == false) then
+            return 0
+        end
+        if not canDispel[index] then
             return 0
         end
     end
@@ -806,6 +840,16 @@ local specWatcher = CreateFrame("Frame")
 specWatcher:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 specWatcher:SetScript("OnEvent", function()
     if configs.enemy then
+        ns.Driver:RequestRestyle(true)
+    end
+end)
+
+local dispelWatcher = CreateFrame("Frame")
+dispelWatcher:RegisterEvent("PLAYER_LOGIN")
+dispelWatcher:RegisterEvent("SPELLS_CHANGED")
+dispelWatcher:RegisterUnitEvent("UNIT_PET", "player")
+dispelWatcher:SetScript("OnEvent", function()
+    if DetectDispels() and configs.enemy then
         ns.Driver:RequestRestyle(true)
     end
 end)

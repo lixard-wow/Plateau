@@ -13,6 +13,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - **Fewer spare nameplates at login:** Plateau now prepares 16 enemy and 4 friendly plates ahead of time instead of 30 and 10, and still adds more out of combat when a crowd appears.
 - **Settings previews no longer build real aura icons**; they draw their own sample icons.
 - **Nameplates only build the parts you have switched on.** Turning a part on later adds it to every nameplate the next time they restyle. /plt debug also shows how long one nameplate takes to build.
+- **Enemy buff icons follow what your class can remove.** Dispellable buffs are only prepared if you know Purge, Greater Purge, Dispel Magic, Spellsteal, Consume Magic, Tranquilizing Shot or Devour Magic, and enrages only if you know Soothe, Tranquilizing Shot or Shiv. This is checked again when your spells, spec or pet change. Show all buffs is unaffected.
 - **Leaner aura icons:** the timer, stack count and dispel border now sit on the cooldown swipe instead of two extra frames per icon, so each icon is cheaper to build. /plt debug lists the slowest parts to build.
 
 ### 2026-10-05 new built-in looks

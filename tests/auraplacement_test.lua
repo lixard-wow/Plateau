@@ -78,4 +78,17 @@ check(PartCount(mine, 2, { enabled = true, maxIcons = 6 }, false) == 0, "other p
 check(PartCount(mine, 2, { enabled = true, maxIcons = 6, includeOthers = true }, false) == 6, "other players' debuffs get icons once turned on")
 check(PartCount(purge, 2, { enabled = true, maxIcons = 3, showEnrage = false }, false) == 0, "enrage buffs get no icons when hidden")
 check(PartCount(purge, 2, { enabled = true, maxIcons = 3 }, true) == 0, "show all buffs uses only the first enemy buff group")
+local A = ns.Elements.Auras
+A.canDispel[1], A.canDispel[2] = false, true
+check(PartCount(purge, 1, { enabled = true, maxIcons = 3 }, false) == 0, "without an offensive dispel, the dispellable buffs group builds no icons")
+check(PartCount(purge, 2, { enabled = true, maxIcons = 3 }, false) == 3, "an enrage remover still gets the enrage group")
+check(PartCount(purge, 1, { enabled = true, maxIcons = 3 }, true) == 3, "show all buffs ignores what your class can remove")
+A.canDispel[1], A.canDispel[2] = true, true
+local known = {}
+ns.FindKnownSpell = function(id) return known[id] and id or nil end
+known[2908] = true
+check(A.DetectDispels() == true and A.canDispel[1] == false and A.canDispel[2] == true, "a druid with Soothe gets only the enrage group")
+check(A.DetectDispels() == false, "nothing changes when spells haven't changed")
+known[2908], known[30449] = nil, true
+check(A.DetectDispels() == true and A.canDispel[1] == true and A.canDispel[2] == false, "a mage with Spellsteal gets only the dispellable buffs group")
 for _, f in ipairs(failures) do print("  " .. f) end
