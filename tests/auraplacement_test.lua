@@ -69,4 +69,13 @@ check(squareHeight == 1 and math.abs(squareTop - 0.08) < 1e-6, "square icons sho
 check(wideHeight == 0.75 and math.abs(wideTop - 0.185) < 1e-6 and math.abs(wideBottom - 0.815) < 1e-6, "wide icons keep their 4 by 3 crop")
 check(flatHeight < wideHeight and math.abs((flatBottom - flatTop) / 0.84 - flatHeight) < 1e-6, "extra wide icons are flatter and crop the art to match, so it isn't squashed")
 check(ns.AuraShape({}) == 1, "an unknown shape falls back to square")
+local PartCount = ns.Elements.Auras.PartCount
+local mine = { key = "mine", parts = { {}, { others = true } } }
+local purge = { key = "purge", parts = { {}, {} } }
+check(PartCount(mine, 1, { enabled = true, maxIcons = 6 }, false) == 6, "an enabled group gets its icons")
+check(PartCount(mine, 1, { enabled = false, maxIcons = 6 }, false) == 0, "a switched-off group gets no icons, so none are built for it")
+check(PartCount(mine, 2, { enabled = true, maxIcons = 6 }, false) == 0, "other players' debuffs get no icons unless that option is on")
+check(PartCount(mine, 2, { enabled = true, maxIcons = 6, includeOthers = true }, false) == 6, "other players' debuffs get icons once turned on")
+check(PartCount(purge, 2, { enabled = true, maxIcons = 3, showEnrage = false }, false) == 0, "enrage buffs get no icons when hidden")
+check(PartCount(purge, 2, { enabled = true, maxIcons = 3 }, true) == 0, "show all buffs uses only the first enemy buff group")
 for _, f in ipairs(failures) do print("  " .. f) end

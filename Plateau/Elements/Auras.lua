@@ -249,15 +249,9 @@ function Auras:Create(plate)
         container.plate = plate
         container.keys = {}
         container.filters = {}
-        for index, part in ipairs(group.parts) do
-            local key = group.key .. index
-            container.keys[index] = key
-            container.filters[index] = part.filter .. NAMEPLATE_ONLY
-            container:AddAuraGroup(key, container.filters[index], {
-                initializeFrame = Initializer(container, group),
-                sortMethod = part.sort,
-                candidateFilters = part.candidates,
-            })
+        container.added = {}
+        for index in ipairs(group.parts) do
+            container.keys[index] = group.key .. index
         end
         plate.auras[group.key] = container
     end
@@ -477,6 +471,25 @@ local function Candidates(base, db, groupKey)
     return filters
 end
 
+local function PartCount(group, index, groupDb, allBuffs)
+    if groupDb.enabled ~= true then
+        return 0
+    end
+    if group.parts[index].others and groupDb.includeOthers ~= true then
+        return 0
+    end
+    if allBuffs and index > 1 then
+        return 0
+    end
+    if group.key == "purge" and not allBuffs then
+        if (index == 1 and groupDb.showMagic == false) or (index == 2 and groupDb.showEnrage == false) then
+            return 0
+        end
+    end
+    return groupDb.maxIcons
+end
+Auras.PartCount = PartCount
+
 function Auras:Style(plate, db)
     for _, group in ipairs(GROUPS) do
         local container = plate.auras[group.key]
@@ -492,24 +505,41 @@ function Auras:Style(plate, db)
         local sortMethod = SORT_METHODS[groupDb.sort] or Sort.Default
         if container.sortMethod ~= sortMethod then
             container.sortMethod = sortMethod
-            for _, key in ipairs(container.keys) do
-                container:SetAuraGroupSortMethod(key, sortMethod, AuraContainerSortDirection.Normal)
+            for index, key in ipairs(container.keys) do
+                if container.added[index] then
+                    container:SetAuraGroupSortMethod(key, sortMethod, AuraContainerSortDirection.Normal)
+                end
             end
         end
         local allBuffs = groupDb.allBuffs == true
+        local nameplateOnly = groupDb.nameplateOnly ~= false and NAMEPLATE_ONLY or ""
+        local added = false
         for index, key in ipairs(container.keys) do
-            container:SetAuraGroupLayout(key, { elementSpacing = groupDb.spacing, lineSpacing = groupDb.spacing })
-            local count = groupDb.maxIcons
-            if group.parts[index].others and groupDb.includeOthers ~= true then
-                count = 0
-            elseif allBuffs and index > 1 then
-                count = 0
-            elseif group.key == "purge" and not allBuffs then
-                if (index == 1 and groupDb.showMagic == false) or (index == 2 and groupDb.showEnrage == false) then
-                    count = 0
+            local count = PartCount(group, index, groupDb, allBuffs)
+            if count > 0 and not container.added[index] then
+                local part = group.parts[index]
+                local filter = part.filter .. nameplateOnly
+                container:AddAuraGroup(key, filter, {
+                    initializeFrame = Initializer(container, group),
+                    sortMethod = part.sort,
+                    candidateFilters = part.candidates,
+                })
+                container.added[index] = true
+                container.filters[index] = filter
+                added = true
+            end
+            if container.added[index] then
+                container:SetAuraGroupLayout(key, { elementSpacing = groupDb.spacing, lineSpacing = groupDb.spacing })
+                container:SetAuraGroupMaxFrameCount(key, count)
+            end
+        end
+        if added then
+            container.filterSignature = nil
+            for index, key in ipairs(container.keys) do
+                if container.added[index] then
+                    container:SetAuraGroupSortMethod(key, sortMethod, AuraContainerSortDirection.Normal)
                 end
             end
-            container:SetAuraGroupMaxFrameCount(key, count)
         end
         local hideText, onlyText = SpecLists(group.key)
         local byState = signatureCache[plate.state]
@@ -536,10 +566,9 @@ function Auras:Style(plate, db)
                 signature = signature,
             }
         end
-        local nameplateOnly = groupDb.nameplateOnly ~= false and NAMEPLATE_ONLY or ""
         for index, key in ipairs(container.keys) do
             local filter = group.parts[index].filter .. nameplateOnly
-            if container.filters[index] ~= filter then
+            if container.added[index] and container.filters[index] ~= filter then
                 container.filters[index] = filter
                 container:SetAuraGroupFilterString(key, filter)
             end
@@ -547,11 +576,13 @@ function Auras:Style(plate, db)
         if container.filterSignature ~= signature then
             container.filterSignature = signature
             for index, key in ipairs(container.keys) do
-                local base = group.parts[index].candidates
-                if group.key == "purge" and index == 1 and allBuffs then
-                    base = nil
+                if container.added[index] then
+                    local base = group.parts[index].candidates
+                    if group.key == "purge" and index == 1 and allBuffs then
+                        base = nil
+                    end
+                    container:SetAuraGroupCandidateFilters(key, Candidates(base, groupDb, group.key))
                 end
-                container:SetAuraGroupCandidateFilters(key, Candidates(base, groupDb, group.key))
             end
         end
     end

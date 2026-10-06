@@ -6,6 +6,11 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-06 lower memory
+
+#### Changed
+- **Aura groups that can't show anything no longer build icons.** The game builds a batch of 10 icons for every aura group on every nameplate, even unused ones. Groups you have switched off, other players' debuffs while that option is off, and hidden enemy buff types are now only added to a nameplate once they are turned on.
+
 ### 2026-10-05 new built-in looks
 
 #### Changed
