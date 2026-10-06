@@ -2201,7 +2201,7 @@ ns.sections = {
         { type = "Color", path = "look.castbar.importantNotReadyColor", label = "Important cast: interrupt on cooldown",
           tooltip = "Like Interrupt on cooldown, but for casts flagged important." },
         { type = "Color", path = "look.castbar.uninterruptible", label = "Uninterruptible cast",
-          tooltip = "The game says this cast can't be interrupted. Tints the bar over the interrupt colors and your bar texture, so a shielded cast always looks the same no matter your interrupt. This color's own opacity sets how strongly the tint shows - lower it to let more of your bar texture show through." },
+          tooltip = "The game says this cast can't be interrupted. Tints the bar over the interrupt colors and your bar texture, so a shielded cast always looks the same no matter your interrupt. It is solid by default; lower this color's opacity to let the cast color and bar texture show through." },
         { type = "Color", path = "look.castbar.importantUninterruptible", label = "Important cast: uninterruptible, CC required",
           tooltip = "Blizzard flags the cast as important and the game says it can't be interrupted. Both come straight from the game. This cast needs crowd control: stun, incapacitate or knockback it, break line of sight, or use a defensive. The game doesn't say whether CC will work on this enemy. Has its own opacity too, independent of Uninterruptible cast above." },
 

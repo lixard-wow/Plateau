@@ -1,6 +1,6 @@
 local _, ns = ...
 
-local SCHEMA_VERSION = 21
+local SCHEMA_VERSION = 22
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -77,6 +77,18 @@ local function RenameProfile(db, OLD, NEW)
 end
 
 local migrations = {
+    [22] = function(db)
+        for name, profile in pairs(db.profiles or {}) do
+            if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then
+                profile.look = type(profile.look) == "table" and profile.look or {}
+                local castbar = type(profile.look.castbar) == "table" and profile.look.castbar or {}
+                profile.look.castbar = castbar
+                if castbar.uninterruptible == nil then
+                    castbar.uninterruptible = { 0.6039, 0.6275, 0.7059, 0.6 }
+                end
+            end
+        end
+    end,
     [21] = function(db)
         local function Clear(look)
             local castbar = type(look) == "table" and look.castbar
