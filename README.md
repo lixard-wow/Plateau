@@ -30,7 +30,7 @@ Plateau replaces the enemy nameplates with its own, and gives you a settings win
 Copy the `Plateau` and `Plateau_Options` folders into your `Interface\AddOns` folder, then restart the game. `Plateau_Options` loads only when you open the settings, so it costs nothing while you play.
 
 ## First run
-The first time you log in, a short setup walkthrough opens. It lets you pick a look, choose which plates show (including friendly plates and player pets), and see a live preview of each choice. After it, the settings window opens with a short tour of its parts. You can skip both, and replay them any time: `/plt setup` for the walkthrough, or the buttons at the top of the **Help** page for the tour.
+The first time you log in, Plateau asks you to pick a look from six ready-made styles. Everything else is set up in the settings window, which opens with a short tour of its parts. You can skip both, and bring them back any time: `/plt setup` for the look picker, or the buttons at the top of the **Help** page for the tour.
 
 ## What you get
 
@@ -123,7 +123,7 @@ Since patch 12.0 the game hides some information from addons during combat and i
 
 ## Commands
 - `/plt` opens the settings.
-- `/plt setup` opens the first-time walkthrough.
+- `/plt setup` opens the look picker from the first-time setup.
 - `/plt minimap` shows or hides the minimap button.
 - `/plt debug` prints the version, restrictions, memory and CPU numbers. Paste it when you report a bug.
 - `/plt debug probe` shows what the game hides about your target and bosses right now; `/plt debug probe watch` logs it through a whole dungeon (it stays on through reloads until `/plt debug probe watch off`).

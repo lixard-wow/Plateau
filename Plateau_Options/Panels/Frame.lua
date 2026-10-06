@@ -598,7 +598,6 @@ local WIDE = {
     ShareProfile = true,
     Conflicts = true,
     Link = true,
-    SetupPreview = true,
 }
 
 local function PlaceRow(row, x, top, lineHeight, stretch)

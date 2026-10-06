@@ -23,7 +23,7 @@ ns.helpTopics = {
         category = "Getting started",
         title = "Looks: ready-made starting points",
         keywords = "looks cards presets layouts styles normal zperl z-perl x-perl plater ellesmere ellesmereui platynator compact name inside setup",
-        text = "The first-time setup walkthrough shows a card for each of the six ready-made looks (Plater-style, Normal, Z-Perl-style, Compact, EllesmereUI-style and Platynator-style), each with a small live nameplate. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
+        text = "The first-time setup shows a card for each of the six ready-made looks (Plater-style, Normal, Z-Perl-style, Compact, EllesmereUI-style and Platynator-style), each with a small live nameplate. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
     },
     {
         category = "Getting started",
@@ -257,7 +257,7 @@ ns.helpTopics = {
         category = "Commands",
         title = "Slash commands",
         keywords = "slash commands sl debug setup reset cvars",
-        text = "/plt opens the settings window.\n/plt setup opens the first-time walkthrough.\n/plt minimap shows or hides the minimap button.\n/plt debug shows the version, restrictions, CPU and memory, and how Plateau reads your target. Paste it when you report a bug.\n/plt reset puts every setting in the current profile back to its default.\n/plt cvars restore undoes every game nameplate setting Plateau changed.",
+        text = "/plt opens the settings window.\n/plt setup opens the look picker from the first-time setup.\n/plt minimap shows or hides the minimap button.\n/plt debug shows the version, restrictions, CPU and memory, and how Plateau reads your target. Paste it when you report a bug.\n/plt reset puts every setting in the current profile back to its default.\n/plt cvars restore undoes every game nameplate setting Plateau changed.",
     },
 }
 
