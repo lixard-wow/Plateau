@@ -6,6 +6,11 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-05 Z-Perl look
+
+#### Changed
+- **Slim is replaced by a new built-in look, Z-Perl,** styled after Z-Perl unit frames: a glossy bar in a thin grey tooltip border on black, plain shadowed text, percent health centered and colored green, yellow and red as health drops, the raid marker on the top-left corner, a soft yellow glow on your target and a matching cast bar with icon. Players who already have a Slim profile keep it as an ordinary profile.
+
 ### 2026-10-05 release hardening
 
 #### Fixed
