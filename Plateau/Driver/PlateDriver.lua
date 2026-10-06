@@ -296,7 +296,11 @@ local function StylePlate(plate)
     for i = 1, #elements do
         local element = elements[i]
         if plate.built[element] and element.enabledIn[plate.state] then
+            local started = plate.timing and debugprofilestop()
             element:Style(plate, look[element.key])
+            if started then
+                AddPartTime(element, started)
+            end
         end
     end
 end
@@ -641,6 +645,12 @@ local WARM_DELAY = 2
 local building
 local stale = {}
 local buildTime = { count = 0, total = 0, slowest = 0 }
+local partTime = {}
+
+local function AddPartTime(element, started)
+    local key = element.key or "?"
+    partTime[key] = (partTime[key] or 0) + debugprofilestop() - started
+end
 
 local function StartBuild(state)
     local started = debugprofilestop()
@@ -659,7 +669,9 @@ local function RunBuild(job, deadline)
     while job.index <= #elements do
         local element = elements[job.index]
         if element.enabled ~= false then
+            local started = debugprofilestop()
             element:Create(plate)
+            AddPartTime(element, started)
             AddHandlers(plate, element, element.events)
             AddHandlers(plate, element, element.globalEvents)
             plate.built[element] = true
@@ -676,7 +688,9 @@ local function RunBuild(job, deadline)
             return false
         end
     end
+    plate.timing = true
     StylePlate(plate)
+    plate.timing = nil
     return true
 end
 
@@ -1104,7 +1118,12 @@ end
 
 function Driver:BuildTime()
     local count = buildTime.count
-    return count, count > 0 and buildTime.total / count or 0, buildTime.slowest
+    local parts = {}
+    for key, total in pairs(partTime) do
+        parts[#parts + 1] = { key = key, ms = count > 0 and total / count or 0 }
+    end
+    table.sort(parts, function(a, b) return a.ms > b.ms end)
+    return count, count > 0 and buildTime.total / count or 0, buildTime.slowest, parts
 end
 
 function Driver:PoolStats()

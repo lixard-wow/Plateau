@@ -86,9 +86,16 @@ function ns.PerformanceLines()
         local builtTotal, attached, spare, on, all = ns.Driver:PoolStats()
         lines[#lines + 1] = ("Plates built: %d (%d on game nameplates, %d spare); elements on: %d of %d"):format(builtTotal, attached, spare, on, all)
         if ns.Driver.BuildTime then
-            local count, average, slowest = ns.Driver:BuildTime()
+            local count, average, slowest, parts = ns.Driver:BuildTime()
             if count > 0 then
                 lines[#lines + 1] = ("Time to build one plate: %.1f ms on average, %.1f ms slowest"):format(average, slowest)
+                local top = {}
+                for i = 1, math.min(3, #parts) do
+                    top[#top + 1] = ("%s %.1f ms"):format(parts[i].key, parts[i].ms)
+                end
+                if #top > 0 then
+                    lines[#lines + 1] = "Slowest parts to build: " .. table.concat(top, ", ")
+                end
             end
         end
     end
