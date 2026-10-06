@@ -101,7 +101,7 @@ local WARN_ICON = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:12:12:0:0|t
 
 function ns.Widgets.Note(parent, spec)
     local row = CreateFrame("Frame", nil, parent)
-    local text = Style.Text(row, spec.size or 11, spec.warn and C.warn or (spec.bright and C.text or C.muted))
+    local text = Style.Text(row, spec.size or 12, spec.warn and C.warn or (spec.bright and C.text or C.muted))
     local prefix = spec.warn and WARN_ICON or ""
     text:SetWordWrap(true)
     if spec.bright then

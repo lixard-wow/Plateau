@@ -33,6 +33,21 @@ frame:SetScale(Style.Scale())
 local frameEdge = Style.Rounded(frame, C.border, "BACKGROUND", -2)
 frameEdge:SetAllPoints()
 local frameFill = Style.Rounded(frame, C.window, "BACKGROUND", -1)
+if Style.theme.innerFrame then
+    local ring = CreateFrame("Frame", nil, frame)
+    ring:SetPoint("TOPLEFT", 4, -4)
+    ring:SetPoint("BOTTOMRIGHT", -4, 4)
+    ring:SetFrameLevel(frame:GetFrameLevel() + 400)
+    ring:EnableMouse(false)
+    for _, edge in ipairs({ { "TOPLEFT", "TOPRIGHT", nil, 1 }, { "BOTTOMLEFT", "BOTTOMRIGHT", nil, 1 }, { "TOPLEFT", "BOTTOMLEFT", 1, nil }, { "TOPRIGHT", "BOTTOMRIGHT", 1, nil } }) do
+        local line = ring:CreateTexture(nil, "OVERLAY")
+        line:SetColorTexture(C.line[1], C.line[2], C.line[3], 1)
+        line:SetPoint(edge[1])
+        line:SetPoint(edge[2])
+        if edge[3] then line:SetWidth(edge[3]) end
+        if edge[4] then line:SetHeight(edge[4]) end
+    end
+end
 frameFill:SetPoint("TOPLEFT", 1, -1)
 frameFill:SetPoint("BOTTOMRIGHT", -1, 1)
 tinsert(UISpecialFrames, "PlateauOptions")
@@ -876,7 +891,7 @@ local function RailButton(section, y)
     marker:Hide()
     button.marker = marker
 
-    local label = Style.Text(button, 12, C.muted)
+    local label = Style.Text(button, 13, C.muted)
     label:SetPoint("LEFT", PAD + 4, 0)
     label:SetText(section.title)
 

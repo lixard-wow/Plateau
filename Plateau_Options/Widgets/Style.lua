@@ -54,7 +54,7 @@ Style.THEMES = {
             iconButtonBorder = Hex("#262b32"),
             warn = Hex("#e0913a"),
             button = Hex("#262b32"),
-            buttonBorder = Hex("#30363f"),
+            buttonBorder = Hex("#262b32"),
             buttonHover = Hex("#30363f"),
             icon = Hex("#c3cad2"),
             iconHover = Hex("#ffffff"),
@@ -107,6 +107,7 @@ Style.THEMES = {
         },
         buttonRadius = 4,
         titleFont = { CINZEL, 14 },
+        innerFrame = true,
         sectionFont = { CINZEL, 12 },
         buttonFont = { SOURCE_BOLD, 12 },
         headerHeight = 42,
@@ -429,7 +430,7 @@ function Style.Fill(frame, color, layer)
 end
 
 local ART = "Interface\\AddOns\\" .. addonName .. "\\Art\\"
-local ROUND = ART .. "round%d.png"
+local ROUND = ART .. "round%d"
 local ICONS = ART .. "Icons\\"
 
 function Style.Rounded(frame, color, layer, sublevel, radius)
@@ -619,7 +620,7 @@ Style.CONTROL_X = 210
 Style.CONTROL_WIDTH = 240
 
 function Style.RowLabel(row, spec)
-    local label = Style.Text(row, 12, Style.colors.text)
+    local label = Style.Text(row, 13, Style.colors.text)
     label:SetPoint("LEFT", 0, 0)
     label:SetWidth(Style.LABEL_WIDTH)
     label:SetWordWrap(true)

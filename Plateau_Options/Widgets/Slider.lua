@@ -48,7 +48,7 @@ function ns.Widgets.Slider(parent, spec)
     fill:SetPoint("LEFT", groove)
     fill:SetPoint("RIGHT", thumb, "CENTER")
     fill:SetHeight(4)
-    Style.Themed(fill, 0.45)
+    Style.Themed(fill, 1)
 
     local function Clean(value)
         value = math.max(min, math.min(max, value))
