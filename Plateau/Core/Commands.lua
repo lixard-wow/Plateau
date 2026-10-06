@@ -79,6 +79,9 @@ function ns.PerformanceLines()
         lines[#lines + 1] = ("Memory usage: %.1f MB"):format(megabytes)
     end
     local total, claimed = ns.Driver:CountActive()
+    if ns.auraButtons then
+        lines[#lines + 1] = ("Aura buttons built: %d (%d of them in combat)"):format(ns.auraButtons.built, ns.auraButtons.combat)
+    end
     lines[#lines + 1] = ("Visible nameplates: %d"):format(total)
     lines[#lines + 1] = ("Nameplates styled by Plateau: %d"):format(claimed)
     return lines

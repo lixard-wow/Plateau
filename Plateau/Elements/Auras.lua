@@ -162,8 +162,22 @@ local function FlushDirtyButtons()
     end
 end
 
+ns.auraButtons = ns.auraButtons or { built = 0, combat = 0 }
+
+local function CountButton()
+    local counts = ns.auraButtons
+    counts.built = counts.built + 1
+    if InCombatLockdown() then
+        counts.combat = counts.combat + 1
+    end
+end
+ns.CountAuraButton = CountButton
+
 local function Initializer(container, group)
     return function(button)
+        if button.plateauInit then return end
+        button.plateauInit = true
+        CountButton()
         container.buttons[#container.buttons + 1] = button
 
         local icon = button:CreateTexture(nil, "ARTWORK")
@@ -366,7 +380,7 @@ local function ScanStep(from)
     end
     scanWanted, scanFound, scanIcons, scanning, scanProgress = {}, {}, {}, false, 0
     ns.spellNameVersion = ns.spellNameVersion + 1
-    ns.Driver:Restyle()
+    ns.Driver:RequestRestyle(true)
     if next(pendingWanted) then
         local queued = pendingWanted
         pendingWanted = {}
@@ -757,7 +771,7 @@ local specWatcher = CreateFrame("Frame")
 specWatcher:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 specWatcher:SetScript("OnEvent", function()
     if configs.enemy then
-        ns.Driver:Restyle()
+        ns.Driver:RequestRestyle(true)
     end
 end)
 

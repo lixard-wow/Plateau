@@ -793,7 +793,7 @@ function DB:SetSpecSpells(group, kind, text, spec)
     all[spec] = all[spec] or {}
     all[spec][group] = all[spec][group] or {}
     all[spec][group][kind] = type(text) == "string" and text or ""
-    ns.Driver:Restyle()
+    Changed()
     return true
 end
 

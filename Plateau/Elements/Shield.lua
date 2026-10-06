@@ -166,6 +166,11 @@ end
 
 local function SlotInitializer(plate, slotKey)
     return function(button)
+        if button.plateauInit then return end
+        button.plateauInit = true
+        if ns.CountAuraButton then
+            ns.CountAuraButton()
+        end
         button.plate = plate
         button.slotKey = slotKey
         plate.shieldSlots[#plate.shieldSlots + 1] = button
@@ -434,7 +439,7 @@ abilities:SetScript("OnEvent", function()
     if enrage ~= canRemove.enrage or magic ~= canRemove.magic then
         canRemove.enrage, canRemove.magic = enrage, magic
         if configs.enemy then
-            ns.Driver:Restyle()
+            ns.Driver:RequestRestyle(true)
         end
     end
 end)

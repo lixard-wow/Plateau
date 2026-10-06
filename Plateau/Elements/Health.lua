@@ -181,17 +181,10 @@ function Health:Disable(plate)
     UnitColors:ClearMobType(plate.mobFlags)
     plate.health:Hide()
     plate.health.border:Hide()
-    plate.healthGradient = nil
+    plate.healthGradient, plate.fadeCurve = nil, nil
 end
 
-function Health:OnEvent(plate, event, unit)
-    if event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH" then
-        self:Update(plate, unit)
-        if plate.healthGradient then
-            self:UpdateColor(plate, plate.unit or unit)
-        end
-        return
-    end
+function Health:OnOtherEvent(plate, event, unit)
     if event == "QUEST_LOG_UPDATE" then
         if not ns.DB.views[plate.state].colors.quest then return end
         self:UpdateColor(plate, plate.unit or unit)
@@ -240,7 +233,22 @@ function Health:UpdateEmphasis(plate)
     end
 end
 
-local function Paint(plate, r, g, b, a)
+local Paint
+
+function Health:OnEvent(plate, event, unit)
+    if event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH" then
+        self:Update(plate, unit)
+        local curve = plate.healthGradient and plate.fadeCurve
+        if curve then
+            local color = UnitHealthPercent(plate.unit or unit, false, curve)
+            Paint(plate, color.r, color.g, color.b, color.a)
+        end
+        return
+    end
+    self:OnOtherEvent(plate, event, unit)
+end
+
+function Paint(plate, r, g, b, a)
     plate.health:SetStatusBarColor(r, g, b, a)
     local name = ns.Elements.Name
     if name then
@@ -252,12 +260,13 @@ local function Finish(plate, unit, r, g, b, a)
     local fade = fades[plate.state]
     a = a or 1
     if fade and not plate.isFriendly and not issecretvalue(r) and not issecretvalue(g) and not issecretvalue(b) and not issecretvalue(a) then
-        local color = UnitHealthPercent(unit, false, FadeCurve(fade, r, g, b, a))
-        plate.healthGradient = true
+        local curve = FadeCurve(fade, r, g, b, a)
+        local color = UnitHealthPercent(unit, false, curve)
+        plate.healthGradient, plate.fadeCurve = true, curve
         Paint(plate, color.r, color.g, color.b, color.a)
         return
     end
-    plate.healthGradient = nil
+    plate.healthGradient, plate.fadeCurve = nil, nil
     Paint(plate, r, g, b, a)
 end
 

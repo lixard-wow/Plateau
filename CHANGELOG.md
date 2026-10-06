@@ -20,6 +20,10 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - Smaller safety fixes: Plateau no longer changes Blizzard's target size setting in combat, frame levels the game hides are left alone, and /plt debug reports a failed realm-marker cleanup or damaged saved settings.
 
 #### Changed
+- **Smoother pulls after entering a dungeon:** after any restyle (entering or leaving an instance, a spec change, a setting change), Plateau now re-styles its spare and empty nameplates in the background out of combat, a little each frame, instead of when each one first appears mid-pull.
+- **No full restyles in the middle of a fight from background changes:** a pet being resummoned, a level-up, a role change or the spell-name lookup finishing now wait until combat ends. Your own setting changes still apply straight away.
+- **Cheaper health color fading:** each health change only re-reads the faded color instead of re-working out the whole color.
+- Building spare nameplates stays within its time budget per frame, and each aura button is only set up once; /plt debug shows how many were built and how many in combat.
 - **Probe log is smaller and private:** it keeps at most 300 entries, never stores names, GUIDs or creature IDs, probe watch turns itself off after 4 hours, and the log is cleared when Plateau updates. The existing log is cleared once.
 
 ### 2026-10-05 nameplates attach to the game's own

@@ -611,6 +611,7 @@ local POOL_ORDER = { "enemy", "friendly" }
 local BUILD_BUDGET_MS = 3
 local WARM_DELAY = 2
 local building
+local stale = {}
 
 local function StartBuild(state)
     local plate = CreateFrame("Frame", nil, hider)
@@ -633,7 +634,13 @@ local function StepBuild(job, deadline)
             return false
         end
     end
-    plate:SetScript("OnEvent", OnPlateEvent)
+    if not job.wired then
+        job.wired = true
+        plate:SetScript("OnEvent", OnPlateEvent)
+        if deadline and debugprofilestop() > deadline then
+            return false
+        end
+    end
     StylePlate(plate)
     return true
 end
@@ -706,6 +713,17 @@ poolWarmer:Hide()
 poolWarmer:SetScript("OnUpdate", function(self)
     if InCombatLockdown() then return end
     local started = debugprofilestop()
+    local plate = next(stale)
+    while plate do
+        stale[plate] = nil
+        if not plate.active and plate.styleVersion ~= styleVersion then
+            StylePlate(plate)
+        end
+        if debugprofilestop() > started + BUILD_BUDGET_MS then
+            return
+        end
+        plate = next(stale)
+    end
     if not building then
         for _, state in ipairs(POOL_ORDER) do
             if #pools[state] < POOL_TARGET[state] then
@@ -893,7 +911,13 @@ restyleQueue:SetScript("OnUpdate", function(self)
     Driver:Restyle()
 end)
 
-function Driver:RequestRestyle()
+local restyleAfterCombat = false
+
+function Driver:RequestRestyle(background)
+    if background and InCombatLockdown() then
+        restyleAfterCombat = true
+        return
+    end
     restyleQueue:Show()
 end
 
@@ -962,6 +986,19 @@ function Driver:Restyle()
         if plate.active then
             StylePlate(plate)
         end
+    end
+    for _, plate in pairs(platesByBase) do
+        if not plate.active then
+            stale[plate] = true
+        end
+    end
+    for _, list in pairs(pools) do
+        for i = 1, #list do
+            stale[list[i]] = true
+        end
+    end
+    if next(stale) then
+        poolWarmer:Show()
     end
     for unit, plate in pairs(platesByUnit) do
         if plate.active then
@@ -1039,6 +1076,10 @@ Driver:RegisterEvent("CVAR_UPDATE")
 Driver:RegisterEvent("ENCOUNTER_START")
 Driver:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
 Driver:SetScript("OnEvent", function(_, event, arg)
+    if event == "PLAYER_REGEN_ENABLED" and restyleAfterCombat then
+        restyleAfterCombat = false
+        restyleQueue:Show()
+    end
     if event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
         inCombat = event == "PLAYER_REGEN_DISABLED"
         if (dimCombatOnly and targetPlate) or hideFriendlyCombat then
