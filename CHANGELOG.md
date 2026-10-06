@@ -11,6 +11,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 Plateau's nameplates are now part of the game's nameplates instead of floating in a separate layer above them.
 
 #### Added
+- **Warnings for settings that clash.** Notes with an alert icon now appear only when a combination applies: Scale casting nameplates together with Enlarge important casts (both pages), the kick marker not showing on the bigger bar, how much of the bigger bar can be clicked, and stacking bounds that keep cast bar room on every plate.
 - **Enlarge important casts** (Cast bar page, off by default, size 1.10 to 2.00): casts the game flags as important get a bigger cast bar drawn in front of every other nameplate. The game hides which casts are important, so Plateau keeps a second, bigger bar ready and the game picks which one shows. The kick marker stays on the normal-size bar.
 - **New icon and brand colour.** A calligraphy P (Allura) replaces the gradient P, and Plateau's name is one colour instead of a gradient. Brand colour (gear button > Plateau settings) colours the P and the name on the minimap button, the settings title, the game menu button and chat: Class colour (default), Colour cycle or Random each login. The addon list icon is a white P, since the game can't recolour it.
 - **Hide friendly pets in dungeons and raids** (Friendly nameplates page, off by default): inside dungeons and raids, other players' pets, totems and minions lose their nameplates and floating names; your own settings come back when you leave.

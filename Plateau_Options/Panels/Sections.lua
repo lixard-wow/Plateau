@@ -1484,9 +1484,13 @@ ns.sections = {
           tooltip = "Scale applied to your focus target's nameplate. 1.00 is normal size, 1.20 is 20% larger." }, On("look.scaling.focusGrow"), "Turn on Scale focus nameplate to use this."),
         { type = "Header", label = "Casting scale" },
         { type = "Toggle", path = "look.scaling.castPop", label = "Scale casting nameplates",
-          tooltip = "Makes a casting enemy easier to spot in a pack." },
+          tooltip = "Makes a casting enemy easier to spot in a pack. This grows the whole plate on every cast: the game hides which casts are important, so it can't be limited to them. To enlarge only important casts, use Enlarge important casts on the Cast bar page instead." },
         Gate({ type = "Slider", path = "look.scaling.castScale", label = "Casting scale", min = 0.5, max = 1.6, step = 0.05,
           tooltip = "Applies while the enemy is casting or channeling a spell, whichever is currently showing on its cast bar. Doesn't stack with the target or enemy type scale: a casting plate uses whichever is biggest, and Blizzard's own target scale counts too. 1.00 is normal size, 1.20 is 20% larger." }, On("look.scaling.castPop"), "Turn on Scale casting nameplates to use this."),
+
+        { type = "Note", warn = true, height = 32,
+          visibleIf = function() return ns.Get("look.scaling.castPop") == true and ns.Get("look.castbar.importantEnlarge") == true end,
+          label = "Enlarge important casts is on too (Cast bar page). An important cast gets both: the whole plate grows to Casting scale, and its bigger cast bar grows on top of that." },
 
         { type = "Header", label = "Blizzard's nameplate size" },
         BaseSpec({ type = "Toggle", path = "look.plate.followBlizzardSize", label = "Use Blizzard nameplate sizing for enemies",
@@ -1566,7 +1570,7 @@ ns.sections = {
         { type = "Header", label = "Nameplate layering", first = true },
         { type = "Toggle", path = "look.scaling.castFront", label = "Casting enemies in front", wide = true,
           keywords = "layering priority order caster casters cast in front draw over overlap",
-          tooltip = "An enemy that is casting right now draws over the plates around it, so you can see the cast in a stack. Your target stays above casting enemies. Off: the game's own order, nearer plates over farther ones with your target on top. Mouseover in front (under Extras) beats both." },
+          tooltip = "An enemy that is casting right now draws over the plates around it, so you can see the cast in a stack. Your target stays above casting enemies. Off: the game's own order, nearer plates over farther ones with your target on top. Mouseover in front (under Extras) beats both. Enlarge important casts (Cast bar page) already draws important cast bars above everything; this also brings every other casting enemy's whole plate forward." },
 
         { type = "Header", label = "Stacking" },
         Gate({ type = "Presets", presets = STACK_PRESETS, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack",
@@ -1589,6 +1593,13 @@ ns.sections = {
           tooltip = "How much of each nameplate counts as its size when stacking: the health bar only, the bar and name, the bar and cast bar, the bar, name and cast bar, or everything including buffs and debuffs. Bigger bounds keep more space between neighbors, but big pulls spread further up the screen." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
         Gate(CVarSlider("nameplateOverlapV", "Vertical spacing", 0.3, 2, 0.05, "The vertical space kept between stacked nameplates, as a multiplier. Higher spreads them further apart; lower brings them closer together."), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
         Gate(CVarSlider("nameplateOverlapH", "Horizontal spacing", 0.3, 2, 0.05, "The side-to-side space kept between stacked nameplates, as a multiplier. Higher spreads them further apart; lower brings them closer together."), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+
+        { type = "Note", warn = true, height = 32,
+          visibleIf = function()
+              local space = ns.Get("look.plate.stackSpace")
+              return space == "cast" or space == "barcast" or space == "all"
+          end,
+          label = "These stacking bounds keep room for a cast bar on every plate, casting or not, so big pulls stack much higher up the screen. Health bar only or Health bar and name keep pulls tighter." },
 
         { type = "Header", label = "Movement" },
         InstantMovement(),
@@ -1616,7 +1627,7 @@ ns.sections = {
         BaseSpec({ type = "Slider", path = "look.plate.clickY", label = "Vertical padding", min = 0, max = 30,
           tooltip = "Extend the clickable area above and below the nameplate. Makes plates easier to click without making them bigger. Same for every nameplate type." }),
         BaseSpec({ type = "Toggle", path = "look.plate.clickCastBar", label = "Include cast bar in clickable area",
-          tooltip = "Extend the clickable area to include the cast bar. Clicking it then targets that enemy too. Same for every nameplate type." }),
+          tooltip = "Extend the clickable area to include the cast bar. Clicking it then targets that enemy too. Same for every nameplate type. The bigger bar from Enlarge important casts is only clickable where it overlaps the normal cast bar." }),
         BaseSpec({ type = "Slider", path = "look.plate.clickOffsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Slides the whole clickable area up (positive values) or down (negative values) without changing its size. Up covers the name above the bar; down covers the cast bar." }),
         { type = "Note", label = "Enable Show clickable areas to display the clickable bounds on the preview and in-world nameplates.", height = 24 },
@@ -2159,6 +2170,19 @@ ns.sections = {
           tooltip = "Casts the game flags as important get a bigger cast bar, drawn in front of every other nameplate. The game hides which casts are important from addons, so Plateau keeps a second, bigger bar ready and the game itself picks which one shows. The kick marker stays on the normal-size bar." },
         Gate({ type = "Slider", path = "look.castbar.importantScale", label = "Important cast size", min = 1.1, max = 2, step = 0.05,
           tooltip = "How much bigger an important cast bar is. 1.30 is 30% bigger. It grows from the middle of the normal bar." }, On("look.castbar.importantEnlarge"), "Turn on Enlarge important casts to use this."),
+
+        { type = "Note", warn = true, height = 32,
+          visibleIf = function() return ns.Get("look.castbar.importantEnlarge") == true and ns.Get("look.scaling.castPop") == true end,
+          label = "Scale casting nameplates is also on (Size page), so every casting plate still grows, important or not. Turn it off if only important casts should get bigger." },
+        { type = "Note", warn = true, height = 24,
+          visibleIf = function() return ns.Get("look.castbar.importantEnlarge") == true and ns.Get("look.castbar.kickMarker") == true end,
+          label = "The interrupt cooldown marker shows on normal-size cast bars only, not on the bigger important one." },
+        { type = "Note", warn = true, height = 32,
+          visibleIf = function() return ns.Get("look.castbar.importantEnlarge") == true and ns.Get("look.plate.clickCastBar") ~= true end,
+          label = "The bigger bar can't be clicked to target. Turn on Include cast bar in clickable area (Clickable area page) to make its middle clickable." },
+        { type = "Note", height = 32,
+          visibleIf = function() return ns.Get("look.castbar.importantEnlarge") == true and ns.Get("look.plate.clickCastBar") == true end,
+          label = "Only the part of the bigger bar over the normal cast bar can be clicked to target. The game can't resize the click area for important casts only." },
 
         { type = "Header", label = "Interrupted casts" },
         { type = "ToggleColor", path = "look.castbar.showInterrupter", colorPath = "look.castbar.interruptedColor", label = "Show interrupter name",
