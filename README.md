@@ -97,7 +97,7 @@ Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Esca
 - **Live preview.** A sample plate updates as you change things. Click any part to jump to that part's settings: the page opens and the exact control flashes, or the page title flashes when the part is the whole section (the cast bar, for example). Drag a part to move it: it snaps to spots that make sense and leaves a one pixel space. Hold Shift to place it anywhere, or turn **Snap** off.
 - **Nameplate types.** Enemy, Enemy player, Friendly, My target and My focus are stacked down the left. Enemy is the base. The others follow it and only differ where you change them, and the window takes the color of the type you pick.
 - **Preview follows your settings.** Whatever you turn on shows on the sample. A **Preview** button next to Reset this section picks the sample's cast (Cast bar page), enemy type and threat (Health bar page) or badge (Elite icon page); it only changes the preview.
-- **Undo and redo.** Every change is remembered and named ("Moved Raid target icon", "Look: Z-Perl-style"). Open the list to step back several at once.
+- **Undo and redo.** Every change is remembered and named ("Moved Raid target icon", "Look: Clean and flat"). Open the list to step back several at once.
 - **Search.** Finds any setting by name or by words in its description and scrolls it to the top. On the Help page it searches only the help topics.
 - **Pages.** One page per part of the nameplate, plus Looks at the top and Game settings and Help at the bottom.
 - **Apply to all plates.** Copies every setting and position on the current page from the type you are editing to all plates.
@@ -107,7 +107,7 @@ Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Esca
 ## Profiles and looks
 A profile holds every look setting, including your per-type changes. Each character remembers which profile it uses.
 
-- **Looks** are six ready-made profiles shown as live cards: Plater-style, Normal, Z-Perl-style, Compact, EllesmereUI-style, and Platynator-style. Press Use this look on a card to switch to it. **Restore a built-in profile** puts one back to how it shipped.
+- **Looks** are six ready-made profiles shown as live cards: Familiar layout, Normal, Classic unit frames, Compact, Clean and flat, and Bold and crisp. Press Use this look on a card to switch to it. **Restore a built-in profile** puts one back to how it shipped.
 - **Switch automatically.** Choose a profile for the open world, dungeons, raids, and delves and scenarios, or per specialization. Content-specific profiles beat specialization profiles, your default profile is the fallback, and automatic switches wait until combat ends.
 - **Manage** them from the button at the bottom left of the window, or the Profiles page: start fresh, copy the current one, copy another into this one, delete.
 

@@ -93,9 +93,6 @@ local migrations = {
             end
         end
     end,
-    [20] = function(db)
-        RenameProfile(db, "Z-Perl", "Z-Perl-style")
-    end,
     [19] = function(db)
         for name, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then

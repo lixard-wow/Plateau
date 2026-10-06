@@ -232,14 +232,6 @@ check(own.Mine.look.enemyPower.enabled == false and own.Mine.look.classPower.ena
 check(ns.DB:SwitchProfile("Normal") and ns.DB:Get("look.classPower.enabled") == false and ns.DB:Get("look.enemyPower.enabled") == false, "v19: built-in looks have both bars off")
 ns.DB:Shutdown()
 
-PlateauDB = { version = 19, profiles = { ["Z-Perl"] = { look = { plate = { width = 99 } } } }, profileKeys = { ["Stalador - Iridikron"] = "Z-Perl" },
-    global = { builtins = { ["Z-Perl"] = true } }, assignments = { ["Stalador - Iridikron"] = { content = { raid = "Z-Perl" }, spec = {} } } }
-ns.DB:Init()
-check(PlateauDB.profiles["Z-Perl"] == nil and PlateauDB.profiles["Z-Perl-style"].look.plate.width == 99, "v20: the Z-Perl profile is renamed Z-Perl-style, keeping its settings")
-check(PlateauDB.profileKeys["Stalador - Iridikron"] == "Z-Perl-style" and PlateauDB.assignments["Stalador - Iridikron"].content.raid == "Z-Perl-style", "v20: characters and automatic switching follow the rename")
-check(PlateauDB.global.builtins["Z-Perl-style"] == true and PlateauDB.global.builtins["Z-Perl"] == nil, "v20: the built-in flag moves too, so it isn't created twice")
-ns.DB:Shutdown()
-
 PlateauDB = { version = 20, profiles = { Default = { look = { castbar = { interruptible = { 1, 0, 0, 1 }, channelColor = { 0, 0, 1, 1 }, height = 14 } },
     states = { target = { castbar = { interruptible = { 0, 1, 0, 1 } } } } } }, profileKeys = {} }
 ns.DB:Init()

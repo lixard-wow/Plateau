@@ -1,19 +1,19 @@
 local addonName, ns = ...
 
 local GLOSS = "Interface\\AddOns\\" .. addonName .. "\\Art\\Bars\\bar-gloss.png"
-local PERL_GREY = { 0.5, 0.5, 0.5, 1 }
+local TOOLTIP_GREY = { 0.5, 0.5, 0.5, 1 }
 local SMOOTH = "Interface\\AddOns\\" .. addonName .. "\\Art\\Bars\\bar-smooth.png"
 local ARIAL_NARROW = "Fonts\\ARIALN.TTF"
 
 ns.presets = {
     looks = {
         {
-            key = "plater",
-            label = "Plater-style",
-            subtitle = "Familiar layout",
-            summary = "Laid out like Plater's default: small flat bars, the name below, a cast bar right under the bar and a blue target glow.",
+            key = "familiar",
+            label = "Familiar layout",
+            subtitle = "Name below the bar",
+            summary = "Small flat bars with the name below, a cast bar right under the bar and a blue glow on your target.",
             accent = 3,
-            tooltip = "Laid out like Plater's default plates: a small flat bar with a thin black border, the name below it in plain shadowed Arial Narrow, health value and percent centered, the level faded above the right end, a cast bar right under the bar with its icon on the left, spell name centered and timer on the right, a blue glow and silver corner brackets on your target, other plates dimmed in combat and faded out of range, your debuffs and enemy buffs in a row above the bar and crowd control on the right.",
+            tooltip = "A small flat bar with a thin black border, the name below it in plain shadowed Arial Narrow (hidden while casting), health value and percent centered, the level faded above the right end, a cast bar right under the bar with its icon on the left, spell name centered and timer on the right, a blue glow and silver corner brackets on your target, other plates dimmed in combat and faded out of range, your debuffs and enemy buffs in a row of wide icons above the bar and crowd control on the right.",
             values = {
                 ["look.plate.width"] = 120,
                 ["look.plate.height"] = 14,
@@ -137,19 +137,19 @@ ns.presets = {
             },
         },
         {
-            key = "zperl",
-            label = "Z-Perl-style",
-            subtitle = "Classic unit frames",
-            summary = "Styled after Z-Perl unit frames: glossy bars in grey tooltip borders with soft shadowed text.",
+            key = "classic",
+            label = "Classic unit frames",
+            subtitle = "Tooltip borders",
+            summary = "Glossy bars in grey tooltip borders with soft shadowed text, like classic unit frames.",
             accent = 2,
-            tooltip = "Styled after Z-Perl unit frames: a glossy bar inside a thin grey tooltip border on black, the name above and percent health centered in plain shadowed text that turns green, yellow and red as health drops, the level on the left, the raid marker on the top-left corner, a soft yellow glow on your target, and a matching glossy cast bar with icon.",
+            tooltip = "A glossy bar inside a thin grey tooltip border on black, the name above and percent health centered in plain shadowed text that turns green, yellow and red as health drops, the level on the left, the raid marker on the top-left corner, a soft yellow glow on your target, and a matching glossy cast bar with icon.",
             values = {
                 ["look.plate.width"] = 140,
                 ["look.plate.height"] = 12,
                 ["look.health.texture"] = GLOSS,
                 ["look.health.background"] = { 0, 0, 0, 1 },
                 ["look.health.borderStyle"] = "thinTooltip",
-                ["look.health.border"] = PERL_GREY,
+                ["look.health.border"] = TOOLTIP_GREY,
                 ["look.health.borderSize"] = 1,
                 ["look.health.smooth"] = true,
                 ["look.name.gap"] = 4,
@@ -165,7 +165,7 @@ ns.presets = {
                 ["look.castbar.texture"] = GLOSS,
                 ["look.castbar.background"] = { 0, 0, 0, 1 },
                 ["look.castbar.borderStyle"] = "thinTooltip",
-                ["look.castbar.border"] = PERL_GREY,
+                ["look.castbar.border"] = TOOLTIP_GREY,
                 ["look.castbar.borderSize"] = 1,
                 ["look.castbar.gap"] = 6,
                 ["look.castbar.outline"] = "",
@@ -180,12 +180,12 @@ ns.presets = {
             },
         },
         {
-            key = "ellesmere",
-            label = "EllesmereUI-style",
-            subtitle = "Clean and flat",
-            summary = "Styled after EllesmereUI's plates: flat bars, shadowed text, a tall purple cast bar and a soft blue target glow.",
+            key = "flat",
+            label = "Clean and flat",
+            subtitle = "Soft target glow",
+            summary = "Flat bars, shadowed text, a tall purple cast bar and a soft blue glow on your target.",
             accent = { 0.41, 0.67, 1, 1 },
-            tooltip = "Styled after EllesmereUI's default plates: a flat 156 by 17 bar with a thin dark border inside it, the name above in plain shadowed text, percent health on the right, a cast bar as tall as the health bar right under it in purple with the icon on the left, spell name on the left and the cast target and timer on the right, a soft blue glow behind your target, your debuffs centered above, buffs on the left and crowd control on the right, the raid marker above the right end and elite icons above the left end.",
+            tooltip = "A flat 156 by 17 bar with a thin dark border inside it, the name above in plain shadowed text, percent health on the right, a cast bar as tall as the health bar right under it in purple with the icon on the left, spell name on the left and the cast target and timer on the right, a soft blue glow behind your target, your debuffs centered above, buffs on the left and crowd control on the right, the raid marker above the right end and elite icons above the left end.",
             values = {
                 ["look.plate.width"] = 156,
                 ["look.plate.height"] = 17,
@@ -253,12 +253,12 @@ ns.presets = {
             },
         },
         {
-            key = "platynator",
-            label = "Platynator-style",
-            subtitle = "Bold and crisp",
-            summary = "Styled after Platynator's plates: thin shaded bars with a slate border, bold outlined text and arrows on your target.",
+            key = "bold",
+            label = "Bold and crisp",
+            subtitle = "Outlined and sharp",
+            summary = "Thin shaded bars with a slate border, bold outlined text and arrows on your target.",
             accent = { 0.69, 0.37, 0.92, 1 },
-            tooltip = "Styled after Platynator's default plates: a thin shaded 125 by 16 bar with a slate border and a spark at the health edge, the name above and the health number centered in bold outlined text, a matching cast bar just under it with the icon on the left, spell name on the left, the cast target in class color on the right and no timer, kick-ready colors, white arrows on both sides of your target, a purple outline on mouseover, your debuffs above on the left, buffs on the left and crowd control on the right, and the raid marker above the name.",
+            tooltip = "A thin shaded 125 by 16 bar with a slate border and a spark at the health edge, the name above and the health number centered in bold outlined text, a matching cast bar just under it with the icon on the left, spell name on the left, the cast target in class color on the right and no timer, kick-ready colors, white arrows on both sides of your target, a purple outline on mouseover, your debuffs above on the left, buffs on the left and crowd control on the right, and the raid marker above the name.",
             values = {
                 ["look.plate.width"] = 125,
                 ["look.plate.height"] = 16,
@@ -504,12 +504,12 @@ local Builtins = {}
 ns.Builtins = Builtins
 
 Builtins.list = {
-    { name = "Plater-style", group = "looks", key = "plater" },
+    { name = "Familiar layout", group = "looks", key = "familiar" },
     { name = "Normal", group = "looks", key = "normal" },
-    { name = "Z-Perl-style", group = "looks", key = "zperl" },
+    { name = "Classic unit frames", group = "looks", key = "classic" },
     { name = "Compact", group = "styles", key = "inside" },
-    { name = "EllesmereUI-style", group = "looks", key = "ellesmere" },
-    { name = "Platynator-style", group = "looks", key = "platynator" },
+    { name = "Clean and flat", group = "looks", key = "flat" },
+    { name = "Bold and crisp", group = "looks", key = "bold" },
 }
 
 Builtins.defaultName = "Normal"

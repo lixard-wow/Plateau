@@ -59,8 +59,7 @@ logo:SetTexture("Interface\\AddOns\\Plateau\\Art\\icon")
 local heading = Style.Text(titleBar, 16, C.text)
 heading:SetPoint("LEFT", logo, "RIGHT", 10, 0)
 
-local G = Style.groupColors
-local line = Style.GradientLine(titleBar, { G.look, G.casts, G.highlights }, 2)
+local line = Style.GradientLine(titleBar, { C.line, C.line }, 1)
 line:SetPoint("BOTTOMLEFT", 1, 0)
 line:SetPoint("BOTTOMRIGHT", -1, 0)
 

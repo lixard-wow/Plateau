@@ -22,14 +22,14 @@ ns.helpTopics = {
     {
         category = "Getting started",
         title = "Looks: ready-made starting points",
-        keywords = "looks cards presets layouts styles normal zperl z-perl x-perl plater ellesmere ellesmereui platynator compact name inside setup",
-        text = "The first-time setup shows a card for each of the six ready-made looks (Plater-style, Normal, Z-Perl-style, Compact, EllesmereUI-style and Platynator-style), each with a small live nameplate. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
+        keywords = "looks cards presets layouts styles normal familiar classic unit frames clean flat bold crisp compact name inside setup",
+        text = "The first-time setup shows a card for each of the six ready-made looks (Familiar layout, Normal, Classic unit frames, Compact, Clean and flat, and Bold and crisp), each with a small live nameplate. Several are inspired by popular nameplate and unit frame addons, rebuilt from Plateau's own settings. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
     },
     {
         category = "Getting started",
         title = "Undo and redo",
         keywords = "undo redo history revert mistake back",
-        text = "Undo and Redo are at the top right of the preview. Every change you make is remembered, and the list names each one, for example Height, Moved Raid target icon or Look: Z-Perl-style.\n\nClick Undo to step back one change. Open the list beside it to jump back several changes at once. Redo brings back what you undid, until you make a new change.\n\nUndo only tracks what you do while this window or the setup is open. It keeps the last 20 changes, and it also covers the game nameplate settings on the Game settings page. Switching profiles clears the list.",
+        text = "Undo and Redo are at the top right of the preview. Every change you make is remembered, and the list names each one, for example Height, Moved Raid target icon or Look: Clean and flat.\n\nClick Undo to step back one change. Open the list beside it to jump back several changes at once. Redo brings back what you undid, until you make a new change.\n\nUndo only tracks what you do while this window or the setup is open. It keeps the last 20 changes, and it also covers the game nameplate settings on the Game settings page. Switching profiles clears the list.",
     },
     {
         category = "Getting started",

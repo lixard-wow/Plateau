@@ -1309,7 +1309,7 @@ local function AuraExtraControls(path)
     return List(
         { type = "Header", label = "Extras" },
         { type = "Dropdown", path = path .. ".shape", label = "Icon shape", options = AURA_SHAPES,
-          tooltip = "Square shows the whole icon. Wide makes icons shorter (4 by 3) and Extra wide shorter still (about 8 by 5, like Plater), cropping the top and bottom of the art to save vertical space." },
+          tooltip = "Square shows the whole icon. Wide makes icons shorter (4 by 3) and Extra wide shorter still (about 8 by 5), cropping the top and bottom of the art to save vertical space." },
         { type = "Toggle", path = path .. ".swipe", label = "Cooldown swipe",
           tooltip = "The dark clock-wipe over each icon as it runs out. Off leaves just the timer text." },
         { type = "Slider", path = path .. ".borderSize", label = "Icon border thickness", min = 0, max = 3,
@@ -2139,7 +2139,7 @@ ns.sections = {
         { type = "Toggle", path = "look.castbar.showIcon", label = "Show spell icon",
           tooltip = "Shows the spell's own icon next to the cast bar." },
         Gate({ type = "Toggle", path = "look.castbar.iconSpan", label = "Extend icon across both bars",
-          tooltip = "Resizes the spell icon to fill the combined height of the health bar and cast bar, and sits beside the whole plate, like popular Plater profiles." }, On("look.castbar.showIcon"), "Turn on Show spell icon to use this."),
+          tooltip = "Resizes the spell icon to fill the combined height of the health bar and cast bar, and sits beside the whole plate." }, On("look.castbar.showIcon"), "Turn on Show spell icon to use this."),
         Gate({ type = "Dropdown", path = "look.castbar.iconSide", label = "Icon position", options = ICON_SIDES,
           tooltip = "Which side of the bars the spell icon sits on." }, On("look.castbar.showIcon"), "Turn on Show spell icon to use this."),
 
