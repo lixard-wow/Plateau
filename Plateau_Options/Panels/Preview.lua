@@ -517,6 +517,7 @@ local function ApplySample()
     cast.notInterruptible = kind == "cantInterrupt" or kind == "importantStop"
     cast.interrupted = kind == "interrupted"
     sample.cast = cast
+    sample.isOther = sectionKey == "fading"
     local executeOn = On("look.execute.highlight") or On("look.execute.lines")
     sample.health = (sectionKey == "health" and executeOn) and 0.12 or baseHealth
     local enemy = picks.enemy
