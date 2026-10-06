@@ -6,17 +6,18 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
-### 2026-10-05 Z-Perl and Plater-style looks
+### 2026-10-05 new built-in looks
 
 #### Changed
 - **Big & bold is replaced by a new built-in look, Plater-style,** laid out like Plater's default plates: a small flat bar, the name below it in Arial Narrow (hidden while casting), health value and percent centered, a faded level above the right end, a cast bar right under the bar with icon, centered spell name and timer, a blue glow and silver corner brackets on your target, other plates dimmed in combat and faded out of range, your debuffs and enemy buffs in a row above the bar and crowd control on the right. Players who already have a Big & bold profile keep it as an ordinary profile.
 - **Two new built-in looks, EllesmereUI-style and Platynator-style,** built from those addons' default plates using Plateau's own settings. EllesmereUI-style: a flat bar with a thin dark inset border, shadowed text, a tall purple cast bar right under the bar and a soft blue target glow. Platynator-style: a thin shaded bar with a slate border and a spark, bold outlined text with the health number centered, a matching cast bar with kick-ready colors and no timer, white arrows on your target and a purple mouseover outline. Both use Arial Narrow, the closest font every game client has.
 - **New Extra wide aura icon shape** (about 8 by 5, like Plater), next to Square and Wide. The art is cropped to fit, not squashed. Plater-style now uses it for your debuffs, enemy buffs and crowd control.
+- **Setup walkthrough pages scroll** with the mouse wheel when they hold more than fits, so Which plates show no longer runs off the bottom of the window.
 - **The settings preview now shows the icon shape you pick**; it always drew square icons before.
 - **The look cards in the setup walkthrough wrap into two rows** when there are more than four, so every preview stays readable.
-- **Slim is replaced by a new built-in look, Z-Perl,** styled after Z-Perl unit frames: a glossy bar in a thin grey tooltip border on black, plain shadowed text, percent health centered and colored green, yellow and red as health drops, the raid marker on the top-left corner, a soft yellow glow on your target and a matching cast bar with icon. Players who already have a Slim profile keep it as an ordinary profile.
+- **Slim is replaced by a new built-in look, Z-Perl-style,** styled after Z-Perl unit frames: a glossy bar in a thin grey tooltip border on black, plain shadowed text, percent health centered and colored green, yellow and red as health drops, the raid marker on the top-left corner, a soft yellow glow on your target and a matching cast bar with icon. Players who already have a Slim profile keep it as an ordinary profile.
 - **Show nameplate-only auras is now off by default** for your debuffs, crowd control and enemy buffs, on every built-in look. Important auras keep it on, since that group is made only of them. Profiles you made yourself keep the setting they had.
-- **The class resource and enemy power bars are now off by default**, including on the Z-Perl look. Turn them on from their pages. Profiles you made yourself keep the setting they had.
+- **The class resource and enemy power bars are now off by default**, including on the Z-Perl-style look. Turn them on from their pages. Profiles you made yourself keep the setting they had.
 
 ### 2026-10-05 rounded glows
 

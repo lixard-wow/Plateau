@@ -20,21 +20,21 @@ check(#DB:ListProfiles() == #ns.Builtins.list, "every built-in profile is create
 check(DB:SwitchProfile("Compact") and DB:Get("look.name.position") ~= ns.defaults.look.name.position, "Compact profile carries the compact look")
 check(DB:SwitchProfile("Normal") and DB:Get("look.plate.height") == 14 and DB:Get("look.plate.width") == 150, "Normal profile carries the standard look")
 DB:SwitchProfile("Normal")
-DB:SwitchProfile("Z-Perl")
-check(DB:Get("look.health.borderStyle") == "thinTooltip" and DB:Get("look.target.glow") == true, "Z-Perl profile carries the Z-Perl look")
+DB:SwitchProfile("Z-Perl-style")
+check(DB:Get("look.health.borderStyle") == "thinTooltip" and DB:Get("look.target.glow") == true, "Z-Perl-style profile carries the Z-Perl look")
 DB:Set("look.plate.height", 20)
-check(DB:RestoreBuiltin("Z-Perl") and DB:Get("look.plate.height") == 12, "restoring a built-in puts it back")
+check(DB:RestoreBuiltin("Z-Perl-style") and DB:Get("look.plate.height") == 12, "restoring a built-in puts it back")
 DB:SwitchProfile("Normal")
-DB:DeleteProfile("Z-Perl")
+DB:DeleteProfile("Z-Perl-style")
 DB:Shutdown()
 DB:Init()
-check(not has("Z-Perl"), "a deleted built-in is not created again on load")
-check(DB:UseBuiltin("Z-Perl") and DB.profileName == "Z-Perl" and has("Z-Perl"), "picking a deleted built-in recreates it")
+check(not has("Z-Perl-style"), "a deleted built-in is not created again on load")
+check(DB:UseBuiltin("Z-Perl-style") and DB.profileName == "Z-Perl-style" and has("Z-Perl-style"), "picking a deleted built-in recreates it")
 
 PlateauDB = { version = 7, profiles = { Default = { look = { plate = { width = 170 } } } }, profileKeys = { ["Stalador - Iridikron"] = "Default" } }
 DB:Init()
 check(DB.profileName == "Default" and DB:Get("look.plate.width") == 170, "existing players keep their profile")
-check(has("Plater-style") and has("Normal") and has("Z-Perl") and has("Compact") and has("EllesmereUI-style") and has("Platynator-style") and not has("Plateau") and not has("Classic"), "existing players get all six built-ins added")
+check(has("Plater-style") and has("Normal") and has("Z-Perl-style") and has("Compact") and has("EllesmereUI-style") and has("Platynator-style") and not has("Plateau") and not has("Classic"), "existing players get all six built-ins added")
 
 PlateauDB = { version = 15, profiles = { Plateau = { look = { plate = { width = 170 } } }, Classic = {} }, profileKeys = { ["Stalador - Iridikron"] = "Plateau" },
     global = { builtins = { Plateau = true, Classic = true } } }

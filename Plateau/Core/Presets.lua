@@ -140,7 +140,7 @@ ns.presets = {
         },
         {
             key = "zperl",
-            label = "Z-Perl",
+            label = "Z-Perl-style",
             subtitle = "Classic unit frames",
             summary = "Styled after Z-Perl unit frames: glossy bars in grey tooltip borders with soft shadowed text.",
             accent = 2,
@@ -511,7 +511,7 @@ ns.Builtins = Builtins
 Builtins.list = {
     { name = "Plater-style", group = "looks", key = "plater" },
     { name = "Normal", group = "looks", key = "normal" },
-    { name = "Z-Perl", group = "looks", key = "zperl" },
+    { name = "Z-Perl-style", group = "looks", key = "zperl" },
     { name = "Compact", group = "styles", key = "inside" },
     { name = "EllesmereUI-style", group = "looks", key = "ellesmere" },
     { name = "Platynator-style", group = "looks", key = "platynator" },

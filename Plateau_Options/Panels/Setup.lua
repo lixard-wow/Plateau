@@ -318,9 +318,57 @@ local pages = {}
 local current = 1
 local skipButton, backButton, nextButton
 
+local WHEEL_STEP = 40
+
+local function Scroller(page, height)
+    local scroll = CreateFrame("ScrollFrame", nil, body)
+    scroll:SetAllPoints()
+    page:SetParent(scroll)
+    page:SetSize(CONTENT_WIDTH, math.max(height, 1))
+    scroll:SetScrollChild(page)
+    scroll.controls = page.controls
+
+    local track = scroll:CreateTexture(nil, "ARTWORK")
+    track:SetPoint("TOPLEFT", scroll, "TOPRIGHT", 8, 0)
+    track:SetPoint("BOTTOMLEFT", scroll, "BOTTOMRIGHT", 8, 0)
+    track:SetWidth(3)
+    track:SetColorTexture(C.border[1], C.border[2], C.border[3], 0.6)
+    local thumb = scroll:CreateTexture(nil, "OVERLAY")
+    thumb:SetWidth(3)
+    thumb:SetColorTexture(C.accent[1], C.accent[2], C.accent[3], 0.9)
+
+    local function Update()
+        local view = scroll:GetHeight()
+        local range = math.max(0, height - view)
+        local shown = range > 0 and view > 0
+        track:SetShown(shown)
+        thumb:SetShown(shown)
+        if not shown then
+            scroll:SetVerticalScroll(0)
+            return
+        end
+        local offset = math.min(scroll:GetVerticalScroll(), range)
+        scroll:SetVerticalScroll(offset)
+        local size = math.max(24, view * view / height)
+        thumb:SetHeight(size)
+        thumb:ClearAllPoints()
+        thumb:SetPoint("TOP", track, "TOP", 0, -(view - size) * offset / range)
+    end
+
+    scroll:EnableMouseWheel(true)
+    scroll:SetScript("OnMouseWheel", function(self, delta)
+        local range = math.max(0, height - self:GetHeight())
+        self:SetVerticalScroll(math.max(0, math.min(range, self:GetVerticalScroll() - delta * WHEEL_STEP)))
+        Update()
+    end)
+    scroll:SetScript("OnSizeChanged", Update)
+    scroll:SetScript("OnShow", Update)
+    return scroll
+end
+
 local function BuildPage(index)
     local page = CreateFrame("Frame", nil, body)
-    page:SetAllPoints()
+    page:SetSize(CONTENT_WIDTH, 1)
     page.controls = {}
     local y = 0
     local column, rowTop, rowHeight = 0, 0, 0
@@ -356,7 +404,7 @@ local function BuildPage(index)
     end
     EndRow()
     page.contentHeight = y
-    return page
+    return Scroller(page, y)
 end
 
 local function Show(index)

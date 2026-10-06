@@ -1,6 +1,6 @@
 local _, ns = ...
 
-local SCHEMA_VERSION = 19
+local SCHEMA_VERSION = 20
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -51,7 +51,35 @@ local function MigrateLayering(look)
     scaling.layerByType, scaling.layerOrder = nil, nil
 end
 
+local function RenameProfile(db, OLD, NEW)
+    if db.profiles and db.profiles[OLD] and not db.profiles[NEW] then
+        db.profiles[NEW] = db.profiles[OLD]
+        db.profiles[OLD] = nil
+        if db.global and db.global.builtins and db.global.builtins[OLD] then
+            db.global.builtins[OLD] = nil
+            db.global.builtins[NEW] = true
+        end
+        for character, name in pairs(db.profileKeys or {}) do
+            if name == OLD then
+                db.profileKeys[character] = NEW
+            end
+        end
+        for _, byCharacter in pairs(db.assignments or {}) do
+            for _, byKey in pairs(byCharacter) do
+                for key, name in pairs(byKey) do
+                    if name == OLD then
+                        byKey[key] = NEW
+                    end
+                end
+            end
+        end
+    end
+end
+
 local migrations = {
+    [20] = function(db)
+        RenameProfile(db, "Z-Perl", "Z-Perl-style")
+    end,
     [19] = function(db)
         for name, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then
@@ -114,29 +142,7 @@ local migrations = {
         end
     end,
     [14] = function(db)
-        local OLD, NEW = "Name inside", "Compact"
-        if db.profiles and db.profiles[OLD] and not db.profiles[NEW] then
-            db.profiles[NEW] = db.profiles[OLD]
-            db.profiles[OLD] = nil
-            if db.global and db.global.builtins and db.global.builtins[OLD] then
-                db.global.builtins[OLD] = nil
-                db.global.builtins[NEW] = true
-            end
-            for character, name in pairs(db.profileKeys or {}) do
-                if name == OLD then
-                    db.profileKeys[character] = NEW
-                end
-            end
-            for _, byCharacter in pairs(db.assignments or {}) do
-                for _, byKey in pairs(byCharacter) do
-                    for key, name in pairs(byKey) do
-                        if name == OLD then
-                            byKey[key] = NEW
-                        end
-                    end
-                end
-            end
-        end
+        RenameProfile(db, "Name inside", "Compact")
     end,
     [13] = function(db)
         local patterns = {}
