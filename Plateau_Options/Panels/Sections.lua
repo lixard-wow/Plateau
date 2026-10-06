@@ -2699,7 +2699,7 @@ ns.sections = {
               get = function() return Plateau.Brand:Mode() end,
               set = function(value) Plateau.Brand:SetMode(value) end,
               reset = function() Plateau.Brand:SetMode("class") end,
-              tooltip = "The colour of Plateau's P icon and name: the minimap button, this window's title, the game menu button and Plateau's chat messages. Class colour follows the character you're playing; Colour cycle slowly shifts through the rainbow; Random each login picks a new colour every time you log in. The icon in the game's addon list can't change colour." },
+              tooltip = "The colour of Plateau's P icon and name on the minimap button, the game menu button and Plateau's chat messages. This window's title uses the window theme's own colour. Class colour follows the character you're playing; Colour cycle slowly shifts through the rainbow; Random each login picks a new colour every time you log in. The icon in the game's addon list can't change colour." },
             { type = "Slider", label = "Settings window scale", min = Style.SCALE_MIN, max = Style.SCALE_MAX, step = 0.05, applyOnRelease = true, keywords = "size zoom bigger smaller options window ui scale",
               get = function() return Style.Scale() end,
               set = function(value)

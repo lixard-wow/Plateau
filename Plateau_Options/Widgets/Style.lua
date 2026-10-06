@@ -29,7 +29,6 @@ Style.THEMES = {
         body = BARLOW,
         heading = BARLOW_COND,
         radius = 10,
-        grain = 0,
         colors = {
             window = Hex("#171a1f"),
             rail = Hex("#1d2127"),
@@ -39,6 +38,7 @@ Style.THEMES = {
             accent = Hex("#4fbf8f"),
             text = Hex("#e8ebee"),
             muted = Hex("#9aa3ad"),
+            title = Hex("#e8ebee"),
             warn = Hex("#e0913a"),
             button = Hex("#262b32"),
             buttonBorder = Hex("#30363f"),
@@ -56,7 +56,6 @@ Style.THEMES = {
         body = SOURCE,
         heading = CINZEL,
         radius = 4,
-        grain = 0.05,
         colors = {
             window = Hex("#1c1611"),
             rail = Hex("#241c15"),
@@ -65,7 +64,8 @@ Style.THEMES = {
             border = Hex("#5a4630"),
             accent = Hex("#c9a35a"),
             text = Hex("#efe6d6"),
-            muted = Hex("#a8998a"),
+            muted = Hex("#bfb19e"),
+            title = Hex("#e9d9b4"),
             warn = Hex("#d0614a"),
             button = Hex("#241c15"),
             buttonBorder = Hex("#5a4630"),
@@ -84,7 +84,6 @@ Style.THEMES = {
         body = SOURCE,
         heading = SOURCE_BOLD,
         radius = 0,
-        grain = 0,
         colors = {
             window = { 0.06, 0.06, 0.06, 1 },
             rail = Hex("#161616"),
@@ -94,6 +93,7 @@ Style.THEMES = {
             accent = { 0.78, 0.66, 0.22, 1 },
             text = { 0.92, 0.91, 0.86, 1 },
             muted = { 0.70, 0.70, 0.70, 1 },
+            title = { 0.92, 0.91, 0.86, 1 },
             warn = Hex("#d0614a"),
             button = Hex("#161616"),
             buttonBorder = { 0.22, 0.22, 0.22, 1 },
@@ -363,24 +363,6 @@ function Style.Fill(frame, color, layer)
     local texture = frame:CreateTexture(nil, layer or "BACKGROUND")
     texture:SetAllPoints()
     texture:SetColorTexture(color[1], color[2], color[3], color[4])
-    return texture
-end
-
-local GRAIN = "Interface\\AddOns\\" .. addonName .. "\\Art\\grain.png"
-local GRAIN_TILE = 128
-
-function Style.Grain(frame, alpha)
-    local texture = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
-    texture:SetAllPoints()
-    texture:SetTexture(GRAIN, "REPEAT", "REPEAT")
-    texture:SetAlpha(alpha or Style.theme.grain)
-    texture:SetShown((alpha or Style.theme.grain) > 0)
-    local function Resize(_, width, height)
-        if not width or width <= 0 or not height or height <= 0 then return end
-        texture:SetTexCoord(0, width / GRAIN_TILE, 0, height / GRAIN_TILE)
-    end
-    frame:HookScript("OnSizeChanged", Resize)
-    Resize(frame, frame:GetWidth(), frame:GetHeight())
     return texture
 end
 
