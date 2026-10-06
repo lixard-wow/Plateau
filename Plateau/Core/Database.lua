@@ -1,6 +1,6 @@
 local _, ns = ...
 
-local SCHEMA_VERSION = 17
+local SCHEMA_VERSION = 18
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -52,6 +52,21 @@ local function MigrateLayering(look)
 end
 
 local migrations = {
+    [18] = function(db)
+        for name, profile in pairs(db.profiles or {}) do
+            if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then
+                profile.look = type(profile.look) == "table" and profile.look or {}
+                local auras = type(profile.look.auras) == "table" and profile.look.auras or {}
+                profile.look.auras = auras
+                for _, group in ipairs({ "mine", "cc", "purge" }) do
+                    auras[group] = type(auras[group]) == "table" and auras[group] or {}
+                    if auras[group].nameplateOnly == nil then
+                        auras[group].nameplateOnly = true
+                    end
+                end
+            end
+        end
+    end,
     [17] = function(db)
         if type(db.global) == "table" then
             db.global.probe, db.global.probeWatch = nil, nil
