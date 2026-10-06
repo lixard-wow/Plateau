@@ -11,6 +11,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 #### Changed
 - **Slim is replaced by a new built-in look, Z-Perl,** styled after Z-Perl unit frames: a glossy bar in a thin grey tooltip border on black, plain shadowed text, percent health centered and colored green, yellow and red as health drops, the raid marker on the top-left corner, a soft yellow glow on your target and a matching cast bar with icon. Players who already have a Slim profile keep it as an ordinary profile.
 - **Show nameplate-only auras is now off by default** for your debuffs, crowd control and enemy buffs, on every built-in look. Important auras keep it on, since that group is made only of them. Profiles you made yourself keep the setting they had.
+- **The class resource and enemy power bars are now off by default**, including on the Z-Perl look. Turn them on from their pages. Profiles you made yourself keep the setting they had.
 
 ### 2026-10-05 release hardening
 
@@ -135,7 +136,7 @@ Every settings page was reviewed: controls that do nothing in the current setup 
 - **Quest icon** with the modern campaign, important, legendary and repeatable markers on retail, and the classic mark on Forever.
 - **Mythic+ enemy forces** showing how much of the enemy forces bar each enemy is worth (retail).
 - **Enemy power bar** on bosses (or every enemy, or your target): energy, rage, mana and other resources drawn from values the game hides, inside the health bar, above it or below it.
-- **Class resource** on your target (on by default): combo points, holy power, soul shards (in tenths), chi, arcane charges, essence and runes (dimmed while recharging), with color, size, spacing and placement.
+- **Class resource** on your target: combo points, holy power, soul shards (in tenths), chi, arcane charges, essence and runes (dimmed while recharging), with color, size, spacing and placement.
 
 #### Cast bar
 - Color that follows your own interrupt: ready, on cooldown, and separate pairs for casts Blizzard flags as important.

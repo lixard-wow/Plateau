@@ -8,7 +8,7 @@ local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 PlateauDB = { version = 1, profiles = { Default = { look = { highlight = { color = { 1, 0, 0, 1 }, size = 3 }, castbar = { height = 14 } } } }, profileKeys = {} }
 ns.DB:Init()
 local t = ns.DB.profile.look.target
-check(PlateauDB.version == 18, "schema bumped to the latest version")
+check(PlateauDB.version == 19, "schema bumped to the latest version")
 check(t.ringColor[1] == 1 and t.ringColor[2] == 0, "v1 ring color ends up in target.ringColor")
 check(t.ringSize == 3, "v1 ring size ends up in target.ringSize")
 check(rawget(ns.DB.profile.look, "highlight") == nil, "highlight group removed")
@@ -19,7 +19,7 @@ check(PlateauDB.profiles.Default.look.target.ringSize == 3, "migrated value surv
 
 PlateauDB = nil
 ns.DB:Init()
-check(PlateauDB.version == 18 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
+check(PlateauDB.version == 19 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
 
 PlateauDB = { version = 1, profiles = { Default = { look = { health = { tapped = { 0.2, 0.2, 0.9, 1 }, borderSize = 2 } } } }, profileKeys = {} }
 ns.DB:Init()
@@ -201,7 +201,7 @@ PlateauDB = { version = 15, profiles = {
 }, profileKeys = { ["Stalador - Iridikron"] = "On" } }
 ns.DB:Init()
 local on = PlateauDB.profiles.On.look.scaling
-check(PlateauDB.version == 18 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
+check(PlateauDB.version == 19 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
 check(on.layerByType == nil and on.layerOrder == nil and on.boss == 1.3, "v16: the old layering keys are removed and other scaling settings kept")
 check(PlateauDB.profiles.On.states.friendly.scaling.castFront == true and PlateauDB.profiles.On.states.friendly.scaling.layerByType == nil, "v16: state overrides are converted too")
 local off = PlateauDB.profiles.Off.look.scaling
@@ -221,4 +221,12 @@ local own = PlateauDB.profiles
 check(own.Default.look.auras.mine.nameplateOnly == true and own.Default.look.auras.purge.nameplateOnly == true, "v18: your own profiles keep nameplate-only auras on")
 check(own.Slim.look.auras.cc.nameplateOnly == false and own.Slim.look.auras.mine.nameplateOnly == true, "v18: a value you already chose is kept")
 check(ns.DB:SwitchProfile("Normal") and ns.DB:Get("look.auras.mine.nameplateOnly") == false and ns.DB:Get("look.auras.important.nameplateOnly") == true, "v18: built-in looks take the new default, important auras stay on")
+ns.DB:Shutdown()
+
+PlateauDB = { version = 18, profiles = { Default = {}, Mine = { look = { enemyPower = { enabled = false } } }, Normal = {} }, profileKeys = {} }
+ns.DB:Init()
+own = PlateauDB.profiles
+check(own.Default.look.classPower.enabled == true and own.Default.look.enemyPower.enabled == true, "v19: your own profiles keep the class resource and enemy power bars")
+check(own.Mine.look.enemyPower.enabled == false and own.Mine.look.classPower.enabled == true, "v19: a value you already chose is kept")
+check(ns.DB:SwitchProfile("Normal") and ns.DB:Get("look.classPower.enabled") == false and ns.DB:Get("look.enemyPower.enabled") == false, "v19: built-in looks have both bars off")
 ns.DB:Shutdown()

@@ -163,7 +163,7 @@ ns.defaults = {
             alpha = 1,
         },
         enemyPower = {
-            enabled = true,
+            enabled = false,
             show = "bosses",
             position = "below",
             height = 5,
@@ -187,7 +187,7 @@ ns.defaults = {
             hideFull = false,
         },
         classPower = {
-            enabled = true,
+            enabled = false,
             classColor = true,
             color = { 1, 0.84, 0.3, 1 },
             emptyColor = { 0.15, 0.15, 0.15, 0.9 },
