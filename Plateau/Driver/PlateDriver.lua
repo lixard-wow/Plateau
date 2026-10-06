@@ -251,6 +251,14 @@ local function SizePlate(plate, look)
     end
 end
 
+local buildTime = { count = 0, total = 0, slowest = 0 }
+local partTime = {}
+
+local function AddPartTime(element, started)
+    local key = element.key or "?"
+    partTime[key] = (partTime[key] or 0) + debugprofilestop() - started
+end
+
 local function DisableElement(element, plate)
     if plate.built[element] then
         element:Disable(plate)
@@ -644,13 +652,6 @@ local BUILD_BUDGET_MS = 3
 local WARM_DELAY = 2
 local building
 local stale = {}
-local buildTime = { count = 0, total = 0, slowest = 0 }
-local partTime = {}
-
-local function AddPartTime(element, started)
-    local key = element.key or "?"
-    partTime[key] = (partTime[key] or 0) + debugprofilestop() - started
-end
 
 local function StartBuild(state)
     local started = debugprofilestop()
