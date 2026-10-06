@@ -619,18 +619,20 @@ local BUILD_BUDGET_MS = 3
 local WARM_DELAY = 2
 local building
 local stale = {}
+local buildTime = { count = 0, total = 0, slowest = 0 }
 
 local function StartBuild(state)
+    local started = debugprofilestop()
     built[state] = built[state] + 1
     local plate = CreateFrame("Frame", nil, hider)
     plate:Hide()
     plate.handlers = {}
     AddOverlay(plate)
     plate.state = state
-    return { plate = plate, state = state, index = 1 }
+    return { plate = plate, state = state, index = 1, spent = debugprofilestop() - started }
 end
 
-local function StepBuild(job, deadline)
+local function RunBuild(job, deadline)
     local plate = job.plate
     while job.index <= #elements do
         local element = elements[job.index]
@@ -651,6 +653,18 @@ local function StepBuild(job, deadline)
     end
     StylePlate(plate)
     return true
+end
+
+local function StepBuild(job, deadline)
+    local started = debugprofilestop()
+    local done = RunBuild(job, deadline)
+    job.spent = (job.spent or 0) + debugprofilestop() - started
+    if done then
+        buildTime.count = buildTime.count + 1
+        buildTime.total = buildTime.total + job.spent
+        buildTime.slowest = math.max(buildTime.slowest, job.spent)
+    end
+    return done
 end
 
 local function BuildPlate(state)
@@ -1059,6 +1073,11 @@ function Driver:GetPlate(unit)
         return plate
     end
     return FindPlate(unit)
+end
+
+function Driver:BuildTime()
+    local count = buildTime.count
+    return count, count > 0 and buildTime.total / count or 0, buildTime.slowest
 end
 
 function Driver:PoolStats()

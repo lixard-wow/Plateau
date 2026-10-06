@@ -85,6 +85,12 @@ function ns.PerformanceLines()
     if ns.Driver.PoolStats then
         local builtTotal, attached, spare, on, all = ns.Driver:PoolStats()
         lines[#lines + 1] = ("Plates built: %d (%d on game nameplates, %d spare); elements on: %d of %d"):format(builtTotal, attached, spare, on, all)
+        if ns.Driver.BuildTime then
+            local count, average, slowest = ns.Driver:BuildTime()
+            if count > 0 then
+                lines[#lines + 1] = ("Time to build one plate: %.1f ms on average, %.1f ms slowest"):format(average, slowest)
+            end
+        end
     end
     lines[#lines + 1] = ("Visible nameplates: %d"):format(total)
     lines[#lines + 1] = ("Nameplates styled by Plateau: %d"):format(claimed)
