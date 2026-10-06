@@ -483,15 +483,21 @@ end
 function ns.Widgets.LookCards(parent, spec)
     local row = CreateFrame("Frame", nil, parent)
     local count = #spec.presets
+    local columns = count > 4 and math.ceil(count / 2) or count
+    local rows = math.ceil(count / columns)
     local stripWidth = spec.width or ns.layout.content
-    local cardWidth = math.floor((stripWidth - (count - 1) * CARD_GAP) / count)
+    local cardWidth = math.floor((stripWidth - (columns - 1) * CARD_GAP) / columns)
     local ratio = (cardWidth - CARD_INSET * 2) / CARD_WIDTH
+    if rows > 1 then
+        ratio = math.min(ratio, 1)
+    end
     local previewHeight = math.floor(SAMPLE_HEIGHT * ratio)
     local cardHeight = CARD_EDGE + 14 + 16 + 4 + 10 + 12 + previewHeight + 12 + 42 + 12 + CARD_BUTTON + CARD_INSET
-    row:SetHeight(CARD_TAG + cardHeight + 6)
+    local rowStep = CARD_TAG + cardHeight + 8
+    row:SetHeight(rows * rowStep - 2)
     local cards = {}
     local strip = CreateFrame("Frame", nil, row)
-    strip:SetSize(stripWidth, CARD_TAG + cardHeight)
+    strip:SetSize(stripWidth, rows * rowStep - 8)
     strip:SetPoint("TOP")
 
     local function Apply(preset)
@@ -514,7 +520,8 @@ function ns.Widgets.LookCards(parent, spec)
         local accent = type(preset.accent) == "table" and preset.accent or Plateau.brand[preset.accent or 1] or C.accent
         local card = CreateFrame("Frame", nil, strip)
         card:SetSize(cardWidth, cardHeight)
-        card:SetPoint("TOPLEFT", (i - 1) * (cardWidth + CARD_GAP), -CARD_TAG)
+        local column, line = (i - 1) % columns, math.floor((i - 1) / columns)
+        card:SetPoint("TOPLEFT", column * (cardWidth + CARD_GAP), -CARD_TAG - line * rowStep)
         card:EnableMouse(true)
         Style.Fill(card, C.field)
         Style.Border(card, C.border)

@@ -22,8 +22,8 @@ ns.helpTopics = {
     {
         category = "Getting started",
         title = "Looks: ready-made starting points",
-        keywords = "looks cards presets layouts styles normal zperl z-perl x-perl plater compact name inside setup",
-        text = "The first-time setup walkthrough shows a card for each of the four ready-made looks (Plater-style, Normal, Z-Perl and Compact), each with a small live nameplate. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
+        keywords = "looks cards presets layouts styles normal zperl z-perl x-perl plater ellesmere ellesmereui platynator compact name inside setup",
+        text = "The first-time setup walkthrough shows a card for each of the six ready-made looks (Plater-style, Normal, Z-Perl, Compact, EllesmereUI-style and Platynator-style), each with a small live nameplate. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
     },
     {
         category = "Getting started",
