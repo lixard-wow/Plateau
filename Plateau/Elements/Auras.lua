@@ -130,7 +130,7 @@ local function StyleButton(button, group, container)
     end
     button.timer:SetShown(db.showTimer)
     button.stacks:SetShown(db.showStacks)
-    button.dispelFrame:SetShown(db.dispelBorder)
+    button.dispel:SetAlpha(db.dispelBorder and 1 or 0)
     if button.pandemic then
         button.pandemic:SetAlpha(db.pandemic and 1 or 0)
     end
@@ -201,20 +201,15 @@ local function Initializer(container, group)
         button.border = ns.CreateBorder(button, button, "OVERLAY", 1)
         button.border:SetColor(0, 0, 0, 1)
 
-        local texts = CreateFrame("Frame", nil, button)
-        texts:SetAllPoints()
-        texts:SetFrameLevel(cooldown:GetFrameLevel() + 2)
-        button.timer = texts:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        button.timer = cooldown:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         button.timer:SetPoint("CENTER", 0, 0)
-        button.stacks = texts:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        button.stacks = cooldown:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         button.stacks:SetPoint("BOTTOMRIGHT", 2, -1)
 
-        button.dispelFrame = CreateFrame("Frame", nil, button)
-        button.dispelFrame:SetAllPoints()
-        button.dispelFrame:SetFrameLevel(texts:GetFrameLevel() + 1)
-        local dispel = button.dispelFrame:CreateTexture(nil, "OVERLAY")
-        dispel:SetPoint("TOPLEFT", -1, 1)
-        dispel:SetPoint("BOTTOMRIGHT", 1, -1)
+        local dispel = cooldown:CreateTexture(nil, "OVERLAY", nil, 7)
+        dispel:SetPoint("TOPLEFT", button, "TOPLEFT", -1, 1)
+        dispel:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, -1)
+        button.dispel = dispel
 
         button:SetIcon(icon)
         button:SetDurationCooldown(cooldown)
