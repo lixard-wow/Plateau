@@ -1,7 +1,38 @@
-local _, ns = ...
+local addonName, ns = ...
 
 local Border = {}
 Border.__index = Border
+
+local CORNER = "Interface\\AddOns\\" .. addonName .. "\\Art\\glow-corner"
+local CORNERS = {
+    { point = "BOTTOMRIGHT", relative = "TOPLEFT", x = -1, y = 1, coords = { 0, 1, 0, 1 } },
+    { point = "BOTTOMLEFT", relative = "TOPRIGHT", x = 1, y = 1, coords = { 1, 0, 0, 1 } },
+    { point = "TOPRIGHT", relative = "BOTTOMLEFT", x = -1, y = -1, coords = { 0, 1, 1, 0 } },
+    { point = "TOPLEFT", relative = "BOTTOMRIGHT", x = 1, y = -1, coords = { 1, 0, 1, 0 } },
+}
+
+local function Faded(self)
+    return self.fade and (self.style == nil or self.style == "shadow")
+end
+
+local function CornersShown(self, shown)
+    if self.corners then
+        for i = 1, 4 do
+            self.corners[i]:SetShown(shown)
+        end
+    end
+end
+
+local function PlaceCorners(self, size, offset)
+    local corners = self.corners
+    if not corners then return end
+    for i, info in ipairs(CORNERS) do
+        local corner = corners[i]
+        corner:ClearAllPoints()
+        corner:SetPoint(info.point, self.anchor, info.relative, info.x * offset, info.y * offset)
+        corner:SetSize(size, size)
+    end
+end
 
 local function Thickness(edge, horizontal, size)
     if horizontal then
@@ -79,6 +110,8 @@ function Border:Layout(size, offset, inside)
     local anchor = self.anchor
     local info = EdgeInfo(self.style)
     self.empty = size <= 0 or self.style == "none"
+    self.laidOut = { size, offset, inside }
+    self.cornersOn = false
     if self.style == "none" then
         for i = 1, 4 do
             self.edges[i]:Hide()
@@ -86,6 +119,7 @@ function Border:Layout(size, offset, inside)
         if self.edgeFrame then
             self.edgeFrame:Hide()
         end
+        CornersShown(self, false)
         return
     end
     if info then
@@ -109,6 +143,12 @@ function Border:Layout(size, offset, inside)
         offset = math.floor(offset + 0.5) * pixel
     end
     local outer = offset + size
+    local fade = not inside and Faded(self)
+    self.cornersOn = fade
+    local span = fade and offset or outer
+    if fade then
+        PlaceCorners(self, size, offset)
+    end
     if inside then
         for i = 1, 4 do
             self.edges[i]:ClearAllPoints()
@@ -133,12 +173,12 @@ function Border:Layout(size, offset, inside)
         self.edges[i]:ClearAllPoints()
     end
 
-    top:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", -outer, offset)
-    top:SetPoint("BOTTOMRIGHT", anchor, "TOPRIGHT", outer, offset)
+    top:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", -span, offset)
+    top:SetPoint("BOTTOMRIGHT", anchor, "TOPRIGHT", span, offset)
     Thickness(top, true, size)
 
-    bottom:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -outer, -offset)
-    bottom:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", outer, -offset)
+    bottom:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -span, -offset)
+    bottom:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", span, -offset)
     Thickness(bottom, true, size)
 
     left:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -offset, offset)
@@ -169,6 +209,7 @@ function Border:SetColor(r, g, b, a)
         self:SetFade(r, g, b, a)
         return
     end
+    self.fade = false
     for i = 1, 4 do
         self.edges[i]:SetColorTexture(r, g, b, a)
         self.edges[i]:SetVertexColor(1, 1, 1, 1)
@@ -203,6 +244,26 @@ function Border:SetFade(r, g, b, a)
     bottom:SetGradient("VERTICAL", outer, inner)
     left:SetGradient("HORIZONTAL", outer, inner)
     right:SetGradient("HORIZONTAL", inner, outer)
+    if not self.corners then
+        local layer, sublevel = top:GetDrawLayer()
+        self.corners = {}
+        for i, info in ipairs(CORNERS) do
+            local corner = self.owner:CreateTexture(nil, layer, nil, sublevel)
+            corner:SetTexture(CORNER)
+            corner:SetTexCoord(info.coords[1], info.coords[2], info.coords[3], info.coords[4])
+            corner:Hide()
+            self.corners[i] = corner
+        end
+    end
+    for i = 1, 4 do
+        self.corners[i]:SetVertexColor(r, g, b, a)
+    end
+    if not self.fade then
+        self.fade = true
+        if self.laidOut then
+            self:Layout(self.laidOut[1], self.laidOut[2], self.laidOut[3])
+        end
+    end
 end
 
 function Border:SetShown(shown)
@@ -212,6 +273,7 @@ function Border:SetShown(shown)
     for i = 1, 4 do
         self.edges[i]:SetShown(visible and not edge)
     end
+    CornersShown(self, visible and not edge and self.cornersOn == true)
     if self.edgeFrame then
         self.edgeFrame:SetShown(visible and edge)
     end
@@ -228,6 +290,9 @@ end
 function Border:SetAlpha(alpha)
     for i = 1, 4 do
         self.edges[i]:SetAlpha(alpha)
+        if self.corners then
+            self.corners[i]:SetAlpha(alpha)
+        end
     end
     if self.edgeFrame then
         self.edgeFrame:SetAlpha(alpha)
@@ -237,6 +302,9 @@ end
 function Border:SetAlphaFromBoolean(value, alphaIfTrue, alphaIfFalse)
     for i = 1, 4 do
         self.edges[i]:SetAlphaFromBoolean(value, alphaIfTrue, alphaIfFalse)
+        if self.corners then
+            self.corners[i]:SetAlphaFromBoolean(value, alphaIfTrue, alphaIfFalse)
+        end
     end
     if self.edgeFrame then
         self.edgeFrame:SetAlphaFromBoolean(value, alphaIfTrue, alphaIfFalse)

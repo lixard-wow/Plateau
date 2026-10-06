@@ -14,6 +14,11 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - **Show nameplate-only auras is now off by default** for your debuffs, crowd control and enemy buffs, on every built-in look. Important auras keep it on, since that group is made only of them. Profiles you made yourself keep the setting they had.
 - **The class resource and enemy power bars are now off by default**, including on the Z-Perl look. Turn them on from their pages. Profiles you made yourself keep the setting they had.
 
+### 2026-10-05 rounded glows
+
+#### Fixed
+- **Target, focus and mouseover glows have soft rounded corners.** The glow strips above and below the bar used to run past the corners as straight lines; the corners now fade out in a curve. The Shadow border style and the class resource glow get the same corners.
+
 ### 2026-10-05 release hardening
 
 #### Fixed
