@@ -22,8 +22,8 @@ ns.helpTopics = {
     {
         category = "Getting started",
         title = "Looks: ready-made starting points",
-        keywords = "looks cards presets layouts styles normal familiar classic unit frames clean flat bold crisp compact name inside setup",
-        text = "The first-time setup shows a card for each of the six ready-made looks (Familiar layout, Normal, Classic unit frames, Compact, Clean and flat, and Bold and crisp), each with a small live nameplate. Several are inspired by popular nameplate and unit frame addons, rebuilt from Plateau's own settings. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
+        keywords = "looks cards presets layouts styles minimal default familiar classic unit frames clean flat bold crisp compact name inside setup",
+        text = "The first-time setup shows a card for each of the six ready-made looks (Minimal, Familiar layout, Classic unit frames, Compact, Clean and flat, and Bold and crisp), each with a small live nameplate. Several are inspired by popular nameplate and unit frame addons, rebuilt from Plateau's own settings. Hover a card to read everything it changes. Press Use this look to switch your whole profile to it, which you can then edit and keep.\n\nTo see the cards again later, type /plt setup to run the walkthrough again, or use Restore built-in on the Profiles page to put any look back to how it shipped.",
     },
     {
         category = "Getting started",
