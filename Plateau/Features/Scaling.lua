@@ -76,7 +76,8 @@ animator:SetScript("OnUpdate", function(self, elapsed)
         else
             local current = plate.shownScale or goal
             current = current + (goal - current) * step
-            if math.abs(goal - current) < 0.002 or not plate.active then
+            local done = math.abs(goal - current) < 0.002 or not plate.active
+            if done then
                 current = goal
                 animating[plate] = nil
             else
@@ -84,6 +85,9 @@ animator:SetScript("OnUpdate", function(self, elapsed)
             end
             plate.shownScale = current
             plate:SetScale(current)
+            if done and ns.RepixelPlate then
+                ns.RepixelPlate(plate)
+            end
         end
     end
     if not any then
@@ -100,6 +104,9 @@ local function SetPlateScale(plate, net)
     animating[plate] = nil
     plate.shownScale = net
     plate:SetScale(net)
+    if not plate.preview and ns.RepixelPlate then
+        ns.RepixelPlate(plate)
+    end
 end
 
 function Scaling:Apply(plate)

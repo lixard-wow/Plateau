@@ -1386,7 +1386,7 @@ local SIZE_PATHS = {
     "look.scaling.elite", "look.scaling.trivial", "look.scaling.focusGrow", "look.scaling.focusScale",
     "look.scaling.castPop", "look.scaling.castScale", "look.target.useBlizzardScale", "look.target.scale",
     "look.scaling.mouseoverGrow", "look.scaling.mouseoverScale", "look.scaling.friendlyScale", "look.scaling.smooth",
-    "look.plate.followBlizzardSize",
+    "look.plate.followBlizzardSize", "look.plate.pixelPerfect",
 }
 local SIZE_CVARS = { "nameplateSize", "nameplateAuraScale", "nameplateMinScale", "nameplateMaxScale" }
 local FADING_PATHS = { "look.range", "look.target.dimOthers", "look.target.dimCombatOnly", "look.target.dimSkipFriendly" }
@@ -1503,6 +1503,8 @@ ns.sections = {
         CVarSlider("nameplateMaxScale", "Nearby nameplate scale", 0.5, 1.5, 0.05, "How big a nameplate grows right next to you."),
 
         { type = "Header", label = "Extras" },
+        { type = "Toggle", path = "look.plate.pixelPerfect", label = "Pixel-perfect borders",
+          tooltip = "Draws borders, rings and glows in whole screen pixels at each nameplate's real size, so a 1 pixel border is exactly one pixel wide on every plate. Off draws them in interface units, which can look soft or uneven on scaled plates." },
         { type = "Toggle", path = "look.scaling.mouseoverGrow", label = "Scale mouseover nameplate",
           tooltip = "The enemy plate under your mouse grows. Doesn't stack with the other scales: the biggest one wins." },
         Gate({ type = "Slider", path = "look.scaling.mouseoverScale", label = "Mouseover scale", min = 0.5, max = 1.6, step = 0.05,

@@ -106,9 +106,25 @@ function Border:LayoutEdge(info, size, inside)
     end
 end
 
+local MIN_PIXEL_SCALE = 0.2
+
 function Border:Layout(size, offset, inside)
     local anchor = self.anchor
     local info = EdgeInfo(self.style)
+    local plate = ns.pixelPlate
+    if plate then
+        local set = plate.pixelSet
+        if not set then
+            set = {}
+            plate.pixelSet = set
+        end
+        local args = set[self]
+        if not args then
+            args = {}
+            set[self] = args
+        end
+        args[1], args[2], args[3] = size, offset, inside
+    end
     self.empty = size <= 0 or self.style == "none"
     self.laidOut = { size, offset, inside }
     self.cornersOn = false
@@ -138,9 +154,12 @@ function Border:Layout(size, offset, inside)
     local top, bottom, left, right = self.edges[1], self.edges[2], self.edges[3], self.edges[4]
     offset = offset or 0
     if ns.pixelBorders and PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
-        local pixel = PixelUtil.GetPixelToUIUnitFactor() / anchor:GetEffectiveScale()
-        size = math.floor(size + 0.5) * pixel
-        offset = math.floor(offset + 0.5) * pixel
+        local scale = anchor:GetEffectiveScale()
+        if scale >= MIN_PIXEL_SCALE then
+            local pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
+            size = math.floor(size + 0.5) * pixel
+            offset = math.floor(offset + 0.5) * pixel
+        end
     end
     local outer = offset + size
     local fade = not inside and Faded(self)
@@ -190,6 +209,17 @@ function Border:Layout(size, offset, inside)
     Thickness(right, false, size)
 
     self:SetShown(self.shown ~= false)
+end
+
+function ns.RepixelPlate(plate)
+    local set = plate.pixelSet
+    if not set or not ns.pixelPerfect then return end
+    local previous = ns.pixelBorders
+    ns.pixelBorders = true
+    for border, args in pairs(set) do
+        border:Layout(args[1], args[2], args[3])
+    end
+    ns.pixelBorders = previous
 end
 
 function Border:SetColor(r, g, b, a)

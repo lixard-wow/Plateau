@@ -301,6 +301,11 @@ local function StylePlate(plate)
     click.border:Layout(1)
     click.border:SetColor(0.27, 0.82, 0.76, 0.9)
     UpdateClickArea(plate)
+    local pixel = ns.pixelPerfect and not plate.preview
+    local wasPixel = ns.pixelBorders
+    if pixel then
+        ns.pixelBorders, ns.pixelPlate = true, plate
+    end
     for i = 1, #elements do
         local element = elements[i]
         if plate.built[element] and element.enabledIn[plate.state] then
@@ -310,6 +315,9 @@ local function StylePlate(plate)
                 AddPartTime(element, started)
             end
         end
+    end
+    if pixel then
+        ns.pixelBorders, ns.pixelPlate = wasPixel, nil
     end
 end
 
@@ -366,7 +374,14 @@ function Driver:ResizeNow(plate)
     for i = 1, #elements do
         local element = elements[i]
         if element.sizeDependent and plate.built[element] and element.enabledIn[plate.state] then
+            local pixel = ns.pixelPerfect and not plate.preview
+            if pixel then
+                ns.pixelBorders, ns.pixelPlate = true, plate
+            end
             element:Style(plate, look[element.key])
+            if pixel then
+                ns.pixelBorders, ns.pixelPlate = false, nil
+            end
         end
     end
 end
@@ -991,6 +1006,7 @@ function Driver:Restyle()
     restyleQueue:Hide()
     views = ns.DB.views
     dimAlpha = views.enemy.target.dimOthers
+    ns.pixelPerfect = views.enemy.plate.pixelPerfect ~= false
     dimCombatOnly = views.enemy.target.dimCombatOnly == true
     local offsetY = views.enemy.plate.offsetY or 0
     if offsetY ~= plateOffsetY then

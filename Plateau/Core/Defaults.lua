@@ -16,6 +16,7 @@ ns.defaults = {
             stackSpace = "name",
             clickThroughFriendly = false,
             offsetY = 0,
+            pixelPerfect = true,
         },
         health = {
             texture = FLAT,

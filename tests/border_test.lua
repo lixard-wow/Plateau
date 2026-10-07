@@ -58,3 +58,26 @@ shadow:Layout(1, 0)
 shadow:SetColor(0, 0, 0, 1)
 shadow:Show()
 check(not shadow.corners[1].shown, "switching back to a plain border hides the corners")
+
+local scale = 0.5
+local plateAnchor = { CreateTexture = owner.CreateTexture, GetEffectiveScale = function() return scale end }
+PixelUtil = { GetPixelToUIUnitFactor = function() return 0.5 end }
+local plate = {}
+local ring = ns.CreateBorder(plateAnchor, plateAnchor, "BACKGROUND", 0)
+ns.pixelBorders, ns.pixelPlate, ns.pixelPerfect = true, plate, true
+ring:Layout(1, 2)
+ns.pixelBorders, ns.pixelPlate = false, nil
+check(plate.pixelSet and plate.pixelSet[ring] and plate.pixelSet[ring][1] == 1 and plate.pixelSet[ring][2] == 2, "a border laid out while styling a plate is remembered with its settings")
+check(ring.edges[1].height == 1, "one pixel is one screen pixel at the plate's scale")
+scale = 2
+ns.RepixelPlate(plate)
+check(ring.edges[1].height == 0.25, "after the plate is rescaled, its borders are redrawn at one screen pixel again")
+check(ns.pixelBorders == false, "redrawing leaves pixel mode the way it found it")
+ns.pixelPerfect = false
+scale = 1
+ns.RepixelPlate(plate)
+check(ring.edges[1].height == 0.25, "with pixel-perfect borders off, rescaling leaves borders alone")
+scale = 0.05
+ns.pixelPerfect = true
+ns.RepixelPlate(plate)
+check(ring.edges[1].height == 1, "a plate with a tiny scale (just created) keeps interface units instead of huge borders")

@@ -8,6 +8,9 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
 ### 2026-10-06 fixes
 
+#### Added
+- **Pixel-perfect borders** (Size page, on by default): borders, rings and glows are drawn in whole screen pixels at each nameplate's real size, so a 1 pixel border is exactly one pixel on every plate, including scaled friendly and target plates. They are only recalculated when a nameplate changes size, so there is no extra cost while you play.
+
 #### Fixed
 - **Friendly names are all the same size.** In name-only mode some friendly player and NPC names showed smaller until you targeted or hovered them, because their plate never got its size set when it appeared.
 
