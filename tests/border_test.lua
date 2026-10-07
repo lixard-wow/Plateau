@@ -81,3 +81,11 @@ scale = 0.05
 ns.pixelPerfect = true
 ns.RepixelPlate(plate)
 check(ring.edges[1].height == 1, "a plate with a tiny scale (just created) keeps interface units instead of huge borders")
+
+local guarded = {}
+local auraRing = ns.CreateBorder(plateAnchor, plateAnchor, "BACKGROUND", 0)
+auraRing.restricted = true
+ns.pixelBorders, ns.pixelPlate = true, guarded
+auraRing:Layout(1, 0)
+ns.pixelBorders, ns.pixelPlate = false, nil
+check(guarded.pixelSet == nil or guarded.pixelSet[auraRing] == nil, "borders on Blizzard's protected aura icons are never redrawn later, so restrictions can't block them")

@@ -112,7 +112,7 @@ function Border:Layout(size, offset, inside)
     local anchor = self.anchor
     local info = EdgeInfo(self.style)
     local plate = ns.pixelPlate
-    if plate then
+    if plate and not self.restricted then
         local set = plate.pixelSet
         if not set then
             set = {}

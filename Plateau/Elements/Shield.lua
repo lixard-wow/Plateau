@@ -180,6 +180,7 @@ local function SlotInitializer(plate, slotKey)
         icon:SetAlpha(0)
         button.icon = icon
         button.glow = ns.CreateBorder(button, plate, "OVERLAY", 3)
+        button.glow.restricted = true
         button.fill = button:CreateTexture(nil, "BACKGROUND")
         button.fill:SetAllPoints(plate.health)
         button.fill:Hide()

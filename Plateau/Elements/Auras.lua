@@ -199,6 +199,7 @@ local function Initializer(container, group)
         button.cooldownFrame = cooldown
 
         button.border = ns.CreateBorder(button, button, "OVERLAY", 1)
+        button.border.restricted = true
         button.border:SetColor(0, 0, 0, 1)
 
         button.timer = cooldown:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
