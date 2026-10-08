@@ -216,13 +216,6 @@ check(PlateauDB.global.spellIDsByName ~= nil, "v17: other account data is kept")
 ns.DB:Shutdown()
 
 load("Core/Presets.lua")
-PlateauDB = { version = 17, profiles = { Default = {}, Slim = { look = { auras = { cc = { nameplateOnly = false } } } }, Minimal = {} }, profileKeys = {} }
-ns.DB:Init()
-local own = PlateauDB.profiles
-check(own.Default.look.auras.mine.nameplateOnly == true and own.Default.look.auras.purge.nameplateOnly == true, "v18: your own profiles keep nameplate-only auras on")
-check(own.Slim.look.auras.cc.nameplateOnly == false and own.Slim.look.auras.mine.nameplateOnly == true, "v18: a value you already chose is kept")
-check(ns.DB:SwitchProfile("Minimal") and ns.DB:Get("look.auras.mine.nameplateOnly") == false and ns.DB:Get("look.auras.important.nameplateOnly") == true, "v18: built-in looks take the new default, important auras stay on")
-ns.DB:Shutdown()
 
 PlateauDB = { version = 18, profiles = { Default = {}, Mine = { look = { enemyPower = { enabled = false } } }, Minimal = {} }, profileKeys = {} }
 ns.DB:Init()

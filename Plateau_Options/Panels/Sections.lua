@@ -1319,9 +1319,7 @@ local function AuraExtraControls(path)
         Gate({ type = "Dropdown", path = path .. ".timerPosition", label = "Timer position", options = AURA_TEXT_POINTS,
           tooltip = "Where the remaining time sits on each icon." }, On(path .. ".showTimer"), "Turn on Show remaining time to use this."),
         Gate({ type = "Dropdown", path = path .. ".stackPosition", label = "Stack count position", options = AURA_TEXT_POINTS,
-          tooltip = "Where the stack count sits on each icon." }, On(path .. ".showStacks"), "Turn on Show stack count to use this."),
-        { type = "Toggle", path = path .. ".nameplateOnly", label = "Show nameplate-only auras",
-          tooltip = "Some auras are flagged by the game to appear only on nameplates; Blizzard's own nameplates show them. Off leaves them out of this group. Important auras are all flagged this way, so turning this off empties that group. The preview shows them as a question-mark icon." }
+          tooltip = "Where the stack count sits on each icon." }, On(path .. ".showStacks"), "Turn on Show stack count to use this.")
     )
 end
 

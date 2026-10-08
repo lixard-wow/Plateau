@@ -39,7 +39,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - **The settings preview now shows the icon shape you pick**; it always drew square icons before.
 - **The look cards in setup wrap into two rows** when there are more than four, so every preview stays readable.
 - **Slim is replaced by a new built-in look, Classic unit frames:** a glossy bar in a thin grey tooltip border on black, plain shadowed text, percent health centered and colored green, yellow and red as health drops, the raid marker on the top-left corner, a soft yellow glow on your target and a matching cast bar with icon. Players who already have a Slim profile keep it as an ordinary profile.
-- **Show nameplate-only auras is now off by default** for your debuffs, crowd control and enemy buffs, on every built-in look. Important auras keep it on, since that group is made only of them. Profiles you made yourself keep the setting they had.
+- **Nameplate-only auras are left out of your debuffs, crowd control and enemy buffs, and the Show nameplate-only auras setting is gone.** Important auras still show them, since every aura in that group is one.
 - **The class resource and enemy power bars are now off by default**, including on the Classic unit frames look. Turn them on from their pages. Profiles you made yourself keep the setting they had.
 
 ### 2026-10-05 rounded glows
@@ -117,7 +117,6 @@ Every settings page was reviewed: controls that do nothing in the current setup 
 - **Renamed to Plateau**, with a new icon: a gradient P. Commands are /plateau and /plt.
 - **Critter and companion names on for new installs**: a brand-new install turns on Blizzard's Show critter and companion names once (undo with right-click or /plt cvars restore), and the setup walkthrough has the switch.
 - **Include other players' debuffs** (Your debuffs page, off by default): shows debuffs from other players after your own, like Blizzard's nameplates.
-- **Show nameplate-only auras** (each aura page, Extras): choose per group whether auras the game shows only on nameplates appear; the preview shows them as a question-mark icon.
 - **Fade hidden nameplates for** (Fading page, under Behind walls): enemies and friendly, enemies only, or friendly only take the game's fading.
 - **Where hidden nameplates fade** (Fading page, under Behind walls): separate switches for the open world, dungeons, raids, delves and scenarios, and battlegrounds and arenas decide where Occluded nameplate opacity applies. Elsewhere nameplates behind walls stay fully visible; Plateau switches Blizzard's setting as you change zones and puts your value back.
 - **Interrupted text** (Cast bar, Extras): the message on an interrupted cast is its own text, with what it says (Interrupted by Name, Name only, Interrupted), position and offsets, font size, color, class color for the name, and an option to keep the spell name showing beside it.

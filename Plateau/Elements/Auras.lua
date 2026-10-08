@@ -46,7 +46,6 @@ local GROUPS = {
 }
 
 local NAMEPLATE_ONLY = "|INCLUDE_NAME_PLATE_ONLY"
-local NAMEPLATE_ONLY_SAMPLE = "Interface\\Icons\\INV_Misc_QuestionMark"
 local OTHERS_SAMPLE = "Interface\\Icons\\Spell_Shadow_CurseOfTounges"
 
 local timerFormatter = C_StringUtil.CreateSecondsFormatter()
@@ -542,7 +541,7 @@ function Auras:Style(plate, db)
             end
         end
         local allBuffs = groupDb.allBuffs == true
-        local nameplateOnly = groupDb.nameplateOnly ~= false and NAMEPLATE_ONLY or ""
+        local nameplateOnly = group.key == "important" and NAMEPLATE_ONLY or ""
         local added = false
         for index, key in ipairs(container.keys) do
             local count = plate.preview and 0 or PartCount(group, index, groupDb, allBuffs)
@@ -745,12 +744,8 @@ function Auras:Preview(plate, state)
         SetOn(plate.auras[key], false)
         local db = config[key]
         local count = state.auras and state.auras[key] or 0
-        local extra = count > 0 and db.nameplateOnly ~= false
         local others = count > 0 and key == "mine" and db.includeOthers == true
         if others then
-            count = count + 1
-        end
-        if extra then
             count = count + 1
         end
         count = math.min(count, db.maxIcons)
@@ -807,10 +802,8 @@ function Auras:Preview(plate, state)
                     icon.texture:SetTexCoord(0.08, 0.92, top, bottom)
                     icon:ClearAllPoints()
                     icon:SetPoint(point, fake, point, column * step * horizontal, row * lineStep * vertical)
-                    if others and i == count - (extra and 1 or 0) then
+                    if others and i == count then
                         icon.texture:SetTexture(OTHERS_SAMPLE)
-                    elseif extra and i == count then
-                        icon.texture:SetTexture(NAMEPLATE_ONLY_SAMPLE)
                     else
                         icon.texture:SetTexture(samples[(i - 1) % #samples + 1])
                     end
