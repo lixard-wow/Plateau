@@ -429,7 +429,7 @@ local function Strip(saved, defaults)
     end
 end
 
-local SPELL_GROUPS = { mine = true, cc = true }
+local SPELL_GROUPS = { mine = true, cc = true, purge = true, important = true }
 local SPELL_KINDS = { hide = true, only = true, watch = true }
 
 local function CleanSpecSpells(source)

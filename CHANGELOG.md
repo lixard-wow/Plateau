@@ -8,6 +8,9 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
 ### 2026-10-06 fixes
 
+#### Changed
+- **The aura pages are reorganized.** A new All auras page holds the text font, outline, shadow and tooltips shared by every group. Your debuffs, Crowd control, Enemy buffs and Important auras now share one layout: Show, Which auras (sort order, maximum duration and spell lists), Layout (position, alignment, growth, offsets, size, shape, count and spacing) and Icon (timer, stack count, swipe, border and dispel colors). Enemy buffs and Important auras gain spell lists, which work in the open world.
+
 #### Added
 - **Pixel-perfect borders** (Size page, on by default): borders, rings and glows are drawn in whole screen pixels at each nameplate's real size, so a 1 pixel border is exactly one pixel on every plate, including scaled friendly and target plates. They are only recalculated when a nameplate changes size, so there is no extra cost while you play.
 

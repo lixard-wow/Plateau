@@ -64,7 +64,8 @@ DB:Shutdown()
 check(PlateauDB.profiles.Default.specSpells[104].mine.only == "192090, 164812" and PlateauDB.profiles.Default.specSpells[104].cc == nil, "spec lists saved, blank ones dropped")
 DB:Init()
 check(DB:GetSpecSpells("mine", "hide", 103) == "1079", "spec lists reload")
-check(not DB:SetSpecSpells("purge", "hide", "1", 104), "buff groups have no spell lists")
+check(DB:SetSpecSpells("purge", "hide", "1", 104) and DB:GetSpecSpells("purge", "hide", 104) == "1", "enemy buffs have spell lists too")
+check(not DB:SetSpecSpells("nope", "hide", "1", 104), "unknown groups have no spell lists")
 
 PlateauDB = nil
 DB:Init()

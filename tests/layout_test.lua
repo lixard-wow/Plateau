@@ -62,7 +62,7 @@ local groups = {
     { label = "Nameplates", keys = { "health", "healthText", "name", "level", "castbar", "enemyPower" } },
     { label = "Behavior", keys = { "size", "fading", "layering", "clicking" } },
     { label = "States", keys = { "target", "focus", "mouseover", "combat" } },
-    { label = "Auras", keys = { "auraMine", "auraPurge", "auraCC", "auraImportant", "shield" } },
+    { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
     { label = "Icons", keys = { "raidMarker", "quest", "classification", "forces", "classPower" } },
     { label = "Friendly", keys = { "friendly" } },
     { label = "Game", keys = { "game" } },
@@ -206,14 +206,10 @@ check(customScale and Logic.IsEnabled(customScale) == false, "Custom target scal
 DB:Set("look.target.useBlizzardScale", false)
 check(Logic.IsEnabled(customScale) == true, "Custom target scale is available when Blizzard scaling is off")
 
-check(hasHeader(byKey.auraMine, "Aura text (all groups)"), "Aura text (all groups) lives on Your debuffs")
-for _, key in ipairs({ "auraCC", "auraPurge", "auraImportant" }) do
-    check(not hasHeader(byKey[key], "Aura text (all groups)"), key .. " no longer duplicates the shared aura text section")
-    local linked = false
-    for _, spec in ipairs(byKey[key].controls) do
-        if spec.type == "Link" and spec.target.section == "auraMine" then linked = true end
-    end
-    check(linked, key .. " links to the shared aura text section")
+check(hasHeader(byKey.auraAll, "Text on every aura icon") and hasHeader(byKey.auraAll, "Tooltips"), "shared aura text and tooltips live on the All auras page")
+for _, key in ipairs({ "auraMine", "auraCC", "auraPurge", "auraImportant" }) do
+    check(hasHeader(byKey[key], "Show") and hasHeader(byKey[key], "Which auras") and hasHeader(byKey[key], "Layout") and hasHeader(byKey[key], "Icon"), key .. " uses the same Show, Which auras, Layout and Icon sections")
+    check(not hasHeader(byKey[key], "Extras") and not hasHeader(byKey[key], "Aura text (all groups)"), key .. " has no leftover Extras or aura text sections")
 end
 
 local profiles = byKey.profiles
@@ -289,10 +285,10 @@ check(foundOn("rename profile", "profiles") and foundOn("copy settings from", "p
 check(foundOn("export active profile", "profiles") and foundOn("activate after import", "profiles"), "export and import are searchable")
 check(foundOn("default profile", "profiles"), "Default profile is searchable")
 check(foundOn("no override", "profiles"), "automatic switching terms are searchable")
-check(foundOn("aura text", "auraMine"), "Aura text (all groups) is found on Your debuffs")
+check(foundOn("text on every aura icon", "auraAll"), "shared aura text is found on All auras")
 check(foundOn("maximum aura duration", "auraPurge") and foundOn("sort order", "auraCC"), "shared aura controls are found on each aura page")
 check(foundOn("only warn for buffs you can remove", "shield") and foundOn("warning priority", "shield"), "buff warning controls are searchable")
-check(foundOn("hidden spells", "auraMine") and foundOn("allowed spells", "auraCC"), "spell lists are searchable")
+check(foundOn("hidden spells", "auraMine") and foundOn("allowed spells", "auraCC") and foundOn("hidden spells", "auraPurge") and foundOn("allowed spells", "auraImportant"), "spell lists are searchable on every aura page")
 check(foundOn("hide level for same-level", "level"), "renamed Level settings are searchable")
 check(foundOn("use class colors for player names", "name") and foundOn("long name handling", "name"), "renamed Name settings are searchable")
 

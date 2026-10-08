@@ -1224,71 +1224,6 @@ local function Chosen(path)
     end
 end
 
-local function AuraSizeControls(path)
-    return List(
-        { type = "Slider", path = path .. ".size", label = "Icon size", min = 10, max = 48,
-          tooltip = "How big each icon in this group is." },
-        { type = "Slider", path = path .. ".maxIcons", label = "Maximum icons", min = 1, max = 12,
-          tooltip = "Caps how many icons this group ever shows at once, even if more apply." },
-        { type = "Slider", path = path .. ".perRow", label = "Icons per row (or column)", min = 1, max = 12,
-          tooltip = "How many icons fit before wrapping to a new row or column." },
-        { type = "Slider", path = path .. ".spacing", label = "Icon spacing", min = 0, max = 10,
-          tooltip = "Gap between adjacent icons in this group." },
-        { type = "Dropdown", path = path .. ".sort", label = "Sort order", options = AURA_SORT,
-          tooltip = "How icons are ordered within the group. Your own auras always come first, then the rest by the choice here: expiring soonest first (permanent auras last), alphabetical, or the game's default order." },
-        { type = "Slider", path = path .. ".maxDuration", label = "Maximum aura duration (seconds, 0 = off)", min = 0, max = 600, step = 5,
-          tooltip = "Hides auras whose total duration is longer than this, not auras with a lot of time left. Permanent auras are hidden as soon as this is above 0. 0 turns the limit off. Works in dungeons and raids: the game does the check." }
-    )
-end
-
-local function AuraPlacementControls(path)
-    return List(
-        { type = "Header", label = "Placement" },
-        { type = "Dropdown", path = path .. ".side", label = "Position", options = AURA_SIDES,
-          tooltip = "Which side of the nameplate this group of icons sits on." },
-        { type = "Dropdown", path = path .. ".grow", label = "Growth direction", options = AURA_GROW,
-          tooltip = "Which way icons are added, and where the next row or column starts once a row is full. Automatic follows Position and Alignment: above or below, icons run right (left when Alignment is Right) and new rows stack up or down away from the bar; on the left, icons run left; on the right, icons run right, with new rows below." },
-        { type = "Dropdown", path = path .. ".align", label = "Alignment", options = AURA_ALIGN,
-          tooltip = "Only matters above or below the nameplate. Left starts the group at the bar's left end, Right at its right end (icons grow leftward with Automatic growth), and Center keeps the row centered over or under the bar however many icons show." },
-        { type = "Slider", path = path .. ".offsetX", label = "Horizontal offset", min = -80, max = 80,
-          tooltip = "Nudges this group of icons left (negative) or right (positive)." },
-        { type = "Slider", path = path .. ".offsetY", label = "Vertical offset", min = -80, max = 80,
-          tooltip = "Nudges this group of icons down (negative) or up (positive)." }
-    )
-end
-
-local function AuraSpellControls(group)
-    return List(
-        { type = "Header", label = "Which spells" },
-        { type = "Note", label = "Spell lists are saved separately for each specialization. Switch specializations to edit its lists.", height = 24 },
-        SpecSpellList(group, "hide", "Hidden spells", "Empty: no spells excluded",
-            "Spell IDs or names, separated by commas. Press Enter to save. A name matches every spell with that name. Hidden spells win if a spell is also in Allowed spells. Works in dungeons and raids for debuffs on enemies."),
-        SpecSpellList(group, "only", "Allowed spells", "Empty: all spells matching this group's filters are allowed",
-            "When filled, only these spells are shown and every other spell in this group is hidden. Spell IDs or names, separated by commas. An allowed spell still has to pass this group's other filters and icon limits, so listing it cannot make an aura appear that would not show otherwise.")
-    )
-end
-
-local function AuraIconControls(path, withPandemic)
-    local controls = List(
-        { type = "Header", label = "On each icon" },
-        { type = "Toggle", path = path .. ".showTimer", label = "Show remaining time",
-          tooltip = "Shows a countdown of the remaining duration on each icon." },
-        Gate({ type = "Slider", path = path .. ".timerSize", label = "Timer font size", min = 6, max = 20,
-          tooltip = "How big the countdown text is." }, On(path .. ".showTimer"), "Turn on Show remaining time to use this."),
-        { type = "Toggle", path = path .. ".showStacks", label = "Show stack count",
-          tooltip = "Shows the number of stacks on each icon, when it has more than one." },
-        Gate({ type = "Slider", path = path .. ".stackSize", label = "Stack count font size", min = 6, max = 20,
-          tooltip = "How big the stack count text is." }, On(path .. ".showStacks"), "Turn on Show stack count to use this."),
-        { type = "Toggle", path = path .. ".dispelBorder", label = "Use dispel-type border colors",
-          tooltip = "Colors each icon's border by the aura's dispel type: Magic, curse, poison, disease and enrage each get their own color." }
-    )
-    if withPandemic then
-        controls[#controls + 1] = { type = "Toggle", path = path .. ".pandemic", label = "Tint in the refresh window",
-          tooltip = "Turns the icon red once refreshing it would carry the leftover time over (the pandemic window)." }
-    end
-    return controls
-end
-
 local AURA_SHAPES = {
     { value = "square", label = "Square" },
     { value = "wide", label = "Wide" },
@@ -1305,22 +1240,76 @@ local AURA_TEXT_POINTS = {
     { value = "BOTTOMRIGHT", label = "Bottom right" },
 }
 
-local function AuraExtraControls(path)
+local function AuraWhichControls(path, groupKey)
     return List(
-        { type = "Header", label = "Extras" },
+        { type = "Header", label = "Which auras" },
+        { type = "Dropdown", path = path .. ".sort", label = "Sort order", options = AURA_SORT,
+          tooltip = "How icons are ordered within the group. Your own auras always come first, then the rest by the choice here: expiring soonest first (permanent auras last), alphabetical, or the game's default order." },
+        { type = "Slider", path = path .. ".maxDuration", label = "Maximum aura duration (seconds, 0 = off)", min = 0, max = 600, step = 5,
+          tooltip = "Hides auras whose total duration is longer than this, not auras with a lot of time left. Permanent auras are hidden as soon as this is above 0. 0 turns the limit off. Works in dungeons and raids: the game does the check." },
+        { type = "Note", label = "Spell lists are saved separately for each specialization. Switch specializations to edit its lists.", height = 24 },
+        SpecSpellList(groupKey, "hide", "Hidden spells", "Empty: no spells excluded",
+          "Spell IDs or names, separated by commas. Press Enter to save. A name matches every spell with that name. Hidden spells win if a spell is also in Allowed spells. Works in dungeons and raids for debuffs on enemies. For enemy buffs and important auras it only works in the open world, because the game hides which buff it is in dungeons and raids."),
+        SpecSpellList(groupKey, "only", "Allowed spells", "Empty: all spells matching this group's filters are allowed",
+          "When filled, only these spells are shown and every other spell in this group is hidden. Spell IDs or names, separated by commas. An allowed spell still has to pass this group's other filters and icon limits, so listing it cannot make an aura appear that would not show otherwise.")
+    )
+end
+
+local function AuraLayoutControls(path)
+    return List(
+        { type = "Header", label = "Layout" },
+        { type = "Dropdown", path = path .. ".side", label = "Position", options = AURA_SIDES,
+          tooltip = "Which side of the nameplate this group of icons sits on." },
+        { type = "Dropdown", path = path .. ".align", label = "Alignment", options = AURA_ALIGN,
+          tooltip = "Only matters above or below the nameplate. Left starts the group at the bar's left end, Right at its right end (icons grow leftward with Automatic growth), and Center keeps the row centered over or under the bar however many icons show." },
+        { type = "Dropdown", path = path .. ".grow", label = "Growth direction", options = AURA_GROW,
+          tooltip = "Which way icons are added, and where the next row or column starts once a row is full. Automatic follows Position and Alignment: above or below, icons run right (left when Alignment is Right) and new rows stack up or down away from the bar; on the left, icons run left; on the right, icons run right, with new rows below." },
+        { type = "Slider", path = path .. ".offsetX", label = "Horizontal offset", min = -80, max = 80,
+          tooltip = "Nudges this group of icons left (negative) or right (positive)." },
+        { type = "Slider", path = path .. ".offsetY", label = "Vertical offset", min = -80, max = 80,
+          tooltip = "Nudges this group of icons down (negative) or up (positive)." },
+        { type = "Slider", path = path .. ".size", label = "Icon size", min = 10, max = 48,
+          tooltip = "How big each icon in this group is." },
         { type = "Dropdown", path = path .. ".shape", label = "Icon shape", options = AURA_SHAPES,
           tooltip = "Square shows the whole icon. Wide makes icons shorter (4 by 3) and Extra wide shorter still (about 8 by 5), cropping the top and bottom of the art to save vertical space." },
+        { type = "Slider", path = path .. ".maxIcons", label = "Maximum icons", min = 1, max = 12,
+          tooltip = "Caps how many icons this group ever shows at once, even if more apply." },
+        { type = "Slider", path = path .. ".perRow", label = "Icons per row (or column)", min = 1, max = 12,
+          tooltip = "How many icons fit before wrapping to a new row or column." },
+        { type = "Slider", path = path .. ".spacing", label = "Icon spacing", min = 0, max = 10,
+          tooltip = "Gap between adjacent icons in this group." }
+    )
+end
+
+local function AuraIconControls(path, withPandemic)
+    local controls = List(
+        { type = "Header", label = "Icon" },
+        { type = "Toggle", path = path .. ".showTimer", label = "Show remaining time",
+          tooltip = "Shows a countdown of the remaining duration on each icon." },
+        Gate({ type = "Slider", path = path .. ".timerSize", label = "Timer font size", min = 6, max = 20,
+          tooltip = "How big the countdown text is." }, On(path .. ".showTimer"), "Turn on Show remaining time to use this."),
+        Gate({ type = "Dropdown", path = path .. ".timerPosition", label = "Timer position", options = AURA_TEXT_POINTS,
+          tooltip = "Where the remaining time sits on each icon." }, On(path .. ".showTimer"), "Turn on Show remaining time to use this."),
+        { type = "Toggle", path = path .. ".showStacks", label = "Show stack count",
+          tooltip = "Shows the number of stacks on each icon, when it has more than one." },
+        Gate({ type = "Slider", path = path .. ".stackSize", label = "Stack count font size", min = 6, max = 20,
+          tooltip = "How big the stack count text is." }, On(path .. ".showStacks"), "Turn on Show stack count to use this."),
+        Gate({ type = "Dropdown", path = path .. ".stackPosition", label = "Stack count position", options = AURA_TEXT_POINTS,
+          tooltip = "Where the stack count sits on each icon." }, On(path .. ".showStacks"), "Turn on Show stack count to use this."),
         { type = "Toggle", path = path .. ".swipe", label = "Cooldown swipe",
           tooltip = "The dark clock-wipe over each icon as it runs out. Off leaves just the timer text." },
         { type = "Slider", path = path .. ".borderSize", label = "Icon border thickness", min = 0, max = 3,
           tooltip = "How thick the border around each icon is. 0 removes it." },
         Gate({ type = "Color", path = path .. ".borderColor", label = "Icon border color",
           tooltip = "The color of the border around each icon. Dispel-type colors, when on, draw over it." }, function() return (ns.Get(path .. ".borderSize") or 0) > 0 end, "Raise Icon border thickness above 0 to use this."),
-        Gate({ type = "Dropdown", path = path .. ".timerPosition", label = "Timer position", options = AURA_TEXT_POINTS,
-          tooltip = "Where the remaining time sits on each icon." }, On(path .. ".showTimer"), "Turn on Show remaining time to use this."),
-        Gate({ type = "Dropdown", path = path .. ".stackPosition", label = "Stack count position", options = AURA_TEXT_POINTS,
-          tooltip = "Where the stack count sits on each icon." }, On(path .. ".showStacks"), "Turn on Show stack count to use this.")
+        { type = "Toggle", path = path .. ".dispelBorder", label = "Use dispel-type border colors",
+          tooltip = "Colors each icon's border by the aura's dispel type: Magic, curse, poison, disease and enrage each get their own color." }
     )
+    if withPandemic then
+        controls[#controls + 1] = { type = "Toggle", path = path .. ".pandemic", label = "Tint in the refresh window",
+          tooltip = "Turns the icon red once refreshing it would carry the leftover time over (the pandemic window)." }
+    end
+    return controls
 end
 
 local function GateTable(test, reason, list)
@@ -1340,22 +1329,34 @@ local function GateTable(test, reason, list)
     return list
 end
 
-local function AuraTextLink()
-    return List(
-        { type = "Link", label = "Aura text (all groups)", target = { section = "auraMine", label = "Aura text (all groups)" },
-          tooltip = "Font, outline, shadow and tooltip settings for the time and stack text on every aura group. They live on the Your debuffs page and apply to all groups." }
-    )
+local function AuraPage(key, title, path, groupKey, intro, introHeight, showLabel, showTooltip, extras, withPandemic)
+    local on, reason = On(path .. ".enabled"), "Turn on " .. showLabel .. " to use this."
+    return Section(key, title, path, Join(
+        List(
+            { type = "Note", label = intro, height = introHeight },
+            { type = "Header", label = "Show" },
+            { type = "Toggle", path = path .. ".enabled", label = showLabel, tooltip = showTooltip }
+        ),
+        GateTable(on, reason, extras or {}),
+        GateTable(on, reason, AuraWhichControls(path, groupKey)),
+        GateTable(on, reason, AuraLayoutControls(path)),
+        GateTable(on, reason, AuraIconControls(path, withPandemic))
+    ))
 end
+
+local AURA_TEXT_PATHS = { "look.auras.font", "look.auras.outline", "look.auras.shadow", "look.auras.tooltips", "look.auras.tooltipsInCombat" }
 
 local function AuraTextControls()
     return List(
-        { type = "Header", label = "Aura text (all groups)" },
+        { type = "Note", label = "Settings shared by every aura group: the time and stack text on each icon, and tooltips.", height = 24 },
+        { type = "Header", label = "Text on every aura icon" },
         { type = "Dropdown", path = "look.auras.font", label = "Font", options = Fonts, unknown = "Custom font",
           tooltip = "The typeface used for the time-left and stack-count text on every aura icon." },
         { type = "Dropdown", path = "look.auras.outline", label = "Outline", options = OUTLINES,
           tooltip = "The dark edge drawn around the aura text, to keep it readable over any icon." },
         { type = "Toggle", path = "look.auras.shadow", label = "Drop shadow",
           tooltip = "Adds a soft dark shadow behind the aura text, on top of the outline." },
+        { type = "Header", label = "Tooltips" },
         { type = "Toggle", path = "look.auras.tooltips", label = "Show the aura's tooltip on mouseover",
           tooltip = "Hovering an icon shows Blizzard's aura tooltip. Icons never catch clicks, so clicking still targets the enemy." },
         { type = "Toggle", path = "look.auras.tooltipsInCombat", label = "Also show tooltips in combat",
@@ -2271,44 +2272,21 @@ ns.sections = {
         { type = "Note", label = "Works in dungeons and raids: Blizzard classifies the enemy's buffs and Plateau only styles the warnings. Appearance changes made during combat apply after combat ends.", height = 44 }
     )),
 
-    Section("auraMine", "Your debuffs", "look.auras.mine", Join(
+    Section("auraAll", "All auras", AURA_TEXT_PATHS, AuraTextControls()),
+    AuraPage("auraMine", "Your debuffs", "look.auras.mine", "mine",
+        "Show your damage-over-time effects and other debuffs on enemies.", 24,
+        "Show your debuffs", "Shows icons for your own damage-over-time effects and other debuffs on the enemy. Crowd control effects you apply appear in the Crowd control group instead.",
         List(
-            { type = "Note", label = "Show your damage-over-time effects and other debuffs on enemies.", height = 24 },
-            { type = "Header", label = "Your debuffs" },
-            { type = "Toggle", path = "look.auras.mine.enabled", label = "Show your debuffs",
-              tooltip = "Shows icons for your own damage-over-time effects and other debuffs on the enemy. Crowd control effects you apply appear in the Crowd control group instead." }
-        ),
-        GateTable(On("look.auras.mine.enabled"), "Turn on Show your debuffs to use this.", AuraSizeControls("look.auras.mine")),
-        GateTable(On("look.auras.mine.enabled"), "Turn on Show your debuffs to use this.", AuraPlacementControls("look.auras.mine")),
-        GateTable(On("look.auras.mine.enabled"), "Turn on Show your debuffs to use this.", AuraSpellControls("mine")),
-        GateTable(On("look.auras.mine.enabled"), "Turn on Show your debuffs to use this.", AuraIconControls("look.auras.mine", true)),
-        GateTable(On("look.auras.mine.enabled"), "Turn on Show your debuffs to use this.", AuraExtraControls("look.auras.mine")),
-        GateTable(On("look.auras.mine.enabled"), "Turn on Show your debuffs to use this.", List(
             { type = "Toggle", path = "look.auras.mine.includeOthers", label = "Include other players' debuffs",
-              tooltip = "Also shows debuffs other players put on the enemy, after your own, like Blizzard's nameplates do. Crowd control stays in its own group. Can get busy in raids. The preview adds one sample icon for them." })),
-        AuraTextControls()
-    )),
-    Section("auraCC", "Crowd control", "look.auras.cc", Join(
+              tooltip = "Also shows debuffs other players put on the enemy, after your own, like Blizzard's nameplates do. Crowd control stays in its own group. Can get busy in raids. The preview adds one sample icon for them." }
+        ), true),
+    AuraPage("auraCC", "Crowd control", "look.auras.cc", "cc",
+        "Show crowd control effects on enemies, including stuns, incapacitate effects, and roots, regardless of who applied them.", 44,
+        "Show crowd control", "Shows icons for stuns, incapacitates, roots and other crowd control on the enemy, no matter who applied it."),
+    AuraPage("auraPurge", "Enemy buffs", "look.auras.purge", "purge",
+        "Show buffs on enemies. By default, only buffs that can be removed (purged, stolen or soothed) are shown. Enable Show all buffs to include other buffs.", 32,
+        "Show enemy buffs", "Shows icons for buffs on the enemy.",
         List(
-            { type = "Note", label = "Show crowd control effects on enemies, including stuns, incapacitate effects, and roots, regardless of who applied them.", height = 44 },
-            { type = "Header", label = "Crowd control" },
-            { type = "Toggle", path = "look.auras.cc.enabled", label = "Show crowd control",
-              tooltip = "Shows icons for stuns, incapacitates, roots and other crowd control on the enemy, no matter who applied it." }
-        ),
-        GateTable(On("look.auras.cc.enabled"), "Turn on Show crowd control to use this.", AuraSizeControls("look.auras.cc")),
-        GateTable(On("look.auras.cc.enabled"), "Turn on Show crowd control to use this.", AuraPlacementControls("look.auras.cc")),
-        GateTable(On("look.auras.cc.enabled"), "Turn on Show crowd control to use this.", AuraSpellControls("cc")),
-        GateTable(On("look.auras.cc.enabled"), "Turn on Show crowd control to use this.", AuraIconControls("look.auras.cc")),
-        GateTable(On("look.auras.cc.enabled"), "Turn on Show crowd control to use this.", AuraExtraControls("look.auras.cc")),
-        AuraTextLink()
-    )),
-    Section("auraPurge", "Enemy buffs", "look.auras.purge", Join(
-        List(
-            { type = "Note", label = "Show buffs on enemies. By default, only buffs that can be removed (purged, stolen or soothed) are shown. Enable Show all buffs to include other buffs.", height = 32 },
-            { type = "Header", label = "Buffs to remove" },
-            { type = "Toggle", path = "look.auras.purge.enabled", label = "Show enemy buffs",
-              tooltip = "Shows icons for buffs on the enemy." }
-        ), GateTable(On("look.auras.purge.enabled"), "Turn on Show enemy buffs to use this.", List(
             { type = "Toggle", path = "look.auras.purge.allBuffs", label = "Show all buffs",
               tooltip = "Off shows only removable buffs: Magic buffs that can be purged or stolen, and enrages. On shows every buff on the enemy except important ones and ones you cast. Hide boss auras, Hide permanent buffs, Maximum aura duration and Maximum icons still apply. Buffs the game flags as important appear under Important auras instead." },
             Gate({ type = "Toggle", path = "look.auras.purge.showMagic", label = "Magic buffs I can purge or spellsteal",
@@ -2320,25 +2298,9 @@ ns.sections = {
             { type = "Toggle", path = "look.auras.purge.hidePermanent", label = "Hide permanent buffs",
               tooltip = "Buffs with no end time, like the one every enemy gets in a Mythic dungeon. Timed buffs still show. Works in dungeons and raids: the game does the check." }
         )),
-        GateTable(On("look.auras.purge.enabled"), "Turn on Show enemy buffs to use this.", AuraSizeControls("look.auras.purge")),
-        GateTable(On("look.auras.purge.enabled"), "Turn on Show enemy buffs to use this.", AuraPlacementControls("look.auras.purge")),
-        GateTable(On("look.auras.purge.enabled"), "Turn on Show enemy buffs to use this.", AuraIconControls("look.auras.purge")),
-        GateTable(On("look.auras.purge.enabled"), "Turn on Show enemy buffs to use this.", AuraExtraControls("look.auras.purge")),
-        AuraTextLink()
-    )),
-    Section("auraImportant", "Important auras", "look.auras.important", Join(
-        List(
-            { type = "Note", label = "Show buffs flagged as important by Blizzard. Disabled by default.", height = 24 },
-            { type = "Header", label = "Important auras" },
-            { type = "Toggle", path = "look.auras.important.enabled", label = "Show important auras",
-              tooltip = "Shows icons for buffs Blizzard flags as important on this enemy, except ones you cast. This is a separate group of icons from Enemy buffs: a buff appears in one or the other. Buff warnings can also mark the same buffs on the nameplate. These are not necessarily removable or something you must act on." }
-        ),
-        GateTable(On("look.auras.important.enabled"), "Turn on Show important auras to use this.", AuraSizeControls("look.auras.important")),
-        GateTable(On("look.auras.important.enabled"), "Turn on Show important auras to use this.", AuraPlacementControls("look.auras.important")),
-        GateTable(On("look.auras.important.enabled"), "Turn on Show important auras to use this.", AuraIconControls("look.auras.important")),
-        GateTable(On("look.auras.important.enabled"), "Turn on Show important auras to use this.", AuraExtraControls("look.auras.important")),
-        AuraTextLink()
-    )),
+    AuraPage("auraImportant", "Important auras", "look.auras.important", "important",
+        "Show buffs flagged as important by Blizzard. Disabled by default.", 24,
+        "Show important auras", "Shows icons for buffs Blizzard flags as important on this enemy, except ones you cast. This is a separate group of icons from Enemy buffs: a buff appears in one or the other. Buff warnings can also mark the same buffs on the nameplate. These are not necessarily removable or something you must act on."),
     Section("target", "Target", TARGET_LOOK, List(
         { type = "Header", label = "My target", first = true },
         { type = "ToggleColor", path = "look.target.ring", colorPath = "look.target.ringColor", label = "Show target border",
