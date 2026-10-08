@@ -155,6 +155,20 @@ local function ApplyFill(bar)
         return
     end
     twin:GetStatusBarTexture():SetVertexColor(ir, ig, ib, ia)
+    local health, twinHealth = bar.plate.health, twin.health
+    if health and twinHealth then
+        twinHealth:SetMinMaxValues(health:GetMinMaxValues())
+        twinHealth:SetValue(health:GetValue())
+        twinHealth:SetStatusBarColor(health:GetStatusBarColor())
+        if s.showCasts == "interruptible" then
+            local hidden = EvaluateColorValueFromBoolean(flag, EvaluateColorValueFromBoolean(stop, 1, 0), 1)
+            health:SetAlpha(hidden)
+            health.borderLayer:SetAlpha(hidden)
+        else
+            health:SetAlphaFromBoolean(flag, 0, 1)
+            health.borderLayer:SetAlphaFromBoolean(flag, 0, 1)
+        end
+    end
     twin.mustStop:SetAlphaFromBoolean(stop, s.importantUninterruptible[4] or 1, 0)
     if s.shieldIcon then
         twin.shieldIcon:SetAlphaFromBoolean(stop, 1, 0)
@@ -191,12 +205,21 @@ local function NormalVisibility(bar, s)
     end
 end
 
+local function ShowRealHealth(plate)
+    local health = plate and plate.health
+    if health then
+        health:SetAlpha(1)
+        health.borderLayer:SetAlpha(1)
+    end
+end
+
 local function StopTwin(bar)
     local twin = bar.twin
     if twin == NO_TWIN then return end
     twin:SetScript("OnUpdate", nil)
     twin.timerBinding:SetEnabled(false)
     twin:Hide()
+    ShowRealHealth(bar.plate)
 end
 
 local function PointMarker(bar, channel)
@@ -414,6 +437,23 @@ function Castbar:CreateTwin(plate)
     timerBinding:SetUpdateInterval(0.1)
     timerBinding:SetEnabled(false)
     twin.timerBinding = timerBinding
+
+    local health = plate.health
+    if health then
+        local copy = CreateFrame("StatusBar", nil, twin)
+        copy:SetMinMaxValues(0, 1)
+        copy.background = copy:CreateTexture(nil, "BACKGROUND")
+        copy.background:SetAllPoints()
+        local copyLayer = CreateFrame("Frame", nil, copy)
+        copyLayer:SetAllPoints()
+        copyLayer:SetFrameLevel(copy:GetFrameLevel() + 3)
+        copy.border = ns.CreateBorder(copyLayer, copy, "BACKGROUND", -7)
+        hooksecurefunc(health, "SetValue", function(_, ...) copy:SetValue(...) end)
+        hooksecurefunc(health, "SetMinMaxValues", function(_, ...) copy:SetMinMaxValues(...) end)
+        hooksecurefunc(health, "SetStatusBarColor", function(_, ...) copy:SetStatusBarColor(...) end)
+        hooksecurefunc(health, "SetReverseFill", function(_, ...) copy:SetReverseFill(...) end)
+        twin.health = copy
+    end
     return twin
 end
 
@@ -442,13 +482,30 @@ local function StyleTexts(bar, db)
     return textRightInset
 end
 
-local function StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight)
+local function StyleTwinHealth(plate, twin, drop, iconOffset, iconRight)
+    local copy, health = twin.health, plate.health
+    if not copy or not health then return end
+    local hdb = ns.DB.views[plate.state].health
+    copy:ClearAllPoints()
+    copy:SetSize(plate:GetWidth(), plate:GetHeight())
+    copy:SetPoint("BOTTOM", twin, "TOP", iconRight and iconOffset / 2 or -iconOffset / 2, drop)
+    ns.SetBarTexture(copy, health.texture or hdb.texture)
+    copy:SetStatusBarDesaturated(hdb.desaturate == true)
+    copy:SetReverseFill(hdb.fillDirection == "right")
+    ns.SetBackgroundTexture(copy.background, hdb.backgroundTexture, hdb.background)
+    copy.border:SetStyle(hdb.borderStyle, copy)
+    copy.border:SetColor(hdb.border[1], hdb.border[2], hdb.border[3], hdb.border[4])
+    copy.border:Layout(hdb.borderSize, 0, hdb.borderInside)
+end
+
+local function StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight, drop, iconOffset)
     local wanted = db.importantEnlarge == true and plate.state ~= "friendly"
     if not wanted then
         StopTwin(bar)
         if bar.twin ~= NO_TWIN then
             bar.twin.enabled = false
         end
+        ShowRealHealth(plate)
         return
     end
     if bar.twin == NO_TWIN then
@@ -460,6 +517,7 @@ local function StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight)
     twin:SetSize(barWidth, height)
     twin:SetPoint("CENTER", bar, "CENTER")
     twin:SetScale(db.importantScale or 1.3)
+    StyleTwinHealth(plate, twin, drop, iconOffset, iconRight)
     ns.SetBarTexture(twin, db.texture)
     ns.SetBarOverlay(twin, db.overlayPattern ~= "" and db.overlayPattern or nil, db.overlayAlpha, db.overlayContrast)
     twin.timerBinding:SetFormatter(settings[plate.state].formatter)
@@ -623,7 +681,7 @@ function Castbar:Style(plate, db)
     bar.iconBorder:SetShown(db.showIcon)
 
     local textRightInset = StyleTexts(bar, db)
-    StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight)
+    StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight, drop, iconOffset)
 
     local interruptText = bar.interruptText
     ns.ApplyFont(interruptText, db.font, db.interruptSize or db.size, db.outline)
