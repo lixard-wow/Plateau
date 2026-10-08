@@ -239,13 +239,25 @@ local function MirrorText(source, parent)
     return copy
 end
 
-local function CopyPoints(source, target, plate, twin)
-    target:ClearAllPoints()
-    for i = 1, source:GetNumPoints() do
-        local point, relative, relativePoint, x, y = source:GetPoint(i)
-        local mapped = (relative and relative == plate.nameClip and twin.nameClip) or twin.health
-        target:SetPoint(point, mapped, relativePoint, x, y)
-    end
+local function MirrorLayout(source, copy, map)
+    hooksecurefunc(source, "ClearAllPoints", function() copy:ClearAllPoints() end)
+    hooksecurefunc(source, "SetAllPoints", function(_, relative)
+        if type(relative) == "table" then
+            copy:SetAllPoints(map(relative))
+        else
+            copy:SetAllPoints()
+        end
+    end)
+    hooksecurefunc(source, "SetPoint", function(_, point, a, b, c, d)
+        if type(a) == "table" then
+            copy:SetPoint(point, map(a), b, c, d)
+        else
+            copy:SetPoint(point, a, b, c, d)
+        end
+    end)
+    hooksecurefunc(source, "SetSize", function(_, ...) copy:SetSize(...) end)
+    hooksecurefunc(source, "SetWidth", function(_, ...) copy:SetWidth(...) end)
+    hooksecurefunc(source, "SetHeight", function(_, ...) copy:SetHeight(...) end)
 end
 
 local function CopyText(source, copy)
@@ -262,25 +274,42 @@ local function CopyText(source, copy)
     copy:SetShown(source:IsShown())
 end
 
-function SyncTwinTexts(plate, twin)
+local function BuildTwinTexts(plate, twin)
     local layer = twin.textLayer
     if not layer then return end
+    local function Map(relative)
+        if relative == plate.nameClip and twin.nameClip then
+            return twin.nameClip
+        end
+        return twin.health
+    end
+    local look = ns.DB.views[plate.state]
     if plate.name and not twin.name then
         twin.nameClip = CreateFrame("Frame", nil, layer)
         twin.nameClip:SetClipsChildren(true)
         twin.name = MirrorText(plate.name, twin.nameClip)
+        MirrorLayout(plate.nameClip, twin.nameClip, Map)
+        MirrorLayout(plate.name, twin.name, Map)
+        local name = ns.Elements.Name
+        if name and look and look.name then
+            name:Style(plate, look.name)
+        end
     end
     if plate.healthText and not twin.healthText then
         twin.healthText = MirrorText(plate.healthText, layer)
+        MirrorLayout(plate.healthText, twin.healthText, Map)
+        local healthText = ns.Elements.HealthText
+        if healthText and look and look.healthText then
+            healthText:Style(plate, look.healthText)
+        end
     end
+end
+
+function SyncTwinTexts(plate, twin)
     if twin.name then
-        CopyPoints(plate.nameClip, twin.nameClip, plate, twin)
-        twin.nameClip:SetSize(plate.nameClip:GetSize())
-        CopyPoints(plate.name, twin.name, plate, twin)
         CopyText(plate.name, twin.name)
     end
     if twin.healthText then
-        CopyPoints(plate.healthText, twin.healthText, plate, twin)
         CopyText(plate.healthText, twin.healthText)
     end
 end
@@ -594,6 +623,7 @@ local function StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight,
     twin:SetPoint("CENTER", bar, "CENTER")
     twin:SetScale(db.importantScale or 1.3)
     StyleTwinHealth(plate, twin, drop, iconOffset, iconRight)
+    BuildTwinTexts(plate, twin)
     ns.SetBarTexture(twin, db.texture)
     ns.SetBarOverlay(twin, db.overlayPattern ~= "" and db.overlayPattern or nil, db.overlayAlpha, db.overlayContrast)
     twin.timerBinding:SetFormatter(settings[plate.state].formatter)
