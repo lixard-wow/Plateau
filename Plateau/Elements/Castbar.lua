@@ -15,7 +15,6 @@ local IsSpellImportant = C_Spell.IsSpellImportant
 local EvaluateColorValueFromBoolean = C_CurveUtil.EvaluateColorValueFromBoolean
 local FLAT = "Interface\\Buttons\\WHITE8X8"
 local SPARK = "Interface\\CastingBar\\UI-CastingBar-Spark"
-local SHIELD = "Interface\\CastingBar\\UI-CastingBar-Small-Shield"
 local issecretvalue = issecretvalue
 local CreateDurationTextBinding = C_DurationUtil.CreateDurationTextBinding
 local UnitNameFromGUID = UnitNameFromGUID
@@ -26,8 +25,6 @@ local InterruptReady = ns.InterruptReady
 
 local TIMER_WIDTH = 30
 local READY_TICK = 0.1
-local TWIN_LEVEL = 1000
-local NO_TWIN = { enabled = false }
 
 local settings = {}
 
@@ -92,8 +89,6 @@ local function TargetTextColor(s, unit)
     return s.targetColor[1], s.targetColor[2], s.targetColor[3], s.targetColor[4]
 end
 
-local HideReal, SyncTwinLooks
-
 local function ApplyFill(bar)
     local state = bar.plate.state
     local s = settings[state]
@@ -108,10 +103,10 @@ local function ApplyFill(bar)
         nr, ng, nb, na = plain[1], plain[2], plain[3], plain[4] or 1
     end
     local flag = bar.isImportant
-    local twin = bar.twin
-    local twinOn = twin.enabled == true
-    local ir, ig, ib, ia
-    if twinOn or issecretvalue(flag) or flag then
+    if not issecretvalue(flag) and not flag then
+        texture:SetVertexColor(nr, ng, nb, na)
+    else
+        local ir, ig, ib, ia
         local important = readiness and InterruptReady:GetColor(state, "important")
         if important then
             ir, ig, ib, ia = important.r, important.g, important.b, important.a
@@ -119,10 +114,6 @@ local function ApplyFill(bar)
             local plain = s.importantReady
             ir, ig, ib, ia = plain[1], plain[2], plain[3], plain[4] or 1
         end
-    end
-    if not issecretvalue(flag) and not flag then
-        texture:SetVertexColor(nr, ng, nb, na)
-    else
         texture:SetVertexColor(
             EvaluateColorValueFromBoolean(flag, ir, nr),
             EvaluateColorValueFromBoolean(flag, ig, ng),
@@ -146,67 +137,6 @@ local function ApplyFill(bar)
     else
         bar.shieldIcon:SetAlpha(0)
     end
-    if not twinOn then
-        if s.showCasts == "interruptible" then
-            bar:SetAlphaFromBoolean(stop, 0, 1)
-        elseif s.showCasts == "important" then
-            bar:SetAlphaFromBoolean(flag, 1, 0)
-        else
-            bar:SetAlpha(1)
-        end
-        return
-    end
-    twin:GetStatusBarTexture():SetVertexColor(ir, ig, ib, ia)
-    local health, twinHealth = bar.plate.health, twin.health
-    if health and twinHealth then
-        twinHealth:SetMinMaxValues(health:GetMinMaxValues())
-        twinHealth:SetValue(health:GetValue())
-        twinHealth:SetStatusBarColor(health:GetStatusBarColor())
-        SyncTwinLooks(twin)
-        local clip = bar.plate.nameClip
-        if s.showCasts == "interruptible" then
-            local hidden = EvaluateColorValueFromBoolean(flag, EvaluateColorValueFromBoolean(stop, 1, 0), 1)
-            health:SetAlpha(hidden)
-            health.borderLayer:SetAlpha(hidden)
-            if clip then
-                clip:SetAlpha(hidden)
-            end
-        else
-            health:SetAlphaFromBoolean(flag, 0, 1)
-            health.borderLayer:SetAlphaFromBoolean(flag, 0, 1)
-            if clip then
-                clip:SetAlphaFromBoolean(flag, 0, 1)
-            end
-        end
-        HideReal(twin, flag, stop, s.showCasts == "interruptible")
-    end
-    twin.mustStop:SetAlphaFromBoolean(stop, s.importantUninterruptible[4] or 1, 0)
-    if s.shieldIcon then
-        twin.shieldIcon:SetAlphaFromBoolean(stop, 1, 0)
-    else
-        twin.shieldIcon:SetAlpha(0)
-    end
-    if s.showCasts == "interruptible" then
-        local allowed = EvaluateColorValueFromBoolean(stop, 0, 1)
-        bar:SetAlpha(EvaluateColorValueFromBoolean(flag, 0, allowed))
-        twin:SetAlpha(EvaluateColorValueFromBoolean(flag, allowed, 0))
-    elseif s.showCasts == "important" then
-        bar:SetAlpha(0)
-        twin:SetAlphaFromBoolean(flag, 1, 0)
-    else
-        bar:SetAlphaFromBoolean(flag, 0, 1)
-        twin:SetAlphaFromBoolean(flag, 1, 0)
-    end
-end
-
-local function NormalVisibility(bar, s)
-    local flag, stop = bar.isImportant, bar.notInterruptible
-    if not issecretvalue(flag) then
-        flag = flag == true
-    end
-    if not issecretvalue(stop) then
-        stop = stop == true
-    end
     if s.showCasts == "interruptible" then
         bar:SetAlphaFromBoolean(stop, 0, 1)
     elseif s.showCasts == "important" then
@@ -214,215 +144,6 @@ local function NormalVisibility(bar, s)
     else
         bar:SetAlpha(1)
     end
-end
-
-local MIRRORED = {
-    { field = "healthText", element = "HealthText", kind = "text", fade = true },
-    { field = "level", element = "Level", kind = "text", fade = true },
-    { field = "enemyTarget", element = "EnemyTarget", kind = "text", fade = true },
-    { field = "forces", element = "Forces", kind = "text", fade = true },
-    { field = "quest", element = "Quest", kind = "texture", fade = true },
-    { field = "questProgress", element = "Quest", kind = "text", fade = true },
-    { field = "classification", element = "Classification", kind = "texture", fade = true },
-    { field = "raidMarker", element = "RaidMarker", kind = "texture" },
-}
-
-local function TwinOf(plate)
-    local bar = plate and plate.castbar
-    local twin = bar and bar.twin
-    if twin and twin ~= NO_TWIN then
-        return twin
-    end
-end
-
-local function ShowRealHealth(plate)
-    local health = plate and plate.health
-    if health then
-        health:SetAlpha(1)
-        health.borderLayer:SetAlpha(1)
-    end
-    if plate and plate.nameClip then
-        plate.nameClip:SetAlpha(1)
-    end
-    local twin = TwinOf(plate)
-    if twin and twin.faded then
-        for source in pairs(twin.faded) do
-            source:SetAlpha(twin.alphaOf[source] or 1)
-        end
-    end
-end
-
-local function MirrorCommon(source, copy, twin)
-    hooksecurefunc(source, "SetAlpha", function(_, value)
-        twin.alphaOf[source] = value
-        copy:SetAlpha(value)
-    end)
-    hooksecurefunc(source, "SetShown", function(_, ...) copy:SetShown(...) end)
-    hooksecurefunc(source, "Show", function() copy:Show() end)
-    hooksecurefunc(source, "Hide", function() copy:Hide() end)
-end
-
-local function MirrorText(source, parent, twin)
-    local copy = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    copy:SetWordWrap(false)
-    hooksecurefunc(source, "SetText", function(_, ...) copy:SetText(...) end)
-    hooksecurefunc(source, "SetFormattedText", function(_, ...) copy:SetFormattedText(...) end)
-    hooksecurefunc(source, "SetTextColor", function(_, ...) copy:SetTextColor(...) end)
-    hooksecurefunc(source, "SetFont", function(_, font, size, flags) copy:SetFont(font, size, flags or "") end)
-    hooksecurefunc(source, "SetShadowOffset", function(_, ...) copy:SetShadowOffset(...) end)
-    hooksecurefunc(source, "SetShadowColor", function(_, ...) copy:SetShadowColor(...) end)
-    hooksecurefunc(source, "SetJustifyH", function(_, ...) copy:SetJustifyH(...) end)
-    MirrorCommon(source, copy, twin)
-    return copy
-end
-
-local function MirrorTexture(source, parent, twin)
-    local copy = parent:CreateTexture(nil, "OVERLAY")
-    local texture = source:GetTexture()
-    if texture then
-        copy:SetTexture(texture)
-    end
-    hooksecurefunc(source, "SetTexture", function(_, ...) copy:SetTexture(...) end)
-    hooksecurefunc(source, "SetAtlas", function(_, ...) copy:SetAtlas(...) end)
-    hooksecurefunc(source, "SetTexCoord", function(_, ...) copy:SetTexCoord(...) end)
-    hooksecurefunc(source, "SetSpriteSheetCell", function(_, ...) copy:SetSpriteSheetCell(...) end)
-    hooksecurefunc(source, "SetVertexColor", function(_, ...) copy:SetVertexColor(...) end)
-    hooksecurefunc(source, "SetDesaturated", function(_, ...) copy:SetDesaturated(...) end)
-    MirrorCommon(source, copy, twin)
-    return copy
-end
-
-local function MirrorLayout(source, copy, map)
-    hooksecurefunc(source, "ClearAllPoints", function() copy:ClearAllPoints() end)
-    hooksecurefunc(source, "SetAllPoints", function(_, relative)
-        if type(relative) == "table" then
-            copy:SetAllPoints(map(relative))
-        else
-            copy:SetAllPoints()
-        end
-    end)
-    hooksecurefunc(source, "SetPoint", function(_, point, a, b, c, d)
-        if type(a) == "table" then
-            copy:SetPoint(point, map(a), b, c, d)
-        else
-            copy:SetPoint(point, a, b, c, d)
-        end
-    end)
-    hooksecurefunc(source, "SetSize", function(_, ...) copy:SetSize(...) end)
-    hooksecurefunc(source, "SetWidth", function(_, ...) copy:SetWidth(...) end)
-    hooksecurefunc(source, "SetHeight", function(_, ...) copy:SetHeight(...) end)
-end
-
-local function Forget(region)
-    region.slPlaceAnchor = nil
-end
-
-local function CopyLook(source, copy)
-    if source.GetFont then
-        local font, size, flags = source:GetFont()
-        if font then
-            copy:SetFont(font, size, flags or "")
-        end
-        copy:SetShadowOffset(source:GetShadowOffset())
-        copy:SetShadowColor(source:GetShadowColor())
-        copy:SetJustifyH(source:GetJustifyH())
-        copy:SetText(source:GetText())
-        copy:SetTextColor(source:GetTextColor())
-    else
-        local atlas = source:GetAtlas()
-        if atlas and atlas ~= "" then
-            copy:SetAtlas(atlas)
-        else
-            local texture = source:GetTexture()
-            if texture then
-                copy:SetTexture(texture)
-            end
-        end
-        copy:SetTexCoord(source:GetTexCoord())
-        copy:SetVertexColor(source:GetVertexColor())
-        copy:SetDesaturated(source:IsDesaturated())
-    end
-    copy:SetShown(source:IsShown())
-end
-
-function SyncTwinLooks(twin)
-    if not twin.copyOf then return end
-    for source, copy in pairs(twin.copyOf) do
-        if copy.GetObjectType and copy:GetObjectType() ~= "Frame" then
-            CopyLook(source, copy)
-        end
-    end
-end
-
-local function BuildTwinTexts(plate, twin)
-    local layer = twin.textLayer
-    if not layer then return end
-    twin.copyOf = twin.copyOf or {}
-    twin.alphaOf = twin.alphaOf or {}
-    twin.faded = twin.faded or {}
-    local copyOf = twin.copyOf
-    local function Map(relative)
-        return copyOf[relative] or twin.health
-    end
-    local refresh = {}
-    if plate.name and not copyOf[plate.name] then
-        local clip = CreateFrame("Frame", nil, layer)
-        clip:SetClipsChildren(true)
-        copyOf[plate.nameClip] = clip
-        twin.nameClip = clip
-        local copy = MirrorText(plate.name, clip, twin)
-        copyOf[plate.name] = copy
-        twin.name = copy
-        MirrorLayout(plate.nameClip, clip, Map)
-        MirrorLayout(plate.name, copy, Map)
-        Forget(plate.name)
-        refresh.Name = true
-    end
-    for _, part in ipairs(MIRRORED) do
-        local source = plate[part.field]
-        if source and not copyOf[source] then
-            local copy = part.kind == "texture" and MirrorTexture(source, layer, twin) or MirrorText(source, layer, twin)
-            copyOf[source] = copy
-            MirrorLayout(source, copy, Map)
-            Forget(source)
-            if part.fade then
-                twin.faded[source] = true
-            end
-            refresh[part.element] = true
-        end
-    end
-    local look = ns.DB.views[plate.state]
-    for key in pairs(refresh) do
-        local element = ns.Elements[key]
-        local db = look and look[element and element.key or ""]
-        if element and db and plate.built[element] then
-            element:Style(plate, db)
-            if plate.active and plate.unit and ns.Runs(element, plate) then
-                element:Enable(plate, plate.unit)
-            end
-        end
-    end
-end
-
-function HideReal(twin, flag, stop, interruptibleOnly)
-    if not twin.faded then return end
-    for source in pairs(twin.faded) do
-        local intended = twin.alphaOf[source] or 1
-        if interruptibleOnly then
-            source:SetAlpha(EvaluateColorValueFromBoolean(flag, EvaluateColorValueFromBoolean(stop, intended, 0), intended))
-        else
-            source:SetAlpha(EvaluateColorValueFromBoolean(flag, 0, intended))
-        end
-    end
-end
-
-local function StopTwin(bar)
-    local twin = bar.twin
-    if twin == NO_TWIN then return end
-    twin:SetScript("OnUpdate", nil)
-    twin.timerBinding:SetEnabled(false)
-    twin:Hide()
-    ShowRealHealth(bar.plate)
 end
 
 local function PointMarker(bar, channel)
@@ -565,7 +286,7 @@ function Castbar:Create(plate)
     bar.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
     bar.shieldIcon = textLayer:CreateTexture(nil, "OVERLAY", nil, 3)
-    bar.shieldIcon:SetTexture(SHIELD)
+    bar.shieldIcon:SetTexture("Interface\\CastingBar\\UI-CastingBar-Small-Shield")
     bar.shieldIcon:SetAlpha(0)
     bar.iconBorder = ns.CreateBorder(bar, bar.icon, "BACKGROUND", -7)
 
@@ -590,187 +311,7 @@ function Castbar:Create(plate)
     timerBinding:SetEnabled(false)
     bar.timerBinding = timerBinding
 
-    bar.twin = NO_TWIN
     plate.castbar = bar
-end
-
-function Castbar:CreateTwin(plate)
-    local twin = CreateFrame("StatusBar", nil, plate)
-    twin:Hide()
-    twin:SetFrameLevel(plate:GetFrameLevel() + TWIN_LEVEL)
-    twin.glow = ns.CreateBorder(twin, twin, "BACKGROUND", -8)
-    local borderLayer = CreateFrame("Frame", nil, twin)
-    borderLayer:SetAllPoints()
-    borderLayer:SetFrameLevel(twin:GetFrameLevel() + 1)
-    twin.border = ns.CreateBorder(borderLayer, twin, "BACKGROUND", -7)
-    twin.background = twin:CreateTexture(nil, "BACKGROUND")
-    twin.background:SetAllPoints()
-
-    local textLayer = CreateFrame("Frame", nil, twin)
-    textLayer:SetAllPoints()
-    textLayer:SetFrameLevel(twin:GetFrameLevel() + 4)
-
-    twin.spark = textLayer:CreateTexture(nil, "OVERLAY", nil, 2)
-    twin.spark:SetTexture(SPARK)
-    twin.spark:SetBlendMode("ADD")
-    twin.spark:Hide()
-
-    twin.mustStop = twin:CreateTexture(nil, "ARTWORK", nil, 7)
-    twin.mustStop:SetAlpha(0)
-
-    twin.icon = twin:CreateTexture(nil, "ARTWORK")
-    twin.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    twin.iconBorder = ns.CreateBorder(twin, twin.icon, "BACKGROUND", -7)
-
-    twin.shieldIcon = textLayer:CreateTexture(nil, "OVERLAY", nil, 3)
-    twin.shieldIcon:SetTexture(SHIELD)
-    twin.shieldIcon:SetAlpha(0)
-
-    twin.timer = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    twin.timer:SetJustifyH("RIGHT")
-    twin.text = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    twin.text:SetJustifyH("LEFT")
-    twin.text:SetWordWrap(false)
-    twin.target = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    twin.target:SetJustifyH("CENTER")
-    twin.target:SetWordWrap(false)
-
-    local timerBinding = CreateDurationTextBinding()
-    timerBinding:SetFontString(twin.timer)
-    timerBinding:SetUpdateInterval(0.1)
-    timerBinding:SetEnabled(false)
-    twin.timerBinding = timerBinding
-
-    local health = plate.health
-    if health then
-        local copy = CreateFrame("StatusBar", nil, twin)
-        copy:SetMinMaxValues(0, 1)
-        copy.background = copy:CreateTexture(nil, "BACKGROUND")
-        copy.background:SetAllPoints()
-        local copyLayer = CreateFrame("Frame", nil, copy)
-        copyLayer:SetAllPoints()
-        copyLayer:SetFrameLevel(copy:GetFrameLevel() + 3)
-        copy.border = ns.CreateBorder(copyLayer, copy, "BACKGROUND", -7)
-        hooksecurefunc(health, "SetValue", function(_, ...) copy:SetValue(...) end)
-        hooksecurefunc(health, "SetMinMaxValues", function(_, ...) copy:SetMinMaxValues(...) end)
-        hooksecurefunc(health, "SetStatusBarColor", function(_, ...) copy:SetStatusBarColor(...) end)
-        hooksecurefunc(health, "SetReverseFill", function(_, ...) copy:SetReverseFill(...) end)
-        twin.health = copy
-        local textLayer = CreateFrame("Frame", nil, copy)
-        textLayer:SetAllPoints()
-        textLayer:SetFrameLevel(copy:GetFrameLevel() + 6)
-        twin.textLayer = textLayer
-    end
-    return twin
-end
-
-local function StyleTexts(bar, db)
-    ns.ApplyFont(bar.timer, db.font, db.size, db.outline)
-    ns.ApplyShadow(bar.timer, db.shadow)
-    ns.ApplyShadow(bar.text, db.shadow)
-    ns.ApplyShadow(bar.target, db.shadow)
-    ns.PlaceIcon(bar.timer, bar, db.timerPosition, 3, db.timerOffsetX, db.timerOffsetY)
-
-    ns.ApplyFont(bar.text, db.font, db.size, db.outline)
-    bar.text:SetJustifyH(db.textJustify)
-    bar.text:ClearAllPoints()
-    local textRightInset = db.showTimer and TIMER_WIDTH or 3
-    if db.textJustify == "RIGHT" then
-        bar.text:SetPoint("RIGHT", -textRightInset, 0)
-    elseif db.textJustify == "CENTER" then
-        bar.text:SetPoint("CENTER", (3 - textRightInset) / 2, 0)
-    else
-        bar.text:SetPoint("LEFT", 3, 0)
-    end
-
-    ns.ApplyFont(bar.target, db.font, db.targetSize, db.outline)
-    bar.target:SetTextColor(db.targetColor[1], db.targetColor[2], db.targetColor[3], db.targetColor[4])
-    ns.PlaceIcon(bar.target, bar, db.targetPosition, 2, db.targetOffsetX, db.targetOffsetY)
-    return textRightInset
-end
-
-local function StyleTwinHealth(plate, twin, drop, iconOffset, iconRight)
-    local copy, health = twin.health, plate.health
-    if not copy or not health then return end
-    local hdb = ns.DB.views[plate.state].health
-    copy:ClearAllPoints()
-    copy:SetSize(plate:GetWidth(), plate:GetHeight())
-    copy:SetPoint("BOTTOM", twin, "TOP", iconRight and iconOffset / 2 or -iconOffset / 2, drop)
-    ns.SetBarTexture(copy, health.texture or hdb.texture)
-    copy:SetStatusBarDesaturated(hdb.desaturate == true)
-    copy:SetReverseFill(hdb.fillDirection == "right")
-    ns.SetBackgroundTexture(copy.background, hdb.backgroundTexture, hdb.background)
-    copy.border:SetStyle(hdb.borderStyle, copy)
-    copy.border:SetColor(hdb.border[1], hdb.border[2], hdb.border[3], hdb.border[4])
-    copy.border:Layout(hdb.borderSize, 0, hdb.borderInside)
-end
-
-local function StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight, drop, iconOffset)
-    local wanted = db.importantEnlarge == true and plate.state ~= "friendly"
-    if not wanted then
-        StopTwin(bar)
-        if bar.twin ~= NO_TWIN then
-            bar.twin.enabled = false
-        end
-        ShowRealHealth(plate)
-        return
-    end
-    if bar.twin == NO_TWIN then
-        bar.twin = Castbar:CreateTwin(plate)
-    end
-    local twin = bar.twin
-    twin.enabled = true
-    twin:ClearAllPoints()
-    twin:SetSize(barWidth, height)
-    twin:SetPoint("CENTER", bar, "CENTER")
-    twin:SetScale(db.importantScale or 1.3)
-    StyleTwinHealth(plate, twin, drop, iconOffset, iconRight)
-    BuildTwinTexts(plate, twin)
-    ns.SetBarTexture(twin, db.texture)
-    ns.SetBarOverlay(twin, db.overlayPattern ~= "" and db.overlayPattern or nil, db.overlayAlpha, db.overlayContrast)
-    twin.timerBinding:SetFormatter(settings[plate.state].formatter)
-    twin.mustStop:ClearAllPoints()
-    twin.mustStop:SetAllPoints(twin:GetStatusBarTexture())
-    twin.mustStop:SetColorTexture(db.importantUninterruptible[1], db.importantUninterruptible[2], db.importantUninterruptible[3], 1)
-
-    twin.border:SetStyle(db.borderStyle, twin)
-    twin.border:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
-    twin.border:Layout(size, 0, db.borderInside)
-    twin.background:SetColorTexture(db.background[1], db.background[2], db.background[3], db.background[4])
-    twin.glow:Layout(db.glowSize, db.borderInside and 0 or size)
-    twin.glow:SetColor(db.importantColor[1], db.importantColor[2], db.importantColor[3], db.importantColor[4])
-    twin.glow:SetAlpha(db.importantGlow and 1 or 0)
-
-    twin.icon:ClearAllPoints()
-    twin.icon:SetSize(height, height)
-    if iconRight then
-        twin.icon:SetPoint("LEFT", twin, "RIGHT", gap, 0)
-    else
-        twin.icon:SetPoint("RIGHT", twin, "LEFT", -gap, 0)
-    end
-    if db.cropIcon == false then
-        twin.icon:SetTexCoord(0, 1, 0, 1)
-    else
-        twin.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    end
-    twin.icon:SetShown(db.showIcon)
-    twin.iconBorder:Layout(size)
-    twin.iconBorder:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
-    twin.iconBorder:SetShown(db.showIcon)
-
-    twin.spark:ClearAllPoints()
-    twin.spark:SetPoint("CENTER", twin:GetStatusBarTexture(), "RIGHT", 0, 0)
-    twin.spark:SetSize(math.max(8, height), height * 2.2)
-    twin.spark:SetVertexColor(db.sparkColor[1], db.sparkColor[2], db.sparkColor[3], db.sparkColor[4])
-
-    twin.shieldIcon:ClearAllPoints()
-    twin.shieldIcon:SetSize(height + 8, height + 8)
-    if db.showIcon then
-        twin.shieldIcon:SetPoint("CENTER", twin.icon, "CENTER")
-    else
-        twin.shieldIcon:SetPoint("CENTER", twin, iconRight and "RIGHT" or "LEFT")
-    end
-    StyleTexts(twin, db)
 end
 
 function Castbar:Configure(db, state)
@@ -888,8 +429,27 @@ function Castbar:Style(plate, db)
     bar.iconBorder:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
     bar.iconBorder:SetShown(db.showIcon)
 
-    local textRightInset = StyleTexts(bar, db)
-    StyleTwin(plate, bar, db, barWidth, height, gap, size, iconRight, drop, iconOffset)
+    ns.ApplyFont(bar.timer, db.font, db.size, db.outline)
+    ns.ApplyShadow(bar.timer, db.shadow)
+    ns.ApplyShadow(bar.text, db.shadow)
+    ns.ApplyShadow(bar.target, db.shadow)
+    ns.PlaceIcon(bar.timer, bar, db.timerPosition, 3, db.timerOffsetX, db.timerOffsetY)
+
+    ns.ApplyFont(bar.text, db.font, db.size, db.outline)
+    bar.text:SetJustifyH(db.textJustify)
+    bar.text:ClearAllPoints()
+    local textRightInset = db.showTimer and TIMER_WIDTH or 3
+    if db.textJustify == "RIGHT" then
+        bar.text:SetPoint("RIGHT", -textRightInset, 0)
+    elseif db.textJustify == "CENTER" then
+        bar.text:SetPoint("CENTER", (3 - textRightInset) / 2, 0)
+    else
+        bar.text:SetPoint("LEFT", 3, 0)
+    end
+
+    ns.ApplyFont(bar.target, db.font, db.targetSize, db.outline)
+    bar.target:SetTextColor(db.targetColor[1], db.targetColor[2], db.targetColor[3], db.targetColor[4])
+    ns.PlaceIcon(bar.target, bar, db.targetPosition, 2, db.targetOffsetX, db.targetOffsetY)
 
     local interruptText = bar.interruptText
     ns.ApplyFont(interruptText, db.font, db.interruptSize or db.size, db.outline)
@@ -942,7 +502,6 @@ function Castbar:Disable(plate)
     bar.duration = nil
     bar.kickClip:Hide()
     bar.mustStop:SetAlpha(0)
-    StopTwin(bar)
     TrackCasting(bar, false)
     if plate.casting then
         plate.casting = false
@@ -993,8 +552,6 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
     bar.spark:Hide()
     bar.kickClip:Hide()
     bar.glow:SetAlpha(0)
-    StopTwin(bar)
-    NormalVisibility(bar, s)
     bar.interrupted:Show()
     bar:Show()
     if not s.interruptKeepName then
@@ -1130,33 +687,6 @@ function Castbar:Refresh(plate, unit, ending)
     end
 
     bar.spark:SetShown(s.showSpark)
-    local twin = bar.twin
-    if twin.enabled then
-        twin.icon:SetTexture(texture)
-        twin.text:SetText(s.showSpellName and name or "")
-        if bar.target:IsShown() then
-            twin.target:SetText(UnitSpellTargetName(unit))
-            twin.target:SetTextColor(TargetTextColor(s, unit))
-            twin.target:Show()
-        else
-            twin.target:Hide()
-        end
-        if bar.duration then
-            twin:SetScript("OnUpdate", nil)
-            twin:SetTimerDuration(bar.duration, nil, direction)
-            twin.timerBinding:SetDuration(bar.duration)
-            twin.timerBinding:SetEnabled(s.showTimer)
-            twin.timer:SetShown(s.showTimer)
-        else
-            twin:SetMinMaxValues(startMs, endMs)
-            twin:SetValue(GetTime() * 1000)
-            twin:SetScript("OnUpdate", FallbackOnUpdate)
-            twin.timerBinding:SetEnabled(false)
-            twin.timer:Hide()
-        end
-        twin.spark:SetShown(s.showSpark)
-        twin:Show()
-    end
     TrackCasting(bar, true)
     if not plate.casting then
         ns.Fire("CAST_START", unit, plate)
@@ -1251,27 +781,6 @@ function Castbar:Preview(plate, state)
         bar.target:Hide()
     end
 
-    local twin = bar.twin
-    if twin.enabled and cast.important and not interrupted then
-        twin:SetMinMaxValues(0, 1)
-        twin:SetValue((s.drain and not cast.channel) and (1 - cast.progress) or cast.progress)
-        SetColor(twin:GetStatusBarTexture(), cast.onCooldown and s.importantNotReady or s.importantReady)
-        twin.mustStop:SetAlpha(cast.notInterruptible and (s.importantUninterruptible[4] or 1) or 0)
-        twin.shieldIcon:SetAlpha((s.shieldIcon and cast.notInterruptible) and 1 or 0)
-        twin.icon:SetTexture(cast.icon)
-        twin.text:SetText(s.showSpellName and cast.name or "")
-        twin.timer:SetText(cast.timer)
-        twin.timer:SetShown(s.showTimer)
-        twin.target:SetShown(bar.target:IsShown())
-        twin.target:SetText(bar.target:GetText() or "")
-        twin.target:SetTextColor(bar.target:GetTextColor())
-        twin.spark:SetShown(s.showSpark)
-        twin:SetAlpha(bar:GetAlpha())
-        bar:SetAlpha(0)
-        twin:Show()
-    else
-        StopTwin(bar)
-    end
     bar:Show()
 end
 

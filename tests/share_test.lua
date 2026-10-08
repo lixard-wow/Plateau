@@ -76,8 +76,8 @@ local okBlank, blankName = DB:ImportProfile("|||", pack({ version = 17, look = {
 check(okBlank and blankName:find("^Imported"), "a name that is empty after cleaning becomes Imported")
 check(not DB:ImportProfile("Long", "!SL1!" .. string.rep("A", 20001), false), "strings over 20,000 characters are refused before unpacking")
 
-local okBad, badName = DB:ImportProfile("Bad values", pack({ version = 17, look = { castbar = { textJustify = "SIDEWAYS", importantScale = 0 }, scaling = { boss = -2, castScale = 99 }, name = { justify = "RIGHT" } } }), false)
+local okBad, badName = DB:ImportProfile("Bad values", pack({ version = 17, look = { castbar = { textJustify = "SIDEWAYS" }, health = { borderSize = 1 }, target = { scale = 0 }, scaling = { boss = -2, castScale = 99 }, name = { justify = "RIGHT" } } }), false)
 check(okBad, "an import with bad values still imports")
 local bad = DB.saved.profiles[badName].look
 check(bad.castbar.textJustify == nil and bad.name.justify == "RIGHT", "an unknown text alignment is dropped and a valid one kept")
-check(bad.castbar.importantScale == 0.1 and bad.scaling.boss == 0.1 and bad.scaling.castScale == 5, "scale values are kept between 0.1 and 5, so the game never gets a zero or negative scale")
+check(bad.target.scale == 0.1 and bad.scaling.boss == 0.1 and bad.scaling.castScale == 5, "scale values are kept between 0.1 and 5, so the game never gets a zero or negative scale")
