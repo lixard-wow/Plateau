@@ -202,7 +202,6 @@ ns.defaults = {
             alpha = 1,
             hideEmpty = false,
             glowMax = false,
-            matchWidth = false,
         },
         classification = {
             enabled = true,

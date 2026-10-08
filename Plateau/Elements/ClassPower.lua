@@ -137,7 +137,7 @@ local function Layout(plate, db, count)
     local width = db.pipWidth
     local height = db.pipHeight
     local spacing = db.spacing
-    if db.matchWidth then
+    if not width or width <= 0 then
         local view = ns.DB.views[plate.state]
         local total = view.plate.width * (plate.idleW or 1) * (plate.simplifiedSize or 1)
         width = math.max(1, (total - (count - 1) * spacing) / count)

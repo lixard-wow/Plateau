@@ -2571,8 +2571,8 @@ ns.sections = {
               tooltip = "Color of each filled segment. Used whenever Use class color is off." }, Off("look.classPower.classColor"), "Not used while Use class color is on."),
             { type = "Color", path = "look.classPower.emptyColor", label = "Empty segment color",
               tooltip = "Color of each segment that isn't filled, meaning resource you don't have right now. Death Knight runes that are recharging aren't shown this way: they stay full and are dimmed. Soul shards fill in tenths, so a partly full shard fills partway." },
-            Gate({ type = "Slider", path = "look.classPower.pipWidth", label = "Segment width", min = 4, max = 40,
-              tooltip = "How wide each segment of the resource is." }, Off("look.classPower.matchWidth"), "Not used while Match health bar width is on."),
+            { type = "Slider", path = "look.classPower.pipWidth", label = "Segment width (0 = match health bar)", min = 0, max = 40,
+              tooltip = "How wide each segment of the resource is. At 0 the segments stretch so the whole resource is exactly as wide as the health bar, like the cast bar's width setting." },
             { type = "Slider", path = "look.classPower.pipHeight", label = "Segment height", min = 2, max = 24,
               tooltip = "How tall each segment of the resource is." },
             { type = "Slider", path = "look.classPower.spacing", label = "Segment spacing", min = 0, max = 10,
@@ -2584,9 +2584,7 @@ ns.sections = {
             { type = "Toggle", path = "look.classPower.hideEmpty", label = "Hide when empty",
               tooltip = "Hides the resource while you have none of it, like no combo points. Death Knight runes always show." },
             { type = "Toggle", path = "look.classPower.glowMax", label = "Glow at maximum",
-              tooltip = "The resource glows in its own color while it is full, as a cue to spend it." },
-            { type = "Toggle", path = "look.classPower.matchWidth", label = "Match health bar width",
-              tooltip = "Stretches the segments so the whole resource is exactly as wide as the health bar, like the cast bar does. Segment width is then worked out for you." }
+              tooltip = "The resource glows in its own color while it is full, as a cue to spend it." }
         )
     )),
 
