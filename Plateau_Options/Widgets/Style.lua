@@ -212,11 +212,13 @@ Style.BUTTON_RADIUS = Style.theme.buttonRadius
 
 function Style.DropArrow(button)
     local arrow = button:CreateTexture(nil, "OVERLAY")
-    arrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
-    arrow:SetSize(10, 10)
-    arrow:SetPoint("RIGHT", -8, 0)
-    arrow:SetRotation(-math.pi / 2)
-    arrow:SetVertexColor(Style.colors.muted[1], Style.colors.muted[2], Style.colors.muted[3])
+    arrow:SetTexture("Interface\\AddOns\\" .. addonName .. "\\Art\\Icons\\icon_chevron_down")
+    arrow:SetSize(12, 12)
+    arrow:SetPoint("RIGHT", -7, 0)
+    local idle, hover = Style.colors.icon or Style.colors.muted, Style.colors.iconHover or Style.colors.text
+    arrow:SetVertexColor(idle[1], idle[2], idle[3])
+    button:HookScript("OnEnter", function() arrow:SetVertexColor(hover[1], hover[2], hover[3]) end)
+    button:HookScript("OnLeave", function() arrow:SetVertexColor(idle[1], idle[2], idle[3]) end)
     button.arrow = arrow
     return arrow
 end
