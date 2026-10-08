@@ -4,7 +4,7 @@ local Style = ns.Style
 local C = Style.colors
 local Widgets = ns.Widgets
 
-local WIDTH, HEIGHT = 1150, 856
+local WIDTH, HEIGHT = 1260, 880
 local RAIL = 168
 local RAIL_TOP = 8
 local PAD = 16
@@ -836,7 +836,7 @@ local RAIL_GROUPS = {
     { label = "Help", keys = { "help" } },
 }
 local RAIL_ROW = 21
-local RAIL_HEADER = 21
+local RAIL_HEADER = 20
 
 local railScroll = CreateFrame("ScrollFrame", nil, rail)
 railScroll:SetPoint("TOPLEFT", 0, -(RAIL_TOP + 1))
