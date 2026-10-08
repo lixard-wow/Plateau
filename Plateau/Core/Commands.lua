@@ -25,6 +25,7 @@ end
 function ns.ResetPerformanceCounts()
     local a, b, c = SlowCounts()
     baseline = a and { a, b, c } or nil
+    if ns.Driver and ns.Driver.ResetClaimTime then ns.Driver:ResetClaimTime() end
 end
 
 function ns.CpuReadout()
@@ -95,6 +96,20 @@ function ns.PerformanceLines()
                 end
                 if #top > 0 then
                     lines[#lines + 1] = "Slowest parts to build: " .. table.concat(top, ", ")
+                end
+            end
+        end
+        if ns.Driver.ClaimTime then
+            local count, average, slowest, restyles, over1, worstFrame, parts = ns.Driver:ClaimTime()
+            if count > 0 then
+                lines[#lines + 1] = ("Time to set up a plate for a new unit: %.3f ms on average, %.2f ms slowest (%d set-ups, %d needed a full restyle)"):format(average, slowest, count, restyles)
+                lines[#lines + 1] = ("Frames where set-ups took over 1 ms: %d (worst frame %.2f ms)"):format(over1, worstFrame)
+                local top = {}
+                for i = 1, math.min(5, #parts) do
+                    top[#top + 1] = ("%s %.3f ms"):format(parts[i].key, parts[i].ms)
+                end
+                if #top > 0 then
+                    lines[#lines + 1] = "Slowest set-up steps (average per set-up): " .. table.concat(top, ", ")
                 end
             end
         end

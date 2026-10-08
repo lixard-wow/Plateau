@@ -537,7 +537,35 @@ local function UpdateEmphasis()
     end
 end
 
+local claimTime = { count = 0, total = 0, slowest = 0, restyles = 0, framesOver1 = 0, worstFrame = 0, frameAt = nil, frameMs = 0, parts = {} }
+
+local function ClaimPart(key, started)
+    local now = debugprofilestop()
+    claimTime.parts[key] = (claimTime.parts[key] or 0) + now - started
+    return now
+end
+
+local function ClaimDone(started)
+    local ms = debugprofilestop() - started
+    claimTime.count = claimTime.count + 1
+    claimTime.total = claimTime.total + ms
+    if ms > claimTime.slowest then claimTime.slowest = ms end
+    local now = GetTime()
+    if claimTime.frameAt ~= now then
+        claimTime.frameAt = now
+        claimTime.frameMs = 0
+        claimTime.counted = false
+    end
+    claimTime.frameMs = claimTime.frameMs + ms
+    if claimTime.frameMs > claimTime.worstFrame then claimTime.worstFrame = claimTime.frameMs end
+    if claimTime.frameMs > 1 and not claimTime.counted then
+        claimTime.counted = true
+        claimTime.framesOver1 = claimTime.framesOver1 + 1
+    end
+end
+
 local function Claim(plate, unit)
+    local claimStarted = debugprofilestop()
     local base = plate.base
     HideBlizzardPlate(base)
     if base.SetStackingBoundsFrame then
@@ -576,6 +604,7 @@ local function Claim(plate, unit)
     if not registered.UNIT_FACTION then
         plate:RegisterUnitEvent("UNIT_FACTION", unit)
     end
+    local t = ClaimPart("events", claimStarted)
     plate.isPlayer = UnitIsPlayer(unit) == true
     plate.isFriendly = not UnitCanAttack("player", unit)
     ApplyHitTest(plate)
@@ -583,16 +612,36 @@ local function Claim(plate, unit)
     if plate.state ~= baseState then
         plate.state = baseState
     end
+    t = ClaimPart("unit checks", t)
     if plate.styledAs ~= styleOf[baseState] or plate.styleVersion ~= styleVersion then
+        claimTime.restyles = claimTime.restyles + 1
         StylePlate(plate)
+        t = ClaimPart("restyle", t)
     end
-    EnableElements(plate, unit)
+    for i = 1, #elements do
+        local element = elements[i]
+        if Runs(element, plate) then
+            element:Enable(plate, unit)
+        else
+            DisableElement(element, plate)
+        end
+        local key = element.claimKey
+        if not key then
+            key = "enable " .. (element.key or "?")
+            element.claimKey = key
+        end
+        t = ClaimPart(key, t)
+    end
     ns.Scaling:Apply(plate)
     UpdateClickArea(plate)
     plate:Show()
+    t = ClaimPart("scale and show", t)
     UpdateEmphasis()
     ApplyEmphasis(plate)
+    t = ClaimPart("highlight", t)
     ns.Fire("PLATE_ADDED", unit, plate)
+    ClaimPart("callbacks", t)
+    ClaimDone(claimStarted)
 end
 
 local function Watch(plate, unit)
@@ -1143,6 +1192,22 @@ function Driver:BuildTime()
     end
     table.sort(parts, function(a, b) return a.ms > b.ms end)
     return count, count > 0 and buildTime.total / count or 0, buildTime.slowest, parts
+end
+
+function Driver:ClaimTime()
+    local count = claimTime.count
+    local parts = {}
+    for key, total in pairs(claimTime.parts) do
+        parts[#parts + 1] = { key = key, ms = count > 0 and total / count or 0 }
+    end
+    table.sort(parts, function(a, b) return a.ms > b.ms end)
+    return count, count > 0 and claimTime.total / count or 0, claimTime.slowest, claimTime.restyles, claimTime.framesOver1, claimTime.worstFrame, parts
+end
+
+function Driver:ResetClaimTime()
+    claimTime.count, claimTime.total, claimTime.slowest, claimTime.restyles = 0, 0, 0, 0
+    claimTime.framesOver1, claimTime.worstFrame, claimTime.frameAt, claimTime.frameMs = 0, 0, nil, 0
+    claimTime.parts = {}
 end
 
 function Driver:PoolStats()
