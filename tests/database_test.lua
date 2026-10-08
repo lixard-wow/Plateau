@@ -36,7 +36,7 @@ check(DB.profile.look.name.enabled == false, "reload: boolean kept")
 check(DB:Reset("look.castbar.height") and DB.profile.look.castbar.height == 10, "reset one setting")
 check(DB:Reset("look.castbar.readyColor") and DB.profile.look.castbar.readyColor[1] == ns.defaults.look.castbar.readyColor[1], "reset color")
 check(DB:Reset() and DB.profile.look.name.enabled == true, "reset all")
-check(PlateauDB.version == 22 and PlateauDB.profileKeys["Stalador - Iridikron"] == "Default", "version + profile key")
+check(PlateauDB.version == 23 and PlateauDB.profileKeys["Stalador - Iridikron"] == "Default", "version + profile key")
 
 PlateauDB = { version = "seventeen", global = 3, profiles = { Default = "oops", Other = { look = 5, states = "x" }, [7] = {} }, profileKeys = { ["Stalador - Iridikron"] = 12 }, assignments = "bad" }
 local ok = pcall(DB.Init, DB)

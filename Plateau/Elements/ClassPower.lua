@@ -5,6 +5,7 @@ local UnitPowerMax = UnitPowerMax
 local UnitPowerDisplayMod = UnitPowerDisplayMod
 local GetRuneCooldown = GetRuneCooldown
 local UnitClassBase = UnitClassBase
+local UnitPowerType = UnitPowerType
 local issecretvalue = issecretvalue
 
 local POWER = Enum.PowerType
@@ -42,7 +43,26 @@ local RESOURCE_TOKEN = {
     [POWER.Essence] = "ESSENCE",
 }
 
-local resource, resourceMax, displayMod
+local ONLY_SPECS = {
+    MONK = { [269] = true },
+    MAGE = { [62] = true },
+}
+
+local NEEDS_CAT_FORM = { DRUID = true }
+
+local function CurrentSpecID()
+    local info = C_SpecializationInfo
+    local getSpec = (info and info.GetSpecialization) or GetSpecialization
+    local getInfo = (info and info.GetSpecializationInfo) or GetSpecializationInfo
+    if not (getSpec and getInfo) then return nil end
+    local index = getSpec()
+    if not index or index <= 0 then return nil end
+    local id = getInfo(index)
+    if issecretvalue(id) then return nil end
+    return id
+end
+
+local resource, resourceMax, displayMod, needsCat
 
 local ClassPower = {
     key = "classPower",
@@ -54,6 +74,14 @@ local function Detect()
     local class = UnitClassBase("player")
     resource = not issecretvalue(class) and class and BY_CLASS[class] or nil
     resourceMax, displayMod = nil, 1
+    needsCat = class and NEEDS_CAT_FORM[class] or false
+    local only = class and ONLY_SPECS[class]
+    if resource and only then
+        local spec = CurrentSpecID()
+        if spec and not only[spec] then
+            resource = nil
+        end
+    end
     if not resource then return end
     if resource == RUNES then
         resourceMax = 6
@@ -109,6 +137,11 @@ local function Layout(plate, db, count)
     local width = db.pipWidth
     local height = db.pipHeight
     local spacing = db.spacing
+    if db.matchWidth then
+        local view = ns.DB.views[plate.state]
+        local total = view.plate.width * (plate.idleW or 1) * (plate.simplifiedSize or 1)
+        width = math.max(1, (total - (count - 1) * spacing) / count)
+    end
     holder:SetSize(count * width + (count - 1) * spacing, height)
     ns.PlaceIcon(holder, plate, db.position, db.gap, db.offsetX, db.offsetY)
     holder:SetAlpha(db.alpha)
@@ -144,6 +177,13 @@ function ClassPower:Update(plate)
     if not (resource and plate.isTarget and not plate.isFriendly and db.enabled) then
         holder:Hide()
         return
+    end
+    if needsCat then
+        local power = UnitPowerType("player")
+        if issecretvalue(power) or power ~= POWER.Energy then
+            holder:Hide()
+            return
+        end
     end
     if resource ~= RUNES then
         local max = UnitPowerMax("player", resource)
@@ -231,10 +271,14 @@ local function Arm()
         listener:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
         listener:RegisterUnitEvent("UNIT_MAXPOWER", "player")
         listener:RegisterEvent("RUNE_POWER_UPDATE")
+        if needsCat then
+            listener:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
+        end
     else
         listener:UnregisterEvent("UNIT_POWER_UPDATE")
         listener:UnregisterEvent("UNIT_MAXPOWER")
         listener:UnregisterEvent("RUNE_POWER_UPDATE")
+        listener:UnregisterEvent("UNIT_DISPLAYPOWER")
     end
 end
 
@@ -251,8 +295,13 @@ listener:SetScript("OnEvent", function(_, event, unit, powerToken)
             local token = RESOURCE_TOKEN[resource]
             if token and powerToken and powerToken ~= token then return end
         end
-    elseif event ~= "RUNE_POWER_UPDATE" then
+    elseif event ~= "RUNE_POWER_UPDATE" and event ~= "UNIT_DISPLAYPOWER" then
         Detect()
+        armed = false
+        listener:UnregisterEvent("UNIT_POWER_UPDATE")
+        listener:UnregisterEvent("UNIT_MAXPOWER")
+        listener:UnregisterEvent("RUNE_POWER_UPDATE")
+        listener:UnregisterEvent("UNIT_DISPLAYPOWER")
         Arm()
     end
     local plate = ns.Driver:GetPlate("target")

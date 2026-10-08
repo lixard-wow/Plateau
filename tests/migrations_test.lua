@@ -8,7 +8,7 @@ local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 PlateauDB = { version = 1, profiles = { Default = { look = { highlight = { color = { 1, 0, 0, 1 }, size = 3 }, castbar = { height = 14 } } } }, profileKeys = {} }
 ns.DB:Init()
 local t = ns.DB.profile.look.target
-check(PlateauDB.version == 22, "schema bumped to the latest version")
+check(PlateauDB.version == 23, "schema bumped to the latest version")
 check(t.ringColor[1] == 1 and t.ringColor[2] == 0, "v1 ring color ends up in target.ringColor")
 check(t.ringSize == 3, "v1 ring size ends up in target.ringSize")
 check(rawget(ns.DB.profile.look, "highlight") == nil, "highlight group removed")
@@ -19,7 +19,7 @@ check(PlateauDB.profiles.Default.look.target.ringSize == 3, "migrated value surv
 
 PlateauDB = nil
 ns.DB:Init()
-check(PlateauDB.version == 22 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
+check(PlateauDB.version == 23 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
 
 PlateauDB = { version = 1, profiles = { Default = { look = { health = { tapped = { 0.2, 0.2, 0.9, 1 }, borderSize = 2 } } } }, profileKeys = {} }
 ns.DB:Init()
@@ -202,7 +202,7 @@ PlateauDB = { version = 15, profiles = {
 }, profileKeys = { ["Stalador - Iridikron"] = "On" } }
 ns.DB:Init()
 local on = PlateauDB.profiles.On.look.scaling
-check(PlateauDB.version == 22 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
+check(PlateauDB.version == 23 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
 check(on.layerByType == nil and on.layerOrder == nil and on.boss == 1.3, "v16: the old layering keys are removed and other scaling settings kept")
 check(PlateauDB.profiles.On.states.friendly.scaling.castFront == true and PlateauDB.profiles.On.states.friendly.scaling.layerByType == nil, "v16: state overrides are converted too")
 local off = PlateauDB.profiles.Off.look.scaling
@@ -240,4 +240,13 @@ local own = PlateauDB.profiles
 check(own.Default.look.castbar.uninterruptible[4] == 0.6, "v22: your own profiles keep the old see-through uninterruptible color")
 check(own.Mine.look.castbar.uninterruptible[1] == 1 and own.Mine.look.castbar.uninterruptible[4] == 0.3, "v22: an uninterruptible color you picked is kept")
 check(ns.DB:SwitchProfile("Minimal") and ns.DB:Get("look.castbar.uninterruptible")[4] == 1, "v22: built-in looks draw uninterruptible casts solid")
+ns.DB:Shutdown()
+
+PlateauDB = { version = 22, profiles = { Default = {}, Mine = { look = { classPower = { position = "LEFT", offsetY = 5 } } }, Minimal = {} }, profileKeys = {} }
+ns.DB:Init()
+own = PlateauDB.profiles
+local pinned = own.Default.look.classPower
+check(pinned.position == "BOTTOM" and pinned.gap == 22 and pinned.offsetY == 0, "v23: your own profiles keep the class resource below the plate")
+check(own.Mine.look.classPower.position == "LEFT" and own.Mine.look.classPower.offsetY == 5 and own.Mine.look.classPower.gap == 22, "v23: a class resource spot you picked is kept")
+check(ns.DB:SwitchProfile("Minimal") and ns.DB:Get("look.classPower.position") == "TOP" and ns.DB:Get("look.classPower.offsetY") == -3, "v23: built-in looks put the class resource on the health bar's top edge")
 ns.DB:Shutdown()

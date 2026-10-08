@@ -62,7 +62,7 @@ check(not shadow.corners[1].shown, "switching back to a plain border hides the c
 local scale = 0.5
 local plateAnchor = { CreateTexture = owner.CreateTexture, GetEffectiveScale = function() return scale end }
 PixelUtil = { GetPixelToUIUnitFactor = function() return 0.5 end }
-local plate = {}
+local plate = { GetEffectiveScale = function() return scale end }
 local ring = ns.CreateBorder(plateAnchor, plateAnchor, "BACKGROUND", 0)
 ns.pixelBorders, ns.pixelPlate, ns.pixelPerfect = true, plate, true
 ring:Layout(1, 2)
@@ -72,6 +72,10 @@ check(ring.edges[1].height == 1, "one pixel is one screen pixel at the plate's s
 scale = 2
 ns.RepixelPlate(plate)
 check(ring.edges[1].height == 0.25, "after the plate is rescaled, its borders are redrawn at one screen pixel again")
+ring.edges[1].height = 99
+ns.RepixelPlate(plate)
+check(ring.edges[1].height == 99, "redrawing at an unchanged scale is skipped")
+ring.edges[1].height = 0.25
 check(ns.pixelBorders == false, "redrawing leaves pixel mode the way it found it")
 ns.pixelPerfect = false
 scale = 1

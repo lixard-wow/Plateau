@@ -2563,7 +2563,7 @@ ns.sections = {
             { type = "Header", label = "Class resource", first = true },
             { type = "Note", label = "Display your class resource on your target's nameplate. Available resources depend on your class.", height = 44 },
             { type = "Toggle", path = "look.classPower.enabled", label = "Show class resource on target",
-              tooltip = "Adds your own resource to your current hostile target's nameplate: combo points (Rogue, Druid), holy power (Paladin), soul shards (Warlock), chi (Monk), arcane charges (Mage), essence (Evoker) or runes (Death Knight). This is your resource, not the target's power (see Enemy power bar). Other classes show nothing, and so does having no target or a friendly one." }
+              tooltip = "Adds your own resource to your current hostile target's nameplate: combo points (Rogue, and Druid while in Cat Form), holy power (Paladin), soul shards (Warlock), chi (Windwalker Monk), arcane charges (Arcane Mage), essence (Evoker) or runes (Death Knight). This is your resource, not the target's power (see Enemy power bar). Other classes and specs show nothing, and so does having no target or a friendly one." }
         ), GateTable(On("look.classPower.enabled"), "Turn on Show class resource on target to use this.", List(
             { type = "Toggle", path = "look.classPower.classColor", label = "Use class color",
               tooltip = "Colors each filled segment with your class color instead of the Color below." },
@@ -2571,8 +2571,8 @@ ns.sections = {
               tooltip = "Color of each filled segment. Used whenever Use class color is off." }, Off("look.classPower.classColor"), "Not used while Use class color is on."),
             { type = "Color", path = "look.classPower.emptyColor", label = "Empty segment color",
               tooltip = "Color of each segment that isn't filled, meaning resource you don't have right now. Death Knight runes that are recharging aren't shown this way: they stay full and are dimmed. Soul shards fill in tenths, so a partly full shard fills partway." },
-            { type = "Slider", path = "look.classPower.pipWidth", label = "Segment width", min = 4, max = 40,
-              tooltip = "How wide each segment of the resource is." },
+            Gate({ type = "Slider", path = "look.classPower.pipWidth", label = "Segment width", min = 4, max = 40,
+              tooltip = "How wide each segment of the resource is." }, Off("look.classPower.matchWidth"), "Not used while Match health bar width is on."),
             { type = "Slider", path = "look.classPower.pipHeight", label = "Segment height", min = 2, max = 24,
               tooltip = "How tall each segment of the resource is." },
             { type = "Slider", path = "look.classPower.spacing", label = "Segment spacing", min = 0, max = 10,
@@ -2584,7 +2584,9 @@ ns.sections = {
             { type = "Toggle", path = "look.classPower.hideEmpty", label = "Hide when empty",
               tooltip = "Hides the resource while you have none of it, like no combo points. Death Knight runes always show." },
             { type = "Toggle", path = "look.classPower.glowMax", label = "Glow at maximum",
-              tooltip = "The resource glows in its own color while it is full, as a cue to spend it." }
+              tooltip = "The resource glows in its own color while it is full, as a cue to spend it." },
+            { type = "Toggle", path = "look.classPower.matchWidth", label = "Match health bar width",
+              tooltip = "Stretches the segments so the whole resource is exactly as wide as the health bar, like the cast bar does. Segment width is then worked out for you." }
         )
     )),
 
