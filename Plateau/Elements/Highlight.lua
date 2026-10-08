@@ -80,8 +80,15 @@ local function Bob(texture, dx, dy)
         group.move:SetSmoothing("IN_OUT")
         texture.bob = group
     end
-    group:Stop()
-    group.move:SetOffset(dx, dy)
+    if group.dx ~= dx or group.dy ~= dy then
+        local playing = group:IsPlaying()
+        group:Stop()
+        group.move:SetOffset(dx, dy)
+        group.dx, group.dy = dx, dy
+        if playing then
+            group:Play()
+        end
+    end
 end
 
 local function PlayBob(texture, on)
@@ -104,6 +111,10 @@ local function EnsureArrows(set, plate)
     if not set.arrowLeft then
         set.arrowLeft = plate.overlay:CreateTexture(nil, "OVERLAY")
         set.arrowRight = plate.overlay:CreateTexture(nil, "OVERLAY")
+        for _, arrow in ipairs({ set.arrowLeft, set.arrowRight }) do
+            arrow:SetSnapToPixelGrid(false)
+            arrow:SetTexelSnappingBias(0)
+        end
     end
 end
 
