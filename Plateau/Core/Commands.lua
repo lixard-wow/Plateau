@@ -100,9 +100,9 @@ function ns.PerformanceLines()
             end
         end
         if ns.Driver.ClaimTime then
-            local count, average, slowest, restyles, over1, worstFrame, parts = ns.Driver:ClaimTime()
+            local count, average, slowest, restyles, over1, worstFrame, parts, swapped = ns.Driver:ClaimTime()
             if count > 0 then
-                lines[#lines + 1] = ("Time to set up a plate for a new unit: %.3f ms on average, %.2f ms slowest (%d set-ups, %d needed a full restyle)"):format(average, slowest, count, restyles)
+                lines[#lines + 1] = ("Time to set up a plate for a new unit: %.3f ms on average, %.2f ms slowest (%d set-ups, %d needed a full restyle, %d avoided one by swapping in a ready spare)"):format(average, slowest, count, restyles, swapped or 0)
                 lines[#lines + 1] = ("Frames where set-ups took over 1 ms: %d (worst frame %.2f ms)"):format(over1, worstFrame)
                 local top = {}
                 for i = 1, math.min(5, #parts) do

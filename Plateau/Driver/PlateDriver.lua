@@ -318,6 +318,7 @@ local function StylePlate(plate)
     end
     if pixel then
         ns.pixelBorders, ns.pixelPlate = wasPixel, nil
+        plate.pixelScale = plate:GetEffectiveScale()
     end
 end
 
@@ -705,6 +706,7 @@ local function OnPlateEvent(plate, event, ...)
 end
 
 local pools = { enemy = {}, friendly = {} }
+local swaps = 0
 local POOL_TARGET = { enemy = 16, friendly = 4 }
 local POOL_BUFFER = { enemy = 8, friendly = 2 }
 local built = { enemy = 0, friendly = 0 }
@@ -877,15 +879,55 @@ poolWarmer:SetScript("OnEvent", function(self)
     end)
 end)
 
+local function SpareStyledFor(state)
+    local list = pools[state]
+    for i = #list, 1, -1 do
+        local spare = list[i]
+        if spare.styledAs == styleOf[state] and spare.styleVersion == styleVersion then
+            return table.remove(list, i)
+        end
+    end
+end
+
+local function SwapToStyled(plate, base, state)
+    if plate.styledAs == styleOf[state] and plate.styleVersion == styleVersion then
+        return plate
+    end
+    local spare = SpareStyledFor(state)
+    if not spare then
+        return plate
+    end
+    platesByBase[base] = nil
+    plate.base = nil
+    plate:Hide()
+    plate:SetParent(hider)
+    plate:ClearAllPoints()
+    plate.stackRegion:SetParent(plate)
+    if plate.styleVersion ~= styleVersion then
+        stale[plate] = true
+        poolWarmer:Show()
+    end
+    local list = pools[plate.state]
+    list[#list + 1] = plate
+    AssignBase(spare, base)
+    swaps = swaps + 1
+    return spare
+end
+
 local function OnUnitAdded(unit)
     local base = GetNamePlateForUnit(unit)
     if not base then return end
 
-    local plate = platesByBase[base] or CreatePlate(base, unit)
+    local claimable, hiddenMinion = Claimable(unit)
+    local plate = platesByBase[base]
+    if not plate then
+        plate = CreatePlate(base, unit)
+    elseif claimable then
+        plate = SwapToStyled(plate, base, UnitCanAttack("player", unit) and "enemy" or "friendly")
+    end
     plate.unit = unit
     platesByUnit[unit] = plate
 
-    local claimable, hiddenMinion = Claimable(unit)
     if claimable then
         Claim(plate, unit)
     else
@@ -1201,13 +1243,14 @@ function Driver:ClaimTime()
         parts[#parts + 1] = { key = key, ms = count > 0 and total / count or 0 }
     end
     table.sort(parts, function(a, b) return a.ms > b.ms end)
-    return count, count > 0 and claimTime.total / count or 0, claimTime.slowest, claimTime.restyles, claimTime.framesOver1, claimTime.worstFrame, parts
+    return count, count > 0 and claimTime.total / count or 0, claimTime.slowest, claimTime.restyles, claimTime.framesOver1, claimTime.worstFrame, parts, swaps
 end
 
 function Driver:ResetClaimTime()
     claimTime.count, claimTime.total, claimTime.slowest, claimTime.restyles = 0, 0, 0, 0
     claimTime.framesOver1, claimTime.worstFrame, claimTime.frameAt, claimTime.frameMs = 0, 0, nil, 0
     claimTime.parts = {}
+    swaps = 0
 end
 
 function Driver:PoolStats()

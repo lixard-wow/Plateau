@@ -214,6 +214,9 @@ end
 function ns.RepixelPlate(plate)
     local set = plate.pixelSet
     if not set or not ns.pixelPerfect then return end
+    local scale = plate:GetEffectiveScale()
+    if plate.pixelScale == scale then return end
+    plate.pixelScale = scale
     local previous = ns.pixelBorders
     ns.pixelBorders = true
     for border, args in pairs(set) do
