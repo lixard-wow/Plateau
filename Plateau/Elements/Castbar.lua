@@ -92,7 +92,7 @@ local function TargetTextColor(s, unit)
     return s.targetColor[1], s.targetColor[2], s.targetColor[3], s.targetColor[4]
 end
 
-local SyncTwinTexts
+local HideReal, SyncTwinLooks
 
 local function ApplyFill(bar)
     local state = bar.plate.state
@@ -162,7 +162,7 @@ local function ApplyFill(bar)
         twinHealth:SetMinMaxValues(health:GetMinMaxValues())
         twinHealth:SetValue(health:GetValue())
         twinHealth:SetStatusBarColor(health:GetStatusBarColor())
-        SyncTwinTexts(bar.plate, twin)
+        SyncTwinLooks(twin)
         local clip = bar.plate.nameClip
         if s.showCasts == "interruptible" then
             local hidden = EvaluateColorValueFromBoolean(flag, EvaluateColorValueFromBoolean(stop, 1, 0), 1)
@@ -178,6 +178,7 @@ local function ApplyFill(bar)
                 clip:SetAlphaFromBoolean(flag, 0, 1)
             end
         end
+        HideReal(twin, flag, stop, s.showCasts == "interruptible")
     end
     twin.mustStop:SetAlphaFromBoolean(stop, s.importantUninterruptible[4] or 1, 0)
     if s.shieldIcon then
@@ -215,6 +216,25 @@ local function NormalVisibility(bar, s)
     end
 end
 
+local MIRRORED = {
+    { field = "healthText", element = "HealthText", kind = "text", fade = true },
+    { field = "level", element = "Level", kind = "text", fade = true },
+    { field = "enemyTarget", element = "EnemyTarget", kind = "text", fade = true },
+    { field = "forces", element = "Forces", kind = "text", fade = true },
+    { field = "quest", element = "Quest", kind = "texture", fade = true },
+    { field = "questProgress", element = "Quest", kind = "text", fade = true },
+    { field = "classification", element = "Classification", kind = "texture", fade = true },
+    { field = "raidMarker", element = "RaidMarker", kind = "texture" },
+}
+
+local function TwinOf(plate)
+    local bar = plate and plate.castbar
+    local twin = bar and bar.twin
+    if twin and twin ~= NO_TWIN then
+        return twin
+    end
+end
+
 local function ShowRealHealth(plate)
     local health = plate and plate.health
     if health then
@@ -224,18 +244,51 @@ local function ShowRealHealth(plate)
     if plate and plate.nameClip then
         plate.nameClip:SetAlpha(1)
     end
+    local twin = TwinOf(plate)
+    if twin and twin.faded then
+        for source in pairs(twin.faded) do
+            source:SetAlpha(twin.alphaOf[source] or 1)
+        end
+    end
 end
 
-local function MirrorText(source, parent)
+local function MirrorCommon(source, copy, twin)
+    hooksecurefunc(source, "SetAlpha", function(_, value)
+        twin.alphaOf[source] = value
+        copy:SetAlpha(value)
+    end)
+    hooksecurefunc(source, "SetShown", function(_, ...) copy:SetShown(...) end)
+    hooksecurefunc(source, "Show", function() copy:Show() end)
+    hooksecurefunc(source, "Hide", function() copy:Hide() end)
+end
+
+local function MirrorText(source, parent, twin)
     local copy = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     copy:SetWordWrap(false)
     hooksecurefunc(source, "SetText", function(_, ...) copy:SetText(...) end)
     hooksecurefunc(source, "SetFormattedText", function(_, ...) copy:SetFormattedText(...) end)
     hooksecurefunc(source, "SetTextColor", function(_, ...) copy:SetTextColor(...) end)
-    hooksecurefunc(source, "SetAlpha", function(_, ...) copy:SetAlpha(...) end)
-    hooksecurefunc(source, "SetShown", function(_, ...) copy:SetShown(...) end)
-    hooksecurefunc(source, "Show", function() copy:Show() end)
-    hooksecurefunc(source, "Hide", function() copy:Hide() end)
+    hooksecurefunc(source, "SetFont", function(_, font, size, flags) copy:SetFont(font, size, flags or "") end)
+    hooksecurefunc(source, "SetShadowOffset", function(_, ...) copy:SetShadowOffset(...) end)
+    hooksecurefunc(source, "SetShadowColor", function(_, ...) copy:SetShadowColor(...) end)
+    hooksecurefunc(source, "SetJustifyH", function(_, ...) copy:SetJustifyH(...) end)
+    MirrorCommon(source, copy, twin)
+    return copy
+end
+
+local function MirrorTexture(source, parent, twin)
+    local copy = parent:CreateTexture(nil, "OVERLAY")
+    local texture = source:GetTexture()
+    if texture then
+        copy:SetTexture(texture)
+    end
+    hooksecurefunc(source, "SetTexture", function(_, ...) copy:SetTexture(...) end)
+    hooksecurefunc(source, "SetAtlas", function(_, ...) copy:SetAtlas(...) end)
+    hooksecurefunc(source, "SetTexCoord", function(_, ...) copy:SetTexCoord(...) end)
+    hooksecurefunc(source, "SetSpriteSheetCell", function(_, ...) copy:SetSpriteSheetCell(...) end)
+    hooksecurefunc(source, "SetVertexColor", function(_, ...) copy:SetVertexColor(...) end)
+    hooksecurefunc(source, "SetDesaturated", function(_, ...) copy:SetDesaturated(...) end)
+    MirrorCommon(source, copy, twin)
     return copy
 end
 
@@ -260,57 +313,106 @@ local function MirrorLayout(source, copy, map)
     hooksecurefunc(source, "SetHeight", function(_, ...) copy:SetHeight(...) end)
 end
 
-local function CopyText(source, copy)
-    local font, size, flags = source:GetFont()
-    if font then
-        copy:SetFont(font, size, flags or "")
+local function Forget(region)
+    region.slPlaceAnchor = nil
+end
+
+local function CopyLook(source, copy)
+    if source.GetFont then
+        local font, size, flags = source:GetFont()
+        if font then
+            copy:SetFont(font, size, flags or "")
+        end
+        copy:SetShadowOffset(source:GetShadowOffset())
+        copy:SetShadowColor(source:GetShadowColor())
+        copy:SetJustifyH(source:GetJustifyH())
+        copy:SetText(source:GetText())
+        copy:SetTextColor(source:GetTextColor())
+    else
+        local atlas = source:GetAtlas()
+        if atlas and atlas ~= "" then
+            copy:SetAtlas(atlas)
+        else
+            local texture = source:GetTexture()
+            if texture then
+                copy:SetTexture(texture)
+            end
+        end
+        copy:SetTexCoord(source:GetTexCoord())
+        copy:SetVertexColor(source:GetVertexColor())
+        copy:SetDesaturated(source:IsDesaturated())
     end
-    copy:SetShadowOffset(source:GetShadowOffset())
-    copy:SetShadowColor(source:GetShadowColor())
-    copy:SetJustifyH(source:GetJustifyH())
-    copy:SetText(source:GetText())
-    copy:SetTextColor(source:GetTextColor())
-    copy:SetAlpha(source:GetAlpha())
     copy:SetShown(source:IsShown())
+end
+
+function SyncTwinLooks(twin)
+    if not twin.copyOf then return end
+    for source, copy in pairs(twin.copyOf) do
+        if copy.GetObjectType and copy:GetObjectType() ~= "Frame" then
+            CopyLook(source, copy)
+        end
+    end
 end
 
 local function BuildTwinTexts(plate, twin)
     local layer = twin.textLayer
     if not layer then return end
+    twin.copyOf = twin.copyOf or {}
+    twin.alphaOf = twin.alphaOf or {}
+    twin.faded = twin.faded or {}
+    local copyOf = twin.copyOf
     local function Map(relative)
-        if relative == plate.nameClip and twin.nameClip then
-            return twin.nameClip
+        return copyOf[relative] or twin.health
+    end
+    local refresh = {}
+    if plate.name and not copyOf[plate.name] then
+        local clip = CreateFrame("Frame", nil, layer)
+        clip:SetClipsChildren(true)
+        copyOf[plate.nameClip] = clip
+        twin.nameClip = clip
+        local copy = MirrorText(plate.name, clip, twin)
+        copyOf[plate.name] = copy
+        twin.name = copy
+        MirrorLayout(plate.nameClip, clip, Map)
+        MirrorLayout(plate.name, copy, Map)
+        Forget(plate.name)
+        refresh.Name = true
+    end
+    for _, part in ipairs(MIRRORED) do
+        local source = plate[part.field]
+        if source and not copyOf[source] then
+            local copy = part.kind == "texture" and MirrorTexture(source, layer, twin) or MirrorText(source, layer, twin)
+            copyOf[source] = copy
+            MirrorLayout(source, copy, Map)
+            Forget(source)
+            if part.fade then
+                twin.faded[source] = true
+            end
+            refresh[part.element] = true
         end
-        return twin.health
     end
     local look = ns.DB.views[plate.state]
-    if plate.name and not twin.name then
-        twin.nameClip = CreateFrame("Frame", nil, layer)
-        twin.nameClip:SetClipsChildren(true)
-        twin.name = MirrorText(plate.name, twin.nameClip)
-        MirrorLayout(plate.nameClip, twin.nameClip, Map)
-        MirrorLayout(plate.name, twin.name, Map)
-        local name = ns.Elements.Name
-        if name and look and look.name then
-            name:Style(plate, look.name)
-        end
-    end
-    if plate.healthText and not twin.healthText then
-        twin.healthText = MirrorText(plate.healthText, layer)
-        MirrorLayout(plate.healthText, twin.healthText, Map)
-        local healthText = ns.Elements.HealthText
-        if healthText and look and look.healthText then
-            healthText:Style(plate, look.healthText)
+    for key in pairs(refresh) do
+        local element = ns.Elements[key]
+        local db = look and look[element and element.key or ""]
+        if element and db and plate.built[element] then
+            element:Style(plate, db)
+            if plate.active and plate.unit and ns.Runs(element, plate) then
+                element:Enable(plate, plate.unit)
+            end
         end
     end
 end
 
-function SyncTwinTexts(plate, twin)
-    if twin.name then
-        CopyText(plate.name, twin.name)
-    end
-    if twin.healthText then
-        CopyText(plate.healthText, twin.healthText)
+function HideReal(twin, flag, stop, interruptibleOnly)
+    if not twin.faded then return end
+    for source in pairs(twin.faded) do
+        local intended = twin.alphaOf[source] or 1
+        if interruptibleOnly then
+            source:SetAlpha(EvaluateColorValueFromBoolean(flag, EvaluateColorValueFromBoolean(stop, intended, 0), intended))
+        else
+            source:SetAlpha(EvaluateColorValueFromBoolean(flag, 0, intended))
+        end
     end
 end
 
