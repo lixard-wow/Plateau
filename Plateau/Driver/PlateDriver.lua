@@ -538,7 +538,7 @@ local function UpdateEmphasis()
     end
 end
 
-local claimTime = { count = 0, total = 0, slowest = 0, restyles = 0, framesOver1 = 0, worstFrame = 0, frameAt = nil, frameMs = 0, parts = {} }
+local claimTime = { count = 0, total = 0, slowest = 0, restyles = 0, versionRestyles = 0, framesOver1 = 0, worstFrame = 0, frameAt = nil, frameMs = 0, parts = {} }
 
 local function ClaimPart(key, started)
     local now = debugprofilestop()
@@ -616,6 +616,9 @@ local function Claim(plate, unit)
     t = ClaimPart("unit checks", t)
     if plate.styledAs ~= styleOf[baseState] or plate.styleVersion ~= styleVersion then
         claimTime.restyles = claimTime.restyles + 1
+        if plate.styleVersion ~= styleVersion then
+            claimTime.versionRestyles = claimTime.versionRestyles + 1
+        end
         StylePlate(plate)
         t = ClaimPart("restyle", t)
     end
@@ -1084,17 +1087,39 @@ restyleQueue:SetScript("OnUpdate", function(self)
 end)
 
 local restyleAfterCombat = false
+local restyleReasons = {}
+local pendingReasons = {}
+local deferredReasons = {}
 
-function Driver:RequestRestyle(background)
+function Driver:RequestRestyle(background, reason)
+    reason = reason or "other"
     if background and InCombatLockdown() then
         restyleAfterCombat = true
+        deferredReasons[reason] = true
         return
     end
+    pendingReasons[reason] = true
     restyleQueue:Show()
 end
 
-function Driver:Restyle()
+function Driver:RestyleReasons()
+    return restyleReasons
+end
+
+function Driver:Restyle(reason)
     restyleQueue:Hide()
+    if reason then
+        pendingReasons[reason] = true
+    end
+    local counted = false
+    for key in pairs(pendingReasons) do
+        restyleReasons[key] = (restyleReasons[key] or 0) + 1
+        pendingReasons[key] = nil
+        counted = true
+    end
+    if not counted then
+        restyleReasons.other = (restyleReasons.other or 0) + 1
+    end
     views = ns.DB.views
     dimAlpha = views.enemy.target.dimOthers
     ns.pixelPerfect = views.enemy.plate.pixelPerfect ~= false
@@ -1243,14 +1268,18 @@ function Driver:ClaimTime()
         parts[#parts + 1] = { key = key, ms = count > 0 and total / count or 0 }
     end
     table.sort(parts, function(a, b) return a.ms > b.ms end)
-    return count, count > 0 and claimTime.total / count or 0, claimTime.slowest, claimTime.restyles, claimTime.framesOver1, claimTime.worstFrame, parts, swaps
+    return count, count > 0 and claimTime.total / count or 0, claimTime.slowest, claimTime.restyles, claimTime.framesOver1, claimTime.worstFrame, parts, swaps, claimTime.versionRestyles
 end
 
 function Driver:ResetClaimTime()
     claimTime.count, claimTime.total, claimTime.slowest, claimTime.restyles = 0, 0, 0, 0
     claimTime.framesOver1, claimTime.worstFrame, claimTime.frameAt, claimTime.frameMs = 0, 0, nil, 0
     claimTime.parts = {}
+    claimTime.versionRestyles = 0
     swaps = 0
+    for key in pairs(restyleReasons) do
+        restyleReasons[key] = nil
+    end
 end
 
 function Driver:PoolStats()
@@ -1291,6 +1320,10 @@ Driver:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
 Driver:SetScript("OnEvent", function(_, event, arg)
     if event == "PLAYER_REGEN_ENABLED" and restyleAfterCombat then
         restyleAfterCombat = false
+        for key in pairs(deferredReasons) do
+            pendingReasons[key] = true
+            deferredReasons[key] = nil
+        end
         restyleQueue:Show()
     end
     if event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
@@ -1311,7 +1344,7 @@ Driver:SetScript("OnEvent", function(_, event, arg)
     end
     if event == "CVAR_UPDATE" then
         if arg == SIMPLIFIED_CVAR then
-            Driver:RequestRestyle()
+            Driver:RequestRestyle(false, "simplified plates setting")
         end
     elseif event == "PLAYER_REGEN_ENABLED" then
         if hitTestPending then

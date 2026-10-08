@@ -83,6 +83,6 @@ loader:SetScript("OnEvent", function(self, event, name)
             return
         end
         ns.ApplyRealmMarker()
-        ns.Driver:Restyle()
+        ns.Driver:Restyle("addon loaded")
     end
 end)

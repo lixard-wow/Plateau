@@ -374,7 +374,7 @@ local function ScanStep(from)
     end
     scanWanted, scanFound, scanIcons, scanning, scanProgress = {}, {}, {}, false, 0
     ns.spellNameVersion = ns.spellNameVersion + 1
-    ns.Driver:RequestRestyle(true)
+    ns.Driver:RequestRestyle(true, "aura spell names found")
     if next(pendingWanted) then
         local queued = pendingWanted
         pendingWanted = {}
@@ -834,7 +834,7 @@ local specWatcher = CreateFrame("Frame")
 specWatcher:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 specWatcher:SetScript("OnEvent", function()
     if configs.enemy then
-        ns.Driver:RequestRestyle(true)
+        ns.Driver:RequestRestyle(true, "spec changed (auras)")
     end
 end)
 
@@ -844,7 +844,7 @@ dispelWatcher:RegisterEvent("SPELLS_CHANGED")
 dispelWatcher:RegisterUnitEvent("UNIT_PET", "player")
 dispelWatcher:SetScript("OnEvent", function()
     if DetectDispels() and configs.enemy then
-        ns.Driver:RequestRestyle(true)
+        ns.Driver:RequestRestyle(true, "dispel spells changed")
     end
 end)
 

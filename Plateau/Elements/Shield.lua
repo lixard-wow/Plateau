@@ -440,7 +440,7 @@ abilities:SetScript("OnEvent", function()
     if enrage ~= canRemove.enrage or magic ~= canRemove.magic then
         canRemove.enrage, canRemove.magic = enrage, magic
         if configs.enemy then
-            ns.Driver:RequestRestyle(true)
+            ns.Driver:RequestRestyle(true, "enrage or magic removal spells changed")
         end
     end
 end)

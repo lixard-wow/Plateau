@@ -246,7 +246,7 @@ watcher:SetScript("OnEvent", function(_, event, name)
         sizeFactor, auraFactor = plate, aura
         selectedScale = selected
         if ns.DB.views then
-            ns.Driver:RequestRestyle()
+            ns.Driver:RequestRestyle(false, "Blizzard nameplate size settings")
         end
     end
 end)

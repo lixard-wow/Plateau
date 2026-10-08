@@ -480,9 +480,9 @@ end
 
 local function Changed()
     if ns.Driver.RequestRestyle then
-        ns.Driver:RequestRestyle()
+        ns.Driver:RequestRestyle(false, "setting changed")
     else
-        ns.Driver:Restyle()
+        ns.Driver:Restyle("setting changed")
     end
 end
 
@@ -723,7 +723,7 @@ function DB:SwitchProfile(name, temporary)
         return false, "no profile called " .. tostring(name)
     end
     self:UseProfile(name, temporary)
-    ns.Driver:RequestRestyle()
+    ns.Driver:RequestRestyle(false, "profile switched")
     return true
 end
 

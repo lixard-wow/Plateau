@@ -100,10 +100,11 @@ function ns.PerformanceLines()
             end
         end
         if ns.Driver.ClaimTime then
-            local count, average, slowest, restyles, over1, worstFrame, parts, swapped = ns.Driver:ClaimTime()
+            local count, average, slowest, restyles, over1, worstFrame, parts, swapped, versionRestyles = ns.Driver:ClaimTime()
             if count > 0 then
                 lines[#lines + 1] = ("Time to set up a plate for a new unit: %.3f ms on average, %.2f ms slowest (%d set-ups, %d needed a full restyle, %d avoided one by swapping in a ready spare)"):format(average, slowest, count, restyles, swapped or 0)
                 lines[#lines + 1] = ("Frames where set-ups took over 1 ms: %d (worst frame %.2f ms)"):format(over1, worstFrame)
+                lines[#lines + 1] = ("Why set-ups restyled: %d because Plateau restyled all plates since, %d because the plate last showed the other kind of unit"):format(versionRestyles or 0, restyles - (versionRestyles or 0))
                 local top = {}
                 for i = 1, math.min(5, #parts) do
                     top[#top + 1] = ("%s %.3f ms"):format(parts[i].key, parts[i].ms)
@@ -112,6 +113,14 @@ function ns.PerformanceLines()
                     lines[#lines + 1] = "Slowest set-up steps (average per set-up): " .. table.concat(top, ", ")
                 end
             end
+        end
+        if ns.Driver.RestyleReasons then
+            local reasons = {}
+            for key, n in pairs(ns.Driver:RestyleReasons()) do
+                reasons[#reasons + 1] = ("%s %d"):format(key, n)
+            end
+            table.sort(reasons)
+            lines[#lines + 1] = "Full restyles of all plates, by reason: " .. (#reasons > 0 and table.concat(reasons, ", ") or "none")
         end
     end
     lines[#lines + 1] = ("Visible nameplates: %d"):format(total)

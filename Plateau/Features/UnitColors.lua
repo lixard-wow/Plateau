@@ -435,7 +435,7 @@ UnitColors:RegisterEvent("PLAYER_LEVEL_UP")
 UnitColors:SetScript("OnEvent", function(_, event)
     if event == "PLAYER_LEVEL_UP" then
         if cfgs.enemy then
-            ns.Driver:RequestRestyle(true)
+            ns.Driver:RequestRestyle(true, "level up")
         end
         return
     end
@@ -447,6 +447,6 @@ UnitColors:SetScript("OnEvent", function(_, event)
         inRaid = instance and instanceType == "raid"
     end
     if cfgs.enemy and (wasTank ~= isTank or wasInInstance ~= inInstance or wasInRaid ~= inRaid) then
-        ns.Driver:RequestRestyle(true)
+        ns.Driver:RequestRestyle(true, "role or instance changed")
     end
 end)
