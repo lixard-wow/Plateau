@@ -728,6 +728,78 @@ function DB:CreateProfile(name, copyFrom)
     return self:SwitchProfile(name)
 end
 
+local COLOR_FLAGS = { classColors = true, targetClassColor = true, interruptClassColor = true, colorByHealth = true, meColor = true, executeColor = true }
+local NOT_COLORS = { background = true, border = true, borderColor = true, backgroundColor = true, emptyColor = true, sparkColor = true }
+local colorPaths
+
+local function IsColorTable(value)
+    return type(value) == "table" and type(value[1]) == "number" and type(value[3]) == "number"
+end
+
+local function CollectColors(node, prefix, inColors, list)
+    for key, value in pairs(node) do
+        local path = prefix .. "." .. key
+        if type(value) == "table" and not IsColorTable(value) then
+            CollectColors(value, path, inColors or key == "colors", list)
+        elseif inColors or (IsColorTable(value) and not NOT_COLORS[key]) or (type(value) == "boolean" and COLOR_FLAGS[key]) then
+            list[#list + 1] = path
+        end
+    end
+    return list
+end
+
+function DB:ColorPaths()
+    if not colorPaths then
+        colorPaths = CollectColors(ns.defaults.look, "look", false, {})
+        table.sort(colorPaths)
+        local set = {}
+        for _, path in ipairs(colorPaths) do
+            set[path] = true
+        end
+        colorPaths.set = set
+    end
+    return colorPaths
+end
+
+local function StoreIn(profile, path, value)
+    local node = profile
+    local parts = {}
+    for part in path:gmatch("[^%.]+") do
+        parts[#parts + 1] = part
+    end
+    for i = 1, #parts - 1 do
+        if type(node[parts[i]]) ~= "table" then
+            node[parts[i]] = {}
+        end
+        node = node[parts[i]]
+    end
+    node[parts[#parts]] = type(value) == "table" and DeepCopy(value) or value
+end
+
+function DB:CopyColors(target)
+    local names = {}
+    if target == "*" then
+        for name in pairs(self.saved.profiles) do
+            if name ~= self.profileName then
+                names[#names + 1] = name
+            end
+        end
+    elseif target and target ~= self.profileName and self.saved.profiles[target] then
+        names[1] = target
+    else
+        return false, "pick a different profile to copy colors to"
+    end
+    for _, path in ipairs(self:ColorPaths()) do
+        local value = self:Get(path)
+        if value ~= nil then
+            for _, name in ipairs(names) do
+                StoreIn(self.saved.profiles[name], path, value)
+            end
+        end
+    end
+    return true, #names
+end
+
 function DB:CopyProfile(from)
     local source = self.saved.profiles[from]
     if not source or from == self.profileName then

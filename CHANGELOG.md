@@ -9,6 +9,8 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 ### 2026-10-06 fixes
 
 #### Changed
+- **Built-in looks no longer change colors.** Picking or applying a look changes layout, sizes, fonts and textures only; cast bar, name, enemy type, threat, reaction and highlight colors stay yours.
+- **Copy colors to** (Profiles page): copies the active profile's colors into another profile or every other profile, leaving their layout alone.
 - **Dropdown arrows match the window theme.** Blizzard's gold chat arrow is replaced by a plain chevron in the theme's icon color, which brightens on hover.
 - **The aura pages are reorganized.** A new All auras page holds the text font, outline, shadow and tooltips shared by every group. Your debuffs, Crowd control, Enemy buffs and Important auras now share one layout: Show, Which auras (sort order, maximum duration and spell lists), Layout (position, alignment, growth, offsets, size, shape, count and spacing) and Icon (timer, stack count, swipe, border and dispel colors). Enemy buffs and Important auras gain spell lists, which work in the open world.
 

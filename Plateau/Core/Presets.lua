@@ -511,6 +511,19 @@ function ns.PresetLook(preset)
     return look
 end
 
+local function DropColors(list)
+    local colors = ns.DB:ColorPaths().set
+    for _, preset in ipairs(list) do
+        for path in pairs(preset.values) do
+            if colors[path] then
+                preset.values[path] = nil
+            end
+        end
+    end
+end
+
+DropColors(ns.presets.looks)
+DropColors(ns.presets.styles)
 Complete(ns.presets.looks)
 Complete(ns.presets.styles)
 

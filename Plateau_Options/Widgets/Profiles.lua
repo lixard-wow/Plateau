@@ -349,7 +349,8 @@ function ns.Widgets.ProfileActions(parent)
     local frame = CreateFrame("Frame", nil, parent)
     local total, selectWidth = GridWidths()
     local copyY = ROW_HEIGHT * 2 + 4
-    local deleteY = copyY + ROW_HEIGHT + HINT_HEIGHT + SEPARATION
+    local colorsY = copyY + ROW_HEIGHT + HINT_HEIGHT + 4
+    local deleteY = colorsY + ROW_HEIGHT + SEPARATION
     local restoreY = deleteY + ROW_HEIGHT + 2
     frame:SetHeight(restoreY + ROW_HEIGHT + 8 + 30)
 
@@ -487,6 +488,34 @@ function ns.Widgets.ProfileActions(parent)
         end
     end)
     hintFrame:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+    local colorsChoice
+    local colorsButton = PickerRow(colorsY, {
+        label = "Copy colors to",
+        options = function()
+            local options = { { value = "*", label = "Every other profile" } }
+            for _, option in ipairs(ProfileOptions(Active())) do
+                options[#options + 1] = option
+            end
+            return options
+        end,
+        unknown = "Pick a profile",
+        get = function() return colorsChoice end,
+        set = function(value) colorsChoice = value end,
+    }, "Copy colors", "Copies the colors of " .. "the active profile (cast bar, names, health text, enemy types, threat, reaction, target, focus and mouseover highlights) into the profile you picked, or into every other profile. Layout, sizes, fonts and textures are not changed. You will be asked to confirm.", function()
+        local target = colorsChoice
+        if target ~= "*" and not Exists(target) then return end
+        local label = target == "*" and "every other profile" or target
+        confirm:Ask("Copy colors", "Copy the colors of " .. Active() .. " to " .. label .. "?\n\nTheir cast bar, name, health text, enemy type, threat, reaction and highlight colors will be replaced. Layout, sizes, fonts and textures stay as they are.", "Copy colors", function()
+            local ok, result = Plateau.DB:CopyColors(target)
+            if ok then
+                Say("Copied the colors of " .. Active() .. " to " .. (target == "*" and (result .. " other profiles") or target) .. ".")
+            else
+                Say(result, true)
+            end
+            AfterChange()
+        end)
+    end)
 
     local deleteButton = PickerRow(deleteY, {
         label = "Delete profile",
