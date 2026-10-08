@@ -10,9 +10,11 @@ local issecretvalue = issecretvalue
 local settings = {}
 local tokens = {}
 
+local REFRESH = 0.25
+
 local EnemyTarget = {
     key = "enemyTarget",
-    events = { "UNIT_TARGET" },
+    events = { "UNIT_TARGET", "UNIT_THREAT_LIST_UPDATE", "UNIT_FLAGS" },
 }
 ns.Elements = ns.Elements or {}
 ns.Elements.EnemyTarget = EnemyTarget
@@ -124,5 +126,36 @@ function EnemyTarget:Preview(plate, state)
     text:SetText(state.enemyTargetName or UnitName("player"))
     text:Show()
 end
+
+local function RefreshAll()
+    ns.Driver:ForEachActive(function(plate)
+        if ns.Runs(EnemyTarget, plate) and plate.unit then
+            EnemyTarget:Update(plate, plate.unit)
+        end
+    end)
+end
+
+local refresher = CreateFrame("Frame")
+refresher:Hide()
+local elapsedSince = 0
+refresher:SetScript("OnUpdate", function(_, elapsed)
+    elapsedSince = elapsedSince + elapsed
+    if elapsedSince < REFRESH then return end
+    elapsedSince = 0
+    RefreshAll()
+end)
+refresher:RegisterEvent("PLAYER_REGEN_DISABLED")
+refresher:RegisterEvent("PLAYER_REGEN_ENABLED")
+refresher:SetScript("OnEvent", function(self, event)
+    if event == "PLAYER_REGEN_DISABLED" and EnemyTarget.enabled then
+        elapsedSince = 0
+        self:Show()
+    else
+        self:Hide()
+    end
+    if EnemyTarget.enabled then
+        RefreshAll()
+    end
+end)
 
 ns.Driver:RegisterElement(EnemyTarget)
