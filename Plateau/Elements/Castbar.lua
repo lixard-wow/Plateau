@@ -92,6 +92,8 @@ local function TargetTextColor(s, unit)
     return s.targetColor[1], s.targetColor[2], s.targetColor[3], s.targetColor[4]
 end
 
+local SyncTwinTexts
+
 local function ApplyFill(bar)
     local state = bar.plate.state
     local s = settings[state]
@@ -160,13 +162,21 @@ local function ApplyFill(bar)
         twinHealth:SetMinMaxValues(health:GetMinMaxValues())
         twinHealth:SetValue(health:GetValue())
         twinHealth:SetStatusBarColor(health:GetStatusBarColor())
+        SyncTwinTexts(bar.plate, twin)
+        local clip = bar.plate.nameClip
         if s.showCasts == "interruptible" then
             local hidden = EvaluateColorValueFromBoolean(flag, EvaluateColorValueFromBoolean(stop, 1, 0), 1)
             health:SetAlpha(hidden)
             health.borderLayer:SetAlpha(hidden)
+            if clip then
+                clip:SetAlpha(hidden)
+            end
         else
             health:SetAlphaFromBoolean(flag, 0, 1)
             health.borderLayer:SetAlphaFromBoolean(flag, 0, 1)
+            if clip then
+                clip:SetAlphaFromBoolean(flag, 0, 1)
+            end
         end
     end
     twin.mustStop:SetAlphaFromBoolean(stop, s.importantUninterruptible[4] or 1, 0)
@@ -210,6 +220,68 @@ local function ShowRealHealth(plate)
     if health then
         health:SetAlpha(1)
         health.borderLayer:SetAlpha(1)
+    end
+    if plate and plate.nameClip then
+        plate.nameClip:SetAlpha(1)
+    end
+end
+
+local function MirrorText(source, parent)
+    local copy = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    copy:SetWordWrap(false)
+    hooksecurefunc(source, "SetText", function(_, ...) copy:SetText(...) end)
+    hooksecurefunc(source, "SetFormattedText", function(_, ...) copy:SetFormattedText(...) end)
+    hooksecurefunc(source, "SetTextColor", function(_, ...) copy:SetTextColor(...) end)
+    hooksecurefunc(source, "SetAlpha", function(_, ...) copy:SetAlpha(...) end)
+    hooksecurefunc(source, "SetShown", function(_, ...) copy:SetShown(...) end)
+    hooksecurefunc(source, "Show", function() copy:Show() end)
+    hooksecurefunc(source, "Hide", function() copy:Hide() end)
+    return copy
+end
+
+local function CopyPoints(source, target, plate, twin)
+    target:ClearAllPoints()
+    for i = 1, source:GetNumPoints() do
+        local point, relative, relativePoint, x, y = source:GetPoint(i)
+        local mapped = (relative and relative == plate.nameClip and twin.nameClip) or twin.health
+        target:SetPoint(point, mapped, relativePoint, x, y)
+    end
+end
+
+local function CopyText(source, copy)
+    local font, size, flags = source:GetFont()
+    if font then
+        copy:SetFont(font, size, flags or "")
+    end
+    copy:SetShadowOffset(source:GetShadowOffset())
+    copy:SetShadowColor(source:GetShadowColor())
+    copy:SetJustifyH(source:GetJustifyH())
+    copy:SetText(source:GetText())
+    copy:SetTextColor(source:GetTextColor())
+    copy:SetAlpha(source:GetAlpha())
+    copy:SetShown(source:IsShown())
+end
+
+function SyncTwinTexts(plate, twin)
+    local layer = twin.textLayer
+    if not layer then return end
+    if plate.name and not twin.name then
+        twin.nameClip = CreateFrame("Frame", nil, layer)
+        twin.nameClip:SetClipsChildren(true)
+        twin.name = MirrorText(plate.name, twin.nameClip)
+    end
+    if plate.healthText and not twin.healthText then
+        twin.healthText = MirrorText(plate.healthText, layer)
+    end
+    if twin.name then
+        CopyPoints(plate.nameClip, twin.nameClip, plate, twin)
+        twin.nameClip:SetSize(plate.nameClip:GetSize())
+        CopyPoints(plate.name, twin.name, plate, twin)
+        CopyText(plate.name, twin.name)
+    end
+    if twin.healthText then
+        CopyPoints(plate.healthText, twin.healthText, plate, twin)
+        CopyText(plate.healthText, twin.healthText)
     end
 end
 
@@ -453,6 +525,10 @@ function Castbar:CreateTwin(plate)
         hooksecurefunc(health, "SetStatusBarColor", function(_, ...) copy:SetStatusBarColor(...) end)
         hooksecurefunc(health, "SetReverseFill", function(_, ...) copy:SetReverseFill(...) end)
         twin.health = copy
+        local textLayer = CreateFrame("Frame", nil, copy)
+        textLayer:SetAllPoints()
+        textLayer:SetFrameLevel(copy:GetFrameLevel() + 6)
+        twin.textLayer = textLayer
     end
     return twin
 end

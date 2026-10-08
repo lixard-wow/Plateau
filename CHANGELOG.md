@@ -9,7 +9,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 ### 2026-10-06 fixes
 
 #### Added
-- **Enlarged important casts now bring the health bar with them.** When Enlarge important casts is on, the health bar grows and comes to the front together with the cast bar, keeping its health, color, texture and border, instead of a lone cast bar floating over everything. The normal health bar fades out underneath until the cast ends.
+- **Enlarged important casts now bring the health bar, name and health text with them.** When Enlarge important casts is on, they grow and come to the front together with the cast bar, keeping their values, colors, fonts and positions, instead of a lone cast bar floating over everything. The normal health bar fades out underneath until the cast ends.
 - **Pixel-perfect borders** (Size page, on by default): borders, rings and glows are drawn in whole screen pixels at each nameplate's real size, so a 1 pixel border is exactly one pixel on every plate, including scaled friendly and target plates. They are only recalculated when a nameplate changes size, so there is no extra cost while you play.
 
 #### Fixed
