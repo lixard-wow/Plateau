@@ -3,6 +3,9 @@ local _, ns = ...
 local UnitName = UnitName
 local UnitIsPlayer = UnitIsPlayer
 local UnitClassBase = UnitClassBase
+local UnitGUID = UnitGUID
+local GetGuildInfo = GetGuildInfo
+local GetUnitTooltip = C_TooltipInfo and C_TooltipInfo.GetUnit
 local issecretvalue = issecretvalue
 
 local settings = {}
@@ -67,6 +70,66 @@ local function Shorten(name, mode)
 end
 ns.ShortenName = Shorten
 
+local LEVEL_PATTERN = ((TOOLTIP_UNIT_LEVEL or "Level %s"):gsub("[%^%$%(%)%.%[%]%*%+%-%?%%]", "%%%0"))
+LEVEL_PATTERN = (LEVEL_PATTERN:gsub("%%%%s", ".-"))
+
+local titleCache = {}
+
+local function NpcTitle(unit)
+    if not GetUnitTooltip then return nil end
+    local guid = UnitGUID(unit)
+    local id
+    if guid and not issecretvalue(guid) then
+        id = guid:match("^%a+%-%d+%-%d+%-%d+%-%d+%-(%d+)")
+    end
+    if id and titleCache[id] ~= nil then
+        return titleCache[id] or nil
+    end
+    local title = false
+    local ok, data = pcall(GetUnitTooltip, unit)
+    local line = ok and data and data.lines and data.lines[2]
+    local text = line and line.leftText
+    if text and not issecretvalue(text) and text ~= "" and not text:find(LEVEL_PATTERN) then
+        title = text
+    end
+    if id then
+        titleCache[id] = title
+    end
+    return title or nil
+end
+
+local function GuildLine(unit)
+    local guild = GetGuildInfo(unit)
+    if not guild or issecretvalue(guild) or guild == "" then return nil end
+    return "<" .. guild .. ">"
+end
+
+function Name:UpdateSubtitle(plate, unit, isPlayer)
+    local sub = plate.subtitle
+    local friendly = ns.DB.views.enemy.friendly
+    local text, color
+    if plate.state == "friendly" and plate.nameOnly and unit then
+        if isPlayer and friendly.guildLine then
+            text, color = GuildLine(unit), friendly.guildColor
+        elseif not isPlayer and friendly.npcTitle then
+            text, color = NpcTitle(unit), friendly.npcTitleColor
+        end
+    end
+    if not text then
+        sub:Hide()
+        return
+    end
+    local s = settings[plate.state]
+    local size = friendly.subtitleSize * (plate.nameSize or s.size) / s.size
+    if sub.size ~= size or sub.font ~= s.font or sub.outline ~= s.outline then
+        sub.size, sub.font, sub.outline = size, s.font, s.outline
+        ns.ApplyFont(sub, s.font, size, s.outline)
+    end
+    sub:SetTextColor(color[1], color[2], color[3], color[4])
+    sub:SetText(text)
+    sub:Show()
+end
+
 function Name:Create(plate)
     local clip = CreateFrame("Frame", nil, plate)
     clip:SetFrameLevel(plate.overlay:GetFrameLevel())
@@ -76,6 +139,11 @@ function Name:Create(plate)
     text:Hide()
     plate.nameClip = clip
     plate.name = text
+    local sub = plate.overlay:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    sub:SetWordWrap(false)
+    sub:SetPoint("TOP", text, "BOTTOM", 0, -1)
+    sub:Hide()
+    plate.subtitle = sub
 end
 
 function Name:Configure(db, state)
@@ -218,6 +286,7 @@ end
 function Name:Disable(plate)
     plate.name:SetText("")
     plate.name:Hide()
+    plate.subtitle:Hide()
     plate.barColorSet = nil
 end
 
@@ -275,6 +344,7 @@ function Name:Update(plate, unit)
         class = ns.UnitColors:PlayerClass(unit) or UnitClassBase(unit)
     end
     self:Color(plate, class)
+    self:UpdateSubtitle(plate, unit, isPlayer)
 end
 
 local FRIENDLY_CLASS_CVAR = "nameplateUseClassColorForFriendlyPlayerUnitNames"
@@ -369,6 +439,20 @@ function Name:Preview(plate, state)
     FitCutStart(plate)
     self:Color(plate, state.isPlayer and state.class)
     plate.name:Show()
+    local friendly = ns.DB.views.enemy.friendly
+    local sample = plate.state == "friendly" and plate.nameOnly
+        and ((state.isPlayer and friendly.guildLine and "<Plateau>") or (not state.isPlayer and friendly.npcTitle and "<Banker>"))
+    if sample then
+        local s = settings[plate.state]
+        ns.ApplyFont(plate.subtitle, s.font, friendly.subtitleSize, s.outline)
+        plate.subtitle.size = nil
+        local color = state.isPlayer and friendly.guildColor or friendly.npcTitleColor
+        plate.subtitle:SetTextColor(color[1], color[2], color[3], color[4])
+        plate.subtitle:SetText(sample)
+        plate.subtitle:Show()
+    else
+        plate.subtitle:Hide()
+    end
 end
 
 ns.Driver:RegisterElement(Name)

@@ -1947,6 +1947,12 @@ ns.sections = {
           tooltip = "Plateau's friendly plates fade out while you're in combat and come back when it ends. Faded plates can still be clicked unless Click-through friendly plates is on (Clickable area page)." }),
         FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.groupColor", colorPath = "look.friendly.groupNameColor", label = "Group member name color",
           tooltip = "Party and raid members' names use this color on Plateau's friendly plates, so your group stands out. Replaces their class color while on." }),
+        NameOnlyGate(FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.guildLine", colorPath = "look.friendly.guildColor", label = "Guild under player names",
+          tooltip = "Adds the player's guild, like <Plateau>, on a smaller line under their name. Only on Plateau's names-only friendly plates, so the open world and delves; the game draws friendly plates in dungeons and raids." })),
+        NameOnlyGate(FriendlyNpcsGate({ type = "ToggleColor", path = "look.friendly.npcTitle", colorPath = "look.friendly.npcTitleColor", label = "Title under NPC names",
+          tooltip = "Adds an NPC's title, like <Banker> under Jim, on a smaller line under their name. It is read from the NPC's tooltip once per kind of NPC; NPCs without a title show nothing extra." })),
+        NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.subtitleSize", label = "Guild and title text size", min = 6, max = 16,
+          tooltip = "Font size of the guild and NPC title lines. It grows and shrinks with the name, so NPC titles follow Friendly NPC name size." })),
 
         { type = "Header", label = "Blizzard's friendly plates (dungeons and raids)" },
         CVarToggle("nameplateShowOnlyNameForFriendlyPlayerUnits", "Only show friendly player names",
