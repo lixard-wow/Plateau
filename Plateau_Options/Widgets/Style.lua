@@ -657,8 +657,30 @@ function Style.LabelHit(label)
     return hit
 end
 
+local function T(text)
+    return Plateau.T(text)
+end
+Style.T = T
+
+local function TranslatedSetText(self, text)
+    self:RawSetText(T(text))
+end
+
+local function TranslatedSetFormattedText(self, pattern, ...)
+    self:RawSetFormattedText(T(pattern), ...)
+end
+
+function Style.Translates(fontString)
+    if fontString.RawSetText then return fontString end
+    fontString.RawSetText = fontString.SetText
+    fontString.SetText = TranslatedSetText
+    fontString.RawSetFormattedText = fontString.SetFormattedText
+    fontString.SetFormattedText = TranslatedSetFormattedText
+    return fontString
+end
+
 function Style.Text(parent, size, color, justify)
-    local text = parent:CreateFontString(nil, "OVERLAY")
+    local text = Style.Translates(parent:CreateFontString(nil, "OVERLAY"))
     Style.SetFont(text, size >= Style.HEADING_SIZE and Style.headingFont or Style.font, size, "")
     text:SetTextColor(color[1], color[2], color[3], color[4])
     text:SetJustifyH(justify or "LEFT")
@@ -682,17 +704,17 @@ function Style.Tooltip(owner, spec)
         if not explain and not hint and not spec.limited then return end
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         local accent = Style.StateColor()
-        GameTooltip:SetText(spec.label or "", accent[1], accent[2], accent[3])
+        GameTooltip:SetText(T(spec.label) or "", accent[1], accent[2], accent[3])
         if explain then
-            GameTooltip:AddLine(spec.tooltip, 1, 1, 1, true)
+            GameTooltip:AddLine(T(spec.tooltip), 1, 1, 1, true)
         end
         if spec.limited then
             local warn = Style.colors.warn
-            GameTooltip:AddLine(LIMITED_BADGE .. " Limited in instances: " .. spec.limited, warn[1], warn[2], warn[3], true)
+            GameTooltip:AddLine(LIMITED_BADGE .. " " .. T("Limited in instances:") .. " " .. T(spec.limited), warn[1], warn[2], warn[3], true)
         end
         if hint then
             local hintColor = Style.colors.accent
-            GameTooltip:AddLine(hint, hintColor[1], hintColor[2], hintColor[3], true)
+            GameTooltip:AddLine(T(hint), hintColor[1], hintColor[2], hintColor[3], true)
         end
         GameTooltip:Show()
     end)

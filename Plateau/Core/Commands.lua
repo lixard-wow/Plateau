@@ -507,6 +507,12 @@ SlashCmdList.PLATEAU = function(input)
 end
 
 Plateau = {
+    L = ns.L,
+    T = ns.T,
+    SetPseudoLocale = function(on)
+        ns.DB.saved.global.pseudoLocale = on == true or nil
+        ns.SetPseudoLocale(on)
+    end,
     DB = ns.DB,
     defaults = ns.defaults,
     version = ns.version,
