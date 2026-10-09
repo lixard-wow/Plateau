@@ -21,6 +21,12 @@ Plateau shows every word in English until someone translates it. English text is
 4. You don't have to translate everything. Any line you leave out stays in English.
 5. Reload the game (`/reload`) to see your changes.
 
+## Sending your translation
+
+Send your finished language file as a pull request or an issue on the [Plateau GitHub page](https://github.com/lixard-wow/Plateau). Say how you'd like to be credited; translators are named in the README and changelog.
+
+The [LICENSE](../LICENSE) allows you to copy and edit the language files and this template for exactly this purpose. By sending a translation you confirm it's your own work and agree it can be included in Plateau. It doesn't allow sharing Plateau or a translated copy anywhere else.
+
 ## Placeholders
 
 Some lines contain `%s` (a word or name) or `%d` (a whole number), like `L["A profile called %s already exists"]`. Keep every placeholder in your translation. If your language needs them in a different order, number them: `%2$s` is the second value and `%1$s` the first.

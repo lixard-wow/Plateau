@@ -144,7 +144,7 @@ Since patch 12.0 the game hides some information from addons during combat and i
 - `/plt cvars restore` undoes every game nameplate setting Plateau changed.
 
 ## Languages
-Plateau is in English. Every string can be translated: see [localization/README.md](localization/README.md) if you'd like to help with your language.
+Plateau is in English. Every string can be translated, and translations are welcome: the [LICENSE](LICENSE) allows you to edit the language files to send one in, and translators are credited here. See [localization/README.md](localization/README.md) for how.
 
 ## Compatibility
 - Plateau replaces Blizzard's enemy nameplates. If another nameplate addon is loaded, a dialog on first run offers to disable the other one, since two would fight over the same plates.
@@ -165,8 +165,9 @@ Plateau_Options/   settings UI (load on demand)
 Releases are packaged with the [BigWigs packager](https://github.com/BigWigsMods/packager); libraries are pulled in as externals by `.pkgmeta`.
 
 ## License
-All rights reserved. You may use Plateau to play World of Warcraft, but not copy, modify or redistribute it. See [LICENSE](LICENSE). The bundled fonts and libraries keep their own licenses.
+All rights reserved. You may use Plateau to play World of Warcraft, but not copy, modify or redistribute it. The one exception is translations: you may edit the language files to send a translation to the author. See [LICENSE](LICENSE). The bundled fonts and libraries keep their own licenses.
 
 ## Credits
+- Translations: none yet. Translators will be named here.
 - Libraries: LibStub, CallbackHandler, LibSharedMedia-3.0, LibDeflate.
 - Icons and atlases used in the preview and quest markers are Blizzard's.

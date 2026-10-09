@@ -16,6 +16,22 @@ You may not, without prior written permission from the copyright holder:
   - sell, sublicense, rent or otherwise commercially exploit it;
   - remove or alter this notice or any copyright notice.
 
+Translations
+------------
+As an exception to the list above, you may, without asking first, copy and edit
+the language files in Plateau/Locales and the template in localization for the
+sole purpose of preparing a translation of Plateau Nameplates and sending it to
+the copyright holder, for example as a pull request or issue on the official
+GitHub repository.
+
+By sending a translation, you confirm that it is your own work and you grant the
+copyright holder a perpetual, worldwide, royalty-free, irrevocable license to
+use, modify and distribute it as part of Plateau Nameplates. Translators who
+want to be credited will be named in the README and changelog.
+
+This exception does not allow you to distribute Plateau Nameplates, a translated
+copy of it, or its language files yourself.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
 IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
