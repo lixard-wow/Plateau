@@ -6,7 +6,7 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
-### 2026-10-08 smoother plates, class resource and off-tank color
+### 2026-10-08 smoother plates, class resource, off-tank color and new display options
 
 #### Changed
 - **Nameplates appear with less work.** When a unit comes into view, Plateau no longer redraws every border on its plate if the plate's size hasn't changed, and a plate last used for the other kind of unit (friendly or enemy) is swapped for a spare that's already styled for it instead of being restyled on the spot. Those restyles were the only nameplate set-ups that took over 1 ms in a busy city.
@@ -15,6 +15,12 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - **Segment width 0 makes the class resource exactly as wide as the health bar**, like the cast bar's width setting. The segments share the bar's width evenly, whatever your resource's count.
 
 #### Added
+- **Interrupt flash** (Cast bar page, on by default): the cast bar flashes once the moment a cast is interrupted, then fades into the interrupted color. The color's opacity sets how bright the flash starts.
+- **Faction icon** (new Icons page, off by default): the Horde or Alliance crest on other players' nameplates, the same icon the target frame uses, optionally only while they're flagged for PvP.
+- **Cast target on the spell name's line:** Cast target position has a new choice, Right after the spell name, so a cast reads like Fireball  Jim on one line.
+- **Threat percent** (new Nameplates page, off by default): your threat on each enemy NPC as a percentage, with Hide at 0%, color, position and font. WoW Forever shares the number; on retail the game may hide it, and then nothing shows.
+- **Guild and NPC title lines** (Friendly nameplates page, Extras, off by default): a smaller line under friendly player names with their guild, and under NPC names with their title, like <Banker>. Names-only friendly plates only, so the open world and delves. NPC titles are read from the tooltip once per kind of NPC.
+- **Join cast bar to health bar** (Cast bar page, off by default): the cast bar sits right under the health bar inside one shared border, with the health bar's bottom edge as the line between them. Needs the plain Pixel border on both bars.
 - **Off-tank color** (Health bar page, Threat, on by default): when you're a tank, an enemy another tank in your group is holding gets its own color, so your co-tank's enemies stand apart from your own and from loose ones. Switch it off to color them like your own secure enemies, as before.
 - **/plt debug shows how long setting up a nameplate takes**, which steps cost the most, how many frames it went over 1 ms, why plates were restyled, and how many restyles were avoided by swapping in a ready spare. Benchmark addons can read the same lines.
 
