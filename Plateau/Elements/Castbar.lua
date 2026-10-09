@@ -488,6 +488,7 @@ function Castbar:Style(plate, db)
     ns.ApplyShadow(interruptText, db.shadow)
     local hit = db.interruptTextColor or { 1, 1, 1, 1 }
     interruptText:SetTextColor(hit[1], hit[2], hit[3], hit[4])
+    interruptText.slPlaceAnchor = nil
     interruptText:ClearAllPoints()
     local x, y = db.interruptOffsetX or 0, db.interruptOffsetY or 0
     if (db.interruptPosition or "SPELL") == "SPELL" then
@@ -545,6 +546,32 @@ function Castbar:Disable(plate)
     bar:Hide()
 end
 
+local function NameFromGUID(guid)
+    if UnitNameFromGUID then
+        return UnitNameFromGUID(guid)
+    end
+    if GetPlayerInfoByGUID then
+        return (select(6, GetPlayerInfoByGUID(guid)))
+    end
+end
+
+local function ClassFromGUID(guid)
+    if UnitClassFromGUID then
+        return (select(2, UnitClassFromGUID(guid)))
+    end
+    if GetPlayerInfoByGUID then
+        return (select(2, GetPlayerInfoByGUID(guid)))
+    end
+end
+
+local function ColoredName(name, class, s)
+    local color = s.interruptClassColor and not issecretvalue(class) and class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
+    if color then
+        return color:WrapTextInColorCode(name)
+    end
+    return name
+end
+
 local function WriteInterrupter(text, s, name)
     if s.interruptFormat == "name" then
         text:SetText(name)
@@ -558,7 +585,7 @@ local function InterruptText(text, interruptedBy, s)
         text:SetText(INTERRUPTED_TEXT)
         return
     end
-    local name = UnitNameFromGUID(interruptedBy)
+    local name = NameFromGUID(interruptedBy)
     if issecretvalue(name) then
         WriteInterrupter(text, s, name)
         return
@@ -567,12 +594,7 @@ local function InterruptText(text, interruptedBy, s)
         text:SetText(INTERRUPTED_TEXT)
         return
     end
-    local _, class = UnitClassFromGUID(interruptedBy)
-    local color = s.interruptClassColor and not issecretvalue(class) and class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
-    if color then
-        name = color:WrapTextInColorCode(name)
-    end
-    WriteInterrupter(text, s, name)
+    WriteInterrupter(text, s, ColoredName(name, ClassFromGUID(interruptedBy), s))
 end
 
 function Castbar:ShowInterrupted(plate, interruptedBy)
@@ -804,8 +826,10 @@ function Castbar:Preview(plate, state)
         if not s.interruptKeepName then
             bar.text:SetText("")
         end
-        if not pcall(InterruptText, bar.interruptText, UnitGUID("player"), s) then
+        if s.interruptFormat == "label" then
             bar.interruptText:SetText(INTERRUPTED_TEXT)
+        else
+            WriteInterrupter(bar.interruptText, s, ColoredName(UnitName("player") or "", UnitClassBase("player"), s))
         end
         bar.kickClip:Hide()
         bar.glow:SetAlpha(0)
