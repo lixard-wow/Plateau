@@ -29,6 +29,7 @@ externals:
 
 ignore:
   - .github
+  - localization
   - .gitattributes
   - .luacheckrc
   - tests

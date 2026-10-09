@@ -1214,7 +1214,7 @@ local function DescribeLines(text)
     if #values == 0 then
         return "No lines"
     end
-    return "Lines at " .. table.concat(values, ", ")
+    return Plateau.T("Lines at %s"):format(table.concat(values, ", "))
 end
 
 local function Chosen(path)
@@ -1330,7 +1330,7 @@ local function GateTable(test, reason, list)
 end
 
 local function AuraPage(key, title, path, groupKey, intro, introHeight, showLabel, showTooltip, extras, withPandemic)
-    local on, reason = On(path .. ".enabled"), "Turn on " .. showLabel .. " to use this."
+    local on, reason = On(path .. ".enabled"), Plateau.T("Turn on %s to use this."):format(Plateau.T(showLabel))
     return Section(key, title, path, Join(
         List(
             { type = "Note", label = intro, height = introHeight },
@@ -1756,7 +1756,10 @@ ns.sections = {
           describe = function(text)
               local id, name = (text or ""):match("^%s*(%d+)%s*[,%-:=]?%s*(.-)%s*$")
               if not id then return "Type an encounter ID, then a name if you like: 2654 Ara-Kara boss" end
-              return "Press Enter to add encounter " .. id .. (name ~= "" and (" (" .. name .. ")") or "") .. " and pick it above"
+              if name ~= "" then
+                  return Plateau.T("Press Enter to add encounter %s (%s) and pick it above"):format(id, name)
+              end
+              return Plateau.T("Press Enter to add encounter %s and pick it above"):format(id)
           end,
           tooltip = "Adds a boss you haven't fought yet so you can set its lines now. Encounter IDs are listed on sites like Wowhead (search the boss, look for Encounter ID). Bosses you fight are added on their own." }, On("look.bossPhases.enabled"), BOSS_ON),
         Gate({ type = "SpellList", label = "Phase lines for this boss", empty = "No lines for this boss",

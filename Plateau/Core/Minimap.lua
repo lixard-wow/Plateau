@@ -21,11 +21,11 @@ local broker = LDB:NewDataObject(NAME, {
         local db = ns.DB
         if db and db.profileName and ns.AutoProfile then
             local status = ns.AutoProfile:Status()
-            tooltip:AddLine("Profile: " .. status.active, 1, 1, 1)
+            tooltip:AddLine(ns.L["Profile: %s"]:format(status.active), 1, 1, 1)
         end
         tooltip:AddLine(" ")
-        tooltip:AddLine("Click to open the settings.", 0.6, 0.8, 1)
-        tooltip:AddLine("Drag to move this button.", 0.6, 0.8, 1)
+        tooltip:AddLine(ns.L["Click to open the settings."], 0.6, 0.8, 1)
+        tooltip:AddLine(ns.L["Drag to move this button."], 0.6, 0.8, 1)
     end,
 })
 

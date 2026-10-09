@@ -1,4 +1,5 @@
 local ns = { Driver = { Restyle = function() end, RequestRestyle = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 function UnitName() return "Stalador" end
 function GetRealmName() return "Iridikron" end
 local instance, spec, combat = "none", 1, false

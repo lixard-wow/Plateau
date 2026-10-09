@@ -2,6 +2,7 @@ local _, ns = ...
 
 local Style = ns.Style
 local C = Style.colors
+local T = Style.T
 
 local function ROW_WIDTH() return ns.layout.content end
 local ROW_STEP = 36
@@ -74,7 +75,7 @@ end
 
 local function ShortCharacter(character)
     if character == Plateau.DB.charKey then
-        return "this character"
+        return T("this character")
     end
     return character
 end
@@ -85,52 +86,52 @@ local function AssignmentName(entry)
         where = tostring(entry.key)
         for _, content in ipairs(Plateau.CONTENT_TYPES) do
             if content.key == entry.key then
-                where = content.label
+                where = T(content.label)
             end
         end
     else
-        where = "specialization " .. tostring(entry.key)
+        where = T("specialization %s"):format(tostring(entry.key))
         if entry.character == Plateau.DB.charKey then
             local _, name = C_SpecializationInfo.GetSpecializationInfo(entry.key)
             if name then
-                where = name .. " specialization"
+                where = T("%s specialization"):format(name)
             end
         end
     end
-    return where .. " (" .. ShortCharacter(entry.character) .. ")"
+    return T("%s (%s)"):format(where, ShortCharacter(entry.character))
 end
 
 function ns.DeleteWarning(name)
     local DB = Plateau.DB
     local refs = DB:ProfileReferences(name)
-    local parts = { "Delete the profile " .. name .. "? Its settings are removed and this can't be undone." }
+    local parts = { T("Delete the profile %s? Its settings are removed and this can't be undone."):format(name) }
     if #refs.defaultFor > 0 then
         local who = {}
         for _, character in ipairs(refs.defaultFor) do
             who[#who + 1] = ShortCharacter(character)
         end
         local replacement = DB:FallbackProfile(name)
-        parts[#parts + 1] = "It is the default profile for " .. table.concat(who, ", ") .. ". This character keeps using " .. DB.profileName .. " as its default; the others switch to " .. tostring(replacement) .. "."
+        parts[#parts + 1] = T("It is the default profile for %s. This character keeps using %s as its default; the others switch to %s."):format(table.concat(who, ", "), DB.profileName, tostring(replacement))
     end
     if #refs.assignments > 0 then
         local where = {}
         for _, entry in ipairs(refs.assignments) do
             where[#where + 1] = AssignmentName(entry)
         end
-        parts[#parts + 1] = "It is assigned to " .. table.concat(where, ", ") .. ". Those automatic assignments are removed, so the next rule or the default profile applies instead."
+        parts[#parts + 1] = T("It is assigned to %s. Those automatic assignments are removed, so the next rule or the default profile applies instead."):format(table.concat(where, ", "))
     end
     return table.concat(parts, "\n\n")
 end
 
 function ns.ReplaceWarning(source, destination)
-    return "Replace the settings of " .. destination .. " with the settings of " .. source .. "?\n\n" .. destination .. "'s current settings will be overwritten. " .. source .. " is not changed, and no profile is switched."
+    return T("Replace the settings of %s with the settings of %s?\n\n%s's current settings will be overwritten. %s is not changed, and no profile is switched."):format(destination, source, destination, source)
 end
 
 function ns.RestoreWarning(name)
     if Exists(name) then
-        return "Restore " .. name .. " to how it shipped?\n\nThe profile exists, so your changes to it will be overwritten. Other profiles are not affected and no profile is switched."
+        return T("Restore %s to how it shipped?\n\nThe profile exists, so your changes to it will be overwritten. Other profiles are not affected and no profile is switched."):format(name)
     end
-    return name .. " doesn't exist right now (it was deleted or renamed).\n\nThis recreates it as it shipped. No profile is switched."
+    return T("%s doesn't exist right now (it was deleted or renamed).\n\nThis recreates it as it shipped. No profile is switched."):format(name)
 end
 
 local namePrompt
@@ -290,11 +291,11 @@ function ns.Widgets.ProfileStatus(parent)
             end
             local status = Plateau.AutoProfile:Status()
             if status.pending then
-                Say("Default profile is now " .. value .. ". " .. status.pending .. " is applied when combat ends.")
+                Say(T("Default profile is now %s. %s is applied when combat ends."):format(value, status.pending))
             elseif status.overridden then
-                Say("Default profile is now " .. value .. ". " .. status.active .. " stays active because of the " .. tostring(status.rule or "automatic rule") .. ".")
+                Say(T("Default profile is now %s. %s stays active because of the %s."):format(value, status.active, tostring(T(status.rule or "automatic rule"))))
             else
-                Say("Default profile is now " .. value .. ".")
+                Say(T("Default profile is now %s."):format(value))
             end
         end,
     })
@@ -313,17 +314,21 @@ function ns.Widgets.ProfileStatus(parent)
         notice:SetWidth(ROW_WIDTH())
         picker:Refresh()
         local status = Plateau.AutoProfile:Status()
-        active:SetText("Active profile: " .. status.active)
+        active:SetText(T("Active profile: %s"):format(status.active))
         local lines = {}
         if status.overridden then
-            lines[#lines + 1] = "Override reason: " .. tostring(status.rule or "automatic switch") .. ". Your default profile is " .. status.default .. "."
+            lines[#lines + 1] = T("Override reason: %s. Your default profile is %s."):format(tostring(T(status.rule or "automatic switch")), status.default)
         elseif status.rule then
-            lines[#lines + 1] = "The " .. status.rule .. " (" .. status.target .. ") replaces this profile the next time you change zone or specialization."
+            lines[#lines + 1] = T("The %s (%s) replaces this profile the next time you change zone or specialization."):format(T(status.rule), status.target)
         end
         if status.pending then
-            lines[#lines + 1] = "Pending switch: " .. status.pending .. " after combat ends."
+            lines[#lines + 1] = T("Pending switch: %s after combat ends."):format(status.pending)
         end
-        lines[#lines + 1] = "Every page edits the active profile" .. (status.overridden and (", " .. status.active .. ", not the default.") or ".")
+        if status.overridden then
+            lines[#lines + 1] = T("Every page edits the active profile, %s, not the default."):format(status.active)
+        else
+            lines[#lines + 1] = T("Every page edits the active profile.")
+        end
         detail:SetText(table.concat(lines, "\n"))
         local height = ROW_STEP + 22 + (detail:GetStringHeight() or 16) + 6 + ((notice:GetText() or "") ~= "" and ((notice:GetStringHeight() or 14) + 6) or 0)
         frame:SetHeight(height)
@@ -391,7 +396,7 @@ function ns.Widgets.ProfileActions(parent)
         local trimmed = name:match("^%s*(.-)%s*$")
         local ok, reason = Plateau.DB:CreateProfile(name, duplicate and Active() or nil)
         if ok then
-            Say("Created " .. trimmed .. " and switched to it. It is now your active and default profile.")
+            Say(T("Created %s and switched to it. It is now your active and default profile."):format(trimmed))
             AfterChange()
         end
         return ok, reason
@@ -405,7 +410,7 @@ function ns.Widgets.ProfileActions(parent)
     end)
     create:SetPoint("LEFT", Style.CONTROL_X, 0)
     local duplicate = ns.Widgets.Button(createRow, "Duplicate active", total - GRID_GAP - halfWidth, function()
-        prompt:Ask("Duplicate active profile", "Name the new profile. It starts as a copy of " .. Active() .. ", then becomes your active and default profile.", function(name)
+        prompt:Ask("Duplicate active profile", T("Name the new profile. It starts as a copy of %s, then becomes your active and default profile."):format(Active()),function(name)
             return Create(name, true)
         end, nil, "Duplicate")
     end)
@@ -436,11 +441,14 @@ function ns.Widgets.ProfileActions(parent)
         set = function(value) renameChoice = value end,
     }, "Rename", "Gives the chosen profile a new name. Character selections and automatic assignments that use it follow the new name.", function()
         local old = renameChoice or Active()
-        prompt:Ask("Rename profile", "Give " .. old .. " a new name. Any character using it, and any automatic assignment, keeps using it under the new name.", function(name)
+        prompt:Ask("Rename profile", T("Give %s a new name. Any character using it, and any automatic assignment, keeps using it under the new name."):format(old), function(name)
             local ok, result = Plateau.DB:RenameProfile(old, name)
             if ok then
-                local builtin = Plateau.Builtins.ByName(old)
-                Say("Renamed " .. old .. " to " .. result .. "." .. (builtin and (" " .. old .. " is a built-in name, so Restore can bring it back as a separate profile.") or ""))
+                if Plateau.Builtins.ByName(old) then
+                    Say(T("Renamed %s to %s. %s is a built-in name, so Restore can bring it back as a separate profile."):format(old, result, old))
+                else
+                    Say(T("Renamed %s to %s."):format(old, result))
+                end
                 AfterChange()
                 return true
             end
@@ -459,15 +467,15 @@ function ns.Widgets.ProfileActions(parent)
         if not Exists(source) then return end
         confirm:Ask("Replace profile settings", ns.ReplaceWarning(source, destination), "Replace settings", function()
             local ok, reason = Plateau.DB:CopyProfile(source)
-            Say(ok and ("Replaced the settings of " .. destination .. " with the settings of " .. source .. ".") or reason, not ok)
+            Say(ok and T("Replaced the settings of %s with the settings of %s."):format(destination, source) or reason, not ok)
             AfterChange()
         end)
     end)
     copyButton:HookScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
         local accent = Style.StateColor()
-        GameTooltip:SetText("Copy settings", accent[1], accent[2], accent[3])
-        GameTooltip:AddLine("Replaces the settings of " .. Active() .. " (the active profile) with the settings of the profile you picked. The picked profile is not changed and no profile is switched. You will be asked to confirm.", 1, 1, 1, true)
+        GameTooltip:SetText(T("Copy settings"), accent[1], accent[2], accent[3])
+        GameTooltip:AddLine(T("Replaces the settings of %s (the active profile) with the settings of the profile you picked. The picked profile is not changed and no profile is switched. You will be asked to confirm."):format(Active()), 1, 1, 1, true)
         GameTooltip:Show()
     end)
     copyButton:HookScript("OnLeave", function() GameTooltip:Hide() end)
@@ -483,7 +491,7 @@ function ns.Widgets.ProfileActions(parent)
         local width = hint:GetStringWidth()
         if width and width > selectWidth then
             GameTooltip:SetOwner(self, "ANCHOR_TOP")
-            GameTooltip:SetText("Destination: " .. Active(), 1, 1, 1)
+            GameTooltip:SetText(T("Destination: %s"):format(Active()), 1, 1, 1)
             GameTooltip:Show()
         end
     end)
@@ -502,14 +510,18 @@ function ns.Widgets.ProfileActions(parent)
         unknown = "Pick a profile",
         get = function() return colorsChoice end,
         set = function(value) colorsChoice = value end,
-    }, "Copy colors", "Copies the colors of " .. "the active profile (cast bar, names, health text, enemy types, threat, reaction, target, focus and mouseover highlights) into the profile you picked, or into every other profile. Layout, sizes, fonts and textures are not changed. You will be asked to confirm.", function()
+    }, "Copy colors", "Copies the colors of the active profile (cast bar, names, health text, enemy types, threat, reaction, target, focus and mouseover highlights) into the profile you picked, or into every other profile. Layout, sizes, fonts and textures are not changed. You will be asked to confirm.", function()
         local target = colorsChoice
         if target ~= "*" and not Exists(target) then return end
-        local label = target == "*" and "every other profile" or target
-        confirm:Ask("Copy colors", "Copy the colors of " .. Active() .. " to " .. label .. "?\n\nTheir cast bar, name, health text, enemy type, threat, reaction and highlight colors will be replaced. Layout, sizes, fonts and textures stay as they are.", "Copy colors", function()
+        local label = target == "*" and T("every other profile") or target
+        confirm:Ask("Copy colors", T("Copy the colors of %s to %s?\n\nTheir cast bar, name, health text, enemy type, threat, reaction and highlight colors will be replaced. Layout, sizes, fonts and textures stay as they are."):format(Active(), label), "Copy colors", function()
             local ok, result = Plateau.DB:CopyColors(target)
             if ok then
-                Say("Copied the colors of " .. Active() .. " to " .. (target == "*" and (result .. " other profiles") or target) .. ".")
+                if target == "*" then
+                    Say(T("Copied the colors of %s to %s other profiles."):format(Active(), tostring(result)))
+                else
+                    Say(T("Copied the colors of %s to %s."):format(Active(), target))
+                end
             else
                 Say(result, true)
             end
@@ -528,7 +540,7 @@ function ns.Widgets.ProfileActions(parent)
         if not Exists(name) then return end
         confirm:Ask("Delete profile", ns.DeleteWarning(name), "Delete profile", function()
             local ok, reason = Plateau.DB:DeleteProfile(name)
-            Say(ok and ("Deleted " .. name .. ".") or reason, not ok)
+            Say(ok and T("Deleted %s."):format(name) or reason, not ok)
             AfterChange()
         end)
     end)
@@ -545,7 +557,7 @@ function ns.Widgets.ProfileActions(parent)
         if not name then return end
         confirm:Ask("Restore built-in profile", ns.RestoreWarning(name), "Restore profile", function()
             local ok, reason = Plateau.DB:RestoreBuiltin(name)
-            Say(ok and ("Restored " .. name .. " to how it shipped.") or reason, not ok)
+            Say(ok and T("Restored %s to how it shipped."):format(name) or reason, not ok)
             AfterChange()
         end)
     end)
@@ -564,7 +576,7 @@ function ns.Widgets.ProfileActions(parent)
         SetButtonEnabled(copyButton, copyChoice ~= nil and copyChoice ~= Active())
         SetButtonEnabled(deleteButton, deleteChoice ~= nil and deleteChoice ~= Active())
         SetButtonEnabled(restoreButton, restoreChoice ~= nil)
-        hint:SetText("Destination: " .. Active())
+        hint:SetText(T("Destination: %s"):format(Active()))
     end
 
     return frame
@@ -595,7 +607,9 @@ function ns.Widgets.AutoProfiles(parent)
         local row = ns.Widgets.Dropdown(frame, {
             label = label,
             options = Options,
-            tooltip = "Uses this profile when " .. (kind == "content" and ("you are in " .. label:lower()) or ("you play " .. label)) .. ". No override means this rule does not apply, so the next rule is checked, and your default profile is used when none applies.",
+            tooltip = kind == "content"
+                and T("Uses this profile when you are in %s. No override means this rule does not apply, so the next rule is checked, and your default profile is used when none applies."):format(T(label):lower())
+                or T("Uses this profile when you play %s. No override means this rule does not apply, so the next rule is checked, and your default profile is used when none applies."):format(label),
             get = function() return Auto:Get(kind, key) end,
             set = function(value)
                 Auto:Set(kind, key, value)
@@ -619,7 +633,7 @@ function ns.Widgets.AutoProfiles(parent)
     local specs = classID and C_SpecializationInfo.GetNumSpecializationsForClassID(classID) or 0
     for index = 1, specs do
         local _, name = C_SpecializationInfo.GetSpecializationInfo(index)
-        AddRow("spec", index, name or ("Specialization " .. index), 2, index)
+        AddRow("spec", index, name or T("Specialization %d"):format(index), 2, index)
     end
 
     frame:SetHeight(HEADING + math.max(contentCount, specs) * ROW_STEP)
@@ -634,6 +648,14 @@ function ns.Widgets.AutoProfiles(parent)
 end
 
 local SHARE_BUTTON, SHARE_BOX_HEIGHT = 190, 90
+
+local function NameTaken(reason)
+    if type(reason) ~= "string" then return false end
+    if reason:find("already exists", 1, true) then return true end
+    local pattern = T("a profile called %s already exists"):gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%0")
+    pattern = pattern:gsub("%%%%s", ".-")
+    return reason:find("^" .. pattern .. "$") ~= nil
+end
 
 local function ShareBox(frame)
     local box = CreateFrame("ScrollFrame", nil, frame)
@@ -723,21 +745,21 @@ function ns.Widgets.ShareProfile(parent)
             local color = C.muted
             importMessage:SetTextColor(color[1], color[2], color[3])
             if not activate then
-                importMessage:SetText("Imported as " .. name .. ". It is saved but not active.")
+                importMessage:SetText(T("Imported as %s. It is saved but not active."):format(name))
             elseif state == "deferred" then
-                importMessage:SetText("Imported as " .. name .. ". It becomes your default profile and is applied when combat ends, unless an automatic rule applies.")
+                importMessage:SetText(T("Imported as %s. It becomes your default profile and is applied when combat ends, unless an automatic rule applies."):format(name))
             elseif Plateau.DB.profileName == name then
-                importMessage:SetText("Imported as " .. name .. ". It is your active and default profile now; an automatic rule can replace it when content or specialization changes.")
+                importMessage:SetText(T("Imported as %s. It is your active and default profile now; an automatic rule can replace it when content or specialization changes."):format(name))
             else
-                importMessage:SetText("Imported as " .. name .. ". It is your default profile, but an automatic rule keeps " .. Plateau.DB.profileName .. " active.")
+                importMessage:SetText(T("Imported as %s. It is your default profile, but an automatic rule keeps %s active."):format(name, Plateau.DB.profileName))
             end
             nameBox:SetText("")
             importEdit:SetText("")
             Refreshed()
         else
-            local reason = name or "the import failed"
-            if reason:find("already exists") then
-                reason = reason .. ". Type a different name, or leave it empty."
+            local reason = name or T("the import failed")
+            if NameTaken(reason) then
+                reason = T("%s. Type a different name, or leave it empty."):format(reason)
             end
             importMessage:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
             importMessage:SetText(reason)
@@ -762,7 +784,7 @@ function ns.Widgets.ShareProfile(parent)
         y = y + 24
         exportTarget:ClearAllPoints()
         exportTarget:SetPoint("TOPLEFT", 0, -y)
-        exportTarget:SetText("Profile to export: " .. Plateau.DB.profileName)
+        exportTarget:SetText(T("Profile to export: %s"):format(Plateau.DB.profileName))
         y = y + 22
         export:ClearAllPoints()
         export:SetPoint("TOPLEFT", 0, -y)

@@ -1,5 +1,7 @@
 local _, ns = ...
 
+local L = ns.L
+
 local function Say(message)
     print(ns.Brand:Text("Plateau") .. " " .. message)
 end
@@ -56,61 +58,61 @@ function ns.PerformanceLines()
         local session = Metric(profiler, metrics.SessionAverageTime)
         local peak = Metric(profiler, metrics.PeakTime)
         if recent then
-            lines[#lines + 1] = ("Recent CPU time: %.2f ms per frame"):format(recent)
-            lines[#lines + 1] = ("Session average CPU time: %.2f ms per frame"):format(session or 0)
-            lines[#lines + 1] = ("Peak CPU time: %.1f ms (worst frame)"):format(peak or 0)
+            lines[#lines + 1] = L["Recent CPU time: %.2f ms per frame"]:format(recent)
+            lines[#lines + 1] = L["Session average CPU time: %.2f ms per frame"]:format(session or 0)
+            lines[#lines + 1] = L["Peak CPU time: %.1f ms (worst frame)"]:format(peak or 0)
             local ok, all = pcall(profiler.GetOverallMetric, metrics.RecentAverageTime)
             if ok and type(all) == "number" and not issecretvalue(all) and all > 0 then
-                lines[#lines + 1] = ("Share of addon CPU time: %.1f%%"):format(recent / all * 100)
+                lines[#lines + 1] = L["Share of addon CPU time: %.1f%%"]:format(recent / all * 100)
             end
         end
         local over5, over10, over50 = SlowCounts()
         if over5 then
             if baseline then
-                lines[#lines + 1] = ("Slow frames since reset: over 5 ms %d, over 10 ms %d, over 50 ms %d"):format(
+                lines[#lines + 1] = L["Slow frames since reset: over 5 ms %d, over 10 ms %d, over 50 ms %d"]:format(
                     over5 - baseline[1], over10 - baseline[2], over50 - baseline[3])
             end
-            lines[#lines + 1] = ("Slow frames this session: over 5 ms %d, over 10 ms %d, over 50 ms %d"):format(over5, over10, over50)
+            lines[#lines + 1] = L["Slow frames this session: over 5 ms %d, over 10 ms %d, over 50 ms %d"]:format(over5, over10, over50)
         end
     else
-        lines[#lines + 1] = "CPU numbers aren't available: the game's addon profiler is off or missing."
+        lines[#lines + 1] = L["CPU numbers aren't available: the game's addon profiler is off or missing."]
     end
     local megabytes = ns.MemoryReadout()
     if megabytes then
-        lines[#lines + 1] = ("Memory usage: %.1f MB"):format(megabytes)
+        lines[#lines + 1] = L["Memory usage: %.1f MB"]:format(megabytes)
     end
     local total, claimed = ns.Driver:CountActive()
     if ns.auraButtons then
-        lines[#lines + 1] = ("Aura buttons built: %d (%d of them in combat)"):format(ns.auraButtons.built, ns.auraButtons.combat)
+        lines[#lines + 1] = L["Aura buttons built: %d (%d of them in combat)"]:format(ns.auraButtons.built, ns.auraButtons.combat)
     end
     if ns.Driver.PoolStats then
         local builtTotal, attached, spare, on, all = ns.Driver:PoolStats()
-        lines[#lines + 1] = ("Plates built: %d (%d on game nameplates, %d spare); elements on: %d of %d"):format(builtTotal, attached, spare, on, all)
+        lines[#lines + 1] = L["Plates built: %d (%d on game nameplates, %d spare); elements on: %d of %d"]:format(builtTotal, attached, spare, on, all)
         if ns.Driver.BuildTime then
             local count, average, slowest, parts = ns.Driver:BuildTime()
             if count > 0 then
-                lines[#lines + 1] = ("Time to build one plate: %.1f ms on average, %.1f ms slowest"):format(average, slowest)
+                lines[#lines + 1] = L["Time to build one plate: %.1f ms on average, %.1f ms slowest"]:format(average, slowest)
                 local top = {}
                 for i = 1, math.min(3, #parts) do
                     top[#top + 1] = ("%s %.1f ms"):format(parts[i].key, parts[i].ms)
                 end
                 if #top > 0 then
-                    lines[#lines + 1] = "Slowest parts to build: " .. table.concat(top, ", ")
+                    lines[#lines + 1] = L["Slowest parts to build: %s"]:format(table.concat(top, ", "))
                 end
             end
         end
         if ns.Driver.ClaimTime then
             local count, average, slowest, restyles, over1, worstFrame, parts, swapped, versionRestyles = ns.Driver:ClaimTime()
             if count > 0 then
-                lines[#lines + 1] = ("Time to set up a plate for a new unit: %.3f ms on average, %.2f ms slowest (%d set-ups, %d needed a full restyle, %d avoided one by swapping in a ready spare)"):format(average, slowest, count, restyles, swapped or 0)
-                lines[#lines + 1] = ("Frames where set-ups took over 1 ms: %d (worst frame %.2f ms)"):format(over1, worstFrame)
-                lines[#lines + 1] = ("Why set-ups restyled: %d because Plateau restyled all plates since, %d because the plate last showed the other kind of unit"):format(versionRestyles or 0, restyles - (versionRestyles or 0))
+                lines[#lines + 1] = L["Time to set up a plate for a new unit: %.3f ms on average, %.2f ms slowest (%d set-ups, %d needed a full restyle, %d avoided one by swapping in a ready spare)"]:format(average, slowest, count, restyles, swapped or 0)
+                lines[#lines + 1] = L["Frames where set-ups took over 1 ms: %d (worst frame %.2f ms)"]:format(over1, worstFrame)
+                lines[#lines + 1] = L["Why set-ups restyled: %d because Plateau restyled all plates since, %d because the plate last showed the other kind of unit"]:format(versionRestyles or 0, restyles - (versionRestyles or 0))
                 local top = {}
                 for i = 1, math.min(5, #parts) do
                     top[#top + 1] = ("%s %.3f ms"):format(parts[i].key, parts[i].ms)
                 end
                 if #top > 0 then
-                    lines[#lines + 1] = "Slowest set-up steps (average per set-up): " .. table.concat(top, ", ")
+                    lines[#lines + 1] = L["Slowest set-up steps (average per set-up): %s"]:format(table.concat(top, ", "))
                 end
             end
         end
@@ -120,11 +122,11 @@ function ns.PerformanceLines()
                 reasons[#reasons + 1] = ("%s %d"):format(key, n)
             end
             table.sort(reasons)
-            lines[#lines + 1] = "Full restyles of all plates, by reason: " .. (#reasons > 0 and table.concat(reasons, ", ") or "none")
+            lines[#lines + 1] = L["Full restyles of all plates, by reason: %s"]:format(#reasons > 0 and table.concat(reasons, ", ") or L["none"])
         end
     end
-    lines[#lines + 1] = ("Visible nameplates: %d"):format(total)
-    lines[#lines + 1] = ("Nameplates styled by Plateau: %d"):format(claimed)
+    lines[#lines + 1] = L["Visible nameplates: %d"]:format(total)
+    lines[#lines + 1] = L["Nameplates styled by Plateau: %d"]:format(claimed)
     return lines
 end
 
@@ -133,7 +135,7 @@ local lastEventCount, lastEventTime
 
 local function Debug()
     local total, claimed = ns.Driver:CountActive()
-    Say(("%s (%s), profile %s"):format(ns.version, ns.flavor, ns.DB.profileName))
+    Say(L["%s (%s), profile %s"]:format(ns.version, ns.flavor, ns.DB.profileName))
     local active = {}
     local states = C_RestrictedActions and C_RestrictedActions.GetAddOnRestrictionState
     if states then
@@ -144,20 +146,20 @@ local function Debug()
             end
         end
     end
-    print(("  Restrictions active: %s"):format(#active > 0 and table.concat(active, ", ") or "none"))
-    print(("  Plates: %d showing, %d drawn by Plateau"):format(total, claimed))
+    print("  " .. L["Restrictions active: %s"]:format(#active > 0 and table.concat(active, ", ") or L["none"]))
+    print("  " .. L["Plates: %d showing, %d drawn by Plateau"]:format(total, claimed))
     if ns.realmPurgeFailed then
-        print("  Realm marker cleanup didn't finish: Blizzard's friendly plates may show errors. Report this with your BugSack log.")
+        print("  " .. L["Realm marker cleanup didn't finish: Blizzard's friendly plates may show errors. Report this with your BugSack log."])
     end
     local failures = ns.DB.migrationFailures
     if ns.recovered or (failures and #failures > 0) then
-        print(("  Saved settings: %s"):format(ns.recovered and ("recovered from damage (" .. ns.recovered .. ")") or ("upgrade problems: " .. table.concat(failures, "; "))))
+        print("  " .. L["Saved settings: %s"]:format(ns.recovered and L["recovered from damage (%s)"]:format(tostring(ns.recovered)) or L["upgrade problems: %s"]:format(table.concat(failures, "; "))))
     end
     local now = GetTime()
     if lastEventTime and now > lastEventTime then
-        print(("  Plate events: %.1f per second since the last /plt debug"):format((ns.Driver.eventCount - lastEventCount) / (now - lastEventTime)))
+        print("  " .. L["Plate events: %.1f per second since the last /plt debug"]:format((ns.Driver.eventCount - lastEventCount) / (now - lastEventTime)))
     else
-        print("  Plate events: run /plt debug again in a few seconds for a rate")
+        print("  " .. L["Plate events: run /plt debug again in a few seconds for a rate"])
     end
     lastEventCount, lastEventTime = ns.Driver.eventCount, now
     for _, line in ipairs(ns.PerformanceLines()) do
@@ -165,33 +167,37 @@ local function Debug()
     end
     if ns.BossPhaseStatus then
         local encounter, problem = ns.BossPhaseStatus()
-        print(("  Boss phase lines: encounter %s%s"):format(tostring(encounter or "none"), problem and (", last problem: " .. problem) or ""))
+        if problem then
+            print("  " .. L["Boss phase lines: encounter %s, last problem: %s"]:format(tostring(encounter or L["none"]), tostring(problem)))
+        else
+            print("  " .. L["Boss phase lines: encounter %s"]:format(tostring(encounter or L["none"])))
+        end
     end
     local kickID = ns.InterruptReady:GetSpellID()
-    print(("  Cast timer: %s. Interrupt: %s"):format(ns.castTimerPath, kickID and (C_Spell.GetSpellName(kickID) or kickID) or "none found"))
+    print("  " .. L["Cast timer: %s. Interrupt: %s"]:format(ns.castTimerPath, kickID and (C_Spell.GetSpellName(kickID) or kickID) or L["none found"]))
     for _, unit in ipairs({ "target", "focus" }) do
         local shown = ns.Driver:GetPlate(unit)
         if shown then
             local look = ns.DB.views.enemy
-            local override = (shown.isTarget and look.target.colorBar and "Target page: Use custom target color")
-                or (shown.isFocus and look.focus.colorBar and "Focus page: Use custom focus color")
+            local override = (shown.isTarget and look.target.colorBar and L["Target page: Use custom target color"])
+                or (shown.isFocus and look.focus.colorBar and L["Focus page: Use custom focus color"])
             local r, g, b = shown.health:GetStatusBarColor()
-            local current = (not issecretvalue(r) and r) and ("%.2f %.2f %.2f"):format(r, g, b) or "hidden"
-            print(("  %s color: %s  [bar now %s]"):format(unit == "target" and "Target" or "Focus",
+            local current = (not issecretvalue(r) and r) and ("%.2f %.2f %.2f"):format(r, g, b) or L["hidden"]
+            print("  " .. (unit == "target" and L["Target color: %s  [bar now %s]"] or L["Focus color: %s  [bar now %s]"]):format(
                 override or ns.UnitColors:Explain(shown, unit), current))
         end
     end
     local plate = ns.Driver:GetPlate("target")
     if plate then
         local function Show(value)
-            if issecretvalue(value) then return "hidden" end
+            if issecretvalue(value) then return L["hidden"] end
             return tostring(value)
         end
-        print(("  Target: state %s, enemy type %s, boss %s, classification %s, level %s"):format(
+        print("  " .. L["Target: state %s, enemy type %s, boss %s, classification %s, level %s"]:format(
             plate.state, tostring(plate.mobType), Show(UnitIsBossMob("target")), Show(UnitClassification("target")),
             Show(UnitEffectiveLevel("target"))))
     else
-        print("  Target: none (target a mob to see how Plateau reads it)")
+        print("  " .. L["Target: none (target a mob to see how Plateau reads it)"])
     end
 end
 
@@ -269,7 +275,7 @@ local function OpenSetup()
     if loaded and PlateauSetup and PlateauSetup.Open then
         PlateauSetup:Open()
     elseif not loaded then
-        Say("could not open setup: " .. tostring(reason))
+        Say(L["could not open setup: %s"]:format(tostring(reason)))
     end
 end
 
@@ -306,14 +312,14 @@ setupWatcher:SetScript("OnEvent", function(_, event)
 end)
 
 local function Help()
-    Say("commands:")
-    print("  /plt - open the settings")
-    print("  /plt setup - pick a ready-made look")
-    print("  /plt minimap - show or hide the minimap button")
-    print("  /plt debug - version, restrictions and memory, for bug reports")
-    print("  /plt debug reset - start counting slow frames from now")
-    print("  /plt reset - put every setting in this profile back to its default")
-    print("  /plt cvars restore - undo every game nameplate setting Plateau changed")
+    Say(L["commands:"])
+    print("  " .. L["/plt - open the settings"])
+    print("  " .. L["/plt setup - pick a ready-made look"])
+    print("  " .. L["/plt minimap - show or hide the minimap button"])
+    print("  " .. L["/plt debug - version, restrictions and memory, for bug reports"])
+    print("  " .. L["/plt debug reset - start counting slow frames from now"])
+    print("  " .. L["/plt reset - put every setting in this profile back to its default"])
+    print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
 end
 
 local function OpenOptions()
@@ -322,9 +328,9 @@ local function OpenOptions()
     if loaded and PlateauOptions and PlateauOptions.Toggle then
         PlateauOptions:Toggle()
     elseif loaded then
-        Say("options didn't finish loading - check BugSack for the first error.")
+        Say(L["options didn't finish loading - check BugSack for the first error."])
     else
-        Say("could not open options: " .. tostring(reason))
+        Say(L["could not open options: %s"]:format(tostring(reason)))
     end
 end
 ns.OpenOptions = OpenOptions
@@ -489,18 +495,18 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "minimap" and ns.Minimap then
         local shown = not ns.Minimap:IsShown()
         ns.Minimap:SetShown(shown)
-        Say(shown and "minimap button shown." or "minimap button hidden. /plt minimap brings it back.")
+        Say(shown and L["minimap button shown."] or L["minimap button hidden. /plt minimap brings it back."])
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
-        Say("slow-frame counts reset. Run /plt debug later to see how many happened since.")
+        Say(L["slow-frame counts reset. Run /plt debug later to see how many happened since."])
     elseif command == "debug" then
         Debug()
     elseif command == "cvars" and path == "restore" then
         ns.CVars:ReleaseAll()
-        Say("put every nameplate game setting back the way it was before Plateau changed it.")
+        Say(L["put every nameplate game setting back the way it was before Plateau changed it."])
     elseif command == "reset" then
         local ok, reason = ns.DB:Reset(path)
-        Say(ok and ("reset " .. (path or "all settings")) or (path .. ": " .. reason))
+        Say(ok and (path and L["reset %s"]:format(path) or L["reset all settings"]) or (path .. ": " .. reason))
     else
         Help()
     end

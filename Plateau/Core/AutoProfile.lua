@@ -1,5 +1,7 @@
 local _, ns = ...
 
+local L = ns.L
+
 local AutoProfile = CreateFrame("Frame")
 ns.AutoProfile = AutoProfile
 
@@ -66,21 +68,25 @@ function AutoProfile:Resolve(content, spec, fallback, profiles)
     return (self:ResolveSource(content, spec, fallback, profiles))
 end
 
-local CONTENT_NAMES = {
-    world = "Open world",
-    dungeon = "Dungeon",
-    raid = "Raid",
-    delve = "Delve or scenario",
-    arena = "Arena",
-    battleground = "Battleground",
+local CONTENT_RULES = {
+    world = { label = "Open world override" },
+    dungeon = { label = "Dungeon override" },
+    raid = { label = "Raid override" },
+    delve = { label = "Delve or scenario override" },
+    arena = { label = "Arena override" },
+    battleground = { label = "Battleground override" },
 }
 
 function AutoProfile:RuleName(kind, key)
     if kind == "content" then
-        return (CONTENT_NAMES[key] or tostring(key)) .. " override"
+        local rule = CONTENT_RULES[key]
+        return rule and L[rule.label] or L["%s override"]:format(tostring(key))
     end
     local _, name = C_SpecializationInfo.GetSpecializationInfo(key)
-    return (name or ("Specialization " .. tostring(key))) .. " specialization"
+    if name then
+        return L["%s specialization"]:format(name)
+    end
+    return L["Specialization %s specialization"]:format(tostring(key))
 end
 
 function AutoProfile:Status()

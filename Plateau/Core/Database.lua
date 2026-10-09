@@ -1,5 +1,7 @@
 local _, ns = ...
 
+local L = ns.L
+
 local SCHEMA_VERSION = 24
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
@@ -725,7 +727,7 @@ end
 
 function DB:SwitchProfile(name, temporary)
     if not self.saved.profiles[name] then
-        return false, "no profile called " .. tostring(name)
+        return false, L["no profile called %s"]:format(tostring(name))
     end
     self:UseProfile(name, temporary)
     ns.Driver:RequestRestyle(false, "profile switched")
@@ -734,11 +736,11 @@ end
 
 function DB:CreateProfile(name, copyFrom)
     if type(name) ~= "string" or not name:find("%S") then
-        return false, "give the profile a name"
+        return false, L["give the profile a name"]
     end
     name = name:match("^%s*(.-)%s*$")
     if self.saved.profiles[name] then
-        return false, "a profile called " .. name .. " already exists"
+        return false, L["a profile called %s already exists"]:format(name)
     end
     local source = copyFrom and self.saved.profiles[copyFrom]
     self.saved.profiles[name] = source and DeepCopy(source) or {}
@@ -804,7 +806,7 @@ function DB:CopyColors(target)
     elseif target and target ~= self.profileName and self.saved.profiles[target] then
         names[1] = target
     else
-        return false, "pick a different profile to copy colors to"
+        return false, L["pick a different profile to copy colors to"]
     end
     for _, path in ipairs(self:ColorPaths()) do
         local value = self:Get(path)
@@ -820,7 +822,7 @@ end
 function DB:CopyProfile(from)
     local source = self.saved.profiles[from]
     if not source or from == self.profileName then
-        return false, "pick a different profile to copy from"
+        return false, L["pick a different profile to copy from"]
     end
     local temporary = self.profileName ~= self:DefaultProfile()
     self.saved.profiles[self.profileName] = DeepCopy(source)
@@ -829,7 +831,7 @@ end
 
 function DB:SetDefaultProfile(name)
     if not self.saved.profiles[name] then
-        return false, "no profile called " .. tostring(name)
+        return false, L["no profile called %s"]:format(tostring(name))
     end
     if not self.charKey then
         return self:SwitchProfile(name, true)
@@ -844,7 +846,7 @@ end
 
 function DB:ActivateProfile(name)
     if not self.saved.profiles[name] then
-        return false, "no profile called " .. tostring(name)
+        return false, L["no profile called %s"]:format(tostring(name))
     end
     if self.charKey and InCombatLockdown and InCombatLockdown() and ns.AutoProfile and ns.AutoProfile.Apply then
         self.saved.profileKeys[self.charKey] = name
@@ -857,17 +859,17 @@ end
 function DB:RenameProfile(old, new)
     local profiles = self.saved.profiles
     if not profiles[old] then
-        return false, "no profile called " .. tostring(old)
+        return false, L["no profile called %s"]:format(tostring(old))
     end
     if type(new) ~= "string" or not new:find("%S") then
-        return false, "give the profile a name"
+        return false, L["give the profile a name"]
     end
     new = new:match("^%s*(.-)%s*$")
     if new == old then
-        return false, "that is already its name"
+        return false, L["that is already its name"]
     end
     if profiles[new] then
-        return false, "a profile called " .. new .. " already exists"
+        return false, L["a profile called %s already exists"]:format(new)
     end
     profiles[new] = profiles[old]
     profiles[old] = nil
@@ -925,7 +927,7 @@ end
 
 function DB:SetSpecSpells(group, kind, text, spec)
     if not SPELL_GROUPS[group] or not SPELL_KINDS[kind] then
-        return false, "unknown list"
+        return false, L["unknown list"]
     end
     spec = spec or ns.CurrentSpec()
     local all = rawget(self.profile, "specSpells")
@@ -1026,11 +1028,11 @@ function DB:ImportProfile(name, text, activate)
     end
     local version = tonumber(payload.version) or SCHEMA_VERSION
     if version ~= version or version < 1 or version > 1e6 then
-        return false, "that profile string is damaged"
+        return false, L["that profile string is damaged"]
     end
     version = math.floor(version)
     if version > SCHEMA_VERSION then
-        return false, "that profile is from a newer Plateau - update first"
+        return false, L["that profile is from a newer Plateau - update first"]
     end
     local holder = { version = version, profiles = { import = {
         look = type(payload.look) == "table" and payload.look or {},
@@ -1038,7 +1040,7 @@ function DB:ImportProfile(name, text, activate)
     } } }
     local migrated, failures = pcall(Migrate, holder)
     if not migrated or #failures > 0 then
-        return false, "that profile string is damaged"
+        return false, L["that profile string is damaged"]
     end
     local imported = holder.profiles.import
     local profile = { look = ns.Share.Sanitize(imported.look or {}, ns.defaults.look), specSpells = CleanSpecSpells(payload.specSpells) }
@@ -1047,14 +1049,14 @@ function DB:ImportProfile(name, text, activate)
     end
     if type(name) == "string" and name:find("%S") then
         if self.saved.profiles[name] then
-            return false, "a profile called " .. name .. " already exists"
+            return false, L["a profile called %s already exists"]:format(name)
         end
     else
-        name = "Imported"
+        name = L["Imported"]
         local number = 1
         while self.saved.profiles[name] do
             number = number + 1
-            name = "Imported " .. number
+            name = L["Imported %d"]:format(number)
         end
     end
     local bossPhases = CleanBossPhases(payload.bossPhases)
@@ -1085,10 +1087,10 @@ end
 
 function DB:DeleteProfile(name)
     if name == self.profileName then
-        return false, "switch to another profile before deleting this one"
+        return false, L["switch to another profile before deleting this one"]
     end
     if not self.saved.profiles[name] then
-        return false, "no profile called " .. tostring(name)
+        return false, L["no profile called %s"]:format(tostring(name))
     end
     self.saved.profiles[name] = nil
     local replacement = self:FallbackProfile(name)
@@ -1153,19 +1155,19 @@ end
 local function Assign(path, value)
     local parent, parentDefault, key = Walk(path)
     if not parent then
-        return false, "unknown setting"
+        return false, L["unknown setting"]
     end
     local default = parentDefault[key]
     if type(default) == "table" then
         if default[1] == nil then
-            return false, "that is a group, pick a setting inside it"
+            return false, L["that is a group, pick a setting inside it"]
         end
         if type(value) ~= "table" or #value < 3 or #value > #default then
-            return false, ("needs %d numbers"):format(#default)
+            return false, L["needs %d numbers"]:format(#default)
         end
         value = { value[1], value[2], value[3], value[4] or default[4] }
     elseif type(value) ~= type(default) then
-        return false, "needs a " .. type(default)
+        return false, L["needs a %s"]:format(type(default))
     end
     parent[key] = value
     return true
@@ -1234,7 +1236,7 @@ end
 function DB:UseBuiltin(name)
     local entry = ns.Builtins and ns.Builtins.ByName(name)
     if not entry then
-        return false, "not a built-in profile"
+        return false, L["not a built-in profile"]
     end
     if not self.saved.profiles[name] then
         self:BuildProfile(name, ns.Builtins.Values(entry))
@@ -1245,7 +1247,7 @@ end
 function DB:RestoreBuiltin(name)
     local entry = ns.Builtins and ns.Builtins.ByName(name)
     if not entry then
-        return false, "not a built-in profile"
+        return false, L["not a built-in profile"]
     end
     self:BuildProfile(name, ns.Builtins.Values(entry))
     if self.profileName == name then
@@ -1263,7 +1265,7 @@ function DB:Reset(path)
     end
     local parent, parentDefault, key = Walk(path)
     if not parent then
-        return false, "unknown setting"
+        return false, L["unknown setting"]
     end
     if IsGroup(parentDefault[key]) then
         Clear(parent[key])

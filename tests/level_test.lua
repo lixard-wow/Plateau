@@ -1,5 +1,6 @@
 local ns = { Elements = {}, Driver = { RegisterElement = function() end, ForEachActive = function() end },
     DB = { views = { enemy = { friendly = { levelEnabled = true } } } } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 function issecretvalue() return false end
 function ns.ApplyFont() end
 function ns.ApplyShadow() end

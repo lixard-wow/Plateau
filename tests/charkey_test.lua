@@ -1,4 +1,5 @@
 local ns = { Driver = { Restyle = function() end, RequestRestyle = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 local playerName = "Unknown"
 function UnitName() return playerName end
 function GetRealmName() return "Classic Beta PvE 2" end

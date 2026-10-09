@@ -55,8 +55,12 @@ local function Label(path)
     return labels[path]
 end
 
+local function T(text)
+    return Plateau.T(text)
+end
+
 local DESCRIBE = {
-    Set = function(path) return Label(path) or "A setting" end,
+    Set = function(path) return T(Label(path) or "A setting") end,
     SetMany = function(values)
         if nextLabel then return nextLabel end
         if not labels then
@@ -79,18 +83,18 @@ local DESCRIBE = {
             end
         end
         if labelCount == 1 then
-            return next(labelSet)
+            return T((next(labelSet)))
         end
         if titleCount == 1 then
-            return (moving and "Moved " or "Changed ") .. next(titleSet)
+            return (moving and T("Moved %s") or T("Changed %s")):format(T((next(titleSet))))
         end
-        return "Several settings"
+        return T("Several settings")
     end,
-    Reset = function(path) return path and ("Reset " .. (Label(path) or "a setting")) or "Reset everything" end,
-    ResetEverywhere = function(paths) return "Reset " .. ((type(paths) == "table" and Label(paths[1])) or "a setting") end,
-    SetSpecSpells = function() return "Spell list" end,
-    CVarSet = function(name) return Label("cvar." .. tostring(name)) or tostring(name) end,
-    CVarRelease = function(name) return "Reset " .. (Label("cvar." .. tostring(name)) or tostring(name)) end,
+    Reset = function(path) return path and T("Reset %s"):format(T(Label(path) or "a setting")) or T("Reset everything") end,
+    ResetEverywhere = function(paths) return T("Reset %s"):format(T((type(paths) == "table" and Label(paths[1])) or "a setting")) end,
+    SetSpecSpells = function() return T("Spell list") end,
+    CVarSet = function(name) return T(Label("cvar." .. tostring(name))) or tostring(name) end,
+    CVarRelease = function(name) return T("Reset %s"):format(T(Label("cvar." .. tostring(name))) or tostring(name)) end,
 }
 
 local function Capture(label)
@@ -124,7 +128,7 @@ function Undo.Remember(kind, ...)
     lastAt = now
     if recent and #stack > 0 then return end
     nextLabel = pending
-    local label = DESCRIBE[kind] and DESCRIBE[kind](...) or "A change"
+    local label = DESCRIBE[kind] and DESCRIBE[kind](...) or T("A change")
     nextLabel = nil
     stack[#stack + 1] = Capture(label)
     if #stack > LIMIT then

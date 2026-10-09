@@ -51,6 +51,7 @@ C_SpecializationInfo = {
 }
 
 local ns = { Driver = { Restyle = function() end, RequestRestyle = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 local function load(path) local f = assert(loadfile(path)); f("Plateau", ns) end
 load("Plateau/Core/Defaults.lua"); load("Plateau/Core/Database.lua"); load("Plateau/Core/Share.lua"); load("Plateau/Core/AutoProfile.lua")
 ns.Builtins = { list = { { name = "Alpha" } }, Label = function(n) return n end, ByName = function(n) return n == "Alpha" and {} or nil end, Values = function() return {} end }
@@ -63,6 +64,7 @@ DB:SwitchProfile("Default")
 DB:Set("look.castbar.height", 30)
 
 Plateau = { DB = DB, Builtins = ns.Builtins, AutoProfile = Auto, CONTENT_TYPES = ns.CONTENT_TYPES, brand = { {1,1,1,1}, {1,1,1,1}, {1,1,1,1} }, Brand = { OnChange = function() end, Text = function(_, t) return t end } }
+Plateau.T = Plateau.T or (function() local l = {} assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", l) return l.T end)()
 local nsOpt = { Widgets = {}, Style = nil, layout = { content = 938, column = 457 } }
 local function loadOpt(path) local f = assert(loadfile(path)); f("Plateau_Options", nsOpt) end
 loadOpt("Plateau_Options/Widgets/Style.lua")

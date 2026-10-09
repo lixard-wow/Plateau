@@ -2,6 +2,7 @@ local global = {}
 local views = { enemy = { health = { fillDirection = "left" } } }
 local ns = { Elements = {}, MarkerLayer = function(plate) return plate.health end, DB = { saved = { global = global }, views = views },
     Driver = { RegisterElement = function() end, ForEachActive = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 function ns.Runs() return true end
 function issecretvalue() return false end
 local instance = true
@@ -11,6 +12,7 @@ function CreateFrame()
     return { RegisterEvent = function() end, SetScript = function(_, _, fn) handler = fn end }
 end
 Plateau = {}
+Plateau.T = Plateau.T or (function() local l = {} assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", l) return l.T end)()
 
 assert(loadfile("Plateau/Elements/BossPhases.lua"))("Plateau", ns)
 local BossPhases = ns.Elements.BossPhases

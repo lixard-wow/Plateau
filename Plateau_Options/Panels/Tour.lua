@@ -121,7 +121,7 @@ function Show(step)
     Style.SetBorderColor(callout, tint)
     Style.SetBorderColor(outline, tint)
 
-    counter:SetText(("%d of %d"):format(number, #STEPS))
+    counter:SetFormattedText("%d of %d", number, #STEPS)
     title:SetText(data.title)
     body:SetText(data.text)
     nextButton.label:SetText(number == #STEPS and "Done" or "Next")

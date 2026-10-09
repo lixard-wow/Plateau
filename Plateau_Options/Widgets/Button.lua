@@ -2,6 +2,7 @@ local _, ns = ...
 
 local Style = ns.Style
 local C = Style.colors
+local T = Style.T
 
 function ns.Widgets.Button(parent, text, width, onClick, primary)
     local button = CreateFrame("Button", nil, parent)
@@ -123,7 +124,7 @@ function ns.Widgets.Link(parent, spec)
     row:SetHeight(24)
     local text = Style.Text(row, 12, Style.StateColor())
     text:SetPoint("LEFT", 0, 0)
-    text:SetText(spec.label .. "  >")
+    text:SetText(T(spec.label) .. "  >")
     row:SetWidth(text:GetStringWidth() + 8)
     row:SetScript("OnClick", function()
         if ns.OpenLink then
@@ -167,12 +168,12 @@ function ns.Widgets.Note(parent, spec)
     end
     if type(spec.label) == "function" then
         function row:Refresh()
-            text:SetText(prefix .. spec.label())
+            text:SetText(prefix .. T(spec.label()))
             Fit()
         end
         row:Refresh()
     else
-        text:SetText(prefix .. spec.label)
+        text:SetText(prefix .. T(spec.label))
     end
     return row
 end
@@ -441,7 +442,7 @@ function ns.Widgets.Presets(parent, spec)
             if preset.apply then
                 preset.apply()
             else
-                ns.Undo.Next("Look: " .. preset.label)
+                ns.Undo.Next(T("Look: %s"):format(T(preset.label)))
                 Plateau.DB:SetMany(preset.values)
             end
             if ns.RefreshAll then
@@ -565,7 +566,7 @@ function ns.Widgets.LookCards(parent, spec)
                 ns.UpdateProfileLabel()
             end
         else
-            ns.Undo.Next("Look: " .. preset.label)
+            ns.Undo.Next(T("Look: %s"):format(T(preset.label)))
             Plateau.DB:SetMany(preset.values)
         end
         if ns.RefreshAll then
@@ -602,7 +603,7 @@ function ns.Widgets.LookCards(parent, spec)
 
         local subtitle = Style.Text(card, 9, C.muted, "CENTER")
         subtitle:SetPoint("TOP", title, "BOTTOM", 0, -4)
-        subtitle:SetText((preset.subtitle or ""):upper())
+        subtitle:SetText(T(preset.subtitle or ""):upper())
 
         local area = CreateFrame("Frame", nil, card)
         area:SetPoint("TOPLEFT", CARD_INSET, -(CARD_EDGE + 14 + 16 + 4 + 10 + 12))
@@ -710,7 +711,7 @@ function ns.Widgets.SpellList(parent, spec)
             if token ~= "" then
                 local id = tonumber(token) or (C_Spell.GetSpellIDForSpellIdentifier and C_Spell.GetSpellIDForSpellIdentifier(token))
                 local name = id and C_Spell.GetSpellName(id)
-                names[#names + 1] = name and ("%s (%d)"):format(name, id) or ("|cffff6655%s: not found|r"):format(token)
+                names[#names + 1] = name and ("%s (%d)"):format(name, id) or ("|cffff6655" .. T("%s: not found"):format(token) .. "|r")
             end
         end
         found:SetText(#names > 0 and table.concat(names, ", ") or (spec.empty or "Empty: nothing filtered"))
@@ -746,7 +747,7 @@ function ns.Widgets.SpellList(parent, spec)
         Describe(text)
         Style.OverrideLabel(label, spec)
         if spec.suffix then
-            label:SetText(("%s  |cff8c9bb0(%s)|r"):format(spec.label, spec.suffix()))
+            label:SetText(("%s  |cff8c9bb0(%s)|r"):format(T(spec.label), T(spec.suffix())))
         end
     end
     Style.RightClickReset(labelHit, spec, function() row:Refresh() end)

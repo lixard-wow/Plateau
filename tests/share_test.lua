@@ -1,5 +1,6 @@
 LibDeflate = dofile("Plateau/Libs/LibDeflate/LibDeflate.lua")
 local ns = { Driver = { Restyle = function() end, RequestRestyle = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 function UnitName() return "Stalador" end
 function GetRealmName() return "Iridikron" end
 local function load(path) assert(loadfile("Plateau/" .. path))("Plateau", ns) end

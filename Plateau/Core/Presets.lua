@@ -1,5 +1,7 @@
 local addonName, ns = ...
 
+local L = ns.L
+
 local GLOSS = "Interface\\AddOns\\" .. addonName .. "\\Art\\Bars\\bar-gloss.png"
 local TOOLTIP_GREY = { 0.5, 0.5, 0.5, 1 }
 local SMOOTH = "Interface\\AddOns\\" .. addonName .. "\\Art\\Bars\\bar-smooth.png"
@@ -573,7 +575,7 @@ end
 
 function Builtins.Label(name)
     if byName[name] then
-        return name .. "  |cff8a93a6(built-in)|r"
+        return name .. "  |cff8a93a6" .. L["(built-in)"] .. "|r"
     end
     return name
 end

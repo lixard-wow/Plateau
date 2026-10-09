@@ -1,5 +1,7 @@
 local ns = { Driver = { Restyle = function() end, RequestRestyle = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 Plateau = {}
+Plateau.T = Plateau.T or (function() local l = {} assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", l) return l.T end)()
 function UnitName() return "Stalador" end
 function GetRealmName() return "Iridikron" end
 local function load(path) assert(loadfile("Plateau/" .. path))("Plateau", ns) end

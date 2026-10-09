@@ -1,5 +1,7 @@
 local _, ns = ...
 
+local L = ns.L
+
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitLevel = UnitLevel
 local UnitClassification = UnitClassification
@@ -8,7 +10,7 @@ local GetCreatureDifficultyColor = GetCreatureDifficultyColor
 local ELITE = { elite = true, rareelite = true, worldboss = true }
 local RARE = { rare = true, rareelite = true }
 local SKULL = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:0|t"
-local BOSS_TEXT = { boss = "Boss", skull = SKULL }
+local BOSS_TEXT = { boss = L["Boss"], skull = SKULL }
 
 local settings = {}
 local bossR, bossG, bossB = 1, 0.1, 0.1

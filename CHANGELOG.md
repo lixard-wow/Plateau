@@ -24,6 +24,8 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - **Off-tank color** (Health bar page, Threat, on by default): when you're a tank, an enemy another tank in your group is holding gets its own color, so your co-tank's enemies stand apart from your own and from loose ones. Switch it off to color them like your own secure enemies, as before.
 - **/plt debug shows how long setting up a nameplate takes**, which steps cost the most, how many frames it went over 1 ms, why plates were restyled, and how many restyles were avoided by swapping in a ready spare. Benchmark addons can read the same lines.
 
+- **Ready for translation.** Every setting, tooltip, Help topic, chat message and `/plt debug` line can now be translated. Each game language has its own file in `Plateau/Locales/` (German, Spanish, Mexican Spanish, French, Italian, Korean, Brazilian Portuguese, Russian, Simplified and Traditional Chinese); they start empty, so everything stays in English until someone fills one in. `localization/template.lua` lists every English string, and `localization/README.md` explains how to translate. Settings search finds settings in your own language and in English.
+
 #### Removed
 - **The probe and layers test tools** (`/plt debug probe`, `probe watch`, `probe clear` and `/plt debug layers`). Their questions are answered: boss plates are fixed and the layering is settled. Any probe log left in your saved settings is cleared once.
 

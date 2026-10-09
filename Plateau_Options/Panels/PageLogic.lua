@@ -196,13 +196,29 @@ local function Synonyms(tooltip, ...)
     return table.concat(extra, " ")
 end
 
-function Logic.SearchScore(entry, words, query)
-    for _, word in ipairs(words) do
-        if not entry.text:find(word, 1, true) then
-            return nil
+local function Localized(text)
+    return Plateau.T(text)
+end
+Logic.Localized = Localized
+
+function Logic.LocalizedText(...)
+    local extra = {}
+    for i = 1, select("#", ...) do
+        local text = select(i, ...)
+        if type(text) == "string" and text ~= "" then
+            local translated = Localized(text)
+            if translated ~= text then
+                extra[#extra + 1] = Logic.Plain(translated)
+            end
         end
     end
-    local label = entry.labelText
+    if #extra == 0 then
+        return ""
+    end
+    return " " .. table.concat(extra, " ")
+end
+
+local function LabelScore(label, words, query)
     local score
     if label == query then
         score = 6
@@ -225,14 +241,36 @@ function Logic.SearchScore(entry, words, query)
             score = 1
         end
     end
+    return score
+end
+
+function Logic.SearchScore(entry, words, query)
+    for _, word in ipairs(words) do
+        if not entry.text:find(word, 1, true) then
+            return nil
+        end
+    end
+    local score = LabelScore(entry.labelText, words, query)
+    if entry.labelLocal then
+        score = math.max(score, LabelScore(entry.labelLocal, words, query))
+    end
     if entry.heading then
         score = score + 0.5
     end
     return score
 end
 
+local function LocalLabel(text)
+    local translated = Localized(text)
+    if type(translated) ~= "string" or translated == text then
+        return nil
+    end
+    return Logic.Plain(translated)
+end
+
 function Logic.BuildSettingsIndex(sections)
     local Plain = Logic.Plain
+    local Extra = Logic.LocalizedText
     local index = {}
     for _, section in ipairs(sections) do
         local isHelp = section.key == "help"
@@ -243,7 +281,8 @@ function Logic.BuildSettingsIndex(sections)
                 label = section.title,
                 where = "Page",
                 labelText = Plain(section.title),
-                text = Plain(section.title) .. " page " .. Synonyms(nil, section.title),
+                labelLocal = LocalLabel(section.title),
+                text = Plain(section.title) .. " page " .. Synonyms(nil, section.title) .. Extra(section.title, "Page"),
             }
         end
         local header = ""
@@ -256,10 +295,11 @@ function Logic.BuildSettingsIndex(sections)
                     section = section,
                     index = i,
                     label = spec.label,
-                    where = spec.type == "Header" and section.title or (header ~= "" and (section.title .. "  >  " .. header) or section.title),
+                    where = spec.type == "Header" and section.title or (header ~= "" and (Localized(section.title) .. "  >  " .. Localized(header)) or section.title),
                     labelText = Plain(spec.label),
+                    labelLocal = LocalLabel(spec.label),
                     heading = spec.type == "Header",
-                    text = Plain(spec.label) .. " " .. Plain(spec.tooltip) .. " " .. Plain(spec.keywords) .. " " .. Plain(section.title) .. " " .. Plain(header) .. " " .. Synonyms(spec.tooltip, spec.label, section.title, header, spec.keywords or ""),
+                    text = Plain(spec.label) .. " " .. Plain(spec.tooltip) .. " " .. Plain(spec.keywords) .. " " .. Plain(section.title) .. " " .. Plain(header) .. " " .. Synonyms(spec.tooltip, spec.label, section.title, header, spec.keywords or "") .. Extra(spec.label, spec.tooltip, spec.keywords, section.title, header),
                 }
             end
         end

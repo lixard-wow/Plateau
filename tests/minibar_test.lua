@@ -1,6 +1,7 @@
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 
 local ns = {}
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 assert(loadfile("Plateau_Options/Panels/PageLogic.lua"))("Plateau_Options", ns)
 local Logic = ns.PageLogic
 

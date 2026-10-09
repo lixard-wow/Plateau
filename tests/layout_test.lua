@@ -16,6 +16,7 @@ C_Spell = setmetatable({}, { __index = function() return function() end end })
 UnitFrameUtil = {}
 
 local ns = { Driver = { Restyle = function() end, RequestRestyle = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 local function load(path) assert(loadfile(path))("Plateau", ns) end
 load("Plateau/Core/Defaults.lua"); load("Plateau/Core/Database.lua"); load("Plateau/Core/Share.lua")
 local DB = ns.DB
@@ -32,6 +33,7 @@ Plateau = {
     barTextures = {}, overlayPatterns = {}, media = setmetatable({}, { __index = function() return function() return {} end end }),
     arrowStyles = setmetatable({}, { __index = function() return { file = 'x' } end }),
 }
+Plateau.T = Plateau.T or (function() local l = {} assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", l) return l.T end)()
 local nsOpt = { Widgets = {}, sections = {} }
 local function loadOpt(path) assert(loadfile(path))("Plateau_Options", nsOpt) end
 loadOpt("Plateau_Options/Widgets/Style.lua")

@@ -18,17 +18,18 @@ local STATE_NOTES = {
 local WORLD_ONLY = { size = true, fading = true, layering = true, combat = true, game = true }
 
 local function Hint()
+    local T = Style.T
     local parts = {}
     if editingTitle then
-        parts[#parts + 1] = "Editing: " .. editingTitle .. " (outlined)."
+        parts[#parts + 1] = T("Editing: %s (outlined)."):format(T(editingTitle))
     end
     if WORLD_ONLY[sectionKey] then
-        parts[#parts + 1] = "Applies to in-world nameplates; the preview does not show it."
+        parts[#parts + 1] = T("Applies to in-world nameplates; the preview does not show it.")
     else
         if STATE_NOTES[sectionKey] then
-            parts[#parts + 1] = STATE_NOTES[sectionKey]
+            parts[#parts + 1] = T(STATE_NOTES[sectionKey])
         end
-        parts[#parts + 1] = HINT
+        parts[#parts + 1] = T(HINT)
     end
     return table.concat(parts, " ")
 end
@@ -244,7 +245,7 @@ local function SetHovered(spot)
     if spot then
         PlaceOutline(spot)
         outline:Show()
-        hint:SetText(Resolve(spot.label) .. (spot.drag and "  -  click to select and edit; drag to move; arrow keys fine-tune" or "  -  click to edit"))
+        hint:SetFormattedText(spot.drag and "%s  -  click to select and edit; drag to move; arrow keys fine-tune" or "%s  -  click to edit", Style.T(Resolve(spot.label)))
         local tint = Style.StateColor()
         hint:SetTextColor(tint[1], tint[2], tint[3])
     else
@@ -478,7 +479,7 @@ undoButton:SetFrameLevel(outline:GetFrameLevel() + 1)
 undoButton:SetScript("OnClick", function(self)
     local options = {}
     for i, label in ipairs(ns.Undo.History()) do
-        options[i] = { value = i, label = (i == 1 and "Undo: " or ("Undo back to: ")) .. label }
+        options[i] = { value = i, label = Style.T(i == 1 and "Undo: %s" or "Undo back to: %s"):format(Style.T(label)) }
     end
     if #options == 0 then return end
     ns.ShowList(self, options, nil, function(steps)
@@ -490,7 +491,11 @@ local function UpdateUndo(canUndo, canRedo)
     undoButton:SetEnabled(canUndo)
     undoButton:SetAlpha(canUndo and 1 or 0.4)
     local count = ns.Undo.Count()
-    undoButton.label:SetText(count > 0 and ("Undo (" .. count .. ")") or "Undo")
+    if count > 0 then
+        undoButton.label:SetFormattedText("Undo (%d)", count)
+    else
+        undoButton.label:SetText("Undo")
+    end
     redoButton:SetEnabled(canRedo)
     redoButton:SetAlpha(canRedo and 1 or 0.4)
 end
@@ -502,8 +507,8 @@ redoButton:HookScript("OnEnter", function(self)
     if not label then return end
     GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
     local accent = Style.StateColor()
-    GameTooltip:SetText("Redo", accent[1], accent[2], accent[3])
-    GameTooltip:AddLine("Puts back: " .. label, 1, 1, 1, true)
+    GameTooltip:SetText(Style.T("Redo"), accent[1], accent[2], accent[3])
+    GameTooltip:AddLine(Style.T("Puts back: %s"):format(Style.T(label)), 1, 1, 1, true)
     GameTooltip:Show()
 end)
 redoButton:HookScript("OnLeave", function() GameTooltip:Hide() end)

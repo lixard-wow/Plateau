@@ -1,4 +1,5 @@
 local ns = { Elements = {}, Driver = { RegisterElement = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 function issecretvalue() return false end
 function ns.ApplyFont() end
 function ns.ApplyShadow() end

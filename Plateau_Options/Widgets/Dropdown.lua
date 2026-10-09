@@ -171,8 +171,8 @@ local function EnsureList()
             end
             if self.option and self.option.tooltip then
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                GameTooltip:SetText(self.option.tooltipTitle or self.option.label, 1, 1, 1)
-                GameTooltip:AddLine(self.option.tooltip, 1, 1, 1, true)
+                GameTooltip:SetText(Style.T(self.option.tooltipTitle or self.option.label), 1, 1, 1)
+                GameTooltip:AddLine(Style.T(self.option.tooltip), 1, 1, 1, true)
                 GameTooltip:Show()
             end
         end)

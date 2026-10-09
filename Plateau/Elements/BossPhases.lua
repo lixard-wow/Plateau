@@ -1,5 +1,7 @@
 local _, ns = ...
 
+local L = ns.L
+
 local issecretvalue = issecretvalue
 local IsInInstance = IsInInstance
 local MAX_LINES = 4
@@ -314,7 +316,7 @@ Plateau.AddBossPhaseBoss = function(id, name)
     if name and name ~= "" then
         global.bossesSeen[id] = name
     elseif not global.bossesSeen[id] and not builtin[id] then
-        global.bossesSeen[id] = "Encounter " .. id
+        global.bossesSeen[id] = L["Encounter %s"]:format(tostring(id))
     end
     return true
 end

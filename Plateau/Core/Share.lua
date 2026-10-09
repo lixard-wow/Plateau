@@ -1,5 +1,7 @@
 local _, ns = ...
 
+local L = ns.L
+
 local PREFIX = "!SL1!"
 local MAX_TEXT = 20000
 local MAX_SERIALIZED = 1000000
@@ -56,33 +58,33 @@ local function ReadString(text, position)
             position = position + 1
         end
     end
-    error("unterminated string")
+    error(L["unterminated string"])
 end
 
 local ReadValue
 local nodes
 
 local function ReadTable(text, position, depth)
-    if depth > 20 then error("too deeply nested") end
+    if depth > 20 then error(L["too deeply nested"]) end
     local result = {}
     while true do
         local c = text:sub(position, position)
         if c == "}" then
             return result, position + 1
         elseif c == "" then
-            error("unterminated table")
+            error(L["unterminated table"])
         end
         local key, value
         key, position = ReadValue(text, position, depth)
         value, position = ReadValue(text, position, depth)
-        if type(key) == "table" then error("table keys are not allowed") end
+        if type(key) == "table" then error(L["table keys are not allowed"]) end
         result[key] = value
     end
 end
 
 function ReadValue(text, position, depth)
     nodes = nodes + 1
-    if nodes > MAX_NODES then error("too much data") end
+    if nodes > MAX_NODES then error(L["too much data"]) end
     local c = text:sub(position, position)
     if c == "{" then
         return ReadTable(text, position + 1, depth + 1)
@@ -90,16 +92,16 @@ function ReadValue(text, position, depth)
         return ReadString(text, position + 1)
     elseif c == "n" then
         local finish = text:find("^", position, true)
-        if not finish then error("bad number") end
+        if not finish then error(L["bad number"]) end
         local number = tonumber(text:sub(position + 1, finish - 1))
-        if not number then error("bad number") end
+        if not number then error(L["bad number"]) end
         return number, finish + 1
     elseif c == "T" then
         return true, position + 1
     elseif c == "F" then
         return false, position + 1
     end
-    error("unexpected data")
+    error(L["unexpected data"])
 end
 
 function Share.Deserialize(text)
@@ -109,7 +111,7 @@ function Share.Deserialize(text)
         return nil, value
     end
     if position <= #text then
-        return nil, "extra data at the end"
+        return nil, L["extra data at the end"]
     end
     return value
 end
@@ -172,20 +174,20 @@ end
 function Share.Decode(text)
     text = (text or ""):gsub("%s", "")
     if text:sub(1, #PREFIX) ~= PREFIX then
-        return nil, "that isn't a Plateau profile string"
+        return nil, L["that isn't a Plateau profile string"]
     end
     if #text > MAX_TEXT then
-        return nil, "that string is too long to be a Plateau profile"
+        return nil, L["that string is too long to be a Plateau profile"]
     end
     local deflate = Deflate()
     local compressed = deflate:DecodeForPrint(text:sub(#PREFIX + 1))
     local serialized = compressed and deflate:DecompressDeflate(compressed)
     if not serialized or #serialized > MAX_SERIALIZED then
-        return nil, "the string is damaged or incomplete"
+        return nil, L["the string is damaged or incomplete"]
     end
     local payload, reason = Share.Deserialize(serialized)
     if type(payload) ~= "table" then
-        return nil, "couldn't read the profile: " .. tostring(reason)
+        return nil, L["couldn't read the profile: %s"]:format(tostring(reason))
     end
     return payload
 end

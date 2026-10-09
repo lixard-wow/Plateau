@@ -19,8 +19,8 @@ local issecretvalue = issecretvalue
 local CreateDurationTextBinding = C_DurationUtil.CreateDurationTextBinding
 local UnitNameFromGUID = UnitNameFromGUID
 local UnitClassFromGUID = UnitClassFromGUID
-local INTERRUPTED_TEXT = INTERRUPTED or "Interrupted"
-local INTERRUPTED_BY = SPELL_INTERRUPTED_BY or "Interrupted by %s"
+local INTERRUPTED_TEXT = INTERRUPTED or ns.L["Interrupted"]
+local INTERRUPTED_BY = SPELL_INTERRUPTED_BY or ns.L["Interrupted by %s"]
 local InterruptReady = ns.InterruptReady
 
 local TIMER_WIDTH = 30

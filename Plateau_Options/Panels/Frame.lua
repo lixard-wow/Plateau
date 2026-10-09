@@ -3,6 +3,7 @@ local _, ns = ...
 local Style = ns.Style
 local C = Style.colors
 local Widgets = ns.Widgets
+local T = Style.T
 
 local WIDTH, HEIGHT = 1260, 880
 local RAIL = 168
@@ -134,7 +135,7 @@ Style.Tooltip(cpuButton, { label = "Plateau CPU", tooltip = "Click to open Diagn
 local function UpdateCpu()
     local ms, percent = Plateau.CpuReadout()
     if ms then
-        cpuText:SetText(("Plateau CPU  %.3f ms (%.1f%%)"):format(ms, percent))
+        cpuText:SetFormattedText("Plateau CPU  %.3f ms (%.1f%%)", ms, percent)
     else
         cpuText:SetText("")
     end
@@ -250,15 +251,15 @@ local function ShowProfileTip(owner)
     local status = Plateau.AutoProfile:Status()
     GameTooltip:SetOwner(owner, "ANCHOR_BOTTOM")
     local accent = Style.StateColor()
-    GameTooltip:SetText("Active profile: " .. status.active, accent[1], accent[2], accent[3])
+    GameTooltip:SetText(T("Active profile: %s"):format(status.active), accent[1], accent[2], accent[3])
     if status.overridden then
-        GameTooltip:AddLine("Default profile: " .. status.default, 1, 1, 1, true)
-        GameTooltip:AddLine("Active because of: " .. tostring(status.rule or "an automatic switch"), C.warn[1], C.warn[2], C.warn[3], true)
+        GameTooltip:AddLine(T("Default profile: %s"):format(status.default), 1, 1, 1, true)
+        GameTooltip:AddLine(T("Active because of: %s"):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
     end
     if status.pending then
-        GameTooltip:AddLine("Pending switch: " .. status.pending .. " after combat ends.", C.warn[1], C.warn[2], C.warn[3], true)
+        GameTooltip:AddLine(T("Pending switch: %s after combat ends."):format(status.pending), C.warn[1], C.warn[2], C.warn[3], true)
     end
-    GameTooltip:AddLine("Click the profile to switch to another one. Click the icon or name, or Restore, to bring the settings back. Drag anywhere else to move this bar.", 0.7, 0.7, 0.7, true)
+    GameTooltip:AddLine(T("Click the profile to switch to another one. Click the icon or name, or Restore, to bring the settings back. Drag anywhere else to move this bar."), 0.7, 0.7, 0.7, true)
     GameTooltip:Show()
 end
 
@@ -301,13 +302,13 @@ end)
 
 function ns.UpdateMiniBar()
     local status = Plateau.AutoProfile:Status()
-    local text = status.active
     if status.pending then
-        text = text .. " (pending)"
+        miniProfile:SetFormattedText("%s (pending)", status.active)
     elseif status.overridden then
-        text = text .. " (auto)"
+        miniProfile:SetFormattedText("%s (auto)", status.active)
+    else
+        miniProfile:SetText(status.active)
     end
-    miniProfile:SetText(text)
 end
 
 local screenWatcher = CreateFrame("Frame")
@@ -541,14 +542,14 @@ profileButton:HookScript("OnEnter", function(self)
     local status = Plateau.AutoProfile:Status()
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
     local accent = Style.StateColor()
-    GameTooltip:SetText("Active profile: " .. status.active, accent[1], accent[2], accent[3])
-    GameTooltip:AddLine("Every page edits this profile. Click to switch it; the profile you pick also becomes your default profile.", 1, 1, 1, true)
-    GameTooltip:AddLine("Default profile: " .. status.default, 1, 1, 1, true)
+    GameTooltip:SetText(T("Active profile: %s"):format(status.active), accent[1], accent[2], accent[3])
+    GameTooltip:AddLine(T("Every page edits this profile. Click to switch it; the profile you pick also becomes your default profile."), 1, 1, 1, true)
+    GameTooltip:AddLine(T("Default profile: %s"):format(status.default), 1, 1, 1, true)
     if status.overridden then
-        GameTooltip:AddLine("Active because of: " .. tostring(status.rule or "an automatic switch") .. ". Picking another profile here can be replaced by the automatic rules when you change zone or specialization.", C.warn[1], C.warn[2], C.warn[3], true)
+        GameTooltip:AddLine(T("Active because of: %s. Picking another profile here can be replaced by the automatic rules when you change zone or specialization."):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
     end
     if status.pending then
-        GameTooltip:AddLine("Pending after combat: " .. status.pending, C.warn[1], C.warn[2], C.warn[3], true)
+        GameTooltip:AddLine(T("Pending after combat: %s"):format(status.pending), C.warn[1], C.warn[2], C.warn[3], true)
     end
     GameTooltip:Show()
 end)
@@ -619,8 +620,8 @@ local function BuildShield(row)
     shield:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         local accent = Style.StateColor()
-        GameTooltip:SetText(type(spec.label) == "string" and spec.label or "", accent[1], accent[2], accent[3])
-        GameTooltip:AddLine(Logic.DisabledReason(spec) or "Not used with the current settings.", 1, 1, 1, true)
+        GameTooltip:SetText(type(spec.label) == "string" and T(spec.label) or "", accent[1], accent[2], accent[3])
+        GameTooltip:AddLine(T(Logic.DisabledReason(spec) or "Not used with the current settings."), 1, 1, 1, true)
         GameTooltip:Show()
     end)
     shield:SetScript("OnLeave", function()
@@ -935,7 +936,7 @@ function ns.UpdatePickButtons(section)
     for i, button in ipairs(pickButtons) do
         local pick = picks[i]
         if pick then
-            button.label:SetText("Preview: " .. PickLabel(pick))
+            button.label:SetFormattedText("Preview: %s", T(PickLabel(pick)))
             button:SetWidth(button.label:GetStringWidth() + 34)
             button.tip.label = pick.label
             button.tip.tooltip = pick.tooltip
@@ -962,7 +963,7 @@ for _, group in ipairs(RAIL_GROUPS) do
     local header = Style.Text(railContent, 11, Style.StateColor())
     header:SetPoint("TOPLEFT", PAD - 4, -(railY + 7))
     railHeaders[#railHeaders + 1] = header
-    header:SetText(group.label:upper())
+    header:SetText(T(group.label):upper())
     railY = railY + RAIL_HEADER
     for _, key in ipairs(group.keys) do
         local section = sectionsByKey[key]
@@ -1002,13 +1003,13 @@ end
 
 function ns.UpdateProfileLabel()
     local status = Plateau.AutoProfile:Status()
-    local text = "Active: " .. status.active
     if status.pending then
-        text = text .. " (pending)"
+        profile:SetFormattedText("Active: %s (pending)", status.active)
     elseif status.overridden then
-        text = text .. " (override)"
+        profile:SetFormattedText("Active: %s (override)", status.active)
+    else
+        profile:SetFormattedText("Active: %s", status.active)
     end
-    profile:SetText(text)
     ns.UpdateMiniBar()
 end
 
@@ -1183,7 +1184,8 @@ local function BuildHelpIndex()
                         label = topic.title,
                         where = topic.category,
                         labelText = topic.title:lower(),
-                        text = (topic.title .. " " .. (topic.keywords or "") .. " " .. topic.text .. " " .. topic.category):lower(),
+                        labelLocal = T(topic.title) ~= topic.title and T(topic.title):lower() or nil,
+                        text = (topic.title .. " " .. (topic.keywords or "") .. " " .. topic.text .. " " .. topic.category):lower() .. Logic.LocalizedText(topic.title, topic.keywords, topic.text, topic.category),
                     }
                 end
             end

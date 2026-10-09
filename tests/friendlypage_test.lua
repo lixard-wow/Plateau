@@ -11,6 +11,7 @@ local stub = { HookScript = function() end, SetScript = function() end }
 function CreateFrame() return stub end
 
 local ns = { Driver = { Restyle = function() end, RequestRestyle = function() end } }
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 local function load(path) assert(loadfile(path))("Plateau", ns) end
 load("Plateau/Core/Defaults.lua"); load("Plateau/Core/Database.lua"); load("Plateau/Core/Share.lua")
 local DB = ns.DB
@@ -18,6 +19,7 @@ PlateauDB = nil
 DB:Init()
 
 Plateau = { DB = DB, brand = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 } }, Brand = { OnChange = function() end, Text = function(_, t) return t end } }
+Plateau.T = Plateau.T or (function() local l = {} assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", l) return l.T end)()
 local nsOpt = {}
 local function loadOpt(path) assert(loadfile(path))("Plateau_Options", nsOpt) end
 loadOpt("Plateau_Options/Widgets/Style.lua")

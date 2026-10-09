@@ -1,5 +1,7 @@
 local _, ns = ...
 
+local L = ns.L
+
 local UnitIsTapDenied = UnitIsTapDenied
 local UnitIsPlayer = UnitIsPlayer
 local UnitClassBase = UnitClassBase
@@ -331,40 +333,48 @@ function UnitColors:Resolve(plate, unit)
 end
 
 local MOB_ORDER = { "boss", "lieutenant", "higher", "trivial", "caster", "elite" }
-local MOB_LABELS = { boss = "Bosses", lieutenant = "Lieutenants", higher = "Elites", trivial = "Minor enemies", caster = "Casters", elite = "Melee" }
+local MOB_LABELS = {
+    boss = { label = "Bosses" },
+    lieutenant = { label = "Lieutenants" },
+    higher = { label = "Elites" },
+    trivial = { label = "Minor enemies" },
+    caster = { label = "Casters" },
+    elite = { label = "Melee" },
+}
 
 function UnitColors:Explain(plate, unit)
     local cfg = cfgs[plate.state]
     if cfg.showTapped and UnitIsTapDenied(unit) then
-        return "tagged by someone else (Colors: Tagged by someone else)"
+        return L["tagged by someone else (Colors: Tagged by someone else)"]
     end
     local reaction = UnitReaction(unit, "player")
     local function Reaction()
         if issecretvalue(reaction) then
-            return "game reaction color (reaction hidden)"
+            return L["game reaction color (reaction hidden)"]
         end
-        local kind = (reaction or 0) <= 3 and "Hostile" or reaction == 4 and "Neutral" or "Friendly"
         if cfg.customReaction then
-            return ("reaction %s: your %s color (Colors: Reaction)"):format(tostring(reaction), kind)
+            local kind = (reaction or 0) <= 3 and L["Hostile"] or reaction == 4 and L["Neutral"] or L["Friendly"]
+            return L["reaction %s: your %s color (Colors: Reaction)"]:format(tostring(reaction), kind)
         end
-        return ("reaction %s: the game's %s color (Colors: Use my own colors is off)"):format(tostring(reaction), kind:lower())
+        local kind = (reaction or 0) <= 3 and L["hostile"] or reaction == 4 and L["neutral"] or L["friendly"]
+        return L["reaction %s: the game's %s color (Colors: Use my own colors is off)"]:format(tostring(reaction), kind)
     end
     if plate.isFriendly then
-        return "friendly plate: " .. Reaction()
+        return L["friendly plate: %s"]:format(Reaction())
     end
     if cfg.threat and cfg.threatDisplay ~= "border" and UnitAffectingCombat(unit) and ThreatColor(cfg, unit) then
-        return "threat color (Colors: Threat)"
+        return L["threat color (Colors: Threat)"]
     end
     if UnitIsPlayer(unit) then
         if cfg.classColors then
             if self:PlayerClass(unit) then
-                return "enemy player: class color"
+                return L["enemy player: class color"]
             end
             local _, _, _, hidden = self:SecretClassColor(unit)
             if hidden then
-                return "enemy player: class color (class hidden by the game, passed straight to the bar)"
+                return L["enemy player: class color (class hidden by the game, passed straight to the bar)"]
             end
-            return "enemy player: class unavailable, so " .. Reaction()
+            return L["enemy player: class unavailable, so %s"]:format(Reaction())
         end
         return Reaction()
     end
@@ -372,17 +382,18 @@ function UnitColors:Explain(plate, unit)
         for i = 1, #MOB_ORDER do
             local mobType = MOB_ORDER[i]
             if plate.mobFlags and plate.mobFlags[mobType] and cfg[mobType] then
-                return ("enemy type %s (Colors: %s)"):format(MOB_LABELS[mobType], MOB_LABELS[mobType])
+                local label = L[MOB_LABELS[mobType].label]
+                return L["enemy type %s (Colors: %s)"]:format(label, label)
             end
         end
         local found = plate.mobType and MOB_LABELS[plate.mobType]
         if found then
-            return ("enemy type %s, but its box is off on the Health bar page, so: %s"):format(found, Reaction())
+            return L["enemy type %s, but its box is off on the Health bar page, so: %s"]:format(L[found.label], Reaction())
         end
     elseif not cfg.mobTypes then
-        return "Color enemies by what they are is off, so: " .. Reaction()
+        return L["Color enemies by what they are is off, so: %s"]:format(Reaction())
     else
-        return "enemy type colors are set to instances only, so: " .. Reaction()
+        return L["enemy type colors are set to instances only, so: %s"]:format(Reaction())
     end
     return Reaction()
 end
