@@ -1,6 +1,6 @@
 local _, ns = ...
 
-local SCHEMA_VERSION = 23
+local SCHEMA_VERSION = 24
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -77,6 +77,11 @@ local function RenameProfile(db, OLD, NEW)
 end
 
 local migrations = {
+    [24] = function(db)
+        if type(db.global) == "table" then
+            db.global.probe, db.global.probeWatch, db.global.probeVersion, db.global.probeUntil = nil, nil, nil, nil
+        end
+    end,
     [23] = function(db)
         for name, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then

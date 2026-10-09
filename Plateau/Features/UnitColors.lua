@@ -136,12 +136,22 @@ local function LooseOnGroupMember(unit)
     return inParty == true or inRaid ~= nil
 end
 
+local function OffTankColor(cfg)
+    if cfg.showOffTank then
+        return cfg.offTankColor
+    end
+    return cfg.showThreatGood and cfg.threatGood or nil
+end
+
 local function ThreatColor(cfg, unit)
     local status = UnitThreatSituation("player", unit)
     if issecretvalue(status) then return nil end
     if isTank then
         if status == nil then
-            if not HeldByOtherTank(unit) and LooseOnGroupMember(unit) then
+            if HeldByOtherTank(unit) then
+                return cfg.showOffTank and cfg.offTankColor or nil
+            end
+            if LooseOnGroupMember(unit) then
                 return cfg.threatBad
             end
             return nil
@@ -150,7 +160,7 @@ local function ThreatColor(cfg, unit)
             return cfg.showThreatGood and cfg.threatGood or nil
         end
         if HeldByOtherTank(unit) then
-            return cfg.showThreatGood and cfg.threatGood or nil
+            return OffTankColor(cfg)
         end
         if status == 1 or status == 2 then
             return cfg.showThreatWarning and cfg.threatWarning or nil

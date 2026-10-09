@@ -71,6 +71,8 @@ ns.defaults = {
             threatWarning = { 0.3176, 0.7137, 1, 1 },
             threatDisplay = "bar",
             threatBad = { 1, 0.1, 0.1, 1 },
+            showOffTank = true,
+            offTankColor = { 0.62, 0.42, 1, 1 },
         },
         enemyTarget = {
             enabled = false,
