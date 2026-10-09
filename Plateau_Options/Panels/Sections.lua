@@ -1912,25 +1912,7 @@ ns.sections = {
           tooltip = "Moves the name up or down when only the name shows. Lower it if the name floats too far above the head." })),
 
         { type = "Header", label = "Raid target icon" },
-        FriendlyGate({ type = "Toggle", path = "look.friendly.raidMarker.own", label = "Place the raid icon separately from enemies",
-          set = function(value)
-              local values = { ["look.friendly.raidMarker.own"] = value == true }
-              if value then
-                  for _, key in ipairs({ "position", "gap", "offsetX", "offsetY" }) do
-                      values["look.friendly.raidMarker." .. key] = Plateau.DB:Get("look.raidMarker." .. key)
-                  end
-              end
-              Plateau.DB:SetMany(values)
-          end,
-          tooltip = "Off: friendly plates put the raid icon where the Raid target icon page says. On: friendly plates use the position below, and moving the icon on this page's preview no longer moves it on enemy plates. Size and opacity still follow the Raid target icon page." }),
-        Gate({ type = "Dropdown", path = "look.friendly.raidMarker.position", label = "Position", options = SIDES,
-          tooltip = "Which side of the friendly nameplate this sits on, or on top of the bar." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.gap", label = "Distance from the nameplate", min = 0, max = 20,
-          tooltip = "How far the raid icon sits from the friendly nameplate's edge, in the direction of Position. Applied before the offsets." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetX", label = "Horizontal offset", min = -40, max = 40,
-          tooltip = "Nudges the raid icon left (negative) or right (positive) from the spot set by Position and distance." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetY", label = "Vertical offset", min = -40, max = 40,
-          tooltip = "Nudges the raid icon down (negative) or up (positive) from the spot set by Position and distance." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
+        { type = "Link", label = "Raid icon placement for friendly plates is on the Raid target icon page", target = { section = "raidMarker", label = "Friendly nameplates" } },
 
         { type = "Header", label = "Full nameplate", visibleIf = FriendlyStyled },
         { type = "Note", label = "Shown instead of just the name, above. Everything else about the look, like size and position, follows the regular nameplate settings; these are the only differences.", height = 32, visibleIf = FriendlyStyled },
@@ -2460,7 +2442,7 @@ ns.sections = {
           tooltip = "Hovering a friendly plate doesn't highlight it." }
     ))),
 
-    Section("raidMarker", "Raid target icon", "look.raidMarker", Join(List(
+    Section("raidMarker", "Raid target icon", { "look.raidMarker", "look.friendly.raidMarker" }, Join(List(
         { type = "Header", label = "Raid target icon", first = true },
         { type = "Toggle", path = "look.raidMarker.enabled", label = "Show raid target icons",
           tooltip = "Shows the raid target marker (star, circle, diamond and so on) already assigned to a unit. It does not assign markers, and it does not show ground or world markers." }
@@ -2480,6 +2462,27 @@ ns.sections = {
               if ns.Get("look.raidMarker.enabled") ~= true then return "Turn on Show raid target icons to use this." end
               return "Turn on Tint the plate border by marker to use this."
           end)
+    ), List(
+        { type = "Header", label = "Friendly nameplates" },
+        FriendlyGate({ type = "Toggle", path = "look.friendly.raidMarker.own", label = "Place the raid icon separately from enemies",
+          set = function(value)
+              local values = { ["look.friendly.raidMarker.own"] = value == true }
+              if value then
+                  for _, key in ipairs({ "position", "gap", "offsetX", "offsetY" }) do
+                      values["look.friendly.raidMarker." .. key] = Plateau.DB:Get("look.raidMarker." .. key)
+                  end
+              end
+              Plateau.DB:SetMany(values)
+          end,
+          tooltip = "Off: friendly plates put the raid icon where the Raid target icon page says. On: friendly plates use the position below, and moving the icon on the Friendly nameplates page's preview no longer moves it on enemy plates. Size and opacity still follow the Raid target icon page." }),
+        Gate({ type = "Dropdown", path = "look.friendly.raidMarker.position", label = "Position", options = SIDES,
+          tooltip = "Which side of the friendly nameplate this sits on, or on top of the bar." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
+        Gate({ type = "Slider", path = "look.friendly.raidMarker.gap", label = "Distance from the nameplate", min = 0, max = 20,
+          tooltip = "How far the raid icon sits from the friendly nameplate's edge, in the direction of Position. Applied before the offsets." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
+        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetX", label = "Horizontal offset", min = -40, max = 40,
+          tooltip = "Nudges the raid icon left (negative) or right (positive) from the spot set by Position and distance." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
+        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetY", label = "Vertical offset", min = -40, max = 40,
+          tooltip = "Nudges the raid icon down (negative) or up (positive) from the spot set by Position and distance." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason)
     ))),
 
     Section("quest", "Quest icon", { "look.quest", "look.colors.quest", "look.colors.questColor", "look.colors.questExcludeBoss" }, Join(
