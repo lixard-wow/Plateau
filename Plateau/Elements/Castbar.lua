@@ -257,6 +257,18 @@ function Castbar:Create(plate)
     interrupted.fill:SetAllPoints()
     interrupted:Hide()
     bar.interrupted = interrupted
+    local flash = interrupted:CreateTexture(nil, "OVERLAY")
+    flash:SetAllPoints()
+    flash:Hide()
+    local flashAnim = flash:CreateAnimationGroup()
+    local fade = flashAnim:CreateAnimation("Alpha")
+    fade:SetFromAlpha(1)
+    fade:SetToAlpha(0)
+    fade:SetDuration(0.45)
+    fade:SetSmoothing("OUT")
+    flashAnim:SetScript("OnFinished", function() flash:Hide() end)
+    flash.anim, flash.fade = flashAnim, fade
+    bar.interruptFlash = flash
     bar.holdToken = 0
     bar.holdCallback = function() HoldExpired(bar) end
 
@@ -336,6 +348,7 @@ function Castbar:Configure(db, state)
     s.interruptFormat = db.interruptFormat or "by"
     s.interruptClassColor = db.interruptClassColor ~= false
     s.interruptKeepName = db.interruptKeepName == true
+    s.interruptFlash = db.interruptFlash == true
     s.showSpellName = db.showSpellName ~= false
     s.drain = db.drainCasts == true
     s.shieldIcon = db.shieldIcon == true
@@ -379,6 +392,9 @@ function Castbar:Style(plate, db)
     bar.mustStop.fill:SetColorTexture(db.importantUninterruptible[1], db.importantUninterruptible[2], db.importantUninterruptible[3], 1)
     local hit = db.interruptedColor
     bar.interrupted.fill:SetColorTexture(hit[1], hit[2], hit[3], hit[4])
+    local flashColor = db.interruptFlashColor
+    bar.interruptFlash:SetColorTexture(flashColor[1], flashColor[2], flashColor[3], 1)
+    bar.interruptFlash.fade:SetFromAlpha(flashColor[4] or 1)
 
     bar.border:SetStyle(db.borderStyle, bar)
     bar.border:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
@@ -495,6 +511,8 @@ function Castbar:Disable(plate)
         bar.stoppedAt = GetTime()
     end
     bar.holding = false
+    bar.interruptFlash.anim:Stop()
+    bar.interruptFlash:Hide()
     bar.interrupted:Hide()
     bar.interruptText:Hide()
     bar:SetScript("OnUpdate", nil)
@@ -554,6 +572,14 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
     bar.glow:SetAlpha(0)
     bar.interrupted:Show()
     bar:Show()
+    local flash = bar.interruptFlash
+    flash.anim:Stop()
+    if s.interruptFlash then
+        flash:Show()
+        flash.anim:Play()
+    else
+        flash:Hide()
+    end
     if not s.interruptKeepName then
         bar.text:SetText("")
     end
@@ -606,6 +632,8 @@ function Castbar:Refresh(plate, unit, ending)
     if bar.holding then
         bar.holding = false
         bar.holdToken = bar.holdToken + 1
+        bar.interruptFlash.anim:Stop()
+        bar.interruptFlash:Hide()
         bar.interrupted:Hide()
         bar.interruptText:Hide()
     end

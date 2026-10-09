@@ -2245,7 +2245,9 @@ ns.sections = {
             { type = "Toggle", path = "look.castbar.interruptClassColor", label = "Class color for the name",
               tooltip = "Shows the interrupting player's name in their class color. The game may hide who interrupted for players outside your group; the name then shows in the text color, or the message reads Interrupted." },
             { type = "Toggle", path = "look.castbar.interruptKeepName", label = "Keep showing the spell name",
-              tooltip = "Off replaces the spell name with the interrupted message. On keeps the spell name and shows the message separately, so move the message somewhere else with Interrupted text position." }))),
+              tooltip = "Off replaces the spell name with the interrupted message. On keeps the spell name and shows the message separately, so move the message somewhere else with Interrupted text position." },
+            { type = "ToggleColor", path = "look.castbar.interruptFlash", colorPath = "look.castbar.interruptFlashColor", label = "Flash when interrupted",
+              tooltip = "The cast bar flashes once in this color the moment a cast is interrupted, then fades into the interrupted color. The color's opacity sets how bright the flash starts." }))),
 
     Section("shield", "Buff warnings", { "look.shield.alertImportant", "look.shield.alertColor", "look.shield.alertDefensive", "look.shield.defensiveColor", "look.shield.alertEnrage", "look.shield.enrageColor", "look.shield.alertMagic", "look.shield.magicColor", "look.shield.alertOnlyMine", "look.shield.alertSize", "look.shield.alertTexture", "look.shield.alertTextureAlpha" }, List(
         { type = "Note", label = "Highlight enemy buffs with a colored border or health bar overlay on the nameplate itself. Buff icons are on Enemy buffs and Important auras.", height = 32 },
