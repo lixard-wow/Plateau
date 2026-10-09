@@ -205,6 +205,16 @@ ns.defaults = {
             hideEmpty = false,
             glowMax = false,
         },
+        faction = {
+            enabled = false,
+            onlyPvP = true,
+            size = 14,
+            position = "TOPLEFT",
+            gap = 2,
+            offsetX = 0,
+            offsetY = 0,
+            alpha = 1,
+        },
         classification = {
             enabled = true,
             size = 14,

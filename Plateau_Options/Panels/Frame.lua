@@ -830,7 +830,7 @@ local RAIL_GROUPS = {
     { label = "Behavior", keys = { "size", "fading", "layering", "clicking" } },
     { label = "States", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
-    { label = "Icons", keys = { "raidMarker", "quest", "classification", "forces", "classPower" } },
+    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction", "forces", "classPower" } },
     { label = "Friendly", keys = { "friendly" } },
     { label = "Game", keys = { "game" } },
     { label = "Help", keys = { "help" } },

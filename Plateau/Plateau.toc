@@ -44,6 +44,7 @@ Elements\EnemyPower.lua
 Elements\Level.lua
 Elements\RaidMarker.lua
 Elements\Classification.lua
+Elements\Faction.lua
 Elements\Quest.lua
 Elements\Forces.lua
 Elements\ClassPower.lua

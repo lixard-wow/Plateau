@@ -2611,6 +2611,18 @@ ns.sections = {
         Placement("look.classification")
     ))),
 
+    Section("faction", "Faction icon", "look.faction", Join(List(
+        { type = "Header", label = "Horde or Alliance icon", first = true },
+        { type = "Toggle", path = "look.faction.enabled", label = "Show faction icon on players",
+          tooltip = "Shows the Horde or Alliance crest on other players' nameplates, the same icon the target frame uses. Enemies that aren't players never get it. Friendly players only show it while their plate isn't names-only." }
+    ), GateList(On("look.faction.enabled"), "Turn on Show faction icon on players to use this.",
+        { type = "Toggle", path = "look.faction.onlyPvP", label = "Only when flagged for PvP",
+          tooltip = "Shows the crest only on players who are flagged for PvP, the way the target frame does. Off shows it on every player." },
+        { type = "Slider", path = "look.faction.size", label = "Icon size", min = 8, max = 40,
+          tooltip = "How big the crest is." },
+        Placement("look.faction")
+    ))),
+
     {
         key = "addon",
         title = "Plateau settings",
