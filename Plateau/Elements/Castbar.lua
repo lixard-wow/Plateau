@@ -257,7 +257,7 @@ function Castbar:Create(plate)
     interrupted.fill:SetAllPoints()
     interrupted:Hide()
     bar.interrupted = interrupted
-    local flash = interrupted:CreateTexture(nil, "OVERLAY")
+    local flash = interrupted:CreateTexture(nil, "ARTWORK", nil, 1)
     flash:SetAllPoints()
     flash:Hide()
     local flashAnim = flash:CreateAnimationGroup()
