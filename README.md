@@ -16,6 +16,7 @@ Plateau replaces the enemy nameplates with its own, and gives you a settings win
 - [Sharing a profile](#sharing-a-profile)
 - [How Midnight's rules affect this addon](#how-midnights-rules-affect-this-addon)
 - [Commands](#commands)
+- [Languages](#languages)
 - [Compatibility](#compatibility)
 - [Troubleshooting](#troubleshooting)
 - [For developers](#for-developers)
@@ -27,7 +28,11 @@ Plateau replaces the enemy nameplates with its own, and gives you a settings win
 - **Optional:** the [SharedMedia](https://www.curseforge.com/wow/addons/sharedmedia) addon (or any addon that adds textures, borders and fonts to the shared media library). Plateau lists everything registered there in its texture, border and font pickers, so a pack such as SharedMedia adds a long list of bar textures, Charcoal among them.
 
 ## Install
-Copy the `Plateau` and `Plateau_Options` folders into your `Interface\AddOns` folder, then restart the game. `Plateau_Options` loads only when you open the settings, so it costs nothing while you play.
+1. On this page, click **Code**, then **Download ZIP**.
+2. Open the zip. Inside the `Plateau-main` folder are two folders: `Plateau` and `Plateau_Options`.
+3. Copy both into `World of Warcraft\_retail_\Interface\AddOns` (for WoW Forever, the `Interface\AddOns` folder of that game version), then restart the game.
+
+`Plateau_Options` loads only when you open the settings, so it costs nothing while you play. A CurseForge release is coming later.
 
 ## First run
 The first time you log in, Plateau asks you to pick a look from six ready-made styles. Everything else is set up in the settings window, which opens with a short tour of its parts. You can skip both, and bring them back any time: `/plt setup` for the look picker, or the buttons at the top of the **Help** page for the tour.
@@ -47,12 +52,14 @@ The first time you log in, Plateau asks you to pick a look from six ready-made s
 ### The cast bar
 - Colors that follow **your own interrupt**: one color while it is ready, another while it is on cooldown, and separate pairs for casts Blizzard flags as important. Uninterruptible casts have their own colors. A spec with no interrupt sees the ready colors on casts that can be interrupted, so healers can call them out.
 - A **line on the cast bar** showing where your interrupt comes back during the cast.
-- **Glow around important casts**, spell icon (beside the bar or one tall icon spanning the health and cast bars), timer that switches to tenths near the end, who the cast is aimed at, and who interrupted it.
+- **Glow around important casts**, spell icon (beside the bar or one tall icon spanning the health and cast bars), timer that switches to tenths near the end, who the cast is aimed at (on its own line or right after the spell name), and who interrupted it.
+- **Interrupt flash:** the bar flashes once when a cast is interrupted.
+- **Join the cast bar to the health bar** inside one shared border, with a line between them.
 
 ### Colors
 - **By enemy type:** bosses, lieutenants, elites, casters, melee and minor enemies, each with its own switch and color.
 - **Threat:** the right rule for your spec. As a tank an enemy that is not on you turns the color, and as damage or healer an enemy that is on you does. Optionally also color enemies that are changing targets or that you are holding. Show it on the bar, on the bar's border, or both.
-- **Tank swaps:** as a tank, an enemy held by another tank in your group counts as fine, so a swap between other tanks does not turn it red.
+- **Off-tank color:** as a tank, an enemy another tank in your group is holding gets its own color, so your co-tank's enemies stand apart from yours and from loose ones. A swap between tanks never turns a plate red.
 - **Quest enemies:** enemies you need for a quest get their own color.
 - **Players:** class colors for enemy players. **Reaction:** your own hostile, neutral and friendly colors. **Tagged by someone else:** grey.
 - **Colorblind palettes:** ready-made colors for deuteranopia and protanopia, and for tritanopia.
@@ -72,13 +79,19 @@ Spell lists per specialization let you hide spells (`Never show these`) or show 
 Your target can have a colored border, a recolored or brightened bar, arrows (several styles, any color), corner brackets, and a soft glow. Your focus has the same options, and mouseover highlights the plate under your cursor. Plates you are not targeting can fade.
 
 ### Icons
-Raid markers, elite, rare and boss icons, a quest icon (with modern campaign, important, legendary and repeatable markers on retail), and **Mythic+ enemy forces**: how much of the enemy forces bar each enemy is worth.
+Raid markers, elite, rare and boss icons, a quest icon (with modern campaign, important, legendary and repeatable markers on retail), a **Horde or Alliance crest** on players (optionally only when they're flagged for PvP), and **Mythic+ enemy forces**: how much of the enemy forces bar each enemy is worth.
+
+### Threat percent
+Your threat on each enemy as a percentage. WoW Forever shares the number with addons; on retail the game may hide it, and then nothing shows. Off by default.
+
+### Friendly names
+Friendly players and NPCs can show just their name. Optionally add a smaller line underneath: the player's guild, or an NPC's title such as `<Banker>`. These work in the open world and delves, since the game draws friendly plates itself in dungeons and raids.
 
 ### Enemy power bar
 A thin bar showing an enemy's energy, rage, mana or other power, on bosses by default, so you can watch a boss's energy in a raid without unit frames. It is drawn from values the game hides, so it works even though Plateau cannot read the number.
 
 ### Your class resource
-Combo points, holy power, soul shards, chi, arcane charges, essence or runes, drawn on your target's plate. It is on by default and does nothing for classes without a resource.
+Combo points, holy power, soul shards, chi, arcane charges, essence or runes, drawn on your target's plate, on the top edge of the health bar. It only shows for specs and forms that use it: Druids in Cat Form, Windwalker Monks and Arcane Mages, plus every Rogue, Paladin, Warlock, Evoker and Death Knight. Set Segment width to 0 to make it exactly as wide as the health bar. Off by default.
 
 ### Sizing, layers and stacking
 - Size by enemy type, a separate size for your target (or Blizzard's), and growth while an enemy casts.
@@ -126,9 +139,12 @@ Since patch 12.0 the game hides some information from addons during combat and i
 - `/plt setup` opens the look picker from the first-time setup.
 - `/plt minimap` shows or hides the minimap button.
 - `/plt debug` prints the version, restrictions, memory and CPU numbers. Paste it when you report a bug.
-- `/plt debug probe` shows what the game hides about your target and bosses right now; `/plt debug probe watch` logs it through a whole dungeon (it stays on through reloads until `/plt debug probe watch off`).
+- `/plt debug reset` starts counting slow frames from now.
 - `/plt reset` puts every setting in the current profile back to its default.
 - `/plt cvars restore` undoes every game nameplate setting Plateau changed.
+
+## Languages
+Plateau is in English. Every string can be translated: see [localization/README.md](localization/README.md) if you'd like to help with your language.
 
 ## Compatibility
 - Plateau replaces Blizzard's enemy nameplates. If another nameplate addon is loaded, a dialog on first run offers to disable the other one, since two would fight over the same plates.
