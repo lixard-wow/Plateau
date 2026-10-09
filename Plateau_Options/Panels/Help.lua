@@ -272,28 +272,11 @@ local C = Style.colors
 
 function ns.Widgets.ResetEverything(parent)
     local button = ns.Widgets.Button(parent, "Reset everything", 150)
-    local armed = false
-    button:SetScript("OnClick", function(self)
-        if armed then
-            armed = false
-            self.label:SetText("Reset everything")
-            self.label:SetTextColor(C.text[1], C.text[2], C.text[3])
-            Plateau.DB:Reset(nil)
-            if ns.RefreshAll then
-                ns.RefreshAll()
-            end
-            return
+    ns.Widgets.Confirm(button, "Reset everything", function()
+        Plateau.DB:Reset(nil)
+        if ns.RefreshAll then
+            ns.RefreshAll()
         end
-        armed = true
-        self.label:SetText("Click again to confirm")
-        self.label:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
-        C_Timer.After(3, function()
-            if armed then
-                armed = false
-                self.label:SetText("Reset everything")
-                self.label:SetTextColor(C.text[1], C.text[2], C.text[3])
-            end
-        end)
     end)
     return button
 end

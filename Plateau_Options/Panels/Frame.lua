@@ -554,28 +554,7 @@ profileButton:HookScript("OnEnter", function(self)
 end)
 profileButton:HookScript("OnLeave", function() GameTooltip:Hide() end)
 
-local function Confirming(button, text, action)
-    local armed = false
-    button:SetScript("OnClick", function(self)
-        if armed then
-            armed = false
-            self.label:SetText(text)
-            self.label:SetTextColor(C.text[1], C.text[2], C.text[3])
-            action()
-            return
-        end
-        armed = true
-        self.label:SetText("Click again to confirm")
-        self.label:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
-        C_Timer.After(3, function()
-            if armed then
-                armed = false
-                self.label:SetText(text)
-                self.label:SetTextColor(C.text[1], C.text[2], C.text[3])
-            end
-        end)
-    end)
-end
+local Confirming = ns.Widgets.Confirm
 
 local pages = {}
 local resetSection

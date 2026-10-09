@@ -25,6 +25,49 @@ function ns.Widgets.Button(parent, text, width, onClick, primary)
     return button
 end
 
+local CONFIRM_SECONDS = 5
+
+function ns.Widgets.Confirm(button, text, action)
+    local armed = false
+    local token = 0
+    local function Disarm()
+        armed = false
+        token = token + 1
+        button.label:SetText(text)
+        button.label:SetTextColor(C.text[1], C.text[2], C.text[3])
+    end
+    local function Expire()
+        token = token + 1
+        local mine = token
+        C_Timer.After(CONFIRM_SECONDS, function()
+            if armed and mine == token and not button:IsMouseOver() then
+                Disarm()
+            end
+        end)
+    end
+    button:SetScript("OnClick", function(self)
+        if armed then
+            Disarm()
+            action()
+            return
+        end
+        armed = true
+        self.label:SetText("Click again to confirm")
+        self.label:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
+        Expire()
+    end)
+    button:HookScript("OnLeave", function()
+        if armed then
+            Expire()
+        end
+    end)
+    button:HookScript("OnHide", function()
+        if armed then
+            Disarm()
+        end
+    end)
+end
+
 function ns.Widgets.PrimaryButton(parent, text, width, onClick)
     return ns.Widgets.Button(parent, text, width, onClick, true)
 end
@@ -366,19 +409,33 @@ function ns.Widgets.Presets(parent, spec)
         buttons[#buttons + 1] = button
         x = x + width + 6
         local armed = false
+        local token = 0
+        local function Expire()
+            token = token + 1
+            local mine = token
+            C_Timer.After(5, function()
+                if armed and mine == token and not button:IsMouseOver() then
+                    armed = false
+                    button.label:SetText(preset.label)
+                    LabelColor(button)
+                end
+            end)
+        end
+        button:HookScript("OnLeave", function()
+            if armed then
+                Expire()
+            end
+        end)
         button:SetScript("OnClick", function(self)
             if not armed then
                 armed = true
                 self.label:SetText("Click to apply")
                 self.label:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
-                C_Timer.After(3, function()
-                    armed = false
-                    self.label:SetText(preset.label)
-                    LabelColor(self)
-                end)
+                Expire()
                 return
             end
             armed = false
+            token = token + 1
             self.label:SetText(preset.label)
             LabelColor(self)
             if preset.apply then
