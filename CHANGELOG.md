@@ -6,6 +6,21 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-08 smoother plates, class resource and off-tank color
+
+#### Changed
+- **Nameplates appear with less work.** When a unit comes into view, Plateau no longer redraws every border on its plate if the plate's size hasn't changed, and a plate last used for the other kind of unit (friendly or enemy) is swapped for a spare that's already styled for it instead of being restyled on the spot. Those restyles were the only nameplate set-ups that took over 1 ms in a busy city.
+- **The class resource only shows for specs and forms that use it.** Druids see combo points only in Cat Form, so Guardian and other forms show nothing; chi shows for Windwalker Monks only and arcane charges for Arcane Mages only. Rogues, Paladins, Warlocks, Evokers and Death Knights are unchanged. It updates as soon as you shift form or change spec.
+- **The class resource sits on the health bar's top edge by default**, half on the bar and half above it, clear of the name. Profiles you made yourself keep their current position.
+- **Segment width 0 makes the class resource exactly as wide as the health bar**, like the cast bar's width setting. The segments share the bar's width evenly, whatever your resource's count.
+
+#### Added
+- **Off-tank color** (Health bar page, Threat, on by default): when you're a tank, an enemy another tank in your group is holding gets its own color, so your co-tank's enemies stand apart from your own and from loose ones. Switch it off to color them like your own secure enemies, as before.
+- **/plt debug shows how long setting up a nameplate takes**, which steps cost the most, how many frames it went over 1 ms, why plates were restyled, and how many restyles were avoided by swapping in a ready spare. Benchmark addons can read the same lines.
+
+#### Removed
+- **The probe and layers test tools** (`/plt debug probe`, `probe watch`, `probe clear` and `/plt debug layers`). Their questions are answered: boss plates are fixed and the layering is settled. Any probe log left in your saved settings is cleared once.
+
 ### 2026-10-06 fixes
 
 #### Changed
