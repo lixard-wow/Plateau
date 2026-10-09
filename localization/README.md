@@ -25,7 +25,11 @@ Plateau shows every word in English until someone translates it. English text is
 
 Send your finished language file as a pull request or an issue on the [Plateau GitHub page](https://github.com/lixard-wow/Plateau). Say how you'd like to be credited; translators are named in the README and changelog.
 
-The [LICENSE](../LICENSE) allows you to copy and edit the language files and this template for exactly this purpose. By sending a translation you confirm it's your own work and agree it can be included in Plateau. It doesn't allow sharing Plateau or a translated copy anywhere else.
+The [LICENSE](../LICENSE) allows you to copy and edit the language files and this template for exactly this purpose. By sending a translation you confirm you wrote it or checked every line yourself, and agree it can be included in Plateau. It doesn't allow sharing Plateau or a translated copy anywhere else.
+
+## Machine translation
+
+Translation tools and AI are fine as a starting point, but every line must be checked by someone who speaks the language fluently and plays WoW. Tools often get game terms wrong (kick, pull, trash, proc, cooldown), guess wrong on short labels that have no context, and sometimes break placeholders like `%s`. If you used a tool, say so when you send your translation. Unchecked machine translations won't be accepted.
 
 ## Placeholders
 
