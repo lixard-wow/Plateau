@@ -465,7 +465,16 @@ function Castbar:Style(plate, db)
 
     ns.ApplyFont(bar.target, db.font, db.targetSize, db.outline)
     bar.target:SetTextColor(db.targetColor[1], db.targetColor[2], db.targetColor[3], db.targetColor[4])
-    ns.PlaceIcon(bar.target, bar, db.targetPosition, 2, db.targetOffsetX, db.targetOffsetY)
+    if db.targetPosition == "AFTERNAME" then
+        local target = bar.target
+        target.slPlaceAnchor = nil
+        target:ClearAllPoints()
+        target:SetPoint("LEFT", bar.text, "RIGHT", 4 + (db.targetOffsetX or 0), db.targetOffsetY or 0)
+        target:SetJustifyH("LEFT")
+    else
+        bar.target:SetJustifyH("CENTER")
+        ns.PlaceIcon(bar.target, bar, db.targetPosition, 2, db.targetOffsetX, db.targetOffsetY)
+    end
 
     local interruptText = bar.interruptText
     ns.ApplyFont(interruptText, db.font, db.interruptSize or db.size, db.outline)

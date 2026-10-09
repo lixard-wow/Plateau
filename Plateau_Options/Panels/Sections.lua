@@ -2207,8 +2207,13 @@ ns.sections = {
           tooltip = "Colors the cast target's name by their class instead of the color above. Only applies when the target is a player - the game only ever gives an addon the target's name for a player anyway." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
         Gate({ type = "Slider", path = "look.castbar.targetSize", label = "Cast target font size", min = 6, max = 20,
           tooltip = "How big the cast target's name is." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
-        Gate({ type = "Dropdown", path = "look.castbar.targetPosition", label = "Cast target position", options = SIDES,
-          tooltip = "Where the cast target's name sits on the bar." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
+        Gate({ type = "Dropdown", path = "look.castbar.targetPosition", label = "Cast target position",
+          options = (function()
+              local list = { { value = "AFTERNAME", label = "Right after the spell name" } }
+              for _, side in ipairs(SIDES) do list[#list + 1] = side end
+              return list
+          end)(),
+          tooltip = "Where the cast target's name sits on the bar. Right after the spell name puts both on one line, like Fireball  Jim; it reads best with Spell name alignment on Left." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
         Gate({ type = "Slider", path = "look.castbar.targetOffsetX", label = "Cast target horizontal offset", min = -40, max = 40,
           tooltip = "Nudges the cast target's name left (negative) or right (positive)." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
         Gate({ type = "Slider", path = "look.castbar.targetOffsetY", label = "Cast target vertical offset", min = -40, max = 40,
