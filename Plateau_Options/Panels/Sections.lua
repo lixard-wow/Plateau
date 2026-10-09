@@ -2516,6 +2516,22 @@ ns.sections = {
         GateList(On("look.forces.enabled"), "Turn on Show enemy forces to use this.", FontControls("look.forces"))
     )),
 
+    Section("threatText", "Threat percent", "look.threatText", Join(
+        List(
+            { type = "Header", label = "Threat percent", first = true },
+            { type = "Note", label = "Your threat on each enemy as a percentage, where 100% means you have it or are about to pull it. The game shares this number on WoW Forever; on retail it may be hidden, and then nothing shows.", height = 44 },
+            { type = "Toggle", path = "look.threatText.enabled", label = "Show threat percent",
+              tooltip = "Shows your threat on each enemy NPC as a percentage. Players and friendly units never show it." },
+            Gate({ type = "Toggle", path = "look.threatText.hideZero", label = "Hide at 0%",
+              tooltip = "Leaves the text off enemies you have no threat on yet. If the game hides the number, it always shows instead." }, On("look.threatText.enabled"), "Turn on Show threat percent to use this."),
+            Gate({ type = "Color", path = "look.threatText.color", label = "Text color",
+              tooltip = "Color of the threat percent text." }, On("look.threatText.enabled"), "Turn on Show threat percent to use this.")
+        ),
+        GateList(On("look.threatText.enabled"), "Turn on Show threat percent to use this.", Placement("look.threatText")),
+        List({ type = "Header", label = "Font" }),
+        GateList(On("look.threatText.enabled"), "Turn on Show threat percent to use this.", FontControls("look.threatText"))
+    )),
+
     Section("enemyPower", "Enemy power bar", "look.enemyPower", Join(List(
         { type = "Header", label = "Display", first = true },
         { type = "Note", label = "Display an enemy's mana, rage, energy, or other power on its nameplate. Power information may be unavailable for some enemies or encounters.", height = 44 },

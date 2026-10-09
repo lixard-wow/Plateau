@@ -37,6 +37,7 @@ Features\OccludedFade.lua
 Features\InstancePets.lua
 Elements\Health.lua
 Elements\HealthText.lua
+Elements\ThreatText.lua
 Elements\EnemyTarget.lua
 Elements\Execute.lua
 Elements\BossPhases.lua
