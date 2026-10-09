@@ -299,12 +299,25 @@ function Border:SetFade(r, g, b, a)
     end
 end
 
+function Border:SetEdgeHidden(index, hidden)
+    local list = self.hiddenEdges
+    if not list then
+        if not hidden then return end
+        list = {}
+        self.hiddenEdges = list
+    end
+    if (list[index] == true) == (hidden == true) then return end
+    list[index] = hidden == true or nil
+    self:SetShown(self.shown ~= false)
+end
+
 function Border:SetShown(shown)
     self.shown = shown
     local visible = shown and not self.empty
     local edge = EdgeInfo(self.style) ~= nil
+    local hidden = self.hiddenEdges
     for i = 1, 4 do
-        self.edges[i]:SetShown(visible and not edge)
+        self.edges[i]:SetShown(visible and not edge and not (hidden and hidden[i]))
     end
     CornersShown(self, visible and not edge and self.cornersOn == true)
     if self.edgeFrame then

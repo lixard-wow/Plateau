@@ -2238,6 +2238,8 @@ ns.sections = {
           tooltip = "All casts, only casts you can interrupt, or only casts the game flags as important. Hidden casts still count for Casting scale and other cast features." },
         { type = "Toggle", path = "look.castbar.cropIcon", label = "Crop icon edges",
           tooltip = "Trims the spell icon's built-in border so only the art shows. Off shows the full icon." },
+        { type = "Toggle", path = "look.castbar.joinBorder", label = "Join cast bar to health bar",
+          tooltip = "The cast bar sits right under the health bar inside one shared border, with the health bar's bottom edge as the line between them. Health bar spacing is ignored while it's on. Needs the plain Pixel border on both bars and no enemy power bar between them; otherwise the bars stay apart. Pair it with Extend icon across both bars for a built-in spell icon." },
 
         { type = "Header", label = "Interrupted text" }
     ), GateList(On("look.castbar.showInterrupter"), "Turn on Show interrupter name to use this.",

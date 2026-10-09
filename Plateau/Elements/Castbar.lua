@@ -360,6 +360,12 @@ end
 function Castbar:Style(plate, db)
     local bar = plate.castbar
     local height, gap, size = (db.height and db.height > 0) and db.height or plate:GetHeight(), db.gap, db.borderSize
+    local look = ns.DB.views[plate.state]
+    local joined = db.joinBorder and (plate.castShift or 0) == 0 and (db.borderStyle or "pixel") == "pixel"
+        and look and (look.health.borderStyle or "pixel") == "pixel"
+    if joined then
+        gap = ns.HealthBorderOffset(look)
+    end
     local drop = gap + (plate.castShift or 0)
     local span = db.showIcon and db.iconSpan
     local iconOffset = (db.showIcon and not span) and (height + gap) or 0
@@ -399,6 +405,7 @@ function Castbar:Style(plate, db)
     bar.border:SetStyle(db.borderStyle, bar)
     bar.border:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
     bar.border:Layout(size, 0, db.borderInside)
+    bar.border:SetEdgeHidden(1, joined)
     bar.background:SetColorTexture(db.background[1], db.background[2], db.background[3], db.background[4])
 
     bar.glow:Layout(db.glowSize, db.borderInside and 0 or size)

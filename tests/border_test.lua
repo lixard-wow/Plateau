@@ -93,3 +93,15 @@ ns.pixelBorders, ns.pixelPlate = true, guarded
 auraRing:Layout(1, 0)
 ns.pixelBorders, ns.pixelPlate = false, nil
 check(guarded.pixelSet == nil or guarded.pixelSet[auraRing] == nil, "borders on Blizzard's protected aura icons are never redrawn later, so restrictions can't block them")
+
+local joinOwner = { CreateTexture = owner.CreateTexture }
+local seam = ns.CreateBorder(joinOwner, joinOwner, "BACKGROUND", 0)
+seam:Layout(1, 0)
+seam:Show()
+seam:SetEdgeHidden(1, true)
+check(not seam.edges[1].shown and seam.edges[2].shown and seam.edges[3].shown and seam.edges[4].shown, "a joined cast bar hides only its top edge")
+seam:Hide()
+seam:Show()
+check(not seam.edges[1].shown and seam.edges[2].shown, "the hidden edge stays hidden when the border is shown again")
+seam:SetEdgeHidden(1, false)
+check(seam.edges[1].shown, "unjoining brings the top edge back")

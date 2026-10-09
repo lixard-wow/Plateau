@@ -619,6 +619,7 @@ ns.defaults = {
             showInterrupter = true,
             interruptHold = 1,
             interruptedColor = { 0.7, 0.12, 0.12, 1 },
+            joinBorder = false,
             interruptFlash = true,
             interruptFlashColor = { 1, 1, 1, 0.8 },
             interruptFormat = "by",
