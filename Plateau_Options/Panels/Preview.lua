@@ -367,6 +367,11 @@ local function AddHotspots(plate)
         Drag.PositionSpec({ path = "look.classPower", region = plate.classPower, anchor = AtPlate(plate), noRing = true }))
     Hotspot(plate, plate.forces, "forces", "Mythic+ enemy forces", 80, 3,
         Drag.PositionSpec({ path = "look.forces", region = plate.forces, anchor = AtPlate(plate) }))
+    Hotspot(plate, plate.threatText, "threatText", "Threat percent", 80, 3,
+        Drag.PositionSpec({ path = "look.threatText", region = plate.threatText, anchor = AtPlate(plate) })).fitText = true
+    Hotspot(plate, plate.faction, "faction", "Faction icon", 80, 1,
+        Drag.PositionSpec({ path = "look.faction", region = plate.faction, anchor = AtPlate(plate) }))
+    Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true
     Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 60, 0, castbarDrag).setting = "Show spell icon"
     local castTarget = Hotspot(plate, plate.castbar.target, "castbar", "Cast target name", 65, 2,
         Drag.PositionSpec({ path = "look.castbar", positionKey = "targetPosition", xKey = "targetOffsetX", yKey = "targetOffsetY", fixedGap = 2, region = plate.castbar.target, anchor = function() return plate.castbar end }))
@@ -541,6 +546,7 @@ local function ApplySample()
     sample.raidMarker = On("look.raidMarker.enabled") and baseMarker or nil
     sample.quest = On("look.quest.enabled") and baseQuest or nil
     sample.classPower = On("look.classPower.enabled")
+    sample.showFaction = sectionKey == "faction" or nil
     sample.enemyPower = On("look.enemyPower.enabled")
     sample.forces = (On("look.forces.enabled") and Plateau.flavor ~= "forever") and baseForces or nil
     local auras = {}

@@ -73,7 +73,7 @@ function Faction:Update(plate, unit)
 end
 
 function Faction:Preview(plate, state)
-    self:Render(plate, state.isPlayer and "Alliance" or nil)
+    self:Render(plate, (state.isPlayer or state.showFaction) and "Alliance" or nil)
 end
 
 function Faction:Render(plate, group)
