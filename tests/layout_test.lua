@@ -330,8 +330,11 @@ end
 for _, path in ipairs({ "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY" }) do
     check(hasPath("clicking", path), path .. " is on Clickable area")
 end
-for _, path in ipairs({ "look.scaling.combatEnabled", "look.scaling.combatScale", "look.scaling.idleScale", "look.idle.enabled", "look.idle.alpha" }) do
+for _, path in ipairs({ "look.idle.enabled", "look.idle.alpha", "look.idle.instancesOnly" }) do
     check(hasPath("combat", path), path .. " is on Out of combat")
+end
+for _, path in ipairs({ "look.scaling.combatEnabled", "look.scaling.combatScale", "look.scaling.idleScale", "look.scaling.mouseoverScale" }) do
+    check(hasPath("size", path) and groupCovers(byKey.size, path) and not hasPath("combat", path) and not groupCovers(byKey.combat, path), path .. " is on Size and reset with it")
 end
 check(byKey.behavior == nil, "the old catch-all Behavior page is gone")
 check(not hasPath("target", "look.target.dimOthers"), "non-target opacity left the Target page")

@@ -1394,6 +1394,7 @@ local SIZE_PATHS = {
     "look.scaling.elite", "look.scaling.trivial", "look.scaling.focusGrow", "look.scaling.focusScale",
     "look.scaling.castPop", "look.scaling.castScale", "look.target.useBlizzardScale", "look.target.scale",
     "look.scaling.mouseoverGrow", "look.scaling.mouseoverScale", "look.scaling.smooth",
+    "look.scaling.combatEnabled", "look.scaling.combatScale", "look.scaling.idleScale",
     "look.plate.followBlizzardSize",
 }
 local SIZE_CVARS = { "nameplateSize", "nameplateAuraScale", "nameplateMinScale", "nameplateMaxScale" }
@@ -1402,7 +1403,7 @@ local FADING_CVARS = { "nameplateOccludedAlphaMult", "nameplateMinAlpha", "namep
 local LAYERING_PATHS = { "look.scaling.castFront", "look.plate.stackSpace", "look.scaling.mouseoverFront", "look.plate.offsetY" }
 local LAYERING_CVARS = { "nameplateStackingTypes", "nameplateOverlapV", "nameplateOverlapH", "nameplateMotionSpeed", "nameplateOtherAtBase" }
 local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
-local COMBAT_PATHS = { "look.scaling.combatEnabled", "look.scaling.combatScale", "look.scaling.idleScale", "look.idle" }
+local COMBAT_PATHS = { "look.idle" }
 local TARGET_LOOK = {}
 for _, key in ipairs({ "ring", "ringColor", "ringSize", "colorBar", "barColor", "texture", "overlayPattern", "overlayAlpha",
     "overlayContrast", "brighten", "arrows", "arrowStyle", "arrowPlacement", "arrowSize", "arrowGap", "arrowColor",
@@ -1460,7 +1461,10 @@ ns.sections = {
 
     Page("size", "Size", SIZE_PATHS, SIZE_CVARS, List(
         { type = "Header", label = "Nameplate scale", first = true },
-        { type = "Note", label = "Each nameplate uses its largest scale below; they don't stack. Combat scale, on the Out of combat page, multiplies the enemy type scale. The preview always shows normal size.", height = 32 },
+        { type = "Note", label = "Each nameplate uses its largest scale below; they don't stack. Combat scale multiplies the enemy type scale. The preview always shows normal size.", height = 32 },
+        { type = "Toggle", path = "look.scaling.smooth", label = "Smooth size changes",
+          tooltip = "Nameplates grow and shrink smoothly instead of snapping." },
+        { type = "Link", label = "Width and height are on the Health bar page", target = { section = "health", label = "Size" } },
         { type = "Header", label = "Enemy type scale" },
         { type = "Toggle", path = "look.scaling.enabled", label = "Scale by enemy type", wide = true,
           tooltip = "Sizes enemy nameplates by type, using the same types as the Health bar colors." },
@@ -1476,6 +1480,13 @@ ns.sections = {
           tooltip = "Size of elites one level above you." }, On("look.scaling.enabled"), "Turn on Scale by enemy type to use this."),
         Gate({ type = "Slider", path = "look.scaling.trivial", label = "Other enemies", min = 0.5, max = 1.6, step = 0.05,
           tooltip = "Size of minor enemies and every enemy not covered above." }, On("look.scaling.enabled"), "Turn on Scale by enemy type to use this."),
+        { type = "Header", label = "Combat scale" },
+        { type = "Toggle", path = "look.scaling.combatEnabled", label = "Scale by combat state",
+          tooltip = "Sizes enemy NPCs differently in and out of combat. Multiplies the enemy type scale." },
+        Gate({ type = "Slider", path = "look.scaling.combatScale", label = "In combat", min = 0.5, max = 1.6, step = 0.05,
+          tooltip = "Size of enemies in combat with anyone." }, On("look.scaling.combatEnabled"), "Turn on Scale by combat state to use this."),
+        Gate({ type = "Slider", path = "look.scaling.idleScale", label = "Out of combat", min = 0.5, max = 1.6, step = 0.05,
+          tooltip = "Size of enemies not in combat." }, On("look.scaling.combatEnabled"), "Turn on Scale by combat state to use this."),
         { type = "Header", label = "Target scale" },
         { type = "Toggle", path = "look.target.useBlizzardScale", label = "Use Blizzard target scaling",
           tooltip = "Your enemy target grows by Blizzard's target scale. Turn off to set your own size below." },
@@ -1491,7 +1502,11 @@ ns.sections = {
           tooltip = "Changes the size of an enemy's nameplate while it casts. Applies to every cast." },
         Gate({ type = "Slider", path = "look.scaling.castScale", label = "Casting scale", min = 0.5, max = 1.6, step = 0.05,
           tooltip = "Size of an enemy's nameplate while it casts or channels." }, On("look.scaling.castPop"), "Turn on Scale casting nameplates to use this."),
-
+        { type = "Header", label = "Mouseover scale" },
+        { type = "Toggle", path = "look.scaling.mouseoverGrow", label = "Scale mouseover nameplate",
+          tooltip = "Changes the size of the enemy nameplate under your cursor." },
+        Gate({ type = "Slider", path = "look.scaling.mouseoverScale", label = "Mouseover scale", min = 0.5, max = 1.6, step = 0.05,
+          tooltip = "Size of the enemy nameplate under your cursor." }, On("look.scaling.mouseoverGrow"), "Turn on Scale mouseover nameplate to use this."),
 
         { type = "Header", label = "Blizzard nameplate size" },
         BaseSpec({ type = "Toggle", path = "look.plate.followBlizzardSize", label = "Use Blizzard nameplate sizing for enemies",
@@ -1502,14 +1517,7 @@ ns.sections = {
         { type = "Header", label = "Size by distance" },
         CVarSlider("nameplateMinScale", "Distant nameplate scale", 0.5, 1, 0.05, "Size of nameplates at the maximum nameplate distance."),
         CVarSlider("nameplateMaxScale", "Nearby nameplate scale", 0.5, 1.5, 0.05, "Size of nameplates right next to you."),
-
-        { type = "Header", label = "Extras" },
-        { type = "Toggle", path = "look.scaling.mouseoverGrow", label = "Scale mouseover nameplate",
-          tooltip = "Changes the size of the enemy nameplate under your cursor." },
-        Gate({ type = "Slider", path = "look.scaling.mouseoverScale", label = "Mouseover scale", min = 0.5, max = 1.6, step = 0.05,
-          tooltip = "Size of the enemy nameplate under your cursor." }, On("look.scaling.mouseoverGrow"), "Turn on Scale mouseover nameplate to use this."),
-        { type = "Toggle", path = "look.scaling.smooth", label = "Smooth size changes",
-          tooltip = "Nameplates grow and shrink smoothly instead of snapping." }
+        { type = "Link", label = "Friendly nameplate scale is on the Friendly page", target = { section = "friendly", label = "Friendly nameplates" } }
     )),
 
     Page("fading", "Fading", FADING_PATHS, FADING_CVARS, List(
@@ -1522,6 +1530,12 @@ ns.sections = {
         { type = "Header", label = "Non-target fading" },
         { type = "Slider", path = "look.target.dimOthers", label = "Non-target opacity", keywords = "dim dimming dimmed dim others fade faded other plates nameplates friendly transparent", min = 0.2, max = 1, step = 0.05,
           tooltip = "Opacity of every other nameplate while you have a target. Stacks with range fading." },
+        Gate({ type = "Toggle", path = "look.target.dimCombatOnly", label = "Dim others only in combat",
+          tooltip = "Non-target opacity applies only while you are in combat." }, DimsOthers, "Lower Non-target opacity below 1 to use this."),
+        Gate({ type = "Toggle", path = "look.target.dimSkipFriendly", label = "Don't dim friendly nameplates",
+          tooltip = "Non-target opacity fades only enemy nameplates." }, DimsOthers, "Lower Non-target opacity below 1 to use this."),
+        { type = "Toggle", path = "look.range.mouseoverFull", label = "Keep mouseover at full opacity",
+          tooltip = "The nameplate under your cursor ignores Non-target opacity and range fading." },
 
         { type = "Header", label = "Behind walls" },
         CVarSlider("nameplateOccludedAlphaMult", "Behind-wall opacity", 0, 1, 0.05, "Opacity of nameplates for units behind walls or terrain."),
@@ -1546,23 +1560,15 @@ ns.sections = {
           get = function() return Plateau.OccludedFade ~= nil and Plateau.OccludedFade:IsOn("pvp") end,
           set = function(value) Plateau.OccludedFade:SetOn("pvp", value == true) end,
           tooltip = "Fades nameplates behind walls in battlegrounds and arenas." },
-        { type = "Dropdown", path = "look.range.gameFade", label = "Blizzard fading applies to",
-          options = { { value = "both", label = "Enemies and friendly" }, { value = "enemy", label = "Enemies only" }, { value = "friendly", label = "Friendly only" } },
-          tooltip = "Which nameplates use Blizzard's behind-wall and distance fading. Plateau's own fading applies to all of them." },
 
         { type = "Header", label = "By distance" },
         CVarSlider("nameplateMinAlpha", "Distant nameplate opacity", 0, 1, 0.05, "Opacity of nameplates at the maximum nameplate distance."),
 
-        { type = "Header", label = "Disappearing nameplates" },
-        CVarToggle("nameplatePlayRemovalAnimation", "Fade out disappearing nameplates", "Nameplates fade out instead of vanishing."),
-
-        { type = "Header", label = "Extras" },
-        Gate({ type = "Toggle", path = "look.target.dimCombatOnly", label = "Dim others only in combat",
-          tooltip = "Non-target opacity applies only while you are in combat." }, DimsOthers, "Lower Non-target opacity below 1 to use this."),
-        Gate({ type = "Toggle", path = "look.target.dimSkipFriendly", label = "Don't dim friendly nameplates",
-          tooltip = "Non-target opacity fades only enemy nameplates." }, DimsOthers, "Lower Non-target opacity below 1 to use this."),
-        { type = "Toggle", path = "look.range.mouseoverFull", label = "Keep mouseover at full opacity",
-          tooltip = "The nameplate under your cursor ignores Non-target opacity and range fading." }
+        { type = "Header", label = "Blizzard fading" },
+        { type = "Dropdown", path = "look.range.gameFade", label = "Blizzard fading applies to",
+          options = { { value = "both", label = "Enemies and friendly" }, { value = "enemy", label = "Enemies only" }, { value = "friendly", label = "Friendly only" } },
+          tooltip = "Which nameplates use Blizzard's behind-wall and distance fading. Plateau's own fading applies to all of them." },
+        CVarToggle("nameplatePlayRemovalAnimation", "Fade out disappearing nameplates", "Nameplates fade out instead of vanishing.")
     )),
 
     Page("layering", "Layering and stacking", LAYERING_PATHS, LAYERING_CVARS, List(
@@ -1570,12 +1576,15 @@ ns.sections = {
         { type = "Toggle", path = "look.scaling.castFront", label = "Casting enemies in front", wide = true,
           keywords = "layering priority order caster casters cast in front draw over overlap",
           tooltip = "Casting enemies draw over nearby nameplates. Your target stays on top." },
+        { type = "Toggle", path = "look.scaling.mouseoverFront", label = "Mouseover in front",
+          tooltip = "The nameplate under your cursor draws above all others, including your target." },
 
         { type = "Header", label = "Stacking" },
+        CVarBitToggle("nameplateStackingTypes", STACK.Enemy, "Stack enemy nameplates", "Enemy nameplates move apart instead of overlapping."),
+        CVarBitToggle("nameplateStackingTypes", STACK.Friendly, "Stack friendly nameplates", "Friendly nameplates move apart instead of overlapping."),
         Gate({ type = "Presets", presets = STACK_PRESETS, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack",
           tooltip = "Ready-made spacing between stacked nameplates." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
         { type = "Note", label = "Click a preset twice to apply it. The underlined preset is in use.", height = 24 },
-        CVarBitToggle("nameplateStackingTypes", STACK.Enemy, "Stack enemy nameplates", "Enemy nameplates move apart instead of overlapping."),
         Gate({ type = "Toggle", label = "Show stacking boxes",
           get = function() return ns.stackBoxesOn == true end,
           set = function(value)
@@ -1583,7 +1592,6 @@ ns.sections = {
               Plateau.SetStackBoxes(value)
           end,
           tooltip = "Outlines the area each nameplate keeps clear when stacking. Stays on until you turn it off or /reload." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
-        CVarBitToggle("nameplateStackingTypes", STACK.Friendly, "Stack friendly nameplates", "Friendly nameplates move apart instead of overlapping."),
 
         { type = "Header", label = "Stacking bounds and spacing" },
         Gate({ type = "Dropdown", label = "Stacking bounds", options = STACK_SPACES,
@@ -1603,13 +1611,11 @@ ns.sections = {
         { type = "Header", label = "Movement" },
         InstantMovement(),
         CVarSlider("nameplateMotionSpeed", "Movement speed", 0, 1, 0.01, "How fast nameplates slide into place when stacking. Requires patch 12.1.5."),
-        CVarToggle("nameplateOtherAtBase", "Position nameplates at feet", "Shows nameplates at units' feet instead of above their heads."),
 
-        { type = "Header", label = "Extras" },
-        { type = "Toggle", path = "look.scaling.mouseoverFront", label = "Mouseover in front",
-          tooltip = "The nameplate under your cursor draws above all others, including your target." },
+        { type = "Header", label = "Position" },
         BaseSpec({ type = "Slider", path = "look.plate.offsetY", label = "Nameplate vertical offset", min = -60, max = 60,
-          tooltip = "Moves nameplates up or down from their usual spot. Doesn't change stacking or nameplates the game draws itself." })
+          tooltip = "Moves nameplates up or down from their usual spot. Doesn't change stacking or nameplates the game draws itself." }),
+        CVarToggle("nameplateOtherAtBase", "Position nameplates at feet", "Shows nameplates at units' feet instead of above their heads.")
     )),
 
     Page("clicking", "Clickable area", CLICK_PATHS, nil, List(
@@ -1625,10 +1631,10 @@ ns.sections = {
           tooltip = "Widens the clickable area without enlarging the nameplate. In combat, applies as new nameplates appear." }),
         BaseSpec({ type = "Slider", path = "look.plate.clickY", label = "Vertical padding", min = 0, max = 30,
           tooltip = "Makes the clickable area taller without enlarging the nameplate." }),
-        BaseSpec({ type = "Toggle", path = "look.plate.clickCastBar", label = "Include cast bar in clickable area",
-          tooltip = "Clicking an enemy's cast bar also targets it." }),
         BaseSpec({ type = "Slider", path = "look.plate.clickOffsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Moves the clickable area up or down without changing its size." }),
+        BaseSpec({ type = "Toggle", path = "look.plate.clickCastBar", label = "Include cast bar in clickable area",
+          tooltip = "Clicking an enemy's cast bar also targets it." }),
 
         { type = "Header", label = "Friendly nameplates" },
         BaseSpec({ type = "Toggle", path = "look.plate.clickThroughFriendly", label = "Click-through friendly nameplates",
@@ -1636,16 +1642,11 @@ ns.sections = {
     )),
 
     Page("combat", "Out of combat", COMBAT_PATHS, nil, List(
-        { type = "Header", label = "Combat scale", first = true },
-        { type = "Toggle", path = "look.scaling.combatEnabled", label = "Scale by combat state",
-          tooltip = "Sizes enemy NPCs differently in and out of combat. Multiplies the enemy type scale." },
-        Gate({ type = "Slider", path = "look.scaling.combatScale", label = "In combat", min = 0.5, max = 1.6, step = 0.05,
-          tooltip = "Size of enemies in combat with anyone." }, On("look.scaling.combatEnabled"), "Turn on Scale by combat state to use this."),
-        Gate({ type = "Slider", path = "look.scaling.idleScale", label = "Out of combat", min = 0.5, max = 1.6, step = 0.05,
-          tooltip = "Size of enemies not in combat." }, On("look.scaling.combatEnabled"), "Turn on Scale by combat state to use this."),
-        { type = "Header", label = "Out-of-combat nameplates" },
+        { type = "Header", label = "Out-of-combat nameplates", first = true },
         { type = "Toggle", path = "look.idle.enabled", label = "Customize out-of-combat nameplates",
           tooltip = "Gives enemies not in combat their own look. Your target, players and friendly nameplates are never changed." },
+        Gate({ type = "Toggle", path = "look.idle.instancesOnly", label = "Only in instances",
+          tooltip = "Applies the out-of-combat look only inside instances, such as dungeons, raids and delves." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
         Gate({ type = "Slider", path = "look.idle.alpha", label = "Opacity", min = 0.1, max = 1, step = 0.05,
           tooltip = "Opacity of out-of-combat nameplates." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
         Gate({ type = "Slider", path = "look.idle.widthScale", label = "Bar width", min = 0.5, max = 1.5, step = 0.05,
@@ -1654,6 +1655,7 @@ ns.sections = {
           tooltip = "Height of out-of-combat nameplates compared to normal." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
         Gate({ type = "ToggleColor", path = "look.idle.colorBar", colorPath = "look.idle.color", label = "Use one bar color",
           tooltip = "Colors every out-of-combat health bar this color, replacing type, threat and quest colors." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
+        { type = "Link", label = "Combat scale is on the Size page", target = { section = "size", label = "Combat scale" } },
         { type = "Header", label = "Show when out of combat" },
         Gate({ type = "Toggle", path = "look.idle.show.auras", label = "Auras",
           tooltip = "Shows auras on out-of-combat nameplates." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
@@ -1676,11 +1678,7 @@ ns.sections = {
         Gate({ type = "Toggle", path = "look.idle.show.enemyTarget", label = "Enemy target name",
           tooltip = "Shows the enemy's target on out-of-combat nameplates." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
         Gate({ type = "Toggle", path = "look.idle.show.castbar", label = "Cast bar",
-          tooltip = "Shows the cast bar on out-of-combat nameplates." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
-
-        { type = "Header", label = "Extras" },
-        Gate({ type = "Toggle", path = "look.idle.instancesOnly", label = "Only in instances",
-          tooltip = "Applies the out-of-combat look only inside instances, such as dungeons, raids and delves." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this.")
+          tooltip = "Shows the cast bar on out-of-combat nameplates." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this.")
     )),
 
     Section("health", "Health bar", { "look.health", "look.execute", "look.bossPhases", "look.plate.width", "look.plate.height", "look.plate.pixelPerfect", "look.shield.absorbs", "look.shield.absorbColor", "look.shield.absorbStyle", "look.shield.absorbPosition", "look.shield.absorbGlow" }, List(
@@ -2330,12 +2328,14 @@ ns.sections = {
         "Shows buffs the game flags as important on enemies.", 24,
         "Show important auras", "Shows icons for buffs the game flags as important on the enemy, except your own. A buff shows here or under Enemy buffs, not both."),
     Section("target", "Target", TARGET_LOOK, List(
-        { type = "Header", label = "My target", first = true },
+        { type = "Header", label = "Border", first = true },
         { type = "ToggleColor", path = "look.target.ring", colorPath = "look.target.ringColor", label = "Show target border",
           swatchLabel = "Target border color", swatchTooltip = "The color of the border around your target.",
           tooltip = "Outlines your target's nameplate." },
         Gate({ type = "Slider", path = "look.target.ringSize", label = "Border thickness", min = 1, max = 6,
           tooltip = "How thick the border around your target is." }, On("look.target.ring"), "Turn on Show target border to use this."),
+
+        { type = "Header", label = "Health bar" },
         { type = "ToggleColor", path = "look.target.colorBar", colorPath = "look.target.barColor", label = "Use custom target color",
           swatchLabel = "Target bar color", swatchTooltip = "The health bar color used for your target.",
           tooltip = "Colors your target's health bar, whatever its type." },
@@ -2385,16 +2385,19 @@ ns.sections = {
         Gate({ type = "Toggle", path = "look.target.pulse", label = "Pulse glow and border",
           tooltip = "Your target's glow and border slowly pulse brighter and dimmer." }, Any(On("look.target.ring"), On("look.target.glow")), "Turn on Show target border or Show target glow to use this."),
 
+        { type = "Link", label = "Target scale is on the Size page", target = { section = "size", label = "Target scale" } },
         { type = "Link", label = "Non-target fading is on the Fading page", target = { section = "fading", label = "Non-target fading" } }
     )),
 
     Section("focus", "Focus", "look.focus", List(
-        { type = "Header", label = "My focus", first = true },
+        { type = "Header", label = "Border", first = true },
         { type = "ToggleColor", path = "look.focus.ring", colorPath = "look.focus.ringColor", label = "Show focus border",
           swatchLabel = "Focus border color", swatchTooltip = "The color of the border around your focus.",
           tooltip = "Outlines your focus's nameplate." },
         Gate({ type = "Slider", path = "look.focus.ringSize", label = "Border thickness", min = 1, max = 6,
           tooltip = "How thick the border around your focus is." }, On("look.focus.ring"), "Turn on Show focus border to use this."),
+
+        { type = "Header", label = "Health bar" },
         { type = "ToggleColor", path = "look.focus.colorBar", colorPath = "look.focus.barColor", label = "Use custom focus color",
           swatchLabel = "Focus bar color", swatchTooltip = "The health bar color used for your focus.",
           tooltip = "Colors your focus's health bar, whatever its type." },
@@ -2441,6 +2444,7 @@ ns.sections = {
           tooltip = "How far the glow spreads from the nameplate." }, On("look.focus.glow"), "Turn on Show focus glow to use this."),
         Gate({ type = "Toggle", path = "look.focus.pulse", label = "Pulse glow and border",
           tooltip = "Your focus's glow and border slowly pulse brighter and dimmer." }, Any(On("look.focus.ring"), On("look.focus.glow")), "Turn on Show focus border or Show focus glow to use this."),
+        { type = "Link", label = "Focus scale is on the Size page", target = { section = "size", label = "Focus scale" } },
         { type = "Note", label = "When your target is also your focus, Target settings win. Focus bar settings fill in where Target's are off." }
     )),
 
@@ -2449,27 +2453,32 @@ ns.sections = {
         { type = "Toggle", path = "look.mouseover.enabled", label = "Enable mouseover highlight",
           tooltip = "Highlights the nameplate under your cursor, or of the unit your cursor is over in the world." }
     ), GateList(HoverOn, HOVER_ON,
+        { type = "Toggle", path = "look.mouseover.skipFriendly", label = "Skip friendly nameplates",
+          tooltip = "Friendly nameplates aren't highlighted." },
         { type = "Toggle", path = "look.mouseover.brighten", label = "Brighten health bar",
           tooltip = "Brightens the health bar under your cursor, like Blizzard's classic nameplates." },
         Gate({ type = "Slider", path = "look.mouseover.brightenAmount", label = "Highlight intensity", min = 0.05, max = 0.6, step = 0.05,
-          tooltip = "How much the health bar brightens." }, On("look.mouseover.brighten"), "Turn on Brighten health bar to use this."),
+          tooltip = "How much the health bar brightens." }, On("look.mouseover.brighten"), "Turn on Brighten health bar to use this.")
+    ), List(
+        { type = "Header", label = "Border" }
+    ), GateList(HoverOn, HOVER_ON,
         { type = "ToggleColor", path = "look.mouseover.ring", colorPath = "look.mouseover.ringColor", label = "Show mouseover border",
           swatchLabel = "Mouseover border color", swatchTooltip = "The color of the border around the nameplate under your cursor.",
           tooltip = "Outlines the nameplate under your cursor." },
         Gate({ type = "Slider", path = "look.mouseover.ringSize", label = "Border thickness", min = 1, max = 6,
           tooltip = "How thick the mouseover border is." }, On("look.mouseover.ring"), "Turn on Show mouseover border to use this.")
     ), List(
-        { type = "Header", label = "Extras" }
+        { type = "Header", label = "Glow" }
     ), GateList(HoverOn, HOVER_ON,
         { type = "ToggleColor", path = "look.mouseover.glow", colorPath = "look.mouseover.glowColor", label = "Show mouseover glow",
           swatchLabel = "Mouseover glow color", swatchTooltip = "The color of the glow around the nameplate under your cursor.",
           tooltip = "Shows a glow around the nameplate under your cursor." }
     ), List(
         Gate({ type = "Slider", path = "look.mouseover.glowSize", label = "Glow size", min = 2, max = 24,
-          tooltip = "How far the glow spreads from the nameplate." }, HoverGlowOn, HoverGlowReason)
-    ), GateList(HoverOn, HOVER_ON,
-        { type = "Toggle", path = "look.mouseover.skipFriendly", label = "Skip friendly nameplates",
-          tooltip = "Friendly nameplates aren't highlighted." }
+          tooltip = "How far the glow spreads from the nameplate." }, HoverGlowOn, HoverGlowReason),
+        { type = "Link", label = "Mouseover scale is on the Size page", target = { section = "size", label = "Mouseover scale" } },
+        { type = "Link", label = "Mouseover in front is on the Layering and stacking page", target = { section = "layering", label = "Nameplate layering" } },
+        { type = "Link", label = "Keep mouseover at full opacity is on the Fading page", target = { section = "fading", label = "Non-target fading" } }
     ))),
 
     Section("raidMarker", "Raid target icon", "look.raidMarker", Join(List(
