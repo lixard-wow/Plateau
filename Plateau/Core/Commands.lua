@@ -519,6 +519,8 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
         Say(L["Slow-frame counters reset."])
+    elseif command == "debug" and path == "auratest" then
+        ns.Elements.Auras:CombatTest(Say)
     elseif command == "debug" and path == "pool" then
         local value = words[3] and words[3]:lower()
         local number = tonumber(value)
