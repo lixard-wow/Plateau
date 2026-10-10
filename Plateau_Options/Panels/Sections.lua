@@ -518,7 +518,9 @@ local function Friendly(key, title, group, controls)
     local section = Section(key, title, group, controls)
     section.reset = function()
         local wasOn = ns.Get("look.friendly.enabled") == true
-        Plateau.DB:Reset(group)
+        for _, path in ipairs(group) do
+            Plateau.DB:Reset(path)
+        end
         if wasOn and ns.Get("look.friendly.enabled") ~= true then
             ns.PromptReload()
         end
@@ -678,44 +680,51 @@ local function CVarSlider(name, label, min, max, step, tooltip)
     return CVarSpec("Slider", name, label, { min = min, max = max, step = step, tooltip = tooltip })
 end
 
-local function BlizzardDrawn()
-    local list = {
-        { type = "Header", label = "Blizzard-drawn nameplates", collapsible = true, collapsed = true },
-        { type = "Note", label = "These only change nameplates the game draws itself, such as friendly nameplates in dungeons, raids and arenas. The two Simplify friendly settings also apply to Plateau's nameplates.", height = 32 },
-    }
+local function BlizzardDrawn(friendly)
+    local list = {}
     local function Add(spec)
         list[#list + 1] = spec
     end
     local function Bits(cvar, enum, entries)
         if not (C_CVar.GetCVar(cvar) and enum) then return end
         for _, entry in ipairs(entries) do
-            if enum[entry[1]] and entry.shown ~= false then
+            if enum[entry[1]] and entry.shown ~= false and (entry.friendly == true) == (friendly == true) then
                 Add(CVarBitToggle(cvar, enum[entry[1]], entry[2], entry[3]))
             end
         end
     end
-
-    if C_CVar.GetCVar("nameplateStyle") and Enum.NamePlateStyle then
-        local style = Enum.NamePlateStyle
-        local options = {
-            { value = style.Modern, label = "Modern" },
-            { value = style.Thin, label = "Thin" },
-            { value = style.Block, label = "Block" },
-            { value = style.HealthFocus, label = "Health focus" },
-            { value = style.CastFocus, label = "Cast focus" },
-            { value = style.Legacy, label = "Legacy" },
-        }
-        if NameplatesOverrides and NameplatesOverrides.ShowClassicStyleOption and NameplatesOverrides.ShowClassicStyleOption() then
-            table.insert(options, 1, { value = style.Classic, label = "Classic" })
+    local function Toggle(cvar, label, tooltip, forFriendly)
+        if C_CVar.GetCVar(cvar) and (forFriendly == true) == (friendly == true) then
+            Add(CVarToggle(cvar, label, tooltip))
         end
-        Add({ type = "Dropdown", label = "Nameplate style", options = options,
-          get = function() return tonumber(CVars:Get("nameplateStyle")) end,
-          set = function(value) CVars:Set("nameplateStyle", value) end,
-          reset = function() CVars:Release("nameplateStyle") end,
-          resetLabel = "Right-click to undo Plateau's change.",
-          path = "cvar.nameplateStyle",
-          tooltip = "The look of the nameplates the game draws." })
     end
+
+    if not friendly then
+        Add({ type = "Header", label = "Blizzard-drawn nameplates", collapsible = true, collapsed = true })
+        Add({ type = "Note", label = "These only change nameplates the game draws itself. The friendly ones are on the Friendly page.", height = 24 })
+        if C_CVar.GetCVar("nameplateStyle") and Enum.NamePlateStyle then
+            local style = Enum.NamePlateStyle
+            local options = {
+                { value = style.Modern, label = "Modern" },
+                { value = style.Thin, label = "Thin" },
+                { value = style.Block, label = "Block" },
+                { value = style.HealthFocus, label = "Health focus" },
+                { value = style.CastFocus, label = "Cast focus" },
+                { value = style.Legacy, label = "Legacy" },
+            }
+            if NameplatesOverrides and NameplatesOverrides.ShowClassicStyleOption and NameplatesOverrides.ShowClassicStyleOption() then
+                table.insert(options, 1, { value = style.Classic, label = "Classic" })
+            end
+            Add({ type = "Dropdown", label = "Nameplate style", options = options,
+              get = function() return tonumber(CVars:Get("nameplateStyle")) end,
+              set = function(value) CVars:Set("nameplateStyle", value) end,
+              reset = function() CVars:Release("nameplateStyle") end,
+              resetLabel = "Right-click to undo Plateau's change.",
+              path = "cvar.nameplateStyle",
+              tooltip = "The look of the nameplates the game draws." })
+        end
+    end
+    Toggle("nameplateForceShowUnitName", "Always show names on Blizzard nameplates", "Nameplates the game draws itself always show the unit's name.")
 
     Bits("nameplateInfoDisplay", Enum.NamePlateInfoDisplay, {
         { "CurrentHealthPercent", "Show health percent", "Shows the health percentage on the nameplates the game draws." },
@@ -746,28 +755,22 @@ local function BlizzardDrawn()
         { "LossOfControl", "Enemy players: loss of control", "Shows one large loss-of-control debuff on enemy players." },
     })
     Bits("nameplateFriendlyPlayerAuraDisplay", Enum.NamePlateFriendlyPlayerAuraDisplay, {
-        { "Buffs", "Friendly players: your buffs", "Shows your buffs on friendly players on the nameplates the game draws." },
-        { "Debuffs", "Friendly players: enemy debuffs", "Shows debuffs from enemies on friendly players on the nameplates the game draws." },
-        { "LossOfControl", "Friendly players: loss of control", "Shows one large loss-of-control debuff on friendly players." },
+        { "Buffs", "Friendly players: your buffs", "Shows your buffs on friendly players on the nameplates the game draws.", friendly = true },
+        { "Debuffs", "Friendly players: enemy debuffs", "Shows debuffs from enemies on friendly players on the nameplates the game draws.", friendly = true },
+        { "LossOfControl", "Friendly players: loss of control", "Shows one large loss-of-control debuff on friendly players.", friendly = true },
     })
-    if C_CVar.GetCVar("nameplateDebuffPadding") then
+    Toggle("nameplateShowDebuffsOnFriendly", "Friendly players: show debuffs", "Shows debuffs on friendly players on the nameplates the game draws.", true)
+    if not friendly and C_CVar.GetCVar("nameplateDebuffPadding") then
         Add(CVarSlider("nameplateDebuffPadding", "Debuff padding", 0, 50, 1, "Space between buff and debuff icons on the nameplates the game draws."))
     end
     Bits("nameplateSimplifiedTypes", Enum.NamePlateSimplifiedType, {
         { "Minion", "Simplify minions", "Draws pets, guardians and totems as small simplified nameplates." },
         { "MinusMob", "Simplify minor enemies", "Draws minor enemies as small simplified nameplates." },
-        { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates." },
-        { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates." },
+        { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", friendly = true },
+        { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", friendly = true },
     })
-    if C_CVar.GetCVar("nameplateShowDebuffsOnFriendly") then
-        Add(CVarToggle("nameplateShowDebuffsOnFriendly", "Friendly players: show debuffs", "Shows debuffs on friendly players on the nameplates the game draws."))
-    end
-    if C_CVar.GetCVar("nameplateShowFriendlyClassColor") then
-        Add(CVarToggle("nameplateShowFriendlyClassColor", "Class colors: friendly players", "Colors friendly player health bars by class on the nameplates the game draws."))
-    end
-    if C_CVar.GetCVar("nameplateShowClassColor") then
-        Add(CVarToggle("nameplateShowClassColor", "Class colors: enemy players", "Colors enemy player health bars by class on the nameplates the game draws."))
-    end
+    Toggle("nameplateShowFriendlyClassColor", "Class colors: friendly players", "Colors friendly player health bars by class on the nameplates the game draws.", true)
+    Toggle("nameplateShowClassColor", "Class colors: enemy players", "Colors enemy player health bars by class on the nameplates the game draws.")
     return list
 end
 
@@ -1134,22 +1137,28 @@ local function EnemiesOn()
     return CVars:Get("nameplateShowEnemies") == "1"
 end
 
-local function GameExtras()
-    local list = { { type = "Header", label = "Extras" } }
+local function GameExtras(group)
+    local list = {}
     local function Add(spec, cvar)
         if C_CVar.GetCVar(cvar) ~= nil then
             list[#list + 1] = spec
         end
     end
-    Add(CVarToggle("UnitNameFocused", "Always show your target's name", "Shows your target's name over its head even when names over heads are off."), "UnitNameFocused")
-    Add(CVarToggle("nameplateForceShowUnitName", "Always show names on Blizzard nameplates", "Nameplates the game draws itself always show the unit's name."), "nameplateForceShowUnitName")
-    Add(CVarToggle("nameplateShowAllPersonalAuras", "Show all personal auras", "Shows every buff and debuff on you on the personal resource display, not just important ones."), "nameplateShowAllPersonalAuras")
-    Add(CVarToggle("SoftTargetIconEnemy", "Soft target icon: enemies", "Shows an icon over the enemy you are soft-targeting with action targeting or a controller."), "SoftTargetIconEnemy")
-    Add(CVarToggle("SoftTargetIconFriend", "Soft target icon: friends", "Shows an icon over the friendly unit you are soft-targeting."), "SoftTargetIconFriend")
-    Add(CVarToggle("SoftTargetIconInteract", "Soft target icon: interactable", "Shows an icon over the object or NPC you can interact with right now."), "SoftTargetIconInteract")
-    Add(CVarSlider("SoftTargetNameplateSize", "Soft target icon size", 10, 40, 1, "How big the soft target icons are."), "SoftTargetNameplateSize")
-    if #list == 1 then
-        return {}
+    if group == "names" then
+        Add(CVarToggle("UnitNameFocused", "Always show your target's name", "Shows your target's name over its head even when names over heads are off."), "UnitNameFocused")
+    elseif group == "personal" then
+        list[1] = { type = "Header", label = "Personal resource display" }
+        list[2] = CVarToggle("nameplateShowSelf", "Personal resource display", "Shows your health and power in a bar over your character.")
+        Add(Gate(CVarToggle("nameplateShowAllPersonalAuras", "Show all personal auras", "Shows every buff and debuff on you on the personal resource display, not just important ones."),
+            function() return CVars:Get("nameplateShowSelf") == "1" end, "Turn on Personal resource display to use this."), "nameplateShowAllPersonalAuras")
+    elseif group == "soft" then
+        Add(CVarToggle("SoftTargetIconEnemy", "Soft target icon: enemies", "Shows an icon over the enemy you are soft-targeting with action targeting or a controller."), "SoftTargetIconEnemy")
+        Add(CVarToggle("SoftTargetIconFriend", "Soft target icon: friends", "Shows an icon over the friendly unit you are soft-targeting."), "SoftTargetIconFriend")
+        Add(CVarToggle("SoftTargetIconInteract", "Soft target icon: interactable", "Shows an icon over the object or NPC you can interact with right now."), "SoftTargetIconInteract")
+        Add(CVarSlider("SoftTargetNameplateSize", "Soft target icon size", 10, 40, 1, "How big the soft target icons are."), "SoftTargetNameplateSize")
+        if #list > 0 then
+            table.insert(list, 1, { type = "Header", label = "Soft target icons" })
+        end
     end
     return list
 end
@@ -1384,7 +1393,7 @@ local SIZE_PATHS = {
     "look.scaling.enabled", "look.scaling.boss", "look.scaling.lieutenant", "look.scaling.higher", "look.scaling.caster",
     "look.scaling.elite", "look.scaling.trivial", "look.scaling.focusGrow", "look.scaling.focusScale",
     "look.scaling.castPop", "look.scaling.castScale", "look.target.useBlizzardScale", "look.target.scale",
-    "look.scaling.mouseoverGrow", "look.scaling.mouseoverScale", "look.scaling.friendlyScale", "look.scaling.smooth",
+    "look.scaling.mouseoverGrow", "look.scaling.mouseoverScale", "look.scaling.smooth",
     "look.plate.followBlizzardSize",
 }
 local SIZE_CVARS = { "nameplateSize", "nameplateAuraScale", "nameplateMinScale", "nameplateMaxScale" }
@@ -1411,9 +1420,6 @@ ns.sections = {
         controls = Join(List(
             { type = "Note", label = "Changes Blizzard's own nameplate settings. Right-click a setting to undo Plateau's change, or type /plt cvars restore to undo them all. This restores your previous values, not Blizzard's defaults.", height = 32 },
 
-            { type = "Header", label = "Other nameplate addons" },
-            { type = "Conflicts" },
-
             { type = "Header", label = "Names over heads" },
             { type = "Note", label = "Names shown over characters' heads. These are Blizzard's Names options.", height = 24 },
             CVarToggle("UnitNameOwn", "Show your name", "Shows your character's name over your head."),
@@ -1422,7 +1428,8 @@ ns.sections = {
             CVarToggle("UnitNameFriendlyPlayerName", "Show friendly player names", "Shows names over friendly players' heads."),
             CVarToggle("UnitNameFriendlyMinionName", "Show friendly minion names", "Shows names over friendly players' pets, totems and other minions."),
             CVarToggle("UnitNameEnemyPlayerName", "Show enemy player names", "Shows names over enemy players' heads."),
-            CVarToggle("UnitNameEnemyMinionName", "Show enemy minion names", "Shows names over enemy players' pets, totems and other minions."),
+            CVarToggle("UnitNameEnemyMinionName", "Show enemy minion names", "Shows names over enemy players' pets, totems and other minions.")
+        ), GameExtras("names"), List(
 
             { type = "Header", label = "Which nameplates show" },
             CVarToggle("nameplateShowAll", "Always show nameplates", "Shows nameplates at all times. Off: only during combat."),
@@ -1432,9 +1439,9 @@ ns.sections = {
             Gate(CVarToggle("nameplateShowEnemyPets", "Enemy pets", "Shows nameplates for enemy players' pets."), EnemiesOn, "Turn on Enemy nameplates to use this."),
             Gate(CVarToggle("nameplateShowEnemyGuardians", "Enemy guardians", "Shows nameplates for temporary helpers summoned by enemies."), EnemiesOn, "Turn on Enemy nameplates to use this."),
             Gate(CVarToggle("nameplateShowEnemyTotems", "Enemy totems", "Shows nameplates for enemy totems."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            { type = "Link", label = "Configure friendly nameplates on the Friendly nameplates page", target = { section = "friendly" } },
-            CVarToggle("nameplateShowSelf", "Personal resource display", "Shows your health and power in a bar over your character."),
             CVarSlider("nameplateMaxDistance", "Maximum nameplate distance", 10, 60, 1, "How far away, in yards, a unit can be and still show a nameplate."),
+            { type = "Link", label = "Configure friendly nameplates on the Friendly nameplates page", target = { section = "friendly" } }
+        ), GameExtras("personal"), GameExtras("soft"), List(
 
             { type = "Header", label = "Off-screen nameplates", collapsible = true, collapsed = true },
             CVarToggle("nameplateShowOffscreen", "Keep enemies in combat on screen",
@@ -1448,9 +1455,7 @@ ns.sections = {
               tooltip = "Pins your target, or every enemy you are fighting, around the screen edge while off screen." },
             CVarSlider("nameplateTopInset", "Top screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the top of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5."),
             CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the bottom of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5.")
-
-
-        ), GameExtras()),
+        ), BlizzardDrawn()),
     },
 
     Page("size", "Size", SIZE_PATHS, SIZE_CVARS, List(
@@ -1503,8 +1508,6 @@ ns.sections = {
           tooltip = "Changes the size of the enemy nameplate under your cursor." },
         Gate({ type = "Slider", path = "look.scaling.mouseoverScale", label = "Mouseover scale", min = 0.5, max = 1.6, step = 0.05,
           tooltip = "Size of the enemy nameplate under your cursor." }, On("look.scaling.mouseoverGrow"), "Turn on Scale mouseover nameplate to use this."),
-        { type = "Slider", path = "look.scaling.friendlyScale", label = "Friendly nameplate scale", min = 0.5, max = 1.6, step = 0.05,
-          tooltip = "Size of friendly nameplates in the open world. In dungeons and raids, the game draws friendly nameplates itself." },
         { type = "Toggle", path = "look.scaling.smooth", label = "Smooth size changes",
           tooltip = "Nameplates grow and shrink smoothly instead of snapping." }
     )),
@@ -1627,7 +1630,7 @@ ns.sections = {
         BaseSpec({ type = "Slider", path = "look.plate.clickOffsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Moves the clickable area up or down without changing its size." }),
 
-        { type = "Header", label = "Extras" },
+        { type = "Header", label = "Friendly nameplates" },
         BaseSpec({ type = "Toggle", path = "look.plate.clickThroughFriendly", label = "Click-through friendly nameplates",
           tooltip = "Clicks pass through Plateau's friendly nameplates to whatever is behind them. Changes made in combat apply when combat ends." })
     )),
@@ -1852,7 +1855,7 @@ ns.sections = {
           tooltip = "How close the bar gets to the low health color at 0 health. 1 reaches it fully." }, On("look.colors.healthGradient"), "Turn on Color by health to use this.")
     )),
 
-    Friendly("friendly", "Friendly nameplates", "look.friendly", Join(List(
+    Friendly("friendly", "Friendly nameplates", { "look.friendly", "look.scaling.friendlyScale" }, Join(List(
         { type = "Header", label = "Friendly nameplates", first = true },
         { type = "Toggle", limited = Style.limited.friendly, label = "Style friendly nameplates with Plateau",
           get = function() return ns.Get("look.friendly.enabled") == true end,
@@ -1874,6 +1877,14 @@ ns.sections = {
             "Shows nameplates for friendly players. Also changes Blizzard's matching setting."), "friendly"),
         Style.Limited(FriendlyToggle("look.friendly.npcs", "nameplateShowFriendlyNpcs", "Friendly NPCs",
             "Shows nameplates for friendly NPCs. Also changes Blizzard's matching setting."), "friendly"),
+        FriendlyGate({ type = "Slider", path = "look.scaling.friendlyScale", label = "Friendly nameplate scale", min = 0.5, max = 1.6, step = 0.05,
+          tooltip = "Size of Plateau's friendly nameplates in the open world." }),
+        FriendlyGate({ type = "Toggle", path = "look.friendly.hideInCombat", label = "Hide friendly nameplates in combat",
+          tooltip = "Fades out friendly nameplates during combat. They can still be clicked unless Click-through friendly nameplates is on." }),
+        { type = "Note", label = "In dungeons, raids and arenas the game draws friendly nameplates itself. Blizzard's friendly nameplates, at the bottom of this page, control those.", height = 32 },
+        { type = "Link", label = "Click-through friendly nameplates is on the Clickable area page", target = { section = "clicking", label = "Friendly nameplates" } },
+
+        { type = "Header", label = "Pets and minions" },
         Style.Limited(Gate({
             type = "Toggle",
             label = "Friendly pets and minions",
@@ -1888,58 +1899,6 @@ ns.sections = {
                 ns.PromptReload()
             end,
         }, FriendlyOn, FriendlyOffReason), "friendly"),
-        { type = "Note", label = "In dungeons, raids and arenas the game draws friendly nameplates itself. The Blizzard settings at the bottom of this page control those.", height = 32 },
-
-        { type = "Header", label = "Shorten names" },
-        FriendlyPlayersGate({ type = "Dropdown", path = "look.friendly.nameMode", label = "Player names", options = SHORTEN_NAMES, limited = Style.limited.friendly, visibleIf = function() return Plateau.flavor == "forever" end,
-          tooltip = "How friendly player names are shortened." }),
-        FriendlyNpcsGate({ type = "Dropdown", path = "look.friendly.npcNameMode", label = "NPC names", options = SHORTEN_NAMES, limited = Style.limited.friendly,
-          tooltip = "How friendly NPC names are shortened." }),
-
-        { type = "Header", label = "Names only" },
-        FriendlyGate({ type = "Toggle", path = "look.friendly.nameOnly", label = "Show names only",
-          tooltip = "Hides the health bar on friendly nameplates and shows only the name. In dungeons and raids, use Only show friendly player names." }),
-        CVarToggle("nameplateUseClassColorForFriendlyPlayerUnitNames", "Class-colored player names",
-            "Colors friendly player names by class, including on Blizzard's nameplates."),
-        NameOnlyGate(FriendlyPlayersGate({ type = "Color", path = "look.friendly.playerNameColor", label = "Player name color",
-          tooltip = "The color of friendly player names when class colors are off." })),
-        NameOnlyGate(FriendlyNpcsGate({ type = "Color", path = "look.friendly.npcNameColor", label = "NPC name color",
-          tooltip = "The color of friendly NPC names." })),
-        FriendlyPlayersGate(CVarSlider("nameplateSize", "Blizzard nameplate size", 1, 5, 1,
-            "Blizzard's Nameplate Size, from 1 (Small) to 5 (Huge). Sizes friendly player names and every nameplate the game draws, including the personal resource display. Same setting as on the Size page.")),
-        FriendlyNpcsGate({ type = "Slider", path = "look.friendly.npcNameScale", label = "NPC name size", min = 1, max = 5,
-          tooltip = "The size of friendly NPC names on Plateau's nameplates, from 1 (Small) to 5 (Huge)." }),
-        NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.nameOffsetY", limited = Style.limited.friendly, label = "Name vertical offset", min = -60, max = 60,
-          tooltip = "Moves the name up or down." })),
-
-        { type = "Header", label = "Raid target icon" },
-        { type = "Link", label = "Raid icon placement for friendly plates is on the Raid target icon page", target = { section = "raidMarker", label = "Friendly nameplates" } },
-
-        { type = "Header", label = "Full nameplate", visibleIf = FriendlyStyled },
-        { type = "Note", label = "Used when Show names only is off. Everything else follows the regular nameplate settings.", height = 24, visibleIf = FriendlyStyled },
-        FriendlyGate({ type = "Toggle", path = "look.friendly.classColors", label = "Use class colors for names", visibleIf = FriendlyStyled,
-          tooltip = "Colors friendly player names by class instead of a flat color." }),
-        FriendlyGate({ type = "Toggle", path = "look.friendly.classificationEnabled", label = "Show elite icon", visibleIf = FriendlyStyled,
-          tooltip = "Shows the elite, rare or boss icon on friendly nameplates." }),
-        FriendlyGate({ type = "Toggle", path = "look.friendly.levelEnabled", label = "Show level", visibleIf = FriendlyStyled,
-          tooltip = "Shows the friendly unit's level." }),
-        { type = "Link", label = "The health bar color is the Friendly swatch on the Health bar colors page", target = { section = "healthColors", label = "Reaction colors" }, visibleIf = FriendlyStyled },
-
-        { type = "Header", label = "Extras" },
-        FriendlyGate({ type = "Toggle", path = "look.friendly.hideInCombat", label = "Hide friendly nameplates in combat",
-          tooltip = "Fades out friendly nameplates during combat. They can still be clicked unless Click-through friendly nameplates is on." }),
-        FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.groupColor", colorPath = "look.friendly.groupNameColor", label = "Group member name color",
-          tooltip = "Colors the names of party and raid members, replacing their class color." }),
-        NameOnlyGate(FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.guildLine", colorPath = "look.friendly.guildColor", label = "Show guild names",
-          tooltip = "Shows a player's guild, like <Plateau>, on a smaller line under their name." })),
-        NameOnlyGate(FriendlyNpcsGate({ type = "ToggleColor", path = "look.friendly.npcTitle", colorPath = "look.friendly.npcTitleColor", label = "Show NPC titles",
-          tooltip = "Shows an NPC's title, like <Banker>, on a smaller line under their name." })),
-        NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.subtitleSize", label = "Guild and title text size", min = 6, max = 16,
-          tooltip = "The font size of guild names and NPC titles." })),
-
-        { type = "Header", label = "Blizzard's friendly nameplates" },
-        CVarToggle("nameplateShowOnlyNameForFriendlyPlayerUnits", "Only show friendly player names",
-            "Shows only names on friendly players' nameplates the game draws, such as in dungeons and raids. Follower dungeon companions keep their bars."),
         CVarToggle("nameplateShowFriendlyPlayerMinions", "Friendly players' minions",
             "Shows nameplates for friendly players' pets, totems and other minions on the nameplates the game draws."),
         { type = "Toggle", label = "Hide friendly pets in dungeons and raids", visibleIf = function() return Plateau.InstancePets ~= nil end,
@@ -1947,6 +1906,27 @@ ns.sections = {
           get = function() return Plateau.InstancePets ~= nil and Plateau.InstancePets:IsOn() end,
           set = function(value) Plateau.InstancePets:SetOn(value == true) end,
           tooltip = "Hides other players' pets, totems and minions, and their names, in dungeons and raids. Saved for your account." },
+        { type = "Link", label = "Names over pets and minions are under Game settings", target = { section = "game", label = "Names over heads" } },
+
+        { type = "Header", label = "Names" },
+        FriendlyGate({ type = "Toggle", path = "look.friendly.nameOnly", label = "Show names only",
+          tooltip = "Hides the health bar on friendly nameplates and shows only the name. In dungeons and raids, use Only show friendly player names." }),
+        FriendlyPlayersGate({ type = "Dropdown", path = "look.friendly.nameMode", label = "Shorten player names", options = SHORTEN_NAMES, limited = Style.limited.friendly, visibleIf = function() return Plateau.flavor == "forever" end,
+          tooltip = "How friendly player names are shortened." }),
+        FriendlyNpcsGate({ type = "Dropdown", path = "look.friendly.npcNameMode", label = "Shorten NPC names", options = SHORTEN_NAMES, limited = Style.limited.friendly,
+          tooltip = "How friendly NPC names are shortened." }),
+        FriendlyPlayersGate(CVarSlider("nameplateSize", "Blizzard nameplate size", 1, 5, 1,
+            "Blizzard's Nameplate Size, from 1 (Small) to 5 (Huge). Sizes friendly player names and every nameplate the game draws, including the personal resource display. Same setting as on the Size page.")),
+        FriendlyNpcsGate({ type = "Slider", path = "look.friendly.npcNameScale", label = "NPC name size", min = 1, max = 5,
+          tooltip = "The size of friendly NPC names on Plateau's nameplates, from 1 (Small) to 5 (Huge)." }),
+        NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.nameOffsetY", limited = Style.limited.friendly, label = "Name vertical offset", min = -60, max = 60,
+          tooltip = "Moves the name up or down." })),
+        NameOnlyGate(FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.guildLine", colorPath = "look.friendly.guildColor", label = "Show guild names",
+          tooltip = "Shows a player's guild, like <Plateau>, on a smaller line under their name." })),
+        NameOnlyGate(FriendlyNpcsGate({ type = "ToggleColor", path = "look.friendly.npcTitle", colorPath = "look.friendly.npcTitleColor", label = "Show NPC titles",
+          tooltip = "Shows an NPC's title, like <Banker>, on a smaller line under their name." })),
+        NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.subtitleSize", label = "Guild and title text size", min = 6, max = 16,
+          tooltip = "The font size of guild names and NPC titles." })),
         RealmNameToggle(),
         Gate({ type = "Toggle", label = "Hide realm marker (*)",
           get = function() return not Plateau.DB.saved.global.keepRealmMarker end,
@@ -1957,8 +1937,55 @@ ns.sections = {
           tooltip = "Hides the (*) after the names of players from other realms. Needs a UI reload." },
           function() return CVars:Get("nameplateShowFriendlyRealmName") ~= "1" end,
           "Turn off Show realm names to use this."),
-        { type = "Link", label = "NPC names over heads are under Game settings", target = { section = "game", label = "Names over heads" } }
-    ), BlizzardDrawn())),
+        { type = "Link", label = "NPC names over heads are under Game settings", target = { section = "game", label = "Names over heads" } },
+
+        { type = "Header", label = "Name color" },
+        CVarToggle("nameplateUseClassColorForFriendlyPlayerUnitNames", "Class-colored player names",
+            "Colors friendly player names by class, including on Blizzard's nameplates."),
+        FriendlyGate({ type = "Toggle", path = "look.friendly.classColors", label = "Use class colors for names", visibleIf = FriendlyStyled,
+          tooltip = "Colors friendly player names by class instead of a flat color." }),
+        NameOnlyGate(FriendlyPlayersGate({ type = "Color", path = "look.friendly.playerNameColor", label = "Player name color",
+          tooltip = "The color of friendly player names when class colors are off." })),
+        NameOnlyGate(FriendlyNpcsGate({ type = "Color", path = "look.friendly.npcNameColor", label = "NPC name color",
+          tooltip = "The color of friendly NPC names." })),
+        FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.groupColor", colorPath = "look.friendly.groupNameColor", label = "Group member name color",
+          tooltip = "Colors the names of party and raid members, replacing their class color." }),
+
+        { type = "Header", label = "Full nameplate", visibleIf = FriendlyStyled },
+        { type = "Note", label = "Used when Show names only is off. Everything else follows the regular nameplate settings.", height = 24, visibleIf = FriendlyStyled },
+        FriendlyGate({ type = "Toggle", path = "look.friendly.classificationEnabled", label = "Show elite icon", visibleIf = FriendlyStyled,
+          tooltip = "Shows the elite, rare or boss icon on friendly nameplates." }),
+        FriendlyGate({ type = "Toggle", path = "look.friendly.levelEnabled", label = "Show level", visibleIf = FriendlyStyled,
+          tooltip = "Shows the friendly unit's level." }),
+        { type = "Link", label = "The health bar color is the Friendly swatch on the Health bar colors page", target = { section = "healthColors", label = "Reaction colors" }, visibleIf = FriendlyStyled },
+
+        { type = "Header", label = "Raid target icon" },
+        FriendlyGate({ type = "Toggle", path = "look.friendly.raidMarker.own", label = "Separate friendly position",
+          set = function(value)
+              local values = { ["look.friendly.raidMarker.own"] = value == true }
+              if value then
+                  for _, key in ipairs({ "position", "gap", "offsetX", "offsetY" }) do
+                      values["look.friendly.raidMarker." .. key] = Plateau.DB:Get("look.raidMarker." .. key)
+                  end
+              end
+              Plateau.DB:SetMany(values)
+          end,
+          tooltip = "Friendly nameplates use their own raid icon position, set below. Size and opacity stay shared." }),
+        Gate({ type = "Dropdown", path = "look.friendly.raidMarker.position", label = "Position", options = SIDES,
+          tooltip = "Where the raid icon sits around a friendly health bar." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
+        Gate({ type = "Slider", path = "look.friendly.raidMarker.gap", label = "Distance", min = 0, max = 20,
+          tooltip = "Space between the raid icon and the friendly nameplate." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
+        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetX", label = "Horizontal offset", min = -40, max = 40,
+          tooltip = "Moves the raid icon left or right." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
+        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetY", label = "Vertical offset", min = -40, max = 40,
+          tooltip = "Moves the raid icon up or down." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
+        { type = "Link", label = "Raid icon size and opacity are on the Raid target icon page", target = { section = "raidMarker", label = "Raid target icon" } },
+
+        { type = "Header", label = "Blizzard's friendly nameplates" },
+        { type = "Note", label = "Change the friendly nameplates the game draws, such as in dungeons, raids and arenas.", height = 24 },
+        CVarToggle("nameplateShowOnlyNameForFriendlyPlayerUnits", "Only show friendly player names",
+            "Shows only names on friendly players' nameplates the game draws, such as in dungeons and raids. Follower dungeon companions keep their bars.")
+    ), BlizzardDrawn(true))),
 
     Section("healthText", "Health text", "look.healthText", Join(List(
         { type = "Header", label = "Text", first = true },
@@ -2445,7 +2472,7 @@ ns.sections = {
           tooltip = "Friendly nameplates aren't highlighted." }
     ))),
 
-    Section("raidMarker", "Raid target icon", { "look.raidMarker", "look.friendly.raidMarker" }, Join(List(
+    Section("raidMarker", "Raid target icon", "look.raidMarker", Join(List(
         { type = "Header", label = "Raid target icon", first = true },
         { type = "Toggle", path = "look.raidMarker.enabled", label = "Show raid target icons",
           tooltip = "Shows raid target icons on nameplates." }
@@ -2454,7 +2481,7 @@ ns.sections = {
           tooltip = "Size of the raid target icon." },
         Placement("look.raidMarker")
     ), List(
-        { type = "Header", label = "Extras" }
+        { type = "Header", label = "Raid icon border" }
     ), GateList(On("look.raidMarker.enabled"), "Turn on Show raid target icons to use this.",
         { type = "Toggle", path = "look.raidMarker.tintBorder", label = "Color border by raid icon",
           tooltip = "Outlines marked nameplates in the icon's color. Target and focus borders take priority." }
@@ -2466,26 +2493,7 @@ ns.sections = {
               return "Turn on Color border by raid icon to use this."
           end)
     ), List(
-        { type = "Header", label = "Friendly nameplates" },
-        FriendlyGate({ type = "Toggle", path = "look.friendly.raidMarker.own", label = "Separate friendly position",
-          set = function(value)
-              local values = { ["look.friendly.raidMarker.own"] = value == true }
-              if value then
-                  for _, key in ipairs({ "position", "gap", "offsetX", "offsetY" }) do
-                      values["look.friendly.raidMarker." .. key] = Plateau.DB:Get("look.raidMarker." .. key)
-                  end
-              end
-              Plateau.DB:SetMany(values)
-          end,
-          tooltip = "Friendly nameplates use their own raid icon position, set below. Size and opacity stay shared." }),
-        Gate({ type = "Dropdown", path = "look.friendly.raidMarker.position", label = "Position", options = SIDES,
-          tooltip = "Where the raid icon sits around a friendly health bar." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.gap", label = "Distance", min = 0, max = 20,
-          tooltip = "Space between the raid icon and the friendly nameplate." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetX", label = "Horizontal offset", min = -40, max = 40,
-          tooltip = "Moves the raid icon left or right." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetY", label = "Vertical offset", min = -40, max = 40,
-          tooltip = "Moves the raid icon up or down." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason)
+        { type = "Link", label = "Friendly nameplates can use their own raid icon position on the Friendly page", target = { section = "friendly", label = "Raid target icon" } }
     ))),
 
     Section("quest", "Quest icon", { "look.quest", "look.colors.quest", "look.colors.questColor", "look.colors.questExcludeBoss" }, Join(
@@ -2680,6 +2688,8 @@ ns.sections = {
         end,
         controls = List(
             { type = "Note", label = "Plateau's own preferences for this settings window, not your nameplates. They are saved once for your account and are not part of a profile.", height = 24 },
+            { type = "Header", label = "Other nameplate addons" },
+            { type = "Conflicts" },
             { type = "Header", label = "Settings window" },
             { type = "Dropdown", label = "Settings window theme",
               options = { { value = "workbench", label = "Workbench" }, { value = "ledger", label = "Artisan Ledger" }, { value = "classic", label = "Lixard Classic" } },
@@ -2772,6 +2782,10 @@ ns.sections = {
             { type = "Header", label = "Share", keywords = "export import profile string copy paste backup" },
             { type = "ShareProfile", label = "Export active profile", keywords = "import profile profile export string paste a plateau profile string activate after import profile name",
               tooltip = "Export the active profile as a text string, or import a string as a new profile." },
+            { type = "Header", label = "Start over", keywords = "reset everything defaults profile start over" },
+            { type = "Note", label = "Puts every setting in the active profile back to its default. Your other profiles are untouched.", height = 24 },
+            { type = "ResetEverything", label = "Reset everything", keywords = "reset everything defaults profile start over",
+              tooltip = "Resets every setting in the active profile. Click again to confirm." },
             { type = "Header", label = "What a profile includes", collapsible = true, collapsed = true, keywords = "scope saved shared game settings spell lists automatic rules export" },
             { type = "Note", label = "In a profile: every Plateau setting on the Nameplates, Behavior, States, Auras, Icons and Friendly pages. Blizzard's own settings, which some of those pages also show, are not part of a profile.", height = 32 },
             { type = "Note", label = "Aura spell lists (Hidden spells and Allowed spells) are saved in the profile and per specialization, so a different profile or specialization shows a different set.", height = 32 },

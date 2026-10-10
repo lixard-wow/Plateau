@@ -158,7 +158,7 @@ end
 
 local game = byKey.game
 local gameGroups = Logic.AssignGroups(game.controls)
-local advanced = { "Off-screen nameplates" }
+local advanced = { "Off-screen nameplates", "Blizzard-drawn nameplates" }
 for _, label in ipairs(advanced) do
     local index, spec = Logic.FindControl(game, label, true)
     check(index ~= nil and spec.collapsible == true and spec.collapsed == true, label .. " is a collapsed advanced section on Game settings")
@@ -230,7 +230,8 @@ for _, spec in ipairs(profiles.controls) do
 end
 check(order[1] == "ProfileStatus" and order[2] == "Header:Manage profiles" and order[3] == "ProfileActions", "Profiles opens with status, then management actions")
 check(order[4] == "Header:Switch automatically" and order[5] == "AutoProfiles" and order[6] == "Header:Share" and order[7] == "ShareProfile", "automatic switching comes after management and sharing comes last")
-check(order[8] == "Header:What a profile includes", "the scope explanation sits at the end")
+check(order[8] == "Header:Start over" and order[9] == "ResetEverything", "Reset everything is on Profiles under Start over")
+check(order[10] == "Header:What a profile includes", "the scope explanation sits at the end")
 local scopeIndex = Logic.FindControl(profiles, "What a profile includes", true)
 check(profiles.controls[scopeIndex].collapsible == true, "the scope explanation is collapsible")
 check(profiles.title == "Profiles", "the page title is unchanged")
@@ -337,7 +338,12 @@ check(not hasPath("target", "look.target.dimOthers"), "non-target opacity left t
 check(not groupCovers(byKey.target, "look.target.dimOthers") and not groupCovers(byKey.target, "look.target.scale"), "resetting Target no longer resets settings that moved to Fading and Size")
 check(groupCovers(byKey.fading, "look.target.dimOthers") and groupCovers(byKey.size, "look.target.scale"), "resetting Fading and Size covers the settings they now hold")
 check(not groupCovers(byKey.size, "look.scaling.castFront") and groupCovers(byKey.layering, "look.scaling.castFront"), "resetting Size does not touch Casting enemies in front")
-check(hasHeader(byKey.friendly, "Blizzard-drawn nameplates") and not hasHeader(game, "Blizzard-drawn nameplates"), "the options for nameplates the game draws moved to Friendly")
+check(hasHeader(game, "Blizzard-drawn nameplates") and not hasHeader(byKey.friendly, "Blizzard-drawn nameplates") and hasHeader(byKey.friendly, "Blizzard's friendly nameplates"), "Blizzard-drawn enemy settings are on Game settings and the friendly ones on Friendly")
+check(not hasHeader(game, "Other nameplate addons") and hasHeader(byKey.addon, "Other nameplate addons"), "the addon conflict list is on Plateau settings")
+for _, path in ipairs({ "look.friendly.raidMarker.own", "look.friendly.raidMarker.position", "look.scaling.friendlyScale" }) do
+    check(hasPath("friendly", path) and groupCovers(byKey.friendly, path), path .. " is on Friendly and reset with it")
+end
+check(not hasPath("raidMarker", "look.friendly.raidMarker.own") and not hasPath("size", "look.scaling.friendlyScale"), "friendly raid icon placement and scale left Raid target icon and Size")
 check(not hasHeader(game, "Stacking and movement") and not hasHeader(game, "Occlusion"), "stacking and fading left Game settings")
 check(foundOn("casting enemies in front", "layering") and foundOn("priority", "layering") and foundOn("range fading", "fading") and foundOn("enemy type scale", "size"), "the moved sections are searchable on their new pages")
 

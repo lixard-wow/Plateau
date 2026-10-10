@@ -52,8 +52,8 @@ ns.helpTopics = {
     {
         category = "Getting started",
         title = "Resetting settings",
-        keywords = "reset default restore revert clear",
-        text = "There are three levels of reset. Right-click a setting to reset just that one to its default. Reset this section, at the bottom of the window, resets the whole page you are on. Reset everything resets every setting in the current profile. Each of the last two asks you to click again to confirm.\n\nIf you only want to undo a recent mistake, Undo is gentler than a reset.",
+        keywords = "reset default restore revert clear start over everything",
+        text = "There are three levels of reset. Right-click a setting to reset just that one to its default. Reset this section, at the bottom of the window, resets the whole page you are on. Reset everything, under Start over on the Profiles page, resets every setting in the active profile. Each of the last two asks you to click again to confirm.\n\nIf you only want to undo a recent mistake, Undo is gentler than a reset.",
     },
     {
         category = "Getting started",
@@ -131,7 +131,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Friendly nameplates page",
         keywords = "friendly nameplates names only npc player instance size dungeon raid",
-        text = "Style friendly nameplates with Plateau decides whether friendly players and NPCs use Plateau's look. In dungeons, raids and arenas the game locks friendly nameplates, so Blizzard draws them there and these settings do not apply. The one exception is size: Blizzard nameplate size is Blizzard's own Nameplate Size, the same setting as Nameplate size on the Size page, so it sizes friendly players there too.\n\nNames only shows just a name with no bar, with separate colors and sizes for players and NPCs. Name vertical offset moves the name up or down if it floats too far above the head. Hide realm marker (*) removes the marker the game adds, even on nameplates the game draws in dungeons; it takes effect after a /reload. Which friendly NPC names float over heads is on the Game settings page, under Names over heads.",
+        text = "Style friendly nameplates with Plateau decides whether friendly players and NPCs use Plateau's look, with its own scale and an option to hide them in combat. In dungeons, raids and arenas the game locks friendly nameplates, so Blizzard draws them there and Blizzard's friendly nameplates, at the bottom of the page, apply instead. Blizzard nameplate size is Blizzard's own Nameplate Size, the same setting as Nameplate size on the Size page, so it sizes friendly players there too.\n\nPets and minions holds every switch for friendly pets, totems and minions. Names covers names only, shortening, sizes, guild and title lines, and realm names; Hide realm marker (*) takes effect after a /reload. Name color holds the class color switches and the flat colors. Raid target icon lets friendly nameplates place the raid icon on their own.",
     },
     {
         category = "Pages",
@@ -203,7 +203,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Raid target icon page",
         keywords = "raid marker icon skull star",
-        text = "Show raid target icons shows the raid target markers already assigned to units. It does not assign markers or show ground markers. Icon size sets how big. To place it, drag the icon on the preview.",
+        text = "Show raid target icons shows the raid target markers already assigned to units. It does not assign markers or show ground markers. Icon size sets how big. To place it, drag the icon on the preview. Raid icon border outlines marked nameplates in the icon's color. Friendly nameplates can use their own position, set on the Friendly page.",
     },
     {
         category = "Pages",
@@ -238,8 +238,8 @@ ns.helpTopics = {
     {
         category = "Pages",
         title = "Game settings page",
-        keywords = "game settings cvar blizzard names over heads which nameplates show off-screen preferences",
-        text = "These are Blizzard's own nameplate settings that don't belong to a Plateau page. Plateau saves the previous value of any you change here, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset the page, or type /plt cvars restore.\n\nOther nameplate addons lists any that could conflict. Each can be turned off from there, or you can turn off Plateau instead if you prefer the other one. Names over heads sets which names float over characters. Which nameplates show decides who gets a nameplate. Off-screen nameplates starts collapsed; click its heading to open it, or search for a setting inside it and it opens for you.\n\nBlizzard settings that belong with a Plateau page live on that page instead: size and size by distance on Size, opacity behind walls and by distance on Fading, stacking and movement on Layering and stacking, and the options for the nameplates the game draws itself on Friendly.\n\nPlateau's own settings (window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window, so restoring Blizzard settings does not touch them. The performance numbers are under Diagnostics on the Help page. These settings are shared by every profile.",
+        keywords = "game settings cvar blizzard names over heads which nameplates show off-screen personal resource soft target blizzard-drawn",
+        text = "These are Blizzard's own nameplate settings that don't belong to a Plateau page. Plateau saves the previous value of any you change here, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset the page, or type /plt cvars restore.\n\nNames over heads sets which names float over characters. Which nameplates show decides who gets a nameplate. Personal resource display and Soft target icons have their own sections. Off-screen nameplates and Blizzard-drawn nameplates start collapsed; click a heading to open it, or search for a setting inside it and it opens for you. Blizzard-drawn nameplates changes the nameplates the game draws itself; the friendly ones are on the Friendly page.\n\nBlizzard settings that belong with a Plateau page live on that page instead: size and size by distance on Size, opacity behind walls and by distance on Fading, and stacking and movement on Layering and stacking.\n\nPlateau's own settings (other nameplate addons, window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window. The performance numbers are under Diagnostics on the Help page. These settings are shared by every profile.",
     },
     {
         category = "How do I",
@@ -305,9 +305,6 @@ local controls = {
         { label = "Replay the tour", width = 150, click = function() if ns.StartTour then ns.StartTour() end end },
         { label = "Run first-time setup", width = 170, click = function() if PlateauSetup then PlateauSetup:Open() end end },
     } },
-    { type = "Header", label = "Start over" },
-    { type = "Note", label = "Puts every setting in the current profile back to its default. Your other profiles are untouched.", height = 24 },
-    { type = "ResetEverything" },
     { type = "Header", label = "Diagnostics", collapsible = true, collapsed = true, searchable = true, key = "diagnostics",
       keywords = "performance cpu memory usage slow frames statistics refresh reset counters profiler",
       helpTopic = {
