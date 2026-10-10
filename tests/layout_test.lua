@@ -365,6 +365,6 @@ local function Shown(fragment)
     return nil
 end
 DB:Set("look.plate.stackSpace", "name")
-check(Shown("keep room for a cast bar on every plate") == false, "no stacking warning for Health bar and name")
+check(Shown("keep room for a cast bar on every nameplate") == false, "no stacking warning for Health bar and name")
 DB:Set("look.plate.stackSpace", "barcast")
-check(Shown("keep room for a cast bar on every plate") == "layering", "stacking bounds that include the cast bar warn about tall stacks")
+check(Shown("keep room for a cast bar on every nameplate") == "layering", "stacking bounds that include the cast bar warn about tall stacks")
