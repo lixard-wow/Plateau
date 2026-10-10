@@ -162,6 +162,13 @@ local function Hotspot(plate, region, sectionKey, label, level, pad, drag)
     return spot
 end
 
+local function DragOf(spot)
+    if spot and spot.friendlyHere and sectionKey == "friendly" then
+        return nil
+    end
+    return spot and spot.drag
+end
+
 local function Resolve(value)
     if type(value) == "function" then
         return value()
@@ -245,7 +252,7 @@ local function SetHovered(spot)
     if spot then
         PlaceOutline(spot)
         outline:Show()
-        hint:SetFormattedText(spot.drag and "%s  -  click to edit, drag to move, arrow keys to nudge" or "%s  -  click to edit", Style.T(Resolve(spot.label)))
+        hint:SetFormattedText(DragOf(spot) and "%s  -  click to edit, drag to move, arrow keys to nudge" or "%s  -  click to edit", Style.T(Resolve(spot.label)))
         local tint = Style.StateColor()
         hint:SetTextColor(tint[1], tint[2], tint[3])
     else
@@ -279,20 +286,22 @@ end)
 layer:SetScript("OnMouseDown", function(_, button)
     if button ~= "LeftButton" then return end
     pressedSpot = SpotAt()
-    if pressedSpot and pressedSpot.drag then
-        ns.Drag.Press(pressedSpot.drag, pressedSpot)
+    local drag = DragOf(pressedSpot)
+    if drag then
+        ns.Drag.Press(drag, pressedSpot)
     end
 end)
 layer:SetScript("OnMouseUp", function(_, button)
     if button ~= "LeftButton" then return end
     local spot = pressedSpot
     pressedSpot = nil
-    local dragged = spot and spot.drag and ns.Drag.Release()
+    local drag = DragOf(spot)
+    local dragged = drag and ns.Drag.Release()
     if dragged or not spot then return end
-    if spot.drag then
-        spot.drag.spot = spot
+    if drag then
+        drag.spot = spot
     end
-    ns.Drag.Select(spot.drag)
+    ns.Drag.Select(drag)
     local key = Resolve(spot.sectionKey)
     ns.SelectSection(key)
     local opened
@@ -339,7 +348,9 @@ local function AddHotspots(plate)
         Drag.PositionSpec({ path = "look.enemyTarget", positionKey = "anchor", text = true, fixedGap = 3, region = plate.enemyTarget, anchor = AtHealth(plate) })).setting = "Show enemy target name"
     Hotspot(plate, plate.level, "level", "Level", 80, 3,
         Drag.PositionSpec({ path = "look.level", positionKey = "anchor", text = true, fixedGap = 3, region = plate.level, anchor = AtHealth(plate) }))
-    Hotspot(plate, plate.name, "name", "Name", 70, 1, Drag.NameSpec(plate)).fitText = true
+    local nameSpot = Hotspot(plate, plate.name, function() return sectionKey == "friendly" and "friendly" or "name" end, "Name", 70, 1, Drag.NameSpec(plate))
+    nameSpot.fitText = true
+    nameSpot.friendlyHere = true
     Hotspot(plate, plate.raidMarker, "raidMarker", "Raid target icon", 80, 0,
         Drag.PositionSpec({
             path = function() return sectionKey == "friendly" and "look.friendly.raidMarker" or "look.raidMarker" end,
