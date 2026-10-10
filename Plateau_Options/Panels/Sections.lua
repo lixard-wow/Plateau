@@ -1893,10 +1893,14 @@ ns.sections = {
             "Blizzard's Nameplate Size, from 1 (Small) to 5 (Huge). Sizes friendly player names and every nameplate the game draws, including the personal resource display. Same setting as on the Size page.")),
         CVarToggle("nameplateUseClassColorForFriendlyPlayerUnitNames", "Class-colored player names",
             "Colors friendly player names by class, including on Blizzard's nameplates."),
-        FriendlyGate({ type = "Toggle", path = "look.friendly.classColors", label = "Use class colors for names", visibleIf = FriendlyStyled,
-          tooltip = "Colors friendly player names by class instead of a flat color." }),
-        NameOnlyGate(FriendlyPlayersGate({ type = "Color", path = "look.friendly.playerNameColor", label = "Player name color",
-          tooltip = "The color of friendly player names when class colors are off." })),
+        NameOnlyGate(Gate({ type = "Color", path = "look.friendly.playerNameColor", label = "Player name color",
+          tooltip = "The color of friendly player names when Class-colored player names is off." },
+          function() return FriendlyPlayersOn() and CVars:Get("nameplateUseClassColorForFriendlyPlayerUnitNames") ~= "1" end,
+          function()
+              if not FriendlyOn() then return FriendlyOffReason() end
+              if not FriendlyPlayersOn() then return "Turn on Friendly players to use this." end
+              return "Turn off Class-colored player names to use this."
+          end)),
         FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.groupColor", colorPath = "look.friendly.groupNameColor", label = "Group member name color",
           tooltip = "Colors the names of party and raid members, replacing their class color." }),
         NameOnlyGate(FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.guildLine", colorPath = "look.friendly.guildColor", label = "Show guild names",
