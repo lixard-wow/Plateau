@@ -23,4 +23,5 @@ Panels\Frame.lua
 Panels\Drag.lua
 Panels\Preview.lua
 Panels\Setup.lua
+Panels\LocalePicker.lua
 Panels\Tour.lua

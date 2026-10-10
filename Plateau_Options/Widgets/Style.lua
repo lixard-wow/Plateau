@@ -243,7 +243,7 @@ function Style.Scale()
 end
 
 local gameFont = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
-local useGameFont = GetLocale ~= nil and NON_LATIN[GetLocale()] == true
+local useGameFont = Plateau.ActiveLocale ~= nil and NON_LATIN[Plateau.ActiveLocale()] == true
 
 local function ChosenFont(key, themeFont)
     local saved = SavedGlobal()[key]

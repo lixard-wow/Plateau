@@ -304,6 +304,20 @@ local function OpenSetup()
     end
 end
 
+local function OpenLocalePicker()
+    if InCombatLockdown() then
+        Say(L["The translation check opens out of combat."])
+        return
+    end
+    ns.WarmThemeFonts()
+    local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
+    if loaded and PlateauLocalePicker and PlateauLocalePicker.Open then
+        PlateauLocalePicker:Open()
+    elseif not loaded then
+        Say(L["Couldn't open the translation check: %s"]:format(tostring(reason)))
+    end
+end
+
 local NEW_USER_CVARS = { UnitNameNonCombatCreatureName = "1" }
 
 local function ApplyNewUserDefaults()
@@ -343,7 +357,7 @@ local function Help()
     print("  " .. L["/plt minimap - show or hide the minimap button"])
     print("  " .. L["/plt debug - version, CPU and memory for bug reports"])
     print("  " .. L["/plt debug reset - start counting slow frames from now"])
-    print("  " .. L["/plt debug locale - show translatable text in [[brackets]] to find text that can't be translated (reloads)"])
+    print("  " .. L["/plt debug locale - preview a translation, or show translatable text in [[brackets]]"])
     print("  " .. L["/plt reset - reset the active profile"])
     print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
 end
@@ -526,10 +540,7 @@ SlashCmdList.PLATEAU = function(input)
         ns.ResetPerformanceCounts()
         Say(L["Slow-frame counters reset."])
     elseif command == "debug" and path == "locale" then
-        local on = not ns.IsPseudoLocale()
-        ns.DB.saved.global.pseudoLocale = on or nil
-        ns.SetPseudoLocale(on)
-        ReloadUI()
+        OpenLocalePicker()
     elseif command == "debug" then
         Debug()
     elseif command == "cvars" and path == "restore" then
@@ -549,6 +560,19 @@ Plateau = {
     SetPseudoLocale = function(on)
         ns.DB.saved.global.pseudoLocale = on == true or nil
         ns.SetPseudoLocale(on)
+    end,
+    IsPseudoLocale = function()
+        return ns.IsPseudoLocale()
+    end,
+    LANGUAGES = ns.LANGUAGES,
+    LocaleCount = function(code)
+        return ns.LocaleCount(code)
+    end,
+    PreviewLocale = function()
+        return ns.PreviewLocale()
+    end,
+    ActiveLocale = function()
+        return ns.ActiveLocale()
     end,
     DB = ns.DB,
     defaults = ns.defaults,

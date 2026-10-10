@@ -82,6 +82,7 @@ loader:SetScript("OnEvent", function(self, event, name)
             ns.Driver:UnregisterAllEvents()
             return
         end
+        ns.ApplyLocale(ns.DB.saved.global.previewLocale)
         ns.SetPseudoLocale(ns.DB.saved.global.pseudoLocale == true)
         ns.ApplyRealmMarker()
         ns.Driver:Restyle("addon loaded")
