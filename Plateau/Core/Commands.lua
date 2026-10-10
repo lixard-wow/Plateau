@@ -85,6 +85,11 @@ function ns.PerformanceLines()
     if ns.auraButtons then
         lines[#lines + 1] = L["Aura buttons built: %d (%d of them in combat)"]:format(ns.auraButtons.built, ns.auraButtons.combat)
     end
+    local Auras = ns.Elements and ns.Elements.Auras
+    if Auras and Auras.SetStats then
+        local setsBuilt, setsCombat, inUse, spareSets = Auras:SetStats()
+        lines[#lines + 1] = L["Aura sets: %d built (%d in combat), %d on plates, %d spare"]:format(setsBuilt, setsCombat, inUse, spareSets)
+    end
     if ns.Driver.PoolStats then
         local builtTotal, attached, spare, on, all = ns.Driver:PoolStats()
         lines[#lines + 1] = L["Plates built: %d (%d on game nameplates, %d spare); elements on: %d of %d"]:format(builtTotal, attached, spare, on, all)

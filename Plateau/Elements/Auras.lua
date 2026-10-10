@@ -97,7 +97,7 @@ end
 ns.AuraShape = Shape
 
 local function StyleButton(button, group, container)
-    local config = configs[container.plate.state]
+    local config = configs[container.state]
     local db = config[group.key]
     local size = db.size * ns.Scaling:AuraFactor()
     local height, top, bottom = Shape(db)
@@ -156,7 +156,7 @@ local function FlushDirtyButtons()
     while #dirtyOrder > 0 and processed < FLUSH_BATCH do
         local container = table.remove(dirtyOrder)
         queuedContainers[container] = nil
-        if dirtyContainers[container] and container.plate.active then
+        if dirtyContainers[container] and container.plate and container.plate.active then
             dirtyContainers[container] = nil
             StyleContainerButtons(container)
         end
@@ -229,32 +229,52 @@ local function Initializer(container, group)
             button.pandemic = pandemic
         end
 
-        if configs[container.plate.state] then
+        if configs[container.state] then
             StyleButton(button, group, container)
         end
     end
 end
 
-function Auras:Create(plate)
-    plate.auras = {}
+local parking = CreateFrame("Frame")
+parking:Hide()
+local spareSets = {}
+local setStats = { built = 0, combat = 0 }
+local auraVersion = 0
+local warming
+local SET_TARGET, SET_BUFFER = 16, 8
+
+local function NewSet(state)
+    local set = { containers = {} }
     for _, group in ipairs(GROUPS) do
-        local container = CreateFrame("AuraContainer", nil, plate.overlay, "CustomAuraContainerTemplate")
+        local container = CreateFrame("AuraContainer", nil, parking, "CustomAuraContainerTemplate")
         container:SetEnabled(false)
         container.buttons = {}
         container.group = group
-        container.plate = plate
+        container.set = set
+        container.state = state
         container.keys = {}
         container.filters = {}
         container.added = {}
         for index in ipairs(group.parts) do
             container.keys[index] = group.key .. index
         end
-        plate.auras[group.key] = container
+        set.containers[group.key] = container
     end
+    setStats.built = setStats.built + 1
+    if InCombatLockdown() then
+        setStats.combat = setStats.combat + 1
+    end
+    return set
+end
+
+function Auras:Create(plate)
+    plate.auras = nil
+    plate.auraSet = nil
 end
 
 function Auras:Configure(db, state)
     configs[state] = db
+    auraVersion = auraVersion + 1
 end
 
 local HORIZONTAL = AnchorUtil.FlowLayoutAxis.Horizontal
@@ -532,29 +552,10 @@ local function AddPart(container, group, index)
     container.filters[index] = filter
 end
 
-function Auras:BuildStep(plate, db, deadline)
-    if plate.nameOnly then
-        return true
-    end
-    for _, group in ipairs(GROUPS) do
-        local container = plate.auras[group.key]
-        local groupDb = db[group.key]
-        local allBuffs = groupDb.allBuffs == true
-        for index in ipairs(container.keys) do
-            if not container.added[index] and PartCount(group, index, groupDb, allBuffs) > 0 then
-                if deadline and debugprofilestop() > deadline then
-                    return false
-                end
-                AddPart(container, group, index)
-                container.sortMethod = nil
-                container.filterSignature = nil
-            end
-        end
-    end
-    return true
-end
-
 function Auras:Style(plate, db)
+    if not plate.auras then
+        return
+    end
     for _, group in ipairs(GROUPS) do
         local container = plate.auras[group.key]
         local groupDb = db[group.key]
@@ -653,6 +654,11 @@ function Auras:Style(plate, db)
             StyleContainerButtons(container)
         end
     end
+    local set = plate.auraSet
+    if set then
+        set.styledState = plate.state
+        set.version = auraVersion
+    end
 end
 
 local function SetOn(container, on)
@@ -662,7 +668,108 @@ local function SetOn(container, on)
     end
 end
 
+local function Anchor(plate, db)
+    for _, group in ipairs(GROUPS) do
+        local container = plate.auras[group.key]
+        local groupDb = db[group.key]
+        local _, relative, _, _, _, anchor = Placement(groupDb)
+        container:ClearAllPoints()
+        container:SetPoint(anchor, plate, relative, groupDb.offsetX, groupDb.offsetY)
+    end
+end
+
+local function Attach(plate)
+    local set = table.remove(spareSets) or NewSet(plate.state)
+    set.plate = plate
+    local level = plate.overlay:GetFrameLevel() + 1
+    for _, container in pairs(set.containers) do
+        container.plate = plate
+        container.state = plate.state
+        container:SetParent(plate.overlay)
+        container:SetFrameLevel(level)
+    end
+    plate.auraSet = set
+    plate.auras = set.containers
+    local db = configs[plate.state]
+    if set.styledState ~= plate.state or set.version ~= auraVersion then
+        Auras:Style(plate, db)
+    else
+        Anchor(plate, db)
+    end
+    if not InCombatLockdown() and ns.Driver.WarmPools then
+        ns.Driver:WarmPools()
+    end
+end
+
+local function Detach(plate)
+    local set = plate.auraSet
+    if not set then return end
+    for _, container in pairs(set.containers) do
+        SetOn(container, false)
+        container.currentUnit = nil
+        container:ClearAllPoints()
+        container:SetParent(parking)
+        container.plate = nil
+    end
+    set.plate = nil
+    plate.auraSet = nil
+    plate.auras = nil
+    spareSets[#spareSets + 1] = set
+end
+
+local function SetsWanted()
+    local global = ns.DB and ns.DB.saved and ns.DB.saved.global
+    local test = global and global.poolTest
+    local target, buffer = SET_TARGET, SET_BUFFER
+    if test == "off" then
+        return false
+    elseif type(test) == "number" then
+        target, buffer = test, math.ceil(test / 2)
+    end
+    local want = setStats.built < target and target or buffer
+    return #spareSets < want
+end
+
+function Auras:WarmStep(deadline)
+    local db = configs.enemy
+    if not (db and Auras.enabledIn.enemy) then
+        return false
+    end
+    if not warming then
+        if not SetsWanted() then
+            return false
+        end
+        warming = NewSet("enemy")
+    end
+    for _, group in ipairs(GROUPS) do
+        local container = warming.containers[group.key]
+        local groupDb = db[group.key]
+        local allBuffs = groupDb.allBuffs == true
+        for index in ipairs(container.keys) do
+            if not container.added[index] and PartCount(group, index, groupDb, allBuffs) > 0 then
+                if debugprofilestop() > deadline then
+                    return true
+                end
+                AddPart(container, group, index)
+                container.sortMethod = nil
+                container.filterSignature = nil
+            end
+        end
+    end
+    spareSets[#spareSets + 1] = warming
+    warming = nil
+    return true
+end
+
+function Auras:SetStats()
+    local spare = #spareSets
+    return setStats.built, setStats.combat, setStats.built - spare - (warming and 1 or 0), spare
+end
+
 function Auras:Enable(plate, unit)
+    if not plate.auraSet then
+        Attach(plate)
+    end
     for _, group in ipairs(GROUPS) do
         local container = plate.auras[group.key]
         if container.currentUnit ~= unit then
@@ -687,11 +794,7 @@ function Auras:Enable(plate, unit)
 end
 
 function Auras:Disable(plate)
-    for _, group in ipairs(GROUPS) do
-        local container = plate.auras[group.key]
-        SetOn(container, false)
-        container.currentUnit = nil
-    end
+    Detach(plate)
     if plate.fakeAuras then
         for _, fake in pairs(plate.fakeAuras) do
             fake:Hide()
@@ -730,7 +833,7 @@ function Auras:CombatTest(say)
     if not TestStep(say, "1 create container", function()
         container = CreateFrame("AuraContainer", nil, first.overlay, "CustomAuraContainerTemplate")
     end) then return end
-    container.buttons, container.group, container.plate = {}, group, first
+    container.buttons, container.group, container.plate, container.state = {}, group, first, first.state
     container.keys, container.filters, container.added = { "test1" }, {}, {}
     TestStep(say, "2 add aura group", function()
         container:AddAuraGroup("test1", group.parts[1].filter, { initializeFrame = Initializer(container, group), sortMethod = group.parts[1].sort })
@@ -828,7 +931,9 @@ function Auras:Preview(plate, state)
     local config = configs[plate.state]
     for _, group in ipairs(GROUPS) do
         local key = group.key
-        SetOn(plate.auras[key], false)
+        if plate.auras then
+            SetOn(plate.auras[key], false)
+        end
         local db = config[key]
         local count = state.auras and state.auras[key] or 0
         local others = count > 0 and key == "mine" and db.includeOthers == true
