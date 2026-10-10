@@ -97,9 +97,12 @@ function ns.PerformanceLines()
             end
         end
         if ns.Driver.Demand then
-            local demand, shown = ns.Driver:Demand()
+            local demand, shown, session = ns.Driver:Demand()
             lines[#lines + 1] = L["Most nameplates styled at once: %d enemy, %d friendly (in combat: %d enemy, %d friendly)"]:format(demand.peak.enemy, demand.peak.friendly, demand.combatPeak.enemy, demand.combatPeak.friendly)
             lines[#lines + 1] = L["Plates built on the spot because no spare was ready: %d (%d in combat), %.1f ms in total, %.1f ms slowest"]:format(demand.misses, demand.combatMisses, demand.missMs, demand.worstMiss)
+            if session then
+                lines[#lines + 1] = L["Plates built on the spot since login or reload: %d (%d in combat), %.1f ms in total, %.1f ms slowest"]:format(session.misses, session.combatMisses, session.missMs, session.worstMiss)
+            end
             if demand.minSpare then
                 lines[#lines + 1] = L["Fewest spare plates left: %d (in combat: %s)"]:format(demand.minSpare, demand.minSpareCombat and tostring(demand.minSpareCombat) or "-")
             end

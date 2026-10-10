@@ -547,6 +547,7 @@ local claimTime = { count = 0, total = 0, slowest = 0, restyles = 0, versionRest
 
 local shown = { enemy = 0, friendly = 0 }
 local demand = { peak = { enemy = 0, friendly = 0 }, combatPeak = { enemy = 0, friendly = 0 }, misses = 0, combatMisses = 0, missMs = 0, worstMiss = 0 }
+local session = { misses = 0, combatMisses = 0, missMs = 0, worstMiss = 0 }
 
 local function NotePeaks(combat)
     combat = combat or InCombatLockdown()
@@ -915,6 +916,14 @@ local function CreatePlate(base, unit)
         demand.missMs = demand.missMs + ms
         if ms > demand.worstMiss then
             demand.worstMiss = ms
+        end
+        session.misses = session.misses + 1
+        if combat then
+            session.combatMisses = session.combatMisses + 1
+        end
+        session.missMs = session.missMs + ms
+        if ms > session.worstMiss then
+            session.worstMiss = ms
         end
     end
     local spare = #pools.enemy + #pools.friendly
@@ -1428,7 +1437,7 @@ function Driver:CountActive()
 end
 
 function Driver:Demand()
-    return demand, shown
+    return demand, shown, session
 end
 
 function Driver:PoolPlan()
