@@ -102,6 +102,7 @@ function ns.PerformanceLines()
             lines[#lines + 1] = L["Plates built on the spot because no spare was ready: %d (%d in combat), %.1f ms in total, %.1f ms slowest"]:format(demand.misses, demand.combatMisses, demand.missMs, demand.worstMiss)
             if session then
                 lines[#lines + 1] = L["Plates built on the spot since login or reload: %d (%d in combat), %.1f ms in total, %.1f ms slowest"]:format(session.misses, session.combatMisses, session.missMs, session.worstMiss)
+                lines[#lines + 1] = L["Plates built a little at a time while the game's own plate showed: %d since login or reload, longest wait %.0f ms"]:format(session.deferred, session.longestWait)
             end
             if demand.minSpare then
                 lines[#lines + 1] = L["Fewest spare plates left: %d (in combat: %s)"]:format(demand.minSpare, demand.minSpareCombat and tostring(demand.minSpareCombat) or "-")

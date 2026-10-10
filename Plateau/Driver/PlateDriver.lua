@@ -547,7 +547,8 @@ local claimTime = { count = 0, total = 0, slowest = 0, restyles = 0, versionRest
 
 local shown = { enemy = 0, friendly = 0 }
 local demand = { peak = { enemy = 0, friendly = 0 }, combatPeak = { enemy = 0, friendly = 0 }, misses = 0, combatMisses = 0, missMs = 0, worstMiss = 0 }
-local session = { misses = 0, combatMisses = 0, missMs = 0, worstMiss = 0 }
+local session = { misses = 0, combatMisses = 0, missMs = 0, worstMiss = 0, deferred = 0, longestWait = 0 }
+demand.deferred, demand.longestWait = 0, 0
 
 local function NotePeaks(combat)
     combat = combat or InCombatLockdown()
@@ -939,11 +940,61 @@ local function CreatePlate(base, unit)
     return plate
 end
 
+local pending = {}
+local pendingSet = {}
+local flushing = false
+
+local function SpareCount(state)
+    return #pools[state] + #pools[state == "enemy" and "friendly" or "enemy"]
+end
+
+local function ClaimPending(force)
+    while #pending > 0 do
+        local unit = pending[1]
+        local entry = pendingSet[unit]
+        if entry and not force and SpareCount(entry.state) == 0 then
+            return
+        end
+        table.remove(pending, 1)
+        if entry then
+            pendingSet[unit] = nil
+            local waited = debugprofilestop() - entry.at
+            demand.deferred = demand.deferred + 1
+            session.deferred = session.deferred + 1
+            if waited > demand.longestWait then
+                demand.longestWait = waited
+            end
+            if waited > session.longestWait then
+                session.longestWait = waited
+            end
+            flushing = true
+            OnUnitAdded(unit)
+            flushing = false
+        end
+    end
+end
+
 local poolWarmer = CreateFrame("Frame")
 poolWarmer:Hide()
 poolWarmer:SetScript("OnUpdate", function(self)
     if InCombatLockdown() then return end
     local started = debugprofilestop()
+    if #pending > 0 then
+        ClaimPending()
+        if #pending > 0 then
+            if not building then
+                local entry = pendingSet[pending[1]]
+                building = StartBuild(entry and entry.state or "enemy")
+            end
+            if StepBuild(building, started + BUILD_BUDGET_MS) then
+                local list = pools[building.state]
+                list[#list + 1] = building.plate
+                building = nil
+                ClaimPending()
+            end
+            return
+        end
+    end
     local plate = next(stale)
     while plate do
         stale[plate] = nil
@@ -1024,6 +1075,15 @@ function OnUnitAdded(unit)
     if claimable then
         watched[unit] = nil
         if not plate then
+            if not flushing and not (inCombat or InCombatLockdown()) and #pools.enemy == 0 and #pools.friendly == 0 then
+                if not pendingSet[unit] then
+                    pendingSet[unit] = { state = UnitCanAttack("player", unit) and "enemy" or "friendly", at = debugprofilestop() }
+                    pending[#pending + 1] = unit
+                end
+                RestoreBlizzardPlate(base)
+                poolWarmer:Show()
+                return
+            end
             plate = CreatePlate(base, unit)
             if not InCombatLockdown() then
                 poolWarmer:Show()
@@ -1052,6 +1112,7 @@ end
 
 local function OnUnitRemoved(unit)
     watched[unit] = nil
+    pendingSet[unit] = nil
     local plate = platesByUnit[unit]
     if not plate then return end
     platesByUnit[unit] = nil
@@ -1400,6 +1461,7 @@ function Driver:ResetClaimTime()
     swaps = 0
     demand.misses, demand.combatMisses, demand.missMs, demand.worstMiss = 0, 0, 0, 0
     demand.minSpare, demand.minSpareCombat = nil, nil
+    demand.deferred, demand.longestWait = 0, 0
     for state, n in pairs(shown) do
         demand.peak[state] = n
         demand.combatPeak[state] = 0
@@ -1431,6 +1493,9 @@ function Driver:CountActive()
         end
     end
     for _ in pairs(watched) do
+        total = total + 1
+    end
+    for _ in pairs(pendingSet) do
         total = total + 1
     end
     return total, claimed
@@ -1469,6 +1534,9 @@ Driver:SetScript("OnEvent", function(_, event, arg)
         inCombat = event == "PLAYER_REGEN_DISABLED"
         if inCombat then
             NotePeaks(true)
+            if #pending > 0 then
+                ClaimPending(true)
+            end
         else
             poolWarmer:Show()
         end
