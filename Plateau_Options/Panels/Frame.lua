@@ -558,7 +558,7 @@ profileButton:HookScript("OnLeave", function() GameTooltip:Hide() end)
 local Confirming = ns.Widgets.Confirm
 
 local pages = {}
-local resetSection
+local resetSection, resetAll
 local railButtons = {}
 local current
 
@@ -795,6 +795,7 @@ function Select(section)
     end
     if resetSection then
         resetSection:SetShown(not section.noReset)
+        resetAll:SetShown(section.resetAll == true)
     end
     if ns.UpdatePickButtons then
         ns.UpdatePickButtons(section)
@@ -905,6 +906,16 @@ Confirming(resetSection, "Reset this section", function()
         Plateau.DB:Reset(current.group)
     end
     RefreshPage(pages[current.key])
+end)
+
+resetAll = Widgets.Button(sectionBar, "Reset everything", 150)
+resetAll:SetPoint("RIGHT", -PAD, 0)
+resetAll:Hide()
+Confirming(resetAll, "Reset everything", function()
+    Plateau.DB:Reset(nil)
+    if ns.RefreshAll then
+        ns.RefreshAll()
+    end
 end)
 
 local pickButtons = {}

@@ -53,7 +53,7 @@ ns.helpTopics = {
         category = "Getting started",
         title = "Resetting settings",
         keywords = "reset default restore revert clear start over everything",
-        text = "There are three levels of reset. Right-click a setting to reset just that one to its default. Reset this section, at the bottom of the window, resets the whole page you are on. Reset everything, under Start over on the Profiles page, resets every setting in the active profile. Each of the last two asks you to click again to confirm.\n\nIf you only want to undo a recent mistake, Undo is gentler than a reset.",
+        text = "There are three levels of reset. Right-click a setting to reset just that one to its default. Reset this section, at the bottom of the window, resets the whole page you are on. Reset everything, in the same spot on the Profiles page, resets every setting in the active profile. Each of the last two asks you to click again to confirm.\n\nIf you only want to undo a recent mistake, Undo is gentler than a reset.",
     },
     {
         category = "Getting started",
@@ -287,17 +287,6 @@ ns.helpTopics = {
 
 local Style = ns.Style
 local C = Style.colors
-
-function ns.Widgets.ResetEverything(parent)
-    local button = ns.Widgets.Button(parent, "Reset everything", 150)
-    ns.Widgets.Confirm(button, "Reset everything", function()
-        Plateau.DB:Reset(nil)
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        end
-    end)
-    return button
-end
 
 local controls = {
     { type = "Note", label = "Every feature of Plateau is explained below. On this page, search finds help topics only.", height = 24 },

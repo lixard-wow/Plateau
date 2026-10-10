@@ -230,8 +230,8 @@ for _, spec in ipairs(profiles.controls) do
 end
 check(order[1] == "ProfileStatus" and order[2] == "Header:Manage profiles" and order[3] == "ProfileActions", "Profiles opens with status, then management actions")
 check(order[4] == "Header:Switch automatically" and order[5] == "AutoProfiles" and order[6] == "Header:Share" and order[7] == "ShareProfile", "automatic switching comes after management and sharing comes last")
-check(order[8] == "Header:Start over" and order[9] == "ResetEverything", "Reset everything is on Profiles under Start over")
-check(order[10] == "Header:What a profile includes", "the scope explanation sits at the end")
+check(profiles.resetAll == true and profiles.noReset == true, "Profiles shows Reset everything where other pages show Reset this section")
+check(order[8] == "Header:What a profile includes", "the scope explanation sits at the end")
 local scopeIndex = Logic.FindControl(profiles, "What a profile includes", true)
 check(profiles.controls[scopeIndex].collapsible == true, "the scope explanation is collapsible")
 check(profiles.title == "Profiles", "the page title is unchanged")
