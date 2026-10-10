@@ -1198,8 +1198,12 @@ function Driver:Restyle(reason)
     if next(stale) then
         poolWarmer:Show()
     end
+    local dropped
     for unit, plate in pairs(platesByUnit) do
-        if plate.active then
+        if plate.active and not Claimable(unit) then
+            dropped = dropped or {}
+            dropped[#dropped + 1] = unit
+        elseif plate.active then
             if plate.clickArea.changed or hitTestChanged then
                 ApplyHitTest(plate)
             end
@@ -1212,6 +1216,12 @@ function Driver:Restyle(reason)
             end
         elseif Claimable(unit) then
             Claim(plate, unit)
+        end
+    end
+    if dropped then
+        for i = 1, #dropped do
+            OnUnitRemoved(dropped[i])
+            OnUnitAdded(dropped[i])
         end
     end
 

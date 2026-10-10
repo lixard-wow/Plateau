@@ -1923,15 +1923,13 @@ ns.sections = {
             type = "Toggle",
             label = "Show in the open world",
             keywords = "pet pets minion minions totem friendly",
-            tooltip = "Shows nameplates for friendly players' pets, totems and minions outside dungeons and raids. Needs a UI reload.",
+            tooltip = "Shows nameplates for friendly players' pets, totems and minions outside dungeons and raids.",
             get = function() return ns.Get("look.friendly.minions") == true end,
             set = function(value)
                 Plateau.DB:Set("look.friendly.minions", value == true)
-                ns.PromptReload()
             end,
             reset = function()
                 Plateau.DB:Reset("look.friendly.minions")
-                ns.PromptReload()
             end,
         }, FriendlyOn, FriendlyOffReason), "friendly"),
         { type = "Toggle", label = "Show in dungeons and raids", visibleIf = function() return Plateau.InstancePets ~= nil end,
