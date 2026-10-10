@@ -68,7 +68,7 @@ local function Pulse(border, on)
     end
 end
 
-local BOB = 6
+local BOB = 4
 local TOWARD = { TOP = { 0, -BOB }, BOTTOM = { 0, BOB }, LEFT = { BOB, 0 }, RIGHT = { -BOB, 0 } }
 
 local function Bob(texture, side)
@@ -113,6 +113,10 @@ local function EnsureArrows(set, plate)
     if not set.arrowLeft then
         set.arrowLeft = plate.overlay:CreateTexture(nil, "OVERLAY")
         set.arrowRight = plate.overlay:CreateTexture(nil, "OVERLAY")
+        for _, arrow in ipairs({ set.arrowLeft, set.arrowRight }) do
+            arrow:SetSnapToPixelGrid(false)
+            arrow:SetTexelSnappingBias(0)
+        end
     end
 end
 
