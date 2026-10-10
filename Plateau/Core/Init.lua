@@ -46,9 +46,9 @@ local function ReportStartup()
     if ns.disabled then
         print("|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled)
     elseif ns.recovered then
-        print("|cffffd200Plateau:|r " .. ns.L["your saved settings were damaged and couldn't be read, so Plateau started with its default settings. The old data is kept in the saved file under 'recovered'. Error: %s"]:format(ns.recovered))
+        print("|cffffd200Plateau:|r " .. ns.L["Saved settings were damaged and have been reset to default. The old data is kept under 'recovered'. Error: %s"]:format(ns.recovered))
     elseif failures and #failures > 0 then
-        print("|cffffd200Plateau:|r " .. ns.L["some saved settings couldn't be updated to this version: %s"]:format(table.concat(failures, "; ")))
+        print("|cffffd200Plateau:|r " .. ns.L["Some saved settings couldn't be updated: %s"]:format(table.concat(failures, "; ")))
     end
 end
 

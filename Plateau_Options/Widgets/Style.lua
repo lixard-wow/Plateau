@@ -357,8 +357,8 @@ end
 local LIMITED_BADGE = " |TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:12:12:0:0|t"
 
 Style.limited = {
-    names = "Doesn't work in dungeons, raids and arenas on retail: the game hides enemy names from addons there, so Plateau can't shorten them and they show in full.",
-    friendly = "Only in the open world. In dungeons, raids and arenas the game locks friendly nameplates, so Blizzard draws them there and these settings don't apply.",
+    names = "Not available in dungeons, raids and arenas. The game hides enemy names there, so they show in full.",
+    friendly = "Open world only. The game draws friendly nameplates in dungeons, raids and arenas.",
 }
 
 function Style.Limited(spec, reason)

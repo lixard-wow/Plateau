@@ -130,7 +130,7 @@ cpuButton:SetScript("OnClick", function()
         ns.OpenLink({ section = "help", key = "diagnostics" })
     end
 end)
-Style.Tooltip(cpuButton, { label = "Plateau CPU", tooltip = "Click to open Diagnostics on the Help page for the full performance numbers." })
+Style.Tooltip(cpuButton, { label = "Plateau CPU", tooltip = "Click to open Diagnostics." })
 
 local function UpdateCpu()
     local ms, percent = Plateau.CpuReadout()
@@ -257,9 +257,9 @@ local function ShowProfileTip(owner)
         GameTooltip:AddLine(T("Active because of: %s"):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
     end
     if status.pending then
-        GameTooltip:AddLine(T("Pending switch: %s after combat ends."):format(status.pending), C.warn[1], C.warn[2], C.warn[3], true)
+        GameTooltip:AddLine(T("Switches to %s after combat."):format(status.pending), C.warn[1], C.warn[2], C.warn[3], true)
     end
-    GameTooltip:AddLine(T("Click the profile to switch to another one. Click the icon or name, or Restore, to bring the settings back. Drag anywhere else to move this bar."), 0.7, 0.7, 0.7, true)
+    GameTooltip:AddLine(T("Click the profile to switch. Click the icon, name or Restore to reopen the settings. Drag to move."), 0.7, 0.7, 0.7, true)
     GameTooltip:Show()
 end
 
@@ -305,7 +305,7 @@ function ns.UpdateMiniBar()
     if status.pending then
         miniProfile:SetFormattedText("%s (pending)", status.active)
     elseif status.overridden then
-        miniProfile:SetFormattedText("%s (auto)", status.active)
+        miniProfile:SetFormattedText("%s (override)", status.active)
     else
         miniProfile:SetText(status.active)
     end
@@ -381,7 +381,7 @@ banner.bar:SetColorTexture(C.muted[1], C.muted[2], C.muted[3], 1)
 banner.text = Style.Text(banner, 11, C.text)
 banner.text:SetPoint("LEFT", 12, 0)
 banner.text:SetPoint("RIGHT", -8, 0)
-banner.text:SetText("Help. The search box above searches only these topics.")
+banner.text:SetText("On this page, search finds help topics only.")
 scroll:SetPoint("BOTTOMRIGHT", -(PAD + 8), FOOTER)
 scroll:EnableMouseWheel(true)
 
@@ -543,13 +543,13 @@ profileButton:HookScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
     local accent = Style.StateColor()
     GameTooltip:SetText(T("Active profile: %s"):format(status.active), accent[1], accent[2], accent[3])
-    GameTooltip:AddLine(T("Every page edits this profile. Click to switch it; the profile you pick also becomes your default profile."), 1, 1, 1, true)
+    GameTooltip:AddLine(T("Every page edits this profile. Click to switch; your choice also becomes your default."), 1, 1, 1, true)
     GameTooltip:AddLine(T("Default profile: %s"):format(status.default), 1, 1, 1, true)
     if status.overridden then
-        GameTooltip:AddLine(T("Active because of: %s. Picking another profile here can be replaced by the automatic rules when you change zone or specialization."):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
+        GameTooltip:AddLine(T("Active because of: %s. Automatic switching can replace your choice when you change zone or specialization."):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
     end
     if status.pending then
-        GameTooltip:AddLine(T("Pending after combat: %s"):format(status.pending), C.warn[1], C.warn[2], C.warn[3], true)
+        GameTooltip:AddLine(T("Switches to %s after combat."):format(status.pending), C.warn[1], C.warn[2], C.warn[3], true)
     end
     GameTooltip:Show()
 end)

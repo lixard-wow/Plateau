@@ -5,7 +5,7 @@ ns.helpTopics = {
         category = "Getting started",
         title = "How Plateau works",
         keywords = "overview basics start intro what is minimize profile",
-        text = "Plateau replaces the way enemy nameplates look: the health bar, name, cast bar, auras and icons. Everything is drawn by Plateau, but the game still decides what is shown, so it keeps working in dungeons and raids.\n\nThis window has three parts. The preview at the top shows a sample nameplate that updates as you change things. The menu on the left lists a page for each part of the nameplate, grouped by what they do. The page on the right holds that part's settings.\n\nEvery change saves right away. There is no Apply or Save button. Settings live in a profile: each character has a default profile, and the active profile is the one you are editing. Minimize shrinks this window to a small bar that shows the active profile.",
+        text = "Plateau replaces the way enemy nameplates look: the health bar, name, cast bar, auras and icons. Everything is drawn by Plateau, but the game still decides what is shown, so it keeps working in dungeons and raids.\n\nThis window has three parts. The preview at the top shows a sample nameplate that updates as you change things. The menu on the left lists a page for each part of the nameplate, grouped by what they do. The page on the right holds that part's settings.\n\nEvery change saves right away. There is no Apply or Save button. Settings live in a profile: each character has a default profile, and the active profile is the one you are editing.",
     },
     {
         category = "Getting started",
@@ -77,13 +77,31 @@ ns.helpTopics = {
         category = "Profiles",
         title = "Sharing a profile",
         keywords = "share export import string copy paste friend backup",
-        text = "To share the active profile, open Profiles, click Export active profile, click the string that appears, press Ctrl+A and then Ctrl+C to copy it. It holds the full look and the aura spell lists, so it looks the same on another computer. It does not hold your default profile, automatic rules, Game settings or Plateau settings.\n\nTo import one, paste the text into the import box, optionally type a profile name, and click Import profile. The string is checked first and saved as a new profile; an empty name becomes Imported. Turn on Activate after import to switch to it at once (or when combat ends). Imports never replace an existing profile, and a refused string changes nothing.",
+        text = "To share the active profile, open Profiles, click Export active profile, click the string that appears, press Ctrl+A and then Ctrl+C to copy it. It holds the full look, the aura spell lists and boss phase lines, so it looks the same on another computer. It does not hold your default profile, automatic rules, Game settings or Plateau settings.\n\nTo import one, paste the text into the import box, optionally type a profile name, and click Import profile. The string is checked first and saved as a new profile; an empty name becomes Imported. Turn on Activate after import to switch to it at once (or when combat ends). Imports never replace an existing profile, and a refused string changes nothing.",
     },
     {
         category = "Pages",
-        title = "Behavior pages",
-        keywords = "behavior size scale fading fade opacity occluded hidden walls line of sight range layering stacking stack overlap order click area clickable padding offset distance",
-        text = "The Behavior group in the left menu has four pages.\n\nSize holds every scale: Scale by enemy type gives bosses, lieutenants, elites, casters, melee enemies and minor enemies their own size, where 1.00 is normal. Target, Focus and Casting scale grow those plates. A plate uses the biggest scale that applies; target, focus and casting scales never stack. Blizzard's nameplate size and Size by distance are Blizzard's own settings: Use Blizzard nameplate sizing for enemies lets Blizzard's Nameplate Size slider resize enemy plates too, while friendly plates always follow it.\n\nFading holds every way a plate can fade: Range fading for enemies your interrupt cannot reach, Plates you are not targeting while you have a target, Behind walls, By distance, and whether disappearing plates fade out. Under Behind walls, switches below the opacity pick where it applies: the open world, dungeons, raids, delves and scenarios, and battlegrounds and arenas each have their own switch.\n\nLayering and stacking decides which plate is in front where they overlap, and how the game spreads them apart. Casting enemies in front draws an enemy that is casting over its neighbors, with your target still on top; otherwise the game's own order applies, nearer over farther. Stacking holds the spacing presets, the stacking switches and Show stacking boxes, which draws the area the game keeps apart. Stacking bounds and spacing decide how much of each plate counts, and Movement holds Instant movement and how fast plates slide.\n\nClickable area has Show clickable areas, which draws the click box on the preview and on real nameplates until you close the window, plus padding and offset sliders and Include cast bar in clickable area.\n\nThese settings affect nameplates in the world; the preview always shows normal size.",
+        title = "Size page",
+        keywords = "size scale enemy type target focus casting blizzard nameplate size distance bigger smaller",
+        text = "Size holds every scale. Scale by enemy type gives bosses, lieutenants, elites, casters, melee enemies and minor enemies their own size, where 1.00 is normal. Target, Focus and Casting scale grow those plates. A plate uses the biggest scale that applies; they never stack.\n\nBlizzard's nameplate size and Size by distance are Blizzard's own settings. Use Blizzard nameplate sizing for enemies lets Blizzard's Nameplate Size resize enemy plates too; friendly plates always follow it. The preview always shows normal size.",
+    },
+    {
+        category = "Pages",
+        title = "Fading page",
+        keywords = "fading fade opacity occluded hidden walls line of sight range distance transparent",
+        text = "Fading holds every way a plate can fade: Range fading for enemies your interrupt can't reach, Plates you are not targeting while you have a target, Behind walls, By distance, and whether disappearing plates fade out.\n\nUnder Behind walls, separate switches pick where it applies: the open world, dungeons, raids, delves and scenarios, and battlegrounds and arenas.",
+    },
+    {
+        category = "Pages",
+        title = "Layering and stacking page",
+        keywords = "layering stacking stack overlap order spacing movement slide front",
+        text = "Layering decides which plate is in front where plates overlap. Casting enemies in front draws a casting enemy over its neighbors, with your target still on top; otherwise nearer plates draw over farther ones.\n\nStacking holds the spacing presets, the stacking switches and Show stacking boxes, which draws the area the game keeps apart. Stacking bounds and spacing decide how much of each plate counts. Movement holds Instant movement and how fast plates slide.",
+    },
+    {
+        category = "Pages",
+        title = "Clickable area page",
+        keywords = "click area clickable padding offset hitbox",
+        text = "Show clickable areas draws the click box on the preview and on real nameplates until you close the window. Padding and offset sliders resize and move it, and Include cast bar in clickable area adds the cast bar to it.",
     },
     {
         category = "Pages",
@@ -95,13 +113,13 @@ ns.helpTopics = {
         category = "Pages",
         title = "Health bar page",
         keywords = "health bar width height texture overlay pattern checkers lines border color absorb absorbs execute threshold marker",
-        text = "Size sets the width and height of the bar. Bar picks the texture, an optional Plateau overlay pattern (checkers or diagonal lines leaning either way) laid on top of it, the background color, and the border color, style and thickness. Picking a border color while the style is No border turns on a thin border. Draw border inside puts it on the bar's inner edge instead of around it. Your target and focus can have their own texture and overlay on their pages.\n\nAbsorbs shows shields on the bar. Absorb position picks whether the shield is added after the health or drawn over the bar from the right edge. Show absorb overflow glow shows a glow at the end of the bar when a shield is bigger than the room left, and Absorb texture changes how the shield is drawn.\n\nThe execute indicator colors any enemy's bar while its health is below the threshold you choose, for every class and spec. Health threshold markers draws up to two marker lines on the bar, for example at 20% and 35%, with their own thickness; they don't change where the execute color starts.",
+        text = "Size sets the width and height of the bar. Bar picks the texture, an optional Plateau overlay pattern (checkers or diagonal lines leaning either way) laid on top of it, the background color, and the border color, style and thickness. Picking a border color while the style is No border turns on a thin border. Draw border inside puts it on the bar's inner edge instead of around it. Your target and focus can have their own texture and overlay on their pages.\n\nAbsorbs shows shields on the bar. Absorb position picks whether the shield is added after the health or drawn over the bar from the right edge. Show absorb overflow glow shows a glow at the end of the bar when a shield is bigger than the room left, and Absorb texture changes how the shield is drawn.\n\nThe execute indicator colors any enemy's bar while its health is below the threshold you choose, for every class and spec. Health threshold markers draws up to two marker lines on the bar, for example at 20% and 35%, with their own thickness; they don't change where the execute color starts.\n\nBoss phase lines draws lines on boss health bars where the fight changes phase. Plateau uses the current boss's percentages, and you can edit them per boss or set default lines for other bosses.",
     },
     {
         category = "Pages",
         title = "Health bar colors",
         keywords = "colors color threat class type boss caster elite melee reaction interrupt hostile neutral friendly tapped quest colorblind preset",
-        text = "The colors are on the Health bar page, below Execute. They are checked in priority order, not simply top to bottom: target or focus overrides beat everything, then Tapped, then Threat (if enabled), then Quest enemies (if enabled) - which overrides enemy type and reaction colors even though its swatch is on the Quest icon page - then enemy type or class color, then Reaction as the fallback.\n\nTapped enemies sets the color of enemies tapped by another player.\n\nThreat colors an enemy when the wrong player has aggro. If you are a tank, an enemy held by another tank in your group counts as fine, so a tank swap between other tanks does not turn it red. Threat transition and Secure threat color add more cases. Threat color display picks the health bar, its border, or both, so you can keep bar colors by enemy type and let only the outline warn you. The game can hide threat in some fights, and the plate keeps its normal color then.\n\nEnemy players can use class colors. Enemy types colors bosses, lieutenants (elites with more health than usual for their level, or two or more levels above you), elites, casters (enemies that use mana, the ones that can be interrupted), melee and minor enemies, each with its own on or off switch and color. Only in dungeons, raids, and delves keeps type colors out of the open world. Elites means enemies above your level. Minor enemies is also the fallback for any normal enemy that doesn't fit the other rows.\n\nThe cast bar colors are on the Cast bar page.\n\nQuest enemies can color enemies that count toward a quest you have, in a color you pick. It overrides their type or reaction color, but threat, tapped, and your target and focus colors still win. Reaction colors lets you pick your own hostile, neutral and friendly colors.\n\nThe Colorblind presets buttons at the top of the page set a full palette; click a preset twice to apply it.",
+        text = "The colors are on the Health bar page. They are checked in priority order: target or focus colors, then Tapped, then Threat, then Quest enemies, then enemy type or class color, then Reaction. Quest enemy color is set on the Quest icon page.\n\nThreat colors an enemy when the wrong player has aggro. For a tank, an enemy held by another tank in your group counts as safe. Threat color display picks the health bar, its border, or both. The game can hide threat in some fights; plates keep their normal color then.\n\nEnemy types colors bosses, lieutenants, elites, casters, melee and minor enemies, each with its own switch and color. Minor enemies is also the fallback for any normal enemy that doesn't fit the other rows. Enemy players can use class colors instead.\n\nThe Colorblind presets set a full palette; click a preset twice to apply it. Cast bar colors are on the Cast bar page.",
     },
     {
         category = "Pages",
@@ -143,31 +161,31 @@ ns.helpTopics = {
         category = "Pages",
         title = "All auras page",
         keywords = "aura text font outline shadow tooltips all auras icons",
-        text = "Settings shared by every aura group. Text on every aura icon sets the font, outline and drop shadow for the time and stack text on all aura icons. Tooltips shows Blizzard's aura tooltip when you hover an icon, with a separate switch for combat. Icons never catch clicks, so clicking still targets the enemy.",
+        text = "Settings shared by every aura group. Text on every aura icon sets the font, outline and drop shadow for the time and stack text on all aura icons. Tooltips shows Blizzard's aura tooltip when you hover an icon, with a separate switch for combat. Icons never catch clicks, so clicking still targets the enemy.\n\nEvery aura page is laid out the same way. Show turns the group on, with any options that belong only to it. Which auras sets the Sort order and a Maximum aura duration (auras that last longer are hidden, permanent ones included, and 0 turns it off), plus two spell lists per specialization: Hidden spells hides the ones you list, and Allowed spells shows nothing else. Type spell names or IDs separated by commas and press Enter. A name matches every spell with that name.\n\nLayout places the group: Position, Alignment, Growth direction and offsets, then Icon size, Icon shape, Maximum icons, Icons per row and Icon spacing.\n\nIcon covers each icon: remaining time and stack count with their sizes and positions, the cooldown swipe, the icon border, and dispel-type border colors.",
     },
     {
         category = "Pages",
         title = "Your debuffs page",
         keywords = "my debuffs your debuffs dots auras own player icons",
-        text = "Your damage-over-time effects and other debuffs on enemies. Include other players' debuffs, under Show, adds debuffs other players put on the enemy after your own. Icon also has a tint for the window when refreshing an effect carries leftover time over.\n\nEvery aura page is laid out the same way. Show turns the group on, with any options that belong only to it. Which auras sets the Sort order and a Maximum aura duration (auras that last longer are hidden, permanent ones included, and 0 turns it off), plus two spell lists per specialization: Hidden spells hides the ones you list, and Allowed spells shows nothing else. Type spell names or IDs separated by commas and press Enter. A name matches every spell with that name.\n\nLayout places the group: Position, Alignment, Growth direction and offsets, then Icon size, Icon shape, Maximum icons, Icons per row and Icon spacing.\n\nIcon covers each icon: remaining time and stack count with their sizes and positions, the cooldown swipe, the icon border, and dispel-type border colors. The font, outline, shadow and tooltips for every aura group are on the All auras page.",
+        text = "Your damage-over-time effects and other debuffs on enemies. Include other players' debuffs, under Show, adds debuffs other players put on the enemy after your own. Icon also has a tint for the window when refreshing an effect carries leftover time over.",
     },
     {
         category = "Pages",
         title = "Crowd control page",
         keywords = "crowd control cc stun root incapacitate auras",
-        text = "Crowd control effects on enemies, including stuns, incapacitate effects and roots, regardless of who applied them. In dungeons and raids, Blizzard decides which auras land in the group. Plateau sets how they look and where they go.\n\nEvery aura page is laid out the same way. Show turns the group on, with any options that belong only to it. Which auras sets the Sort order and a Maximum aura duration (auras that last longer are hidden, permanent ones included, and 0 turns it off), plus two spell lists per specialization: Hidden spells hides the ones you list, and Allowed spells shows nothing else. Type spell names or IDs separated by commas and press Enter. A name matches every spell with that name.\n\nLayout places the group: Position, Alignment, Growth direction and offsets, then Icon size, Icon shape, Maximum icons, Icons per row and Icon spacing.\n\nIcon covers each icon: remaining time and stack count with their sizes and positions, the cooldown swipe, the icon border, and dispel-type border colors. The font, outline, shadow and tooltips for every aura group are on the All auras page.",
+        text = "Crowd control effects on enemies, including stuns, incapacitate effects and roots, regardless of who applied them. In dungeons and raids, Blizzard decides which auras land in the group. Plateau sets how they look and where they go.",
     },
     {
         category = "Pages",
         title = "Enemy buffs page",
         keywords = "enemy buffs purge spellsteal soothe enrage dispel",
-        text = "Buffs on enemies. By default only removable buffs are shown: Magic buffs that can be purged or stolen, and enrages, each with its own switch under Show. Show all buffs lists every other buff too. Hide boss auras hides auras the game flags as boss auras, and Hide permanent buffs hides buffs with no end time. A buff the game flags as important shows under Important auras instead of here. Spell lists only work on enemy buffs in the open world, because the game hides which buff it is in dungeons and raids.\n\nEvery aura page is laid out the same way. Show turns the group on, with any options that belong only to it. Which auras sets the Sort order and a Maximum aura duration (auras that last longer are hidden, permanent ones included, and 0 turns it off), plus two spell lists per specialization: Hidden spells hides the ones you list, and Allowed spells shows nothing else. Type spell names or IDs separated by commas and press Enter. A name matches every spell with that name.\n\nLayout places the group: Position, Alignment, Growth direction and offsets, then Icon size, Icon shape, Maximum icons, Icons per row and Icon spacing.\n\nIcon covers each icon: remaining time and stack count with their sizes and positions, the cooldown swipe, the icon border, and dispel-type border colors. The font, outline, shadow and tooltips for every aura group are on the All auras page.",
+        text = "Buffs on enemies. By default only removable buffs are shown: Magic buffs that can be purged or stolen, and enrages, each with its own switch under Show. Show all buffs lists every other buff too. Hide boss auras hides auras the game flags as boss auras, and Hide permanent buffs hides buffs with no end time. A buff the game flags as important shows under Important auras instead of here. Spell lists only work on enemy buffs in the open world, because the game hides which buff it is in dungeons and raids.",
     },
     {
         category = "Pages",
         title = "Important auras page",
         keywords = "important auras flagged",
-        text = "Buffs the game flags as important on an enemy, except ones you cast. This group is off by default. It is a separate group from Enemy buffs: a buff shows in one or the other. Buff warnings can also mark the same buffs on the nameplate.\n\nEvery aura page is laid out the same way. Show turns the group on, with any options that belong only to it. Which auras sets the Sort order and a Maximum aura duration (auras that last longer are hidden, permanent ones included, and 0 turns it off), plus two spell lists per specialization: Hidden spells hides the ones you list, and Allowed spells shows nothing else. Type spell names or IDs separated by commas and press Enter. A name matches every spell with that name.\n\nLayout places the group: Position, Alignment, Growth direction and offsets, then Icon size, Icon shape, Maximum icons, Icons per row and Icon spacing.\n\nIcon covers each icon: remaining time and stack count with their sizes and positions, the cooldown swipe, the icon border, and dispel-type border colors. The font, outline, shadow and tooltips for every aura group are on the All auras page.",
+        text = "Buffs the game flags as important on an enemy, except ones you cast. This group is off by default. It is a separate group from Enemy buffs: a buff shows in one or the other. Buff warnings can also mark the same buffs on the nameplate.",
     },
     {
         category = "Pages",
@@ -218,12 +236,6 @@ ns.helpTopics = {
         text = "These are Blizzard's own nameplate settings that don't belong to a Plateau page. Plateau saves the previous value of any you change here, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset the page, or type /plt cvars restore.\n\nOther nameplate addons lists any that could conflict. Each can be turned off from there, or you can turn off Plateau instead if you prefer the other one. Names over heads sets which names float over characters. Which nameplates show decides who gets a plate. Keeping nameplates on screen starts collapsed; click its heading to open it, or search for a setting inside it and it opens for you.\n\nBlizzard settings that belong with a Plateau page live on that page instead: size and size by distance on Size, opacity behind walls and by distance on Fading, stacking and movement on Layering and stacking, and the options for the nameplates the game draws itself on Friendly.\n\nPlateau's own settings (window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window, so restoring Blizzard settings does not touch them. The performance numbers are under Diagnostics on the Help page. These settings are shared by every profile.",
     },
     {
-        category = "Pages",
-        title = "Profiles page",
-        keywords = "profiles page manage",
-        text = "Where you see the default and active profile, create, duplicate, rename, copy settings between, delete and restore profiles, set which profile switches in automatically, and export or import a profile string. See the Profiles topics under Profiles for how each part works.",
-    },
-    {
         category = "How do I",
         title = "Make elites and casters stand out",
         keywords = "colors elites casters kick priority type color bar",
@@ -239,19 +251,19 @@ ns.helpTopics = {
         category = "How do I",
         title = "Hide a spell from my debuffs",
         keywords = "hide spell never show filter thrash moonfire remove aura",
-        text = "Open Your debuffs, go to Which spells, and type the spell's name or ID in Hidden spells. Press Enter to save. Use commas to list several. The list is saved per specialization, so switch spec to edit another one.\n\nA name matches every spell with that name, so a debuff that has a different ID from your spell is still hidden. The first time you use a new name, Plateau looks it up in the background for a few seconds.",
+        text = "Open Your debuffs, go to Which auras, and type the spell's name or ID in Hidden spells. Press Enter to save. Use commas to list several. The list is saved per specialization, so switch spec to edit another one.\n\nA name matches every spell with that name, so a debuff that has a different ID from your spell is still hidden. The first time you use a new name, Plateau looks it up in the background for a few seconds.",
     },
     {
         category = "How do I",
         title = "Move my auras or icons",
         keywords = "move aura placement position icons above below left right center",
-        text = "Drag the group on the preview and drop it on a spot, or open its page and use Placement. Position sets above, below, left or right. Alignment sets left, center or right along that side. Growth direction sets which way icons are added. Horizontal and vertical offsets move it by pixels.\n\nHold Shift while dragging, or turn Snap off, to place it freely.",
+        text = "Drag the group on the preview and drop it on a spot, or set it on its page. On aura pages these settings are under Layout. Position sets above, below, left or right. Alignment sets left, center or right along that side. Growth direction sets which way icons are added. Horizontal and vertical offsets move it by pixels.\n\nHold Shift while dragging, or turn Snap off, to place it freely.",
     },
     {
         category = "How do I",
         title = "Stop nameplates overlapping",
         keywords = "overlap stacking stack spacing slide crowded",
-        text = "Open Layering and stacking. Under Stacking, click a preset, then click it again to apply it: Tight, Balanced or Spread out. They change only the spacing between plates. Turn on Show stacking boxes to see the area the game keeps apart. If plates overlap because your name or cast bar takes extra room, set Stacking bounds under Stacking bounds and spacing to the option that counts it. Turn on Instant movement under Movement if you also want plates to jump straight to their spot.",
+        text = "Open Layering and stacking. Under Stacking, click a preset, then click it again to apply it: Tight, Balanced or Spread out. They change only the spacing between plates. Turn on Show stacking boxes to see the area the game keeps apart. If plates overlap because your name or cast bar takes extra room, change Stacking bounds to include it. Turn on Instant movement under Movement if you also want plates to jump straight to their spot.",
     },
     {
         category = "How do I",
@@ -262,7 +274,7 @@ ns.helpTopics = {
     {
         category = "Commands",
         title = "Slash commands",
-        keywords = "slash commands sl debug setup reset cvars",
+        keywords = "slash commands plt debug setup reset cvars",
         text = "/plt opens the settings window.\n/plt setup opens the look picker from the first-time setup.\n/plt minimap shows or hides the minimap button.\n/plt debug shows the version, restrictions, CPU and memory, and how Plateau reads your target. Paste it when you report a bug.\n/plt reset puts every setting in the current profile back to its default.\n/plt cvars restore undoes every game nameplate setting Plateau changed.",
     },
 }
@@ -282,7 +294,7 @@ function ns.Widgets.ResetEverything(parent)
 end
 
 local controls = {
-    { type = "Note", label = "Every feature of Plateau is explained below. When you are on this page, the search box at the top searches only this help, so type a word like cast, drag or profile to jump to a topic.", height = 44 },
+    { type = "Note", label = "Every feature of Plateau is explained below. On this page, search finds help topics only.", height = 24 },
     { type = "Actions", buttons = {
         { label = "Replay the tour", width = 150, click = function() if ns.StartTour then ns.StartTour() end end },
         { label = "Run first-time setup", width = 170, click = function() if PlateauSetup then PlateauSetup:Open() end end },
@@ -301,7 +313,7 @@ local controls = {
     { type = "Note", height = 90, label = function()
         return table.concat(Plateau.PerformanceLines(), "\n")
     end },
-    { type = "Note", label = "CPU figures are Plateau's own execution time from the game's addon profiler, not total game frame time. Reset slow-frame counters only restarts Slow frames since reset; Slow frames this session and the CPU figures are not cleared.", height = 44 },
+    { type = "Note", label = "CPU is Plateau's own time, not total frame time. Reset slow-frame counters clears only Slow frames since reset.", height = 30 },
     { type = "Actions", buttons = {
         { label = "Refresh statistics", width = 170, click = function() ns.RefreshAll() end },
         { label = "Reset slow-frame counters", width = 200, click = function()

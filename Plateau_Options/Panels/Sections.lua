@@ -2682,13 +2682,13 @@ ns.sections = {
                       ns.PromptReload()
                   end
               end,
-              tooltip = "The look of Plateau's settings window and pop-ups. Workbench is flat charcoal with a green accent; Artisan Ledger is walnut and brass with a serif title face; Lixard Classic is near-black, square and gold. Your nameplates don't change. Takes effect after a reload." },
-            { type = "Dropdown", label = "Brand colour", keywords = "color colour brand icon minimap class rainbow cycle random logo",
-              options = { { value = "class", label = "Class colour" }, { value = "cycle", label = "Colour cycle" }, { value = "random", label = "Random each login" } },
+              tooltip = "The look of Plateau's settings window and pop-ups. Nameplates are not affected. Requires a reload." },
+            { type = "Dropdown", label = "Brand color", keywords = "color colour brand icon minimap class rainbow cycle random logo",
+              options = { { value = "class", label = "Class color" }, { value = "cycle", label = "Color cycle" }, { value = "random", label = "Random each login" } },
               get = function() return Plateau.Brand:Mode() end,
               set = function(value) Plateau.Brand:SetMode(value) end,
               reset = function() Plateau.Brand:SetMode("class") end,
-              tooltip = "The colour of Plateau's P icon and name on the minimap button, the game menu button and Plateau's chat messages. This window's title uses the window theme's own colour. Class colour follows the character you're playing; Colour cycle slowly shifts through the rainbow; Random each login picks a new colour every time you log in. The icon in the game's addon list can't change colour." },
+              tooltip = "The color of Plateau's icon and name on the minimap button, game menu button and chat messages." },
             { type = "Slider", label = "Settings window scale", min = Style.SCALE_MIN, max = Style.SCALE_MAX, step = 0.05, applyOnRelease = true, keywords = "size zoom bigger smaller options window ui scale",
               get = function() return Style.Scale() end,
               set = function(value)
@@ -2699,7 +2699,7 @@ ns.sections = {
                   Plateau.DB.saved.global.optionsScale = nil
                   ns.ApplyScale()
               end,
-              tooltip = "How big this settings window is, on top of your game's UI scale. 1.00 is normal size. Your nameplates don't change." },
+              tooltip = "The size of this settings window, on top of your UI scale. Nameplates are not affected." },
             { type = "Header", label = "Fonts" },
             { type = "Dropdown", label = "Text font", keywords = "font typeface options window",
               options = function() return ns.OptionsFonts() end,
@@ -2713,7 +2713,7 @@ ns.sections = {
                   Plateau.DB.saved.global.optionsFont = nil
                   ns.PromptReload()
               end,
-              tooltip = "The font for labels, buttons and descriptions in this settings window. Theme font uses the one that comes with the window theme. Fonts from other addons appear here too. Your nameplates don't change; set their fonts on the Name and Health text pages. Takes effect after a reload." },
+              tooltip = "The font for text in this settings window. Nameplates are not affected. Requires a reload." },
             { type = "Dropdown", label = "Heading font", keywords = "font typeface title header options window",
               options = function() return ns.OptionsFonts() end,
               get = function() return Plateau.DB.saved.global.optionsHeadingFont or "" end,
@@ -2726,24 +2726,24 @@ ns.sections = {
                   Plateau.DB.saved.global.optionsHeadingFont = nil
                   ns.PromptReload()
               end,
-              tooltip = "The font for page titles, section headings and the Plateau name in this settings window. Theme font uses the one that comes with the window theme. Takes effect after a reload." },
+              tooltip = "The font for titles and headings in this settings window. Requires a reload." },
             { type = "Header", label = "Help and access" },
             { type = "Toggle", label = "Show settings tooltips",
               get = function() return Plateau.DB.saved.global.tooltipsEnabled ~= false end,
               set = function(value) Plateau.DB.saved.global.tooltipsEnabled = value == true end,
-              tooltip = "Off hides the hover tooltips that explain what each setting does, for when you already know your way around. Right-click-to-reset hints and instance-limit warnings still show." },
+              tooltip = "Shows a description when you hover a setting. Reset hints and instance warnings always show." },
             { type = "Toggle", label = "Show Plateau in game menu",
               get = function() return not Plateau.DB.saved.global.hideMenuButton end,
               set = function(value) Plateau.DB.saved.global.hideMenuButton = not value end,
-              tooltip = "The button above AddOns in the Escape menu. Turn it off if you would rather open the settings with /plt. Takes effect the next time the menu opens." },
+              tooltip = "Adds a Plateau button above AddOns in the Game Menu. Takes effect the next time the menu opens." },
             { type = "Toggle", label = "Show minimap button", visibleIf = function() return Plateau.Minimap ~= nil end,
               get = function() return Plateau.Minimap ~= nil and Plateau.Minimap:IsShown() end,
               set = function(value) Plateau.Minimap:SetShown(value == true) end,
-              tooltip = "A Plateau button on the edge of the minimap that opens the settings. Drag it to move it around the minimap. /plt minimap also shows or hides it." },
-            { type = "Toggle", label = "Show in the addon list by the minimap", visibleIf = function() return Plateau.Minimap ~= nil and Plateau.Minimap:HasCompartment() end,
+              tooltip = "A button on the minimap that opens the settings. Drag it to move it." },
+            { type = "Toggle", label = "Show in addon compartment", visibleIf = function() return Plateau.Minimap ~= nil and Plateau.Minimap:HasCompartment() end,
               get = function() return Plateau.Minimap ~= nil and Plateau.Minimap:InCompartment() end,
               set = function(value) Plateau.Minimap:SetCompartment(value == true) end,
-              tooltip = "Adds Plateau to the game's addon dropdown next to the minimap, so the settings are a click away even with the minimap button hidden." }
+              tooltip = "Lists Plateau in the addon compartment by the minimap." }
         ),
     },
 

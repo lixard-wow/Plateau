@@ -16,7 +16,7 @@ local HALF_WIDTH = (CONTENT_WIDTH - COLUMN_GAP) / 2
 
 local PAGE = {
     title = "Pick a look",
-    intro = "Each look is a ready-made profile. Using one switches to it and makes it your default. Everything else, from which plates show to colors and interrupts, is in /plt, where your changes are saved in that profile.",
+    intro = "Each look is a ready-made profile. Choosing one makes it your active and default profile. Fine-tune it any time with /plt.",
     controls = function()
         return {
             { type = "LookCards", presets = ns.AllLooks(), width = CONTENT_WIDTH, wide = true, mode = "profile" },
@@ -249,7 +249,7 @@ local conflictText = Style.Text(conflicts, 11, C.muted)
 conflictText:SetPoint("TOPLEFT", PAD, -48)
 conflictText:SetPoint("RIGHT", -PAD, 0)
 conflictText:SetWordWrap(true)
-conflictText:SetText("These also change nameplates. With two running, plates can flicker, double up or ignore settings. Tick the ones to turn off, or turn off Plateau instead if you would rather use one of them. Either reloads your UI.")
+conflictText:SetText("These addons also change nameplates and can conflict with Plateau. Select the ones to disable, or disable Plateau instead. Either reloads your UI.")
 
 local conflictRows = {}
 local conflictList = {}
@@ -284,7 +284,7 @@ local function FinishConflicts()
     end
 end
 
-local disableButton = Widgets.PrimaryButton(conflicts, "Turn off ticked and reload", 190, function()
+local disableButton = Widgets.PrimaryButton(conflicts, "Disable selected and reload", 190, function()
     local any = false
     for _, entry in ipairs(conflictList) do
         if entry.checked then
@@ -302,7 +302,7 @@ local disableButton = Widgets.PrimaryButton(conflicts, "Turn off ticked and relo
 end)
 disableButton:SetPoint("BOTTOMRIGHT", -PAD, 14)
 
-local keepButton = Widgets.Button(conflicts, "Keep them", 110, function()
+local keepButton = Widgets.Button(conflicts, "Keep all", 110, function()
     for _, entry in ipairs(conflictList) do
         Plateau.IgnoreConflict(entry.name)
     end
@@ -310,7 +310,7 @@ local keepButton = Widgets.Button(conflicts, "Keep them", 110, function()
 end)
 keepButton:SetPoint("RIGHT", disableButton, "LEFT", -8, 0)
 
-local selfButton = Widgets.Button(conflicts, "Turn off Plateau", 130, function()
+local selfButton = Widgets.Button(conflicts, "Disable Plateau", 130, function()
     Plateau.DisableSelf()
     ReloadUI()
 end)
@@ -339,7 +339,7 @@ function Widgets.Conflicts(parent)
     local row = CreateFrame("Frame", nil, parent)
     row:SetHeight(40)
     local lines = {}
-    row.selfButton = Widgets.Button(row, "Turn off Plateau instead and reload", 250, function()
+    row.selfButton = Widgets.Button(row, "Disable Plateau and reload", 250, function()
         Plateau.DisableSelf()
         ReloadUI()
     end)
@@ -370,7 +370,7 @@ function Widgets.Conflicts(parent)
                 entryRow:SetSize(440, 28)
                 entryRow.text = Style.Text(entryRow, 12, C.text)
                 entryRow.text:SetPoint("LEFT")
-                entryRow.button = Widgets.Button(entryRow, "Turn off and reload", 150)
+                entryRow.button = Widgets.Button(entryRow, "Disable and reload", 150)
                 entryRow.button:SetPoint("RIGHT")
                 lines[i] = entryRow
             end

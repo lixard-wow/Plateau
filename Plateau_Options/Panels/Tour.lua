@@ -11,31 +11,31 @@ local STEPS = {
         target = "window",
         place = "center",
         title = "Welcome to Plateau",
-        text = "This is where you shape every part of an enemy nameplate. A short tour of the window follows. You can skip it now, and replay it any time from the Help page.",
+        text = "Customize every part of your enemy nameplates here. Skip this tour any time, and replay it from the Help page.",
     },
     {
         target = "preview",
         place = "below",
         title = "The live preview",
-        text = "This sample nameplate updates as you change settings. Click any part of it, or a whole group of buff icons, to jump to that part's settings; the part you are editing is outlined. Drag a part to move it, and hold Shift to place it anywhere. The arrow keys nudge a selected part.",
+        text = "This sample nameplate shows your changes as you make them. Click a part to edit it, drag it to move it, and hold Shift to place it freely.",
     },
     {
         target = "snap",
         place = "below",
         title = "Snapping",
-        text = "Snap, under Undo and Redo, decides whether dragged pieces pull onto guide dots or land exactly where you let go. It never changes your saved settings.",
+        text = "Snap pulls dragged parts onto guide dots. Turn it off to drop them anywhere.",
     },
     {
         target = "undo",
         place = "below",
         title = "Undo and redo",
-        text = "Every change is remembered and named. Open the Undo list to step back one change or many, and Redo brings them back. Nothing you try here is permanent. Switching profiles clears the list.",
+        text = "Undo steps back through your last 20 changes, and Redo brings them back. Switching profiles clears the list.",
     },
     {
         target = "menu",
         place = "right",
         title = "The pages",
-        text = "Each page holds one part of the nameplate, grouped by what it does: the health bar, text, cast bar, colors, highlights, auras, icons and more. A dot beside a page means it differs from the default. Game settings, which holds Blizzard's own nameplate settings, and Help are at the bottom.",
+        text = "Each page holds one part of the nameplate. A dot beside a page means it differs from the default. Blizzard's own nameplate settings are on Game settings.",
     },
     {
         target = "search",
@@ -47,13 +47,13 @@ local STEPS = {
         target = "minimize",
         place = "below",
         title = "Minimize",
-        text = "Minimize shrinks this window to a small bar that shows your active profile, so you can watch the game while you tweak. Click the icon, the name or Restore to bring it back exactly as it was. The x hides the settings without turning anything off.",
+        text = "Shrinks this window to a small bar so you can watch the game while you adjust settings. Click the icon, name or Restore to bring it back.",
     },
     {
         target = "profile",
         place = "above",
         title = "Profiles",
-        text = "This shows your active profile, the one every page edits. Click it to switch; the profile you pick also becomes your default. Choose Manage profiles to create, duplicate, rename, copy, share or delete one, and to switch automatically by content or specialization. Everything saves as you go. That's the tour. Have fun.",
+        text = "Your active profile, the one every page edits. Click it to switch or to manage profiles. Changes save automatically.",
     },
 }
 

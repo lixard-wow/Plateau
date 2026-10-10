@@ -149,7 +149,7 @@ local function Debug()
     print("  " .. L["Restrictions active: %s"]:format(#active > 0 and table.concat(active, ", ") or L["none"]))
     print("  " .. L["Plates: %d showing, %d drawn by Plateau"]:format(total, claimed))
     if ns.realmPurgeFailed then
-        print("  " .. L["Realm marker cleanup didn't finish: Blizzard's friendly plates may show errors. Report this with your BugSack log."])
+        print("  " .. L["Realm marker cleanup failed. Blizzard's friendly nameplates may show errors."])
     end
     local failures = ns.DB.migrationFailures
     if ns.recovered or (failures and #failures > 0) then
@@ -197,7 +197,7 @@ local function Debug()
             plate.state, tostring(plate.mobType), Show(UnitIsBossMob("target")), Show(UnitClassification("target")),
             Show(UnitEffectiveLevel("target"))))
     else
-        print("  " .. L["Target: none (target a mob to see how Plateau reads it)"])
+        print("  " .. L["Target: none"])
     end
 end
 
@@ -275,7 +275,7 @@ local function OpenSetup()
     if loaded and PlateauSetup and PlateauSetup.Open then
         PlateauSetup:Open()
     elseif not loaded then
-        Say(L["could not open setup: %s"]:format(tostring(reason)))
+        Say(L["Couldn't open setup: %s"]:format(tostring(reason)))
     end
 end
 
@@ -312,11 +312,11 @@ setupWatcher:SetScript("OnEvent", function(_, event)
 end)
 
 local function Help()
-    Say(L["commands:"])
+    Say(L["Commands:"])
     print("  " .. L["/plt - open the settings"])
     print("  " .. L["/plt setup - pick a ready-made look"])
     print("  " .. L["/plt minimap - show or hide the minimap button"])
-    print("  " .. L["/plt debug - version, restrictions and memory, for bug reports"])
+    print("  " .. L["/plt debug - version, CPU and memory for bug reports"])
     print("  " .. L["/plt debug reset - start counting slow frames from now"])
     print("  " .. L["/plt reset - put every setting in this profile back to its default"])
     print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
@@ -328,9 +328,9 @@ local function OpenOptions()
     if loaded and PlateauOptions and PlateauOptions.Toggle then
         PlateauOptions:Toggle()
     elseif loaded then
-        Say(L["options didn't finish loading - check BugSack for the first error."])
+        Say(L["Settings failed to load. Check the first Lua error."])
     else
-        Say(L["could not open options: %s"]:format(tostring(reason)))
+        Say(L["Couldn't open settings: %s"]:format(tostring(reason)))
     end
 end
 ns.OpenOptions = OpenOptions
@@ -495,18 +495,18 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "minimap" and ns.Minimap then
         local shown = not ns.Minimap:IsShown()
         ns.Minimap:SetShown(shown)
-        Say(shown and L["minimap button shown."] or L["minimap button hidden. /plt minimap brings it back."])
+        Say(shown and L["Minimap button shown."] or L["Minimap button hidden. Type /plt minimap to show it."])
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
-        Say(L["slow-frame counts reset. Run /plt debug later to see how many happened since."])
+        Say(L["Slow-frame counters reset."])
     elseif command == "debug" then
         Debug()
     elseif command == "cvars" and path == "restore" then
         ns.CVars:ReleaseAll()
-        Say(L["put every nameplate game setting back the way it was before Plateau changed it."])
+        Say(L["Blizzard nameplate settings restored."])
     elseif command == "reset" then
         local ok, reason = ns.DB:Reset(path)
-        Say(ok and (path and L["reset %s"]:format(path) or L["reset all settings"]) or (path .. ": " .. reason))
+        Say(ok and (path and L["%s reset to default."]:format(path) or L["All settings reset to default."]) or (path .. ": " .. reason))
     else
         Help()
     end

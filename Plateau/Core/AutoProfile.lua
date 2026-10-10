@@ -86,7 +86,7 @@ function AutoProfile:RuleName(kind, key)
     if name then
         return L["%s specialization"]:format(name)
     end
-    return L["Specialization %s specialization"]:format(tostring(key))
+    return L["Specialization %s"]:format(tostring(key))
 end
 
 function AutoProfile:Status()

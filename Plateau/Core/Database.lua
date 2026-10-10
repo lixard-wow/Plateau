@@ -727,7 +727,7 @@ end
 
 function DB:SwitchProfile(name, temporary)
     if not self.saved.profiles[name] then
-        return false, L["no profile called %s"]:format(tostring(name))
+        return false, L["Profile %s not found."]:format(tostring(name))
     end
     self:UseProfile(name, temporary)
     ns.Driver:RequestRestyle(false, "profile switched")
@@ -736,11 +736,11 @@ end
 
 function DB:CreateProfile(name, copyFrom)
     if type(name) ~= "string" or not name:find("%S") then
-        return false, L["give the profile a name"]
+        return false, L["Enter a profile name."]
     end
     name = name:match("^%s*(.-)%s*$")
     if self.saved.profiles[name] then
-        return false, L["a profile called %s already exists"]:format(name)
+        return false, L["A profile named %s already exists."]:format(name)
     end
     local source = copyFrom and self.saved.profiles[copyFrom]
     self.saved.profiles[name] = source and DeepCopy(source) or {}
@@ -806,7 +806,7 @@ function DB:CopyColors(target)
     elseif target and target ~= self.profileName and self.saved.profiles[target] then
         names[1] = target
     else
-        return false, L["pick a different profile to copy colors to"]
+        return false, L["Choose a different profile to copy colors to."]
     end
     for _, path in ipairs(self:ColorPaths()) do
         local value = self:Get(path)
@@ -822,7 +822,7 @@ end
 function DB:CopyProfile(from)
     local source = self.saved.profiles[from]
     if not source or from == self.profileName then
-        return false, L["pick a different profile to copy from"]
+        return false, L["Choose a different profile to copy from."]
     end
     local temporary = self.profileName ~= self:DefaultProfile()
     self.saved.profiles[self.profileName] = DeepCopy(source)
@@ -831,7 +831,7 @@ end
 
 function DB:SetDefaultProfile(name)
     if not self.saved.profiles[name] then
-        return false, L["no profile called %s"]:format(tostring(name))
+        return false, L["Profile %s not found."]:format(tostring(name))
     end
     if not self.charKey then
         return self:SwitchProfile(name, true)
@@ -846,7 +846,7 @@ end
 
 function DB:ActivateProfile(name)
     if not self.saved.profiles[name] then
-        return false, L["no profile called %s"]:format(tostring(name))
+        return false, L["Profile %s not found."]:format(tostring(name))
     end
     if self.charKey and InCombatLockdown and InCombatLockdown() and ns.AutoProfile and ns.AutoProfile.Apply then
         self.saved.profileKeys[self.charKey] = name
@@ -859,17 +859,17 @@ end
 function DB:RenameProfile(old, new)
     local profiles = self.saved.profiles
     if not profiles[old] then
-        return false, L["no profile called %s"]:format(tostring(old))
+        return false, L["Profile %s not found."]:format(tostring(old))
     end
     if type(new) ~= "string" or not new:find("%S") then
-        return false, L["give the profile a name"]
+        return false, L["Enter a profile name."]
     end
     new = new:match("^%s*(.-)%s*$")
     if new == old then
-        return false, L["that is already its name"]
+        return false, L["That is already its name."]
     end
     if profiles[new] then
-        return false, L["a profile called %s already exists"]:format(new)
+        return false, L["A profile named %s already exists."]:format(new)
     end
     profiles[new] = profiles[old]
     profiles[old] = nil
@@ -1028,11 +1028,11 @@ function DB:ImportProfile(name, text, activate)
     end
     local version = tonumber(payload.version) or SCHEMA_VERSION
     if version ~= version or version < 1 or version > 1e6 then
-        return false, L["that profile string is damaged"]
+        return false, L["This profile string is damaged."]
     end
     version = math.floor(version)
     if version > SCHEMA_VERSION then
-        return false, L["that profile is from a newer Plateau - update first"]
+        return false, L["This profile needs a newer version of Plateau."]
     end
     local holder = { version = version, profiles = { import = {
         look = type(payload.look) == "table" and payload.look or {},
@@ -1040,7 +1040,7 @@ function DB:ImportProfile(name, text, activate)
     } } }
     local migrated, failures = pcall(Migrate, holder)
     if not migrated or #failures > 0 then
-        return false, L["that profile string is damaged"]
+        return false, L["This profile string is damaged."]
     end
     local imported = holder.profiles.import
     local profile = { look = ns.Share.Sanitize(imported.look or {}, ns.defaults.look), specSpells = CleanSpecSpells(payload.specSpells) }
@@ -1049,7 +1049,7 @@ function DB:ImportProfile(name, text, activate)
     end
     if type(name) == "string" and name:find("%S") then
         if self.saved.profiles[name] then
-            return false, L["a profile called %s already exists"]:format(name)
+            return false, L["A profile named %s already exists."]:format(name)
         end
     else
         name = L["Imported"]
@@ -1087,10 +1087,10 @@ end
 
 function DB:DeleteProfile(name)
     if name == self.profileName then
-        return false, L["switch to another profile before deleting this one"]
+        return false, L["You can't delete the active profile."]
     end
     if not self.saved.profiles[name] then
-        return false, L["no profile called %s"]:format(tostring(name))
+        return false, L["Profile %s not found."]:format(tostring(name))
     end
     self.saved.profiles[name] = nil
     local replacement = self:FallbackProfile(name)
@@ -1236,7 +1236,7 @@ end
 function DB:UseBuiltin(name)
     local entry = ns.Builtins and ns.Builtins.ByName(name)
     if not entry then
-        return false, L["not a built-in profile"]
+        return false, L["Not a built-in profile."]
     end
     if not self.saved.profiles[name] then
         self:BuildProfile(name, ns.Builtins.Values(entry))
@@ -1247,7 +1247,7 @@ end
 function DB:RestoreBuiltin(name)
     local entry = ns.Builtins and ns.Builtins.ByName(name)
     if not entry then
-        return false, L["not a built-in profile"]
+        return false, L["Not a built-in profile."]
     end
     self:BuildProfile(name, ns.Builtins.Values(entry))
     if self.profileName == name then

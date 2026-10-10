@@ -114,7 +114,7 @@ function ns.Widgets.Header(parent, spec)
         row:SetScript("OnLeave", function()
             state:SetTextColor(C.muted[1], C.muted[2], C.muted[3])
         end)
-        Style.Tooltip(row, { label = spec.label, tooltip = "Click to show or hide these settings. Searching for a setting inside opens the section for you." })
+        Style.Tooltip(row, { label = spec.label, tooltip = "Click to show or hide these settings." })
     end
     return row
 end
@@ -589,7 +589,7 @@ function ns.Widgets.LookCards(parent, spec)
 
         card.tag = Style.Text(strip, 10, accent, "CENTER")
         card.tag:SetPoint("BOTTOM", card, "TOP", 0, 5)
-        card.tag:SetText("IN USE")
+        card.tag:SetText("In use")
 
         card.edge = card:CreateTexture(nil, "ARTWORK")
         card.edge:SetPoint("TOPLEFT", 1, -1)
@@ -714,7 +714,7 @@ function ns.Widgets.SpellList(parent, spec)
                 names[#names + 1] = name and ("%s (%d)"):format(name, id) or ("|cffff6655" .. T("%s: not found"):format(token) .. "|r")
             end
         end
-        found:SetText(#names > 0 and table.concat(names, ", ") or (spec.empty or "Empty: nothing filtered"))
+        found:SetText(#names > 0 and table.concat(names, ", ") or (spec.empty or "No spells listed"))
     end
 
     local function Save(self)

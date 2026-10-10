@@ -1,6 +1,6 @@
 ## Interface: 120100, 120105, 16001
 ## Title: |cff36c2c9Plateau Nameplates|r
-## Notes: Fast, readable nameplates built for Midnight's addon rules.
+## Notes: Fast, readable enemy nameplates.
 ## Author: lixard-wow
 ## Version: 0.1.0-beta
 ## OptionalDeps: SharedMedia

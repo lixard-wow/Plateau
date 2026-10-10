@@ -174,20 +174,20 @@ end
 function Share.Decode(text)
     text = (text or ""):gsub("%s", "")
     if text:sub(1, #PREFIX) ~= PREFIX then
-        return nil, L["that isn't a Plateau profile string"]
+        return nil, L["Not a Plateau profile string."]
     end
     if #text > MAX_TEXT then
-        return nil, L["that string is too long to be a Plateau profile"]
+        return nil, L["This string is too long to be a Plateau profile."]
     end
     local deflate = Deflate()
     local compressed = deflate:DecodeForPrint(text:sub(#PREFIX + 1))
     local serialized = compressed and deflate:DecompressDeflate(compressed)
     if not serialized or #serialized > MAX_SERIALIZED then
-        return nil, L["the string is damaged or incomplete"]
+        return nil, L["This string is damaged or incomplete."]
     end
     local payload, reason = Share.Deserialize(serialized)
     if type(payload) ~= "table" then
-        return nil, L["couldn't read the profile: %s"]:format(tostring(reason))
+        return nil, L["Couldn't read the profile: %s"]:format(tostring(reason))
     end
     return payload
 end

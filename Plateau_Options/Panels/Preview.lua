@@ -5,7 +5,7 @@ local C = Style.colors
 local layout = ns.layout
 
 local PLATE_SCALE = 1.5
-local HINT = "Click any part of the nameplate to edit it; drag it to move it. Hold Shift while dragging to place it freely."
+local HINT = "Click a part to edit it. Drag to move it; hold Shift to place it freely."
 
 local sectionKey, editingTitle
 
@@ -245,7 +245,7 @@ local function SetHovered(spot)
     if spot then
         PlaceOutline(spot)
         outline:Show()
-        hint:SetFormattedText(spot.drag and "%s  -  click to select and edit; drag to move; arrow keys fine-tune" or "%s  -  click to edit", Style.T(Resolve(spot.label)))
+        hint:SetFormattedText(spot.drag and "%s  -  click to edit, drag to move, arrow keys to nudge" or "%s  -  click to edit", Style.T(Resolve(spot.label)))
         local tint = Style.StateColor()
         hint:SetTextColor(tint[1], tint[2], tint[3])
     else
@@ -334,7 +334,7 @@ local function AddHotspots(plate)
     Hotspot(plate, plate.castbar, "castbar", "Cast bar", 60, 0, castbarDrag)
     Hotspot(plate, plate.healthText, "healthText", "Health text", 80, 3,
         Drag.PositionSpec({ path = "look.healthText", positionKey = "anchor", text = true, fixedGap = 3, region = plate.healthText, anchor = AtHealth(plate) })).setting = "Show health text"
-    Hotspot(plate, plate.enemyTarget, "name", "Enemy's target", 80, 3,
+    Hotspot(plate, plate.enemyTarget, "name", "Enemy target name", 80, 3,
         Drag.PositionSpec({ path = "look.enemyTarget", positionKey = "anchor", text = true, fixedGap = 3, region = plate.enemyTarget, anchor = AtHealth(plate) })).setting = "Show enemy target name"
     Hotspot(plate, plate.level, "level", "Level", 80, 3,
         Drag.PositionSpec({ path = "look.level", positionKey = "anchor", text = true, fixedGap = 3, region = plate.level, anchor = AtHealth(plate) }))
@@ -373,19 +373,19 @@ local function AddHotspots(plate)
         Drag.PositionSpec({ path = "look.faction", region = plate.faction, anchor = AtPlate(plate) }))
     Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true
     Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 60, 0, castbarDrag).setting = "Show spell icon"
-    local castTarget = Hotspot(plate, plate.castbar.target, "castbar", "Cast target name", 65, 2,
+    local castTarget = Hotspot(plate, plate.castbar.target, "castbar", "Cast target", 65, 2,
         Drag.PositionSpec({ path = "look.castbar", positionKey = "targetPosition", xKey = "targetOffsetX", yKey = "targetOffsetY", fixedGap = 2, region = plate.castbar.target, anchor = function() return plate.castbar end }))
     castTarget.fitText = true
     castTarget.setting = "Show cast target"
     local castName = Hotspot(plate, plate.castbar.text, "castbar",
-        function() return picks.cast == "interrupted" and "Interrupted-by text" or "Spell name" end, 65, 1, castbarDrag)
+        function() return picks.cast == "interrupted" and "Interrupted text" or "Spell name" end, 65, 1, castbarDrag)
     castName.fitText = true
     castName.setting = "Text"
-    local castTimer = Hotspot(plate, plate.castbar.timer, "castbar", "Time remaining", 65, 1,
+    local castTimer = Hotspot(plate, plate.castbar.timer, "castbar", "Cast time", 65, 1,
         Drag.PositionSpec({ path = "look.castbar", positionKey = "timerPosition", xKey = "timerOffsetX", yKey = "timerOffsetY", fixedGap = 3, region = plate.castbar.timer, anchor = function() return plate.castbar end }))
     castTimer.fitText = true
     castTimer.setting = "Show remaining cast time"
-    local absorb = Hotspot(plate, plate.absorb, "health", "Absorb", 30, 0)
+    local absorb = Hotspot(plate, plate.absorb, "health", "Absorbs", 30, 0)
     absorb.clipTo = plate.health
     absorb.setting = "Show absorbs"
     Hotspot(plate, plate.targetSet.arrowLeft, "target", "Target", 40, 2).setting = "Show target arrows"
@@ -506,7 +506,7 @@ local function UpdateUndo(canUndo, canRedo)
 end
 ns.Undo.OnChanged(UpdateUndo)
 UpdateUndo(false, false)
-Style.Tooltip(undoButton, { label = "Undo", tooltip = "Lists your last 20 changes, newest first. Pick one to undo it and everything after it. A slider drag counts as one change. Switching profiles clears the list." })
+Style.Tooltip(undoButton, { label = "Undo", tooltip = "Undoes your last change. Open the list to undo up to 20. Switching profiles clears it." })
 redoButton:HookScript("OnEnter", function(self)
     local label = ns.Undo.NextRedo()
     if not label then return end
@@ -633,7 +633,7 @@ snapButton:SetScript("OnClick", function()
     PaintSnap()
 end)
 PaintSnap()
-Style.Tooltip(snapButton, { label = "Snapping", tooltip = "On: dragged pieces pull onto the dots and land exactly on them. Off: pieces land exactly where you let go. Hold Shift while dragging to place freely just once." })
+Style.Tooltip(snapButton, { label = "Snapping", tooltip = "On: dragged parts snap to the guide dots. Off: they land where you drop them. Hold Shift to skip snapping once." })
 
 function ns.SetPreviewSection(key)
     if key ~= sectionKey then
