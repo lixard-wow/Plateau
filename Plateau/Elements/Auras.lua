@@ -552,16 +552,12 @@ local function AddPart(container, group, index)
     container.filters[index] = filter
 end
 
-function Auras:Style(plate, db)
-    if not plate.auras then
-        return
-    end
+local function StyleSet(set, state, db)
+    local containers = set.containers
     for _, group in ipairs(GROUPS) do
-        local container = plate.auras[group.key]
+        local container = containers[group.key]
         local groupDb = db[group.key]
-        local point, relative, horizontal, vertical, axis, anchor = Placement(groupDb)
-        container:ClearAllPoints()
-        container:SetPoint(anchor, plate, relative, groupDb.offsetX, groupDb.offsetY)
+        local point, _, horizontal, vertical, axis = Placement(groupDb)
         container:SetFlowLayoutAxis(axis)
         container:SetFlowLayoutAnchorPoint(point)
         container:SetFlowLayoutGrowthDirection(horizontal, vertical)
@@ -580,7 +576,7 @@ function Auras:Style(plate, db)
         local nameplateOnly = group.key == "important" and NAMEPLATE_ONLY or ""
         local added = false
         for index, key in ipairs(container.keys) do
-            local count = (plate.preview or plate.nameOnly) and 0 or PartCount(group, index, groupDb, allBuffs)
+            local count = PartCount(group, index, groupDb, allBuffs)
             if count > 0 and not container.added[index] then
                 AddPart(container, group, index)
                 added = true
@@ -599,10 +595,10 @@ function Auras:Style(plate, db)
             end
         end
         local hideText, onlyText = SpecLists(group.key)
-        local byState = signatureCache[plate.state]
+        local byState = signatureCache[state]
         if not byState then
             byState = {}
-            signatureCache[plate.state] = byState
+            signatureCache[state] = byState
         end
         local cached = byState[group.key]
         local signature
@@ -645,27 +641,17 @@ function Auras:Style(plate, db)
     end
     if Restricted() then
         for _, group in ipairs(GROUPS) do
-            MarkDirty(plate.auras[group.key])
+            MarkDirty(containers[group.key])
         end
     else
         for _, group in ipairs(GROUPS) do
-            local container = plate.auras[group.key]
+            local container = containers[group.key]
             dirtyContainers[container] = nil
             StyleContainerButtons(container)
         end
     end
-    local set = plate.auraSet
-    if set then
-        set.styledState = plate.state
-        set.version = auraVersion
-    end
-end
-
-local function SetOn(container, on)
-    if container.isOn ~= on then
-        container.isOn = on
-        container:SetEnabled(on)
-    end
+    set.styledState = state
+    set.version = auraVersion
 end
 
 local function Anchor(plate, db)
@@ -675,6 +661,23 @@ local function Anchor(plate, db)
         local _, relative, _, _, _, anchor = Placement(groupDb)
         container:ClearAllPoints()
         container:SetPoint(anchor, plate, relative, groupDb.offsetX, groupDb.offsetY)
+    end
+end
+
+function Auras:Style(plate, db)
+    local set = plate.auraSet
+    if not set then
+        return
+    end
+    StyleSet(set, plate.state, db)
+    Anchor(plate, db)
+end
+
+
+local function SetOn(container, on)
+    if container.isOn ~= on then
+        container.isOn = on
+        container:SetEnabled(on)
     end
 end
 
@@ -692,10 +695,9 @@ local function Attach(plate)
     plate.auras = set.containers
     local db = configs[plate.state]
     if set.styledState ~= plate.state or set.version ~= auraVersion then
-        Auras:Style(plate, db)
-    else
-        Anchor(plate, db)
+        StyleSet(set, plate.state, db)
     end
+    Anchor(plate, db)
     if not InCombatLockdown() and ns.Driver.WarmPools then
         ns.Driver:WarmPools()
     end
@@ -756,6 +758,10 @@ function Auras:WarmStep(deadline)
             end
         end
     end
+    if debugprofilestop() > deadline then
+        return true
+    end
+    StyleSet(warming, "enemy", db)
     spareSets[#spareSets + 1] = warming
     warming = nil
     return true
