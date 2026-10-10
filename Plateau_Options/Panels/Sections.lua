@@ -570,7 +570,7 @@ local function NpcNames()
         type = "Dropdown",
         label = "NPC names",
         options = NPC_NAME_OPTIONS,
-        tooltip = "Same choices as Blizzard's NPC Names option, which sets several game settings together.",
+        tooltip = "Chooses which NPCs show their names over their heads.",
         get = function()
             local function On(name) return CVars:Get(name) == "1" end
             if On("UnitNameNPC") then return 4 end
@@ -657,11 +657,11 @@ end
 
 local STACK = Enum.NamePlateStackType or {}
 
-local function FriendlyToggle(path, cvar, label)
+local function FriendlyToggle(path, cvar, label, tooltip)
     return {
         type = "Toggle",
         label = label,
-        tooltip = "Also turns Blizzard's own setting on or off, since the game has to show these plates before Plateau can style them.",
+        tooltip = tooltip,
         get = function() return CVars:Get(cvar) == "1" and ns.Get(path) ~= false end,
         set = function(value)
             CVars:Set(cvar, value and "1" or "0")
@@ -681,7 +681,7 @@ end
 local function BlizzardDrawn()
     local list = {
         { type = "Header", label = "Blizzard-drawn nameplates", collapsible = true, collapsed = true },
-        { type = "Note", label = "These change only the nameplates the game draws itself: friendly nameplates in dungeons, raids and arenas, where the game locks them, and any nameplate Plateau isn't styling. Plateau's own nameplates are not affected, except by the two Simplify friendly switches.", height = 44 },
+        { type = "Note", label = "These only change nameplates the game draws itself, such as friendly nameplates in dungeons, raids and arenas. The two Simplify friendly settings also apply to Plateau's nameplates.", height = 32 },
     }
     local function Add(spec)
         list[#list + 1] = spec
@@ -708,13 +708,13 @@ local function BlizzardDrawn()
         if NameplatesOverrides and NameplatesOverrides.ShowClassicStyleOption and NameplatesOverrides.ShowClassicStyleOption() then
             table.insert(options, 1, { value = style.Classic, label = "Classic" })
         end
-        Add({ type = "Dropdown", label = "Style", options = options,
+        Add({ type = "Dropdown", label = "Nameplate style", options = options,
           get = function() return tonumber(CVars:Get("nameplateStyle")) end,
           set = function(value) CVars:Set("nameplateStyle", value) end,
           reset = function() CVars:Release("nameplateStyle") end,
           resetLabel = "Right-click to undo Plateau's change.",
           path = "cvar.nameplateStyle",
-          tooltip = "The overall look of the nameplates the game draws: Modern, Thin, Block, Health focus, Cast focus or Legacy." })
+          tooltip = "The look of the nameplates the game draws." })
     end
 
     Bits("nameplateInfoDisplay", Enum.NamePlateInfoDisplay, {
@@ -731,9 +731,9 @@ local function BlizzardDrawn()
         { "HighlightWhenCastTarget", "Cast bar: highlight when aimed at you", "Highlights a cast when you are its target." },
     })
     Bits("nameplateThreatDisplay", Enum.NamePlateThreatDisplay, {
-        { "Progressive", "Aggro: progressive", "Shows aggro building up gradually on the game's nameplates." },
-        { "Flash", "Aggro: flash", "Flashes the game's nameplate when aggro changes." },
-        { "HealthBarColor", "Aggro: health bar color", "Colors the game's health bar by aggro." },
+        { "Progressive", "Threat display: progressive", "Shows threat building up gradually on the game's nameplates." },
+        { "Flash", "Threat display: flash", "Flashes the game's nameplate when threat changes." },
+        { "HealthBarColor", "Threat display: health bar color", "Colors the game's health bar by threat." },
     })
     Bits("nameplateEnemyNpcAuraDisplay", Enum.NamePlateEnemyNpcAuraDisplay, {
         { "Buffs", "Enemy NPCs: buffs", "Shows enemy NPC buffs on the nameplates the game draws." },
@@ -743,12 +743,12 @@ local function BlizzardDrawn()
     Bits("nameplateEnemyPlayerAuraDisplay", Enum.NamePlateEnemyPlayerAuraDisplay, {
         { "Buffs", "Enemy players: buffs", "Shows enemy player buffs on the nameplates the game draws." },
         { "Debuffs", "Enemy players: your debuffs", "Shows your debuffs on enemy players on the nameplates the game draws." },
-        { "LossOfControl", "Enemy players: big debuff", "Shows one large loss-of-control debuff on enemy players." },
+        { "LossOfControl", "Enemy players: loss of control", "Shows one large loss-of-control debuff on enemy players." },
     })
     Bits("nameplateFriendlyPlayerAuraDisplay", Enum.NamePlateFriendlyPlayerAuraDisplay, {
         { "Buffs", "Friendly players: your buffs", "Shows your buffs on friendly players on the nameplates the game draws." },
         { "Debuffs", "Friendly players: enemy debuffs", "Shows debuffs from enemies on friendly players on the nameplates the game draws." },
-        { "LossOfControl", "Friendly players: big debuff", "Shows one large loss-of-control debuff on friendly players." },
+        { "LossOfControl", "Friendly players: loss of control", "Shows one large loss-of-control debuff on friendly players." },
     })
     if C_CVar.GetCVar("nameplateDebuffPadding") then
         Add(CVarSlider("nameplateDebuffPadding", "Debuff padding", 0, 50, 1, "Space between buff and debuff icons on the nameplates the game draws."))
@@ -756,11 +756,11 @@ local function BlizzardDrawn()
     Bits("nameplateSimplifiedTypes", Enum.NamePlateSimplifiedType, {
         { "Minion", "Simplify minions", "Draws pets, guardians and totems as small simplified nameplates." },
         { "MinusMob", "Simplify minor enemies", "Draws minor enemies as small simplified nameplates." },
-        { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small simplified nameplates with no name, health text or auras; your target keeps its name. Plateau's friendly plates follow this too. With Only show friendly player names or Show just the name on, only your target's name is left." },
-        { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small simplified nameplates with no name, health text or auras; your target keeps its name. Plateau's friendly plates follow this too. With Show just the name on, only your target's name is left." },
+        { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates." },
+        { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates." },
     })
     if C_CVar.GetCVar("nameplateShowDebuffsOnFriendly") then
-        Add(CVarToggle("nameplateShowDebuffsOnFriendly", "Friendly plates: show debuffs", "Shows debuffs on friendly players on the nameplates the game draws, like friendly plates in dungeons and raids."))
+        Add(CVarToggle("nameplateShowDebuffsOnFriendly", "Friendly players: show debuffs", "Shows debuffs on friendly players on the nameplates the game draws."))
     end
     if C_CVar.GetCVar("nameplateShowFriendlyClassColor") then
         Add(CVarToggle("nameplateShowFriendlyClassColor", "Class colors: friendly players", "Colors friendly player health bars by class on the nameplates the game draws."))
@@ -774,7 +774,7 @@ end
 local RADIAL = {
     { value = 0, label = "Off" },
     { value = 1, label = "Target only" },
-    { value = 2, label = "Everything I'm fighting" },
+    { value = 2, label = "All enemies in combat" },
 }
 
 local STACK_SPACES = {
@@ -874,8 +874,8 @@ local function Off(path)
 end
 
 local function RealmNameToggle()
-    local spec = CVarToggle("nameplateShowFriendlyRealmName", "Show friendly players' realm names",
-        "Adds a friendly player's home realm to their name when they're from a different one than you, on Plateau's friendly plates and Blizzard's. Blizzard's plates pick up the change after a /reload.")
+    local spec = CVarToggle("nameplateShowFriendlyRealmName", "Show realm names",
+        "Adds the realm to the names of friendly players from other realms. Blizzard's nameplates update after a UI reload.")
     local set, reset = spec.set, spec.reset
     spec.set = function(value)
         set(value)
@@ -924,7 +924,7 @@ local function NameOnlyGate(spec)
         if own and not own() then
             return type(ownReason) == "function" and ownReason() or ownReason
         end
-        return "Only used while Show just the name, no bar is on. Full friendly plates use the Name page's colors."
+        return "Turn on Show names only to use this."
     end
     return spec
 end
@@ -936,14 +936,14 @@ end
 local function FriendlyPlayersGate(spec)
     return Gate(spec, FriendlyPlayersOn, function()
         if not FriendlyOn() then return FriendlyOffReason() end
-        return "Friendly players is off, so Blizzard draws their names with its own settings."
+        return "Turn on Friendly players to use this."
     end)
 end
 
 local function FriendlyNpcsGate(spec)
     return Gate(spec, FriendlyNpcsOn, function()
         if not FriendlyOn() then return FriendlyOffReason() end
-        return "Friendly NPCs is off, so Blizzard draws their names with its own settings."
+        return "Turn on Friendly NPCs to use this."
     end)
 end
 
@@ -1141,9 +1141,9 @@ local function GameExtras()
             list[#list + 1] = spec
         end
     end
-    Add(CVarToggle("UnitNameFocused", "Always show your target's name", "The name over your target's head shows even when names over heads are turned off above."), "UnitNameFocused")
-    Add(CVarToggle("nameplateForceShowUnitName", "Always show names on Blizzard's plates", "Plates the game draws itself, like friendly plates in dungeons and raids, always include the unit's name."), "nameplateForceShowUnitName")
-    Add(CVarToggle("nameplateShowAllPersonalAuras", "Show all your auras on the personal resource display", "Your own bar over your character shows every buff and debuff on you, not just the important ones. Needs Show personal resource display."), "nameplateShowAllPersonalAuras")
+    Add(CVarToggle("UnitNameFocused", "Always show your target's name", "Shows your target's name over its head even when names over heads are off."), "UnitNameFocused")
+    Add(CVarToggle("nameplateForceShowUnitName", "Always show names on Blizzard nameplates", "Nameplates the game draws itself always show the unit's name."), "nameplateForceShowUnitName")
+    Add(CVarToggle("nameplateShowAllPersonalAuras", "Show all personal auras", "Shows every buff and debuff on you on the personal resource display, not just important ones."), "nameplateShowAllPersonalAuras")
     Add(CVarToggle("SoftTargetIconEnemy", "Soft target icon: enemies", "Shows an icon over the enemy you are soft-targeting with action targeting or a controller."), "SoftTargetIconEnemy")
     Add(CVarToggle("SoftTargetIconFriend", "Soft target icon: friends", "Shows an icon over the friendly unit you are soft-targeting."), "SoftTargetIconFriend")
     Add(CVarToggle("SoftTargetIconInteract", "Soft target icon: interactable", "Shows an icon over the object or NPC you can interact with right now."), "SoftTargetIconInteract")
@@ -1244,14 +1244,14 @@ local function AuraWhichControls(path, groupKey)
     return List(
         { type = "Header", label = "Which auras" },
         { type = "Dropdown", path = path .. ".sort", label = "Sort order", options = AURA_SORT,
-          tooltip = "How icons are ordered within the group. Your own auras always come first, then the rest by the choice here: expiring soonest first (permanent auras last), alphabetical, or the game's default order." },
-        { type = "Slider", path = path .. ".maxDuration", label = "Maximum aura duration (seconds, 0 = off)", min = 0, max = 600, step = 5,
-          tooltip = "Hides auras whose total duration is longer than this, not auras with a lot of time left. Permanent auras are hidden as soon as this is above 0. 0 turns the limit off. Works in dungeons and raids: the game does the check." },
+          tooltip = "The order of icons in this group. Your own auras always come first." },
+        { type = "Slider", path = path .. ".maxDuration", label = "Maximum aura duration", min = 0, max = 600, step = 5,
+          tooltip = "Hides auras with a total duration longer than this many seconds, and permanent auras. 0 turns the limit off." },
         { type = "Note", label = "Spell lists are saved separately for each specialization. Switch specializations to edit its lists.", height = 24 },
         SpecSpellList(groupKey, "hide", "Hidden spells", "Empty: no spells excluded",
-          "Spell IDs or names, separated by commas. Press Enter to save. A name matches every spell with that name. Hidden spells win if a spell is also in Allowed spells. Works in dungeons and raids for debuffs on enemies. For enemy buffs and important auras it only works in the open world, because the game hides which buff it is in dungeons and raids."),
+          "Spells that never show in this group. Enter spell IDs or names, separated by commas, and press Enter. Enemy buffs and important auras can only be hidden in the open world."),
         SpecSpellList(groupKey, "only", "Allowed spells", "Empty: all spells matching this group's filters are allowed",
-          "When filled, only these spells are shown and every other spell in this group is hidden. Spell IDs or names, separated by commas. An allowed spell still has to pass this group's other filters and icon limits, so listing it cannot make an aura appear that would not show otherwise.")
+          "When filled, only these spells show in this group. Enter spell IDs or names, separated by commas. They still have to pass the group's other filters.")
     )
 end
 
@@ -1261,9 +1261,9 @@ local function AuraLayoutControls(path)
         { type = "Dropdown", path = path .. ".side", label = "Position", options = AURA_SIDES,
           tooltip = "Which side of the nameplate this group of icons sits on." },
         { type = "Dropdown", path = path .. ".align", label = "Alignment", options = AURA_ALIGN,
-          tooltip = "Only matters above or below the nameplate. Left starts the group at the bar's left end, Right at its right end (icons grow leftward with Automatic growth), and Center keeps the row centered over or under the bar however many icons show." },
+          tooltip = "Where the row starts when the icons are above or below the nameplate." },
         { type = "Dropdown", path = path .. ".grow", label = "Growth direction", options = AURA_GROW,
-          tooltip = "Which way icons are added, and where the next row or column starts once a row is full. Automatic follows Position and Alignment: above or below, icons run right (left when Alignment is Right) and new rows stack up or down away from the bar; on the left, icons run left; on the right, icons run right, with new rows below." },
+          tooltip = "The direction new icons are added, and where a new row or column starts. Automatic follows Position and Alignment." },
         { type = "Slider", path = path .. ".offsetX", label = "Horizontal offset", min = -80, max = 80,
           tooltip = "Nudges this group of icons left (negative) or right (positive)." },
         { type = "Slider", path = path .. ".offsetY", label = "Vertical offset", min = -80, max = 80,
@@ -1271,11 +1271,11 @@ local function AuraLayoutControls(path)
         { type = "Slider", path = path .. ".size", label = "Icon size", min = 10, max = 48,
           tooltip = "How big each icon in this group is." },
         { type = "Dropdown", path = path .. ".shape", label = "Icon shape", options = AURA_SHAPES,
-          tooltip = "Square shows the whole icon. Wide makes icons shorter (4 by 3) and Extra wide shorter still (about 8 by 5), cropping the top and bottom of the art to save vertical space." },
+          tooltip = "Square shows the whole icon. Wide and Extra wide crop the top and bottom to save height." },
         { type = "Slider", path = path .. ".maxIcons", label = "Maximum icons", min = 1, max = 12,
           tooltip = "Caps how many icons this group ever shows at once, even if more apply." },
-        { type = "Slider", path = path .. ".perRow", label = "Icons per row (or column)", min = 1, max = 12,
-          tooltip = "How many icons fit before wrapping to a new row or column." },
+        { type = "Slider", path = path .. ".perRow", label = "Icons per row", min = 1, max = 12,
+          tooltip = "How many icons fit before starting a new row, or a new column when icons grow up or down." },
         { type = "Slider", path = path .. ".spacing", label = "Icon spacing", min = 0, max = 10,
           tooltip = "Gap between adjacent icons in this group." }
     )
@@ -1297,17 +1297,17 @@ local function AuraIconControls(path, withPandemic)
         Gate({ type = "Dropdown", path = path .. ".stackPosition", label = "Stack count position", options = AURA_TEXT_POINTS,
           tooltip = "Where the stack count sits on each icon." }, On(path .. ".showStacks"), "Turn on Show stack count to use this."),
         { type = "Toggle", path = path .. ".swipe", label = "Cooldown swipe",
-          tooltip = "The dark clock-wipe over each icon as it runs out. Off leaves just the timer text." },
+          tooltip = "Shows a dark sweep over each icon as the aura runs out." },
         { type = "Slider", path = path .. ".borderSize", label = "Icon border thickness", min = 0, max = 3,
           tooltip = "How thick the border around each icon is. 0 removes it." },
         Gate({ type = "Color", path = path .. ".borderColor", label = "Icon border color",
           tooltip = "The color of the border around each icon. Dispel-type colors, when on, draw over it." }, function() return (ns.Get(path .. ".borderSize") or 0) > 0 end, "Raise Icon border thickness above 0 to use this."),
-        { type = "Toggle", path = path .. ".dispelBorder", label = "Use dispel-type border colors",
-          tooltip = "Colors each icon's border by the aura's dispel type: Magic, curse, poison, disease and enrage each get their own color." }
+        { type = "Toggle", path = path .. ".dispelBorder", label = "Color borders by dispel type",
+          tooltip = "Colors each icon's border by dispel type: Magic, Curse, Poison, Disease or Enrage." }
     )
     if withPandemic then
-        controls[#controls + 1] = { type = "Toggle", path = path .. ".pandemic", label = "Tint in the refresh window",
-          tooltip = "Turns the icon red once refreshing it would carry the leftover time over (the pandemic window)." }
+        controls[#controls + 1] = { type = "Toggle", path = path .. ".pandemic", label = "Highlight when refreshable",
+          tooltip = "Turns the icon red once recasting it would keep the remaining time." }
     end
     return controls
 end
@@ -1349,19 +1349,19 @@ local AURA_TEXT_PATHS = { "look.auras.font", "look.auras.outline", "look.auras.s
 local function AuraTextControls()
     return List(
         { type = "Note", label = "Settings shared by every aura group: the time and stack text on each icon, and tooltips.", height = 24 },
-        { type = "Header", label = "Text on every aura icon" },
+        { type = "Header", label = "Text" },
         { type = "Dropdown", path = "look.auras.font", label = "Font", options = Fonts, unknown = "Custom font",
-          tooltip = "The typeface used for the time-left and stack-count text on every aura icon." },
-        { type = "Dropdown", path = "look.auras.outline", label = "Outline", options = OUTLINES,
-          tooltip = "The dark edge drawn around the aura text, to keep it readable over any icon." },
-        { type = "Toggle", path = "look.auras.shadow", label = "Drop shadow",
-          tooltip = "Adds a soft dark shadow behind the aura text, on top of the outline." },
+          tooltip = "The typeface for the time and stack text on every aura icon." },
+        { type = "Dropdown", path = "look.auras.outline", label = "Font outline", options = OUTLINES,
+          tooltip = "A dark edge around the aura text to keep it readable." },
+        { type = "Toggle", path = "look.auras.shadow", label = "Text shadow",
+          tooltip = "Adds a soft dark shadow behind the aura text." },
         { type = "Header", label = "Tooltips" },
-        { type = "Toggle", path = "look.auras.tooltips", label = "Show the aura's tooltip on mouseover",
-          tooltip = "Hovering an icon shows Blizzard's aura tooltip. Icons never catch clicks, so clicking still targets the enemy." },
-        { type = "Toggle", path = "look.auras.tooltipsInCombat", label = "Also show tooltips in combat",
-          tooltip = "Off hides aura tooltips specifically while you're in combat, so a crowded fight doesn't spam them as your mouse crosses icons." },
-        { type = "Note", label = "In dungeons and raids Blizzard decides which auras land in each group; Plateau sets the size, look and placement. Icon size and text changes made mid-fight apply when combat ends.", height = 44 }
+        { type = "Toggle", path = "look.auras.tooltips", label = "Show aura tooltips",
+          tooltip = "Shows the aura's tooltip when you mouse over its icon. Clicking still targets the enemy." },
+        { type = "Toggle", path = "look.auras.tooltipsInCombat", label = "Show tooltips in combat",
+          tooltip = "Off hides aura tooltips during combat." },
+        { type = "Note", label = "In dungeons and raids the game decides which auras go in each group. Icon size and text changes made in combat apply after combat ends.", height = 32 }
     )
 end
 
@@ -1409,45 +1409,45 @@ ns.sections = {
             CVars:ReleaseAll()
         end,
         controls = Join(List(
-            { type = "Note", label = "Adjust Blizzard's nameplate settings. Plateau saves the previous values of settings you change here so they can be restored. Right-click a setting to restore its saved value. Reset this section or type /plt cvars restore to restore every setting Plateau changed. This puts back the values from before Plateau changed them, not Blizzard's defaults.", height = 44 },
+            { type = "Note", label = "Changes Blizzard's own nameplate settings. Right-click a setting to undo Plateau's change, or type /plt cvars restore to undo them all. This restores your previous values, not Blizzard's defaults.", height = 32 },
 
             { type = "Header", label = "Other nameplate addons" },
             { type = "Conflicts" },
 
             { type = "Header", label = "Names over heads" },
-            { type = "Note", label = "Names the game floats over characters (Blizzard's Names options). Nameplates are set under Which nameplates show.", height = 24 },
-            CVarToggle("UnitNameOwn", "Show your name", "Floats your own character's name over your head."),
+            { type = "Note", label = "Names shown over characters' heads. These are Blizzard's Names options.", height = 24 },
+            CVarToggle("UnitNameOwn", "Show your name", "Shows your character's name over your head."),
             NpcNames(),
-            CVarToggle("UnitNameNonCombatCreatureName", "Show critter and companion names", "Names for non-combat critters, battle pets and companions."),
-            CVarToggle("UnitNameFriendlyPlayerName", "Show friendly player names", "Names over friendly players' heads in the world."),
-            CVarToggle("UnitNameFriendlyMinionName", "Show friendly minion names", "Names over friendly players' pets, totems and other minions."),
-            CVarToggle("UnitNameEnemyPlayerName", "Show enemy player names", "Names over enemy players' heads in the world."),
-            CVarToggle("UnitNameEnemyMinionName", "Show enemy minion names", "Names over enemy players' pets, totems and other minions."),
+            CVarToggle("UnitNameNonCombatCreatureName", "Show critter and companion names", "Shows names over critters, battle pets and companions."),
+            CVarToggle("UnitNameFriendlyPlayerName", "Show friendly player names", "Shows names over friendly players' heads."),
+            CVarToggle("UnitNameFriendlyMinionName", "Show friendly minion names", "Shows names over friendly players' pets, totems and other minions."),
+            CVarToggle("UnitNameEnemyPlayerName", "Show enemy player names", "Shows names over enemy players' heads."),
+            CVarToggle("UnitNameEnemyMinionName", "Show enemy minion names", "Shows names over enemy players' pets, totems and other minions."),
 
             { type = "Header", label = "Which nameplates show" },
-            CVarToggle("nameplateShowAll", "Always show nameplates", "Off: nameplates only appear once you're in combat with an enemy. This controls nameplate visibility."),
-            CVarToggle("nameplateShowEnemies", "Enemy nameplates", "The master switch for enemy nameplates. Off hides every one of them. This controls nameplate visibility."),
-            Gate(CVarToggle("nameplateShowEnemyMinus", "Minor enemies", "Blizzard's weakest enemies, usually with a minus sign in their tooltip. This controls nameplate visibility."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            Gate(CVarToggle("nameplateShowEnemyMinions", "Enemy minions", "Pets, totems and other minions belonging to enemy players or NPCs. This controls nameplate visibility, not the names over their heads."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            Gate(CVarToggle("nameplateShowEnemyPets", "Enemy pets", "Hunter pets, warlock pets and other player-controlled pets on the enemy side. This controls nameplate visibility."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            Gate(CVarToggle("nameplateShowEnemyGuardians", "Enemy guardians", "Temporary summoned helpers that fight for enemy units. This controls nameplate visibility."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            Gate(CVarToggle("nameplateShowEnemyTotems", "Enemy totems", "Shaman and other totems placed by enemies. This controls nameplate visibility."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+            CVarToggle("nameplateShowAll", "Always show nameplates", "Shows nameplates at all times. Off: only during combat."),
+            CVarToggle("nameplateShowEnemies", "Enemy nameplates", "Shows nameplates for enemies. Off hides all of them."),
+            Gate(CVarToggle("nameplateShowEnemyMinus", "Minor enemies", "Shows nameplates for minor enemies, the weakest trash units."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+            Gate(CVarToggle("nameplateShowEnemyMinions", "Enemy minions", "Shows nameplates for enemy pets, totems and other minions."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+            Gate(CVarToggle("nameplateShowEnemyPets", "Enemy pets", "Shows nameplates for enemy players' pets."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+            Gate(CVarToggle("nameplateShowEnemyGuardians", "Enemy guardians", "Shows nameplates for temporary helpers summoned by enemies."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+            Gate(CVarToggle("nameplateShowEnemyTotems", "Enemy totems", "Shows nameplates for enemy totems."), EnemiesOn, "Turn on Enemy nameplates to use this."),
             { type = "Link", label = "Configure friendly nameplates on the Friendly nameplates page", target = { section = "friendly" } },
-            CVarToggle("nameplateShowSelf", "Show personal resource display", "Shows a health/power bar over your own character. A separate Blizzard system from normal nameplates."),
-            CVarSlider("nameplateMaxDistance", "Maximum nameplate distance (yards)", 10, 60, 1, "The farthest away, in yards, a unit can be and still show a nameplate."),
+            CVarToggle("nameplateShowSelf", "Personal resource display", "Shows your health and power in a bar over your character."),
+            CVarSlider("nameplateMaxDistance", "Maximum nameplate distance", 10, 60, 1, "How far away, in yards, a unit can be and still show a nameplate."),
 
-            { type = "Header", label = "Keeping nameplates on screen", collapsible = true, collapsed = true },
-            CVarToggle("nameplateShowOffscreen", "Keep engaged enemies' nameplates on screen",
-                "Pins the nameplate of an enemy that is in combat with you or your group to the edge of the screen while the enemy itself is off screen."),
-            { type = "Dropdown", label = "Off-screen nameplates", options = RADIAL,
+            { type = "Header", label = "Off-screen nameplates", collapsible = true, collapsed = true },
+            CVarToggle("nameplateShowOffscreen", "Keep enemies in combat on screen",
+                "Pins nameplates of enemies in combat with your group to the screen edge while they are off screen."),
+            { type = "Dropdown", label = "Pin off-screen nameplates", options = RADIAL,
               get = function() return tonumber(CVars:Get("nameplateTargetRadialPosition")) or 0 end,
               set = function(value) CVars:Set("nameplateTargetRadialPosition", value) end,
               reset = function() CVars:Release("nameplateTargetRadialPosition") end,
               resetLabel = "Right-click to undo Plateau's change.",
               path = "cvar.nameplateTargetRadialPosition",
-              tooltip = "Chooses whose off-screen nameplate is pinned around the edge of the screen: nobody, only your target, or everything you're fighting. Keep engaged enemies' nameplates on screen is a separate setting that applies to enemies in combat with you or your group." },
-            CVarSlider("nameplateTopInset", "Top screen margin", 0, 0.3, 0.01, "Fraction of the screen height, measured down from the top edge, that nameplates can't enter (0.10 is 10% of the screen height). 12.1.5 brings this back."),
-            CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Fraction of the screen height, measured up from the bottom edge, that nameplates can't enter (0.10 is 10% of the screen height). 12.1.5 brings this back.")
+              tooltip = "Pins your target, or every enemy you are fighting, around the screen edge while off screen." },
+            CVarSlider("nameplateTopInset", "Top screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the top of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5."),
+            CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the bottom of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5.")
 
 
         ), GameExtras()),
@@ -1872,13 +1872,15 @@ ns.sections = {
                   ns.PromptReload()
               end
           end,
-          tooltip = "Off leaves friendly plates to Blizzard. Turning it off takes full effect after /reload." },
-        Style.Limited(FriendlyToggle("look.friendly.players", "nameplateShowFriendlyPlayers", "Friendly players"), "friendly"),
-        Style.Limited(FriendlyToggle("look.friendly.npcs", "nameplateShowFriendlyNpcs", "Friendly NPCs"), "friendly"),
+          tooltip = "Off: Blizzard draws friendly nameplates. Turning it off needs a UI reload." },
+        Style.Limited(FriendlyToggle("look.friendly.players", "nameplateShowFriendlyPlayers", "Friendly players",
+            "Shows nameplates for friendly players. Also changes Blizzard's matching setting."), "friendly"),
+        Style.Limited(FriendlyToggle("look.friendly.npcs", "nameplateShowFriendlyNpcs", "Friendly NPCs",
+            "Shows nameplates for friendly NPCs. Also changes Blizzard's matching setting."), "friendly"),
         Style.Limited(Gate({
             type = "Toggle",
             label = "Friendly pets and minions",
-            tooltip = "Pets, totems and other minions that belong to a friendly player. Off hides their plates completely, including the game's own. Follower dungeon companions are not affected. Takes effect after a /reload.",
+            tooltip = "Shows nameplates for friendly players' pets, totems and other minions. Off also hides the game's own. Needs a UI reload.",
             get = function() return ns.Get("look.friendly.minions") == true end,
             set = function(value)
                 Plateau.DB:Set("look.friendly.minions", value == true)
@@ -1889,75 +1891,75 @@ ns.sections = {
                 ns.PromptReload()
             end,
         }, FriendlyOn, FriendlyOffReason), "friendly"),
-        { type = "Note", label = "In dungeons, raids and arenas the game locks friendly plates, so Blizzard draws them there. The Blizzard settings at the bottom control those.", height = 32 },
+        { type = "Note", label = "In dungeons, raids and arenas the game draws friendly nameplates itself. The Blizzard settings at the bottom of this page control those.", height = 32 },
 
         { type = "Header", label = "Shorten names" },
         FriendlyPlayersGate({ type = "Dropdown", path = "look.friendly.nameMode", label = "Player names", options = SHORTEN_NAMES, limited = Style.limited.friendly, visibleIf = function() return Plateau.flavor == "forever" end,
-          tooltip = "How friendly players' names are shortened. Only shown on flavors where players have a given name and a surname." }),
+          tooltip = "How friendly player names are shortened." }),
         FriendlyNpcsGate({ type = "Dropdown", path = "look.friendly.npcNameMode", label = "NPC names", options = SHORTEN_NAMES, limited = Style.limited.friendly,
-          tooltip = "How friendly NPCs' names are shortened. NPCs commonly have multi-word names, so this is where shortening shows up the most." }),
+          tooltip = "How friendly NPC names are shortened." }),
 
         { type = "Header", label = "Names only" },
-        FriendlyGate({ type = "Toggle", path = "look.friendly.nameOnly", label = "Show just the name, no bar",
-          tooltip = "Plateau's friendly plates show only a name, with no health bar underneath. In dungeons and raids the game draws friendly plates; Only show friendly player names below does this there." }),
-        CVarToggle("nameplateUseClassColorForFriendlyPlayerUnitNames", "Class-color friendly player names",
-            "Blizzard's own setting, so it also covers Blizzard's friendly plates in dungeons and raids."),
-        NameOnlyGate(FriendlyPlayersGate({ type = "Color", path = "look.friendly.playerNameColor", label = "Player name color (class colors off)",
-          tooltip = "Used for friendly player names on Plateau's plates when class colors above are off. In dungeons and raids the game picks its own name colors." })),
+        FriendlyGate({ type = "Toggle", path = "look.friendly.nameOnly", label = "Show names only",
+          tooltip = "Hides the health bar on friendly nameplates and shows only the name. In dungeons and raids, use Only show friendly player names." }),
+        CVarToggle("nameplateUseClassColorForFriendlyPlayerUnitNames", "Class-colored player names",
+            "Colors friendly player names by class, including on Blizzard's nameplates."),
+        NameOnlyGate(FriendlyPlayersGate({ type = "Color", path = "look.friendly.playerNameColor", label = "Player name color",
+          tooltip = "The color of friendly player names when class colors are off." })),
         NameOnlyGate(FriendlyNpcsGate({ type = "Color", path = "look.friendly.npcNameColor", label = "NPC name color",
-          tooltip = "Used for friendly NPC names on Plateau's plates. In dungeons and raids the game picks its own name colors." })),
-        FriendlyPlayersGate(CVarSlider("nameplateSize", "Friendly player name size", 1, 5, 1,
-            "1 Small, 2 Medium, 3 Large, 4 Extra Large, 5 Huge. This is Blizzard's Nameplate Size, so it is the same setting as Nameplate size (Blizzard) on the Size page and in the game's own options: changing one changes the other. It sizes friendly players on Plateau's plates and on the plates the game draws in dungeons, raids and arenas. It also sizes the personal resource bar and anything else the game draws itself.")),
-        FriendlyNpcsGate({ type = "Slider", path = "look.friendly.npcNameScale", label = "Friendly NPC name size", min = 1, max = 5,
-          tooltip = "1 Small, 2 Medium, 3 Large, 4 Extra Large, 5 Huge, the same steps as Friendly player name size, so the same number gives the same size. Only Plateau's friendly plates use it; the plates the game draws in dungeons and raids use Friendly player name size for everyone." }),
-        NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.nameOffsetY", limited = Style.limited.friendly, label = "Name height (up or down)", min = -60, max = 60,
-          tooltip = "Moves the name up or down when only the name shows. Lower it if the name floats too far above the head." })),
+          tooltip = "The color of friendly NPC names." })),
+        FriendlyPlayersGate(CVarSlider("nameplateSize", "Blizzard nameplate size", 1, 5, 1,
+            "Blizzard's Nameplate Size, from 1 (Small) to 5 (Huge). Sizes friendly player names and every nameplate the game draws, including the personal resource display. Same setting as on the Size page.")),
+        FriendlyNpcsGate({ type = "Slider", path = "look.friendly.npcNameScale", label = "NPC name size", min = 1, max = 5,
+          tooltip = "The size of friendly NPC names on Plateau's nameplates, from 1 (Small) to 5 (Huge)." }),
+        NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.nameOffsetY", limited = Style.limited.friendly, label = "Name vertical offset", min = -60, max = 60,
+          tooltip = "Moves the name up or down." })),
 
         { type = "Header", label = "Raid target icon" },
         { type = "Link", label = "Raid icon placement for friendly plates is on the Raid target icon page", target = { section = "raidMarker", label = "Friendly nameplates" } },
 
         { type = "Header", label = "Full nameplate", visibleIf = FriendlyStyled },
-        { type = "Note", label = "Shown instead of just the name, above. Everything else about the look, like size and position, follows the regular nameplate settings; these are the only differences.", height = 32, visibleIf = FriendlyStyled },
+        { type = "Note", label = "Used when Show names only is off. Everything else follows the regular nameplate settings.", height = 24, visibleIf = FriendlyStyled },
         FriendlyGate({ type = "Toggle", path = "look.friendly.classColors", label = "Use class colors for names", visibleIf = FriendlyStyled,
-          tooltip = "Colors friendly player names by their class instead of a flat color." }),
-        FriendlyGate({ type = "Toggle", path = "look.friendly.classificationEnabled", label = "Show the elite/rare icon", visibleIf = FriendlyStyled,
-          tooltip = "Shows the elite, rare or boss icon on friendly plates that qualify." }),
-        FriendlyGate({ type = "Toggle", path = "look.friendly.levelEnabled", label = "Show the level", visibleIf = FriendlyStyled,
+          tooltip = "Colors friendly player names by class instead of a flat color." }),
+        FriendlyGate({ type = "Toggle", path = "look.friendly.classificationEnabled", label = "Show elite icon", visibleIf = FriendlyStyled,
+          tooltip = "Shows the elite, rare or boss icon on friendly nameplates." }),
+        FriendlyGate({ type = "Toggle", path = "look.friendly.levelEnabled", label = "Show level", visibleIf = FriendlyStyled,
           tooltip = "Shows the friendly unit's level." }),
         { type = "Link", label = "The health bar color is the Friendly swatch on the Health bar page", target = { section = "health", label = "Reaction colors" }, visibleIf = FriendlyStyled },
 
         { type = "Header", label = "Extras" },
-        FriendlyGate({ type = "Toggle", path = "look.friendly.hideInCombat", label = "Hide friendly plates in combat",
-          tooltip = "Plateau's friendly plates fade out while you're in combat and come back when it ends. Faded plates can still be clicked unless Click-through friendly plates is on (Clickable area page)." }),
+        FriendlyGate({ type = "Toggle", path = "look.friendly.hideInCombat", label = "Hide friendly nameplates in combat",
+          tooltip = "Fades out friendly nameplates during combat. They can still be clicked unless Click-through friendly plates is on." }),
         FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.groupColor", colorPath = "look.friendly.groupNameColor", label = "Group member name color",
-          tooltip = "Party and raid members' names use this color on Plateau's friendly plates, so your group stands out. Replaces their class color while on." }),
-        NameOnlyGate(FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.guildLine", colorPath = "look.friendly.guildColor", label = "Guild under player names",
-          tooltip = "Adds the player's guild, like <Plateau>, on a smaller line under their name. Only on Plateau's names-only friendly plates, so the open world and delves; the game draws friendly plates in dungeons and raids." })),
-        NameOnlyGate(FriendlyNpcsGate({ type = "ToggleColor", path = "look.friendly.npcTitle", colorPath = "look.friendly.npcTitleColor", label = "Title under NPC names",
-          tooltip = "Adds an NPC's title, like <Banker> under Jim, on a smaller line under their name. It is read from the NPC's tooltip once per kind of NPC; NPCs without a title show nothing extra." })),
+          tooltip = "Colors the names of party and raid members, replacing their class color." }),
+        NameOnlyGate(FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.guildLine", colorPath = "look.friendly.guildColor", label = "Show guild names",
+          tooltip = "Shows a player's guild, like <Plateau>, on a smaller line under their name." })),
+        NameOnlyGate(FriendlyNpcsGate({ type = "ToggleColor", path = "look.friendly.npcTitle", colorPath = "look.friendly.npcTitleColor", label = "Show NPC titles",
+          tooltip = "Shows an NPC's title, like <Banker>, on a smaller line under their name." })),
         NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.subtitleSize", label = "Guild and title text size", min = 6, max = 16,
-          tooltip = "Font size of the guild and NPC title lines. It grows and shrinks with the name, so NPC titles follow Friendly NPC name size." })),
+          tooltip = "The font size of guild names and NPC titles." })),
 
-        { type = "Header", label = "Blizzard's friendly plates (dungeons and raids)" },
+        { type = "Header", label = "Blizzard's friendly nameplates" },
         CVarToggle("nameplateShowOnlyNameForFriendlyPlayerUnits", "Only show friendly player names",
-            "Blizzard applies this to real players only. Follower dungeon companions are NPCs, so they keep their bars."),
+            "Shows only names on friendly players' nameplates the game draws, such as in dungeons and raids. Follower dungeon companions keep their bars."),
         CVarToggle("nameplateShowFriendlyPlayerMinions", "Friendly players' minions",
-            "Pets, totems and other minions. Blizzard's name-only setting skips them, so in dungeons and raids they always get a bar. Turn this off to hide them there."),
+            "Shows nameplates for friendly players' pets, totems and other minions on the nameplates the game draws."),
         { type = "Toggle", label = "Hide friendly pets in dungeons and raids", visibleIf = function() return Plateau.InstancePets ~= nil end,
           keywords = "pet pets minion minions totem names hide dungeon raid instance mythic",
           get = function() return Plateau.InstancePets ~= nil and Plateau.InstancePets:IsOn() end,
           set = function(value) Plateau.InstancePets:SetOn(value == true) end,
-          tooltip = "Inside dungeons and raids, hides other players' pets, totems and minions: both their nameplates and the names floating over them. Outside, your own settings for Friendly players' minions and Show friendly minion names come back. Applies after combat if you change it mid-fight. Saved for your account." },
+          tooltip = "Hides other players' pets, totems and minions, and their names, in dungeons and raids. Saved for your account." },
         RealmNameToggle(),
-        Gate({ type = "Toggle", label = "Hide the (*) after other realms' player names",
+        Gate({ type = "Toggle", label = "Hide realm marker (*)",
           get = function() return not Plateau.DB.saved.global.keepRealmMarker end,
           set = function(value)
               Plateau.DB.saved.global.keepRealmMarker = not value
               ns.PromptReload()
           end,
-          tooltip = "The game adds (*) to players from other realms, including on plates it draws itself in dungeons and raids. This tells the game to leave it off. Takes effect after a /reload." },
+          tooltip = "Hides the (*) after the names of players from other realms. Needs a UI reload." },
           function() return CVars:Get("nameplateShowFriendlyRealmName") ~= "1" end,
-          "Show friendly players' realm names is on, so the full realm name shows instead of (*)."),
+          "Turn off Show realm names to use this."),
         { type = "Link", label = "NPC names over heads are under Game settings", target = { section = "game", label = "Names over heads" } }
     ), BlizzardDrawn())),
 
@@ -2247,61 +2249,61 @@ ns.sections = {
               tooltip = "The cast bar flashes this color when a cast is interrupted." }))),
 
     Section("shield", "Buff warnings", { "look.shield.alertImportant", "look.shield.alertColor", "look.shield.alertDefensive", "look.shield.defensiveColor", "look.shield.alertEnrage", "look.shield.enrageColor", "look.shield.alertMagic", "look.shield.magicColor", "look.shield.alertOnlyMine", "look.shield.alertSize", "look.shield.alertTexture", "look.shield.alertTextureAlpha" }, List(
-        { type = "Note", label = "Highlight enemy buffs with a colored border or health bar overlay on the nameplate itself. Buff icons are on Enemy buffs and Important auras.", height = 32 },
+        { type = "Note", label = "Marks enemies that have certain buffs with a colored border or a health bar overlay. Buff icons are on Enemy buffs and Important auras.", height = 32 },
 
         { type = "Header", label = "Warnings" },
         { type = "ToggleColor", path = "look.shield.alertImportant", colorPath = "look.shield.alertColor", label = "Important buff",
-          tooltip = "Buffs the game itself flags as important on enemies, the ones you're meant to notice. Blizzard decides which buffs count; Plateau has no list of its own." },
+          tooltip = "Marks enemies that have a buff the game flags as important." },
         { type = "ToggleColor", path = "look.shield.alertEnrage", colorPath = "look.shield.enrageColor", label = "Enrage",
-          tooltip = "Any enrage effect that can be removed (Soothe, Tranquilizing Shot, Shiv)." },
+          tooltip = "Marks enemies that have an enrage effect that can be removed." },
         { type = "ToggleColor", path = "look.shield.alertDefensive", colorPath = "look.shield.defensiveColor", label = "Major defensive buff",
-          tooltip = "Major damage-reduction buffs on the enemy, the ones the game itself flags as big defensives. Blizzard decides which buffs count." },
+          tooltip = "Marks enemies that have a buff the game flags as a major defensive." },
         { type = "ToggleColor", path = "look.shield.alertMagic", colorPath = "look.shield.magicColor", label = "Dispellable Magic buff",
-          tooltip = "Any Magic buff that can be removed (Purge, Dispel Magic, Consume Magic, Spellsteal, Tranquilizing Shot, Devour Magic). Buffs you could take with Spellsteal count." },
+          tooltip = "Marks enemies that have a Magic buff that can be dispelled or stolen." },
         Gate({ type = "Toggle", path = "look.shield.alertOnlyMine", label = "Only warn for buffs you can remove",
-          tooltip = "Applies to Enrage and Dispellable Magic buff only. Hides those warnings while you know no spell that removes them: Soothe, Tranquilizing Shot or Shiv for enrages; Purge, Dispel Magic, Consume Magic, Spellsteal, Tranquilizing Shot or your pet's Devour Magic for Magic. It checks the spells you currently know, so it updates when you change spec, talents or pet. It does not check cooldowns, range or whether the spell is usable." }, Any(On("look.shield.alertEnrage"), On("look.shield.alertMagic")), "Turn on Enrage or Dispellable Magic buff to use this."),
-        { type = "Slider", path = "look.shield.alertSize", label = "Border thickness (0 = no border)", min = 0, max = 8,
-          tooltip = "How thick the warning border is." },
+          tooltip = "Hides the Enrage and Magic warnings when you know no spell that removes them. Cooldowns and range are not checked." }, Any(On("look.shield.alertEnrage"), On("look.shield.alertMagic")), "Turn on Enrage or Dispellable Magic buff to use this."),
+        { type = "Slider", path = "look.shield.alertSize", label = "Border thickness", min = 0, max = 8,
+          tooltip = "How thick the warning border is. 0 hides the border." },
         { type = "Dropdown", path = "look.shield.alertTexture", label = "Health bar overlay", options = ALERT_TEXTURES,
-          tooltip = "Lays a texture in the warning's color over the whole health bar, on top of the border or instead of it. Set Border thickness to 0 for the overlay alone." },
+          tooltip = "Covers the health bar with a pattern in the warning's color." },
         Gate({ type = "Slider", path = "look.shield.alertTextureAlpha", label = "Overlay opacity", min = 0.1, max = 1, step = 0.05,
           tooltip = "How opaque the health bar overlay is." }, Chosen("look.shield.alertTexture"), "Choose a Health bar overlay to use this."),
         { type = "PriorityList", path = "look.shield.alertOrder", label = "Warning priority", keys = { "important", "defensive", "enrage", "magic" },
           names = { important = "Important buff", defensive = "Major defensive buff", enrage = "Enrage", magic = "Dispellable Magic buff" },
-          tooltip = "When multiple warning categories apply, the highest-priority one is drawn on top of the others. Turned-off categories are ignored, and a category's border and overlay share the same priority. Drag a row to move it, or use Up and Down." },
+          tooltip = "When several warnings apply, the highest one shows. Drag a row, or use Up and Down, to reorder." },
 
-        { type = "Note", label = "Works in dungeons and raids: Blizzard classifies the enemy's buffs and Plateau only styles the warnings. Appearance changes made during combat apply after combat ends.", height = 44 }
+        { type = "Note", label = "Changes made in combat apply after combat ends.", height = 24 }
     )),
 
-    Section("auraAll", "All auras", AURA_TEXT_PATHS, AuraTextControls()),
+    Section("auraAll", "Aura text and tooltips", AURA_TEXT_PATHS, AuraTextControls()),
     AuraPage("auraMine", "Your debuffs", "look.auras.mine", "mine",
-        "Show your damage-over-time effects and other debuffs on enemies.", 24,
-        "Show your debuffs", "Shows icons for your own damage-over-time effects and other debuffs on the enemy. Crowd control effects you apply appear in the Crowd control group instead.",
+        "Shows your damage-over-time effects and other debuffs on enemies.", 24,
+        "Show your debuffs", "Shows icons for your debuffs on the enemy. Crowd control you apply shows in the Crowd control group.",
         List(
-            { type = "Toggle", path = "look.auras.mine.includeOthers", label = "Include other players' debuffs",
-              tooltip = "Also shows debuffs other players put on the enemy, after your own, like Blizzard's nameplates do. Crowd control stays in its own group. Can get busy in raids. The preview adds one sample icon for them." }
+            { type = "Toggle", path = "look.auras.mine.includeOthers", label = "Show other players' debuffs",
+              tooltip = "Also shows debuffs from other players, after your own." }
         ), true),
     AuraPage("auraCC", "Crowd control", "look.auras.cc", "cc",
-        "Show crowd control effects on enemies, including stuns, incapacitate effects, and roots, regardless of who applied them.", 44,
-        "Show crowd control", "Shows icons for stuns, incapacitates, roots and other crowd control on the enemy, no matter who applied it."),
+        "Shows crowd control on enemies, such as stuns and roots, from any source.", 32,
+        "Show crowd control", "Shows icons for stuns, incapacitates, roots and other crowd control on the enemy, from any source."),
     AuraPage("auraPurge", "Enemy buffs", "look.auras.purge", "purge",
-        "Show buffs on enemies. By default, only buffs that can be removed (purged, stolen or soothed) are shown. Enable Show all buffs to include other buffs.", 32,
+        "Shows buffs on enemies. By default only buffs that can be removed are shown.", 32,
         "Show enemy buffs", "Shows icons for buffs on the enemy.",
         List(
             { type = "Toggle", path = "look.auras.purge.allBuffs", label = "Show all buffs",
-              tooltip = "Off shows only removable buffs: Magic buffs that can be purged or stolen, and enrages. On shows every buff on the enemy except important ones and ones you cast. Hide boss auras, Hide permanent buffs, Maximum aura duration and Maximum icons still apply. Buffs the game flags as important appear under Important auras instead." },
-            Gate({ type = "Toggle", path = "look.auras.purge.showMagic", label = "Magic buffs I can purge or spellsteal",
-              tooltip = "Shows magic buffs you have a spell to remove (Purge, Dispel Magic, Consume Magic, Spellsteal, Devour Magic)." }, Off("look.auras.purge.allBuffs"), "Not used while Show all buffs is on."),
-            Gate({ type = "Toggle", path = "look.auras.purge.showEnrage", label = "Enrages I can soothe",
-              tooltip = "Shows enrage effects you have a spell to remove (Soothe, Tranquilizing Shot, Shiv)." }, Off("look.auras.purge.allBuffs"), "Not used while Show all buffs is on."),
+              tooltip = "Off: only buffs that can be removed. On: every buff except important ones and your own." },
+            Gate({ type = "Toggle", path = "look.auras.purge.showMagic", label = "Magic buffs you can remove",
+              tooltip = "Shows Magic buffs you know a spell to purge or steal." }, Off("look.auras.purge.allBuffs"), "Not used while Show all buffs is on."),
+            Gate({ type = "Toggle", path = "look.auras.purge.showEnrage", label = "Enrages you can remove",
+              tooltip = "Shows enrage effects you know a spell to soothe." }, Off("look.auras.purge.allBuffs"), "Not used while Show all buffs is on."),
             { type = "Toggle", path = "look.auras.purge.hideBoss", label = "Hide boss auras",
-              tooltip = "Hides buffs the game flags as boss auras (auras from boss mechanics). It checks the aura itself, not the unit, so ordinary buffs on a boss still show. Works in dungeons and raids: the game does the check." },
+              tooltip = "Hides auras from boss mechanics. Ordinary buffs on a boss still show." },
             { type = "Toggle", path = "look.auras.purge.hidePermanent", label = "Hide permanent buffs",
-              tooltip = "Buffs with no end time, like the one every enemy gets in a Mythic dungeon. Timed buffs still show. Works in dungeons and raids: the game does the check." }
+              tooltip = "Hides buffs with no duration, such as the one every enemy gets in a Mythic dungeon." }
         )),
     AuraPage("auraImportant", "Important auras", "look.auras.important", "important",
-        "Show buffs flagged as important by Blizzard. Disabled by default.", 24,
-        "Show important auras", "Shows icons for buffs Blizzard flags as important on this enemy, except ones you cast. This is a separate group of icons from Enemy buffs: a buff appears in one or the other. Buff warnings can also mark the same buffs on the nameplate. These are not necessarily removable or something you must act on."),
+        "Shows buffs the game flags as important on enemies.", 24,
+        "Show important auras", "Shows icons for buffs the game flags as important on the enemy, except your own. A buff shows here or under Enemy buffs, not both."),
     Section("target", "Target", TARGET_LOOK, List(
         { type = "Header", label = "My target", first = true },
         { type = "ToggleColor", path = "look.target.ring", colorPath = "look.target.ringColor", label = "Show target border",
