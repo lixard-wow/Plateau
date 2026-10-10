@@ -2247,9 +2247,8 @@ ns.sections = {
         Gate({ type = "Slider", path = "look.castbar.targetOffsetY", label = "Cast target vertical offset", min = -40, max = 40,
           tooltip = "Nudges the cast target's name down (negative) or up (positive)." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
 
-        { type = "Header", label = "Font" },
-        FontControls("look.castbar"),
-
+        { type = "Header", label = "Font" }
+    ), List(FontControls("look.castbar")), List(
         { type = "Header", label = "Interrupted casts" },
         { type = "ToggleColor", path = "look.castbar.showInterrupter", colorPath = "look.castbar.interruptedColor", label = "Show interrupter name",
           tooltip = "Shows who interrupted the cast, and turns the bar this color." }
