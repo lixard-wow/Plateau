@@ -1252,8 +1252,6 @@ local AURA_TEXT_POINTS = {
 local function AuraWhichControls(path, groupKey)
     return List(
         { type = "Header", label = "Which auras" },
-        { type = "Dropdown", path = path .. ".sort", label = "Sort order", options = AURA_SORT,
-          tooltip = "The order of icons in this group. Your own auras always come first." },
         { type = "Slider", path = path .. ".maxDuration", label = "Maximum aura duration", min = 0, max = 600, step = 5,
           tooltip = "Hides auras with a total duration longer than this many seconds, and permanent auras. 0 turns the limit off." },
         { type = "Note", label = "Spell lists are saved separately for each specialization. Switch specializations to edit its lists.", height = 24 },
@@ -1267,6 +1265,8 @@ end
 local function AuraLayoutControls(path)
     return List(
         { type = "Header", label = "Layout" },
+        { type = "Dropdown", path = path .. ".sort", label = "Sort order", options = AURA_SORT,
+          tooltip = "The order of icons in this group. Your own auras always come first." },
         { type = "Dropdown", path = path .. ".side", label = "Position", options = AURA_SIDES,
           tooltip = "Which side of the nameplate this group of icons sits on." },
         { type = "Dropdown", path = path .. ".align", label = "Alignment", options = AURA_ALIGN,
@@ -1996,8 +1996,10 @@ ns.sections = {
         Gate({ type = "Slider", path = "look.healthText.decimals", label = "Percentage decimal places", min = 0, max = 2,
           tooltip = "Decimal places shown in health percentages." }, HealthTextPercent, HealthTextPercentReason)
     ), GateList(HealthTextOn, TEXT_ON,
-        { type = "Color", path = "look.healthText.color", label = "Text color",
-          tooltip = "Color of the health text." },
+        { type = "Dropdown", path = "look.healthText.valuePrecision", label = "Number format", options = VALUE_PRECISION,
+          tooltip = "How large health numbers are shortened." },
+        { type = "Toggle", path = "look.healthText.percentSign", label = "Show % sign",
+          tooltip = "Shows a % sign after percentages." },
         { type = "Dropdown", path = "look.healthText.anchor", label = "Position", options = TEXT_POSITIONS,
           tooltip = "Where the health text sits on the health bar." },
         { type = "Slider", path = "look.healthText.offsetX", label = "Horizontal offset", min = -50, max = 50,
@@ -2005,18 +2007,17 @@ ns.sections = {
         { type = "Slider", path = "look.healthText.offsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Nudges the health text down (negative) or up (positive)." }
     ), List(
-        { type = "Header", label = "Font" }
-    ), GateList(HealthTextOn, TEXT_ON, FontControls("look.healthText")), List(
-        { type = "Header", label = "Extras" }
+        { type = "Header", label = "When to show" }
     ), GateList(HealthTextOn, TEXT_ON,
-        { type = "Dropdown", path = "look.healthText.valuePrecision", label = "Number format", options = VALUE_PRECISION,
-          tooltip = "How large health numbers are shortened." },
-        { type = "Toggle", path = "look.healthText.percentSign", label = "Show % sign",
-          tooltip = "Shows a % sign after percentages." },
         { type = "Toggle", path = "look.healthText.hideFull", label = "Hide at full health",
           tooltip = "Hides the text until the enemy takes damage." },
         { type = "Toggle", path = "look.healthText.targetOnly", label = "Only on my target",
-          tooltip = "Shows health text only on your target." },
+          tooltip = "Shows health text only on your target." }
+    ), List(
+        { type = "Header", label = "Color" }
+    ), GateList(HealthTextOn, TEXT_ON,
+        { type = "Color", path = "look.healthText.color", label = "Text color",
+          tooltip = "Color of the health text." },
         { type = "Toggle", path = "look.healthText.colorByHealth", label = "Color text by health",
           tooltip = "The text fades from the full health color to the low health color as health drops." }
     ), GateList(HealthTextColors, HealthTextColorsReason,
@@ -2029,7 +2030,9 @@ ns.sections = {
     ), GateList(HealthTextOn, TEXT_ON,
         { type = "ToggleColor", path = "look.healthText.executeColor", colorPath = "look.healthText.executeTextColor", label = "Execute range color",
           tooltip = "The text turns this color in execute range. The threshold is set on the Health bar page." }
-    ))),
+    ), List(
+        { type = "Header", label = "Font" }
+    ), GateList(HealthTextOn, TEXT_ON, FontControls("look.healthText")))),
 
     Section("name", "Name", { "look.name", "look.enemyTarget" }, Join(List(
         { type = "Header", label = "Name", first = true },
@@ -2040,31 +2043,31 @@ ns.sections = {
           tooltip = "Color of the name. Player names can use class colors instead." },
         { type = "Toggle", path = "look.name.classColors", label = "Use class colors for player names",
           tooltip = "Colors enemy player names by class. Friendly players are set on the Friendly nameplates page." },
+        { type = "Toggle", path = "look.name.matchBar", label = "Match health bar color",
+          tooltip = "Enemy names use the health bar's current color." },
         { type = "Dropdown", path = "look.name.position", label = "Position", options = NAME_POSITIONS,
           tooltip = "Where the name sits relative to the health bar." },
         { type = "Dropdown", path = "look.name.justify", label = "Text alignment", options = ALIGN,
           tooltip = "Aligns the name left, center or right." },
+        { type = "Slider", path = "look.name.gap", label = "Distance from bar", min = -10, max = 20,
+          tooltip = "Space between the name and the health bar. When the name is inside the bar, moves it up or down." },
         { type = "Dropdown", path = "look.name.mode", label = "Shorten names", options = SHORTEN_NAMES, limited = Plateau.flavor ~= "forever" and Style.limited.names or nil,
           tooltip = "Shortens enemy names to a word or initials." .. RETAIL_NAME_NOTE },
         { type = "Dropdown", label = "Long names", options = OVERFLOW_NAMES, path = "look.name.overflow",
           tooltip = "How names wider than the maximum width are cut." },
         { type = "Slider", path = "look.name.width", label = "Maximum name width", min = 0, max = 250,
           visibleIf = function() return ns.Get("look.name.overflow") ~= "none" end,
-          tooltip = "Widest a name can be before it is cut. 0 uses the nameplate width." },
-        { type = "Slider", path = "look.name.gap", label = "Distance from bar", min = -10, max = 20,
-          tooltip = "Space between the name and the health bar. When the name is inside the bar, moves it up or down." }
+          tooltip = "Widest a name can be before it is cut. 0 uses the nameplate width." }
     ), List(
-        { type = "Header", label = "Font" }
-    ), GateList(NameOn, NAME_ON, FontControls("look.name")), List(
-        { type = "Header", label = "Extras" }
+        { type = "Header", label = "When to show" }
     ), GateList(NameOn, NAME_ON,
         { type = "Toggle", path = "look.name.targetOnly", label = "Only on my target",
           tooltip = "Shows enemy names only on your target." },
-        { type = "Toggle", path = "look.name.matchBar", label = "Match health bar color",
-          tooltip = "Enemy names use the health bar's current color." },
         { type = "Toggle", path = "look.name.hideCasting", label = "Hide while casting",
           tooltip = "Hides an enemy's name while its cast bar is showing." }
     ), List(
+        { type = "Header", label = "Font" }
+    ), GateList(NameOn, NAME_ON, FontControls("look.name")), List(
         { type = "Header", label = "Enemy target name" },
         { type = "Toggle", path = "look.enemyTarget.enabled", label = "Show enemy target name",
           tooltip = "Shows who the enemy is targeting." }
@@ -2073,26 +2076,29 @@ ns.sections = {
           tooltip = "Colors the target's name by class. Otherwise it uses the color shown.",
           swatchLabel = "Custom target name color",
           swatchTooltip = "Used when Use class colors is off, or when a class color isn't available." },
+        { type = "ToggleColor", path = "look.enemyTarget.meColor", colorPath = "look.enemyTarget.meColorValue", label = "Color when targeting you",
+          tooltip = "The target's name turns this color when the enemy is targeting you." },
         { type = "Dropdown", path = "look.enemyTarget.anchor", label = "Position", options = TEXT_POSITIONS,
           tooltip = "Where the target's name sits on the health bar." },
         { type = "Slider", path = "look.enemyTarget.offsetX", label = "Horizontal offset", min = -50, max = 50,
           tooltip = "Nudges this text left (negative) or right (positive)." },
         { type = "Slider", path = "look.enemyTarget.offsetY", label = "Vertical offset", min = -30, max = 30,
-          tooltip = "Nudges this text down (negative) or up (positive)." },
-        { type = "ToggleColor", path = "look.enemyTarget.meColor", colorPath = "look.enemyTarget.meColorValue", label = "Color when targeting you",
-          tooltip = "The target's name turns this color when the enemy is targeting you." },
-        FontControls("look.enemyTarget")
-    ))),
+          tooltip = "Nudges this text down (negative) or up (positive)." }
+    ), List(
+        { type = "Header", label = "Enemy target font" }
+    ), GateList(EnemyTargetOn, ENEMY_TARGET_ON, FontControls("look.enemyTarget")))),
 
     Section("level", "Level", "look.level", Join(List(
         { type = "Header", label = "Level", first = true },
         { type = "Toggle", path = "look.level.enabled", label = "Show level",
           tooltip = "Shows the unit's level." }
     ), GateList(LevelOn, LEVEL_ON,
-        { type = "Toggle", path = "look.level.hideAtPlayerLevel", label = "Hide on same-level normal enemies",
-          tooltip = "Hides the level on non-elite enemies at your level." },
         { type = "Toggle", path = "look.level.showElitePlus", label = "Show + for elites",
           tooltip = "Adds + after the level of elites and rare elites (90+)." },
+        { type = "Toggle", path = "look.level.markRares", label = "Show r for rares",
+          tooltip = "Adds r after the level of rares (90r, or 90r+ for rare elites)." },
+        { type = "Dropdown", path = "look.level.bossText", label = "Boss level text", options = BOSS_LEVEL_TEXT,
+          tooltip = "What shows instead of a level on bosses and enemies whose level is hidden." },
         { type = "Toggle", path = "look.level.colorByDifficulty", label = "Color by difficulty",
           tooltip = "Colors the level by difficulty, like the target frame." },
         { type = "Color", path = "look.level.color", label = "Custom level color",
@@ -2104,19 +2110,17 @@ ns.sections = {
         { type = "Slider", path = "look.level.offsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Nudges the level text down (negative) or up (positive)." }
     ), List(
-        { type = "Header", label = "Font" }
-    ), GateList(LevelOn, LEVEL_ON, FontControls("look.level")), List(
-        { type = "Header", label = "Extras" }
+        { type = "Header", label = "When to show" }
     ), GateList(LevelOn, LEVEL_ON,
-        { type = "Toggle", path = "look.level.hideInInstances", label = "Hide in dungeons and raids",
-          tooltip = "Hides levels in dungeons and raids." },
-        { type = "Dropdown", path = "look.level.bossText", label = "Boss level text", options = BOSS_LEVEL_TEXT,
-          tooltip = "What shows instead of a level on bosses and enemies whose level is hidden." },
-        { type = "Toggle", path = "look.level.markRares", label = "Show r for rares",
-          tooltip = "Adds r after the level of rares (90r, or 90r+ for rare elites)." },
+        { type = "Toggle", path = "look.level.hideAtPlayerLevel", label = "Hide on same-level normal enemies",
+          tooltip = "Hides the level on non-elite enemies at your level." },
         { type = "Toggle", path = "look.level.hideTrivial", label = "Hide trivial levels",
-          tooltip = "Hides the level on gray enemies too low to give experience." }
-    ))),
+          tooltip = "Hides the level on gray enemies too low to give experience." },
+        { type = "Toggle", path = "look.level.hideInInstances", label = "Hide in dungeons and raids",
+          tooltip = "Hides levels in dungeons and raids." }
+    ), List(
+        { type = "Header", label = "Font" }
+    ), GateList(LevelOn, LEVEL_ON, FontControls("look.level")))),
 
     Section("castbar", "Cast bar", "look.castbar", Join(List(
         { type = "Header", label = "Show", first = true },
@@ -2510,23 +2514,21 @@ ns.sections = {
         { type = "Header", label = "Quest icon", first = true },
         { type = "Toggle", path = "look.quest.enabled", label = "Show quest icon",
           tooltip = "Marks enemies needed for quests in your log. Not available on every game version." },
+        { type = "Toggle", path = "look.colors.questExcludeBoss", label = "Exclude bosses",
+          tooltip = "Bosses never get the quest icon or quest color." },
         Gate({ type = "Dropdown", path = "look.quest.style", label = "Icon style", options = QUEST_ICONS,
           tooltip = "The quest icon's artwork." }, On("look.quest.enabled"), "Turn on Show quest icon to use this."),
         Gate({ type = "Slider", path = "look.quest.size", label = "Icon size", min = 8, max = 40,
-          tooltip = "Size of the quest icon." }, On("look.quest.enabled"), "Turn on Show quest icon to use this.")
+          tooltip = "Size of the quest icon." }, On("look.quest.enabled"), "Turn on Show quest icon to use this."),
+        Gate({ type = "Toggle", path = "look.quest.showProgress", label = "Show objective progress",
+          tooltip = "Shows quest progress, like 3/8, beside the icon. May be hidden inside instances." }, On("look.quest.enabled"), "Turn on Show quest icon to use this.")
         ),
         GateList(On("look.quest.enabled"), "Turn on Show quest icon to use this.", Placement("look.quest")),
         List(
         { type = "Header", label = "Quest enemy color" },
         { type = "ToggleColor", path = "look.colors.quest", colorPath = "look.colors.questColor", label = "Color quest enemies",
           tooltip = "Colors the health bars of enemies needed for your quests. Threat, tapped, target and focus colors take priority." },
-        { type = "Toggle", path = "look.colors.questExcludeBoss", label = "Exclude bosses",
-          tooltip = "Bosses never get the quest icon or quest color." }
-        ),
-        List(
-        { type = "Header", label = "Extras" },
-        Gate({ type = "Toggle", path = "look.quest.showProgress", label = "Show objective progress",
-          tooltip = "Shows quest progress, like 3/8, beside the icon. May be hidden inside instances." }, On("look.quest.enabled"), "Turn on Show quest icon to use this.")
+        { type = "Link", label = "Other health bar colors are on the Health bar colors page", target = { section = "healthColors", label = "Colorblind presets" } }
         )
     )),
 
@@ -2580,6 +2582,11 @@ ns.sections = {
     ), GateList(PowerOn, POWER_ON,
         { type = "Dropdown", path = "look.enemyPower.show", label = "Show on", options = ENEMY_POWER_SHOW,
           tooltip = "Which enemies get a power bar. Bosses are the same enemies as the Bosses health bar color." },
+        { type = "Toggle", path = "look.enemyPower.hideFull", label = "Hide at full power",
+          tooltip = "Hides the power bar while the enemy's power is full." }
+    ), List(
+        { type = "Header", label = "Bar" }
+    ), GateList(PowerOn, POWER_ON,
         { type = "Dropdown", path = "look.enemyPower.position", label = "Bar position", options = ENEMY_POWER_POSITIONS,
           tooltip = "Where the power bar sits relative to the health bar." },
         { type = "Slider", path = "look.enemyPower.height", label = "Height", min = 2, max = 20,
@@ -2592,26 +2599,21 @@ ns.sections = {
           tooltip = "Nudges the power bar down (negative) or up (positive)." },
         { type = "Slider", path = "look.enemyPower.alpha", label = "Opacity", min = 0.1, max = 1, step = 0.05,
           tooltip = "Opacity of the power bar and its text." },
+        { type = "Dropdown", path = "look.enemyPower.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
+          tooltip = "Fill texture of the power bar." },
         { type = "ToggleColor", path = "look.enemyPower.customColor", colorPath = "look.enemyPower.color", label = "Custom power color",
           tooltip = "Uses this color instead of the power type's usual color." },
         { type = "Color", path = "look.enemyPower.backgroundColor", label = "Background color",
           tooltip = "Color of the unfilled portion of the power bar." },
-        { type = "Toggle", path = "look.enemyPower.showText", label = "Show power text",
-          tooltip = "Shows the enemy's power on the bar, when available." }
-    ), List(
-        Gate({ type = "Slider", path = "look.enemyPower.textSize", label = "Font size", min = 6, max = 20,
-          tooltip = "Size of the power text." }, PowerText, PowerTextReason)
-    ), List(
-        { type = "Header", label = "Extras" }
-    ), GateList(PowerOn, POWER_ON,
-        { type = "Dropdown", path = "look.enemyPower.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
-          tooltip = "Fill texture of the power bar." },
         { type = "ToggleColor", path = "look.enemyPower.border", colorPath = "look.enemyPower.borderColor", label = "Border",
           tooltip = "Shows a thin border around the power bar." },
         { type = "Toggle", path = "look.enemyPower.smooth", label = "Smooth changes",
-          tooltip = "Animates power changes instead of jumping." },
-        { type = "Toggle", path = "look.enemyPower.hideFull", label = "Hide at full power",
-          tooltip = "Hides the power bar while the enemy's power is full." }
+          tooltip = "Animates power changes instead of jumping." }
+    ), List(
+        { type = "Header", label = "Text" }
+    ), GateList(PowerOn, POWER_ON,
+        { type = "Toggle", path = "look.enemyPower.showText", label = "Show power text",
+          tooltip = "Shows the enemy's power on the bar, when available." }
     ), GateList(PowerText, PowerTextReason,
         { type = "Dropdown", path = "look.enemyPower.textFormat", label = "Text format", options = POWER_TEXT_FORMATS,
           tooltip = "How the power text is shown." },
@@ -2619,6 +2621,8 @@ ns.sections = {
           tooltip = "Where the text sits on the power bar." },
         { type = "Dropdown", path = "look.enemyPower.font", label = "Font", options = Fonts, unknown = "Custom font",
           tooltip = "Font of the power text." },
+        { type = "Slider", path = "look.enemyPower.textSize", label = "Font size", min = 6, max = 20,
+          tooltip = "Size of the power text." },
         { type = "Dropdown", path = "look.enemyPower.outline", label = "Font outline", options = OUTLINES,
           tooltip = "The dark edge drawn around each letter, to keep it readable over any background." }
     ))),
@@ -2629,6 +2633,10 @@ ns.sections = {
             { type = "Toggle", path = "look.classPower.enabled", label = "Show class resource on target",
               tooltip = "Shows your combo points, holy power, chi or other class resource on your enemy target's nameplate." }
         ), GateTable(On("look.classPower.enabled"), "Turn on Show class resource on target to use this.", List(
+            { type = "Toggle", path = "look.classPower.hideEmpty", label = "Hide when empty",
+              tooltip = "Hides the resource while you have none. Death Knight runes always show." },
+            { type = "Toggle", path = "look.classPower.glowMax", label = "Glow at maximum",
+              tooltip = "The resource glows while it is full." },
             { type = "Toggle", path = "look.classPower.classColor", label = "Use class color",
               tooltip = "Colors filled segments with your class color." },
             Gate({ type = "Color", path = "look.classPower.color", label = "Color",
@@ -2642,14 +2650,7 @@ ns.sections = {
             { type = "Slider", path = "look.classPower.spacing", label = "Segment spacing", min = 0, max = 10,
               tooltip = "Space between segments." }
         )),
-        GateList(On("look.classPower.enabled"), "Turn on Show class resource on target to use this.", Placement("look.classPower")),
-        List({ type = "Header", label = "Extras" }),
-        GateList(On("look.classPower.enabled"), "Turn on Show class resource on target to use this.",
-            { type = "Toggle", path = "look.classPower.hideEmpty", label = "Hide when empty",
-              tooltip = "Hides the resource while you have none. Death Knight runes always show." },
-            { type = "Toggle", path = "look.classPower.glowMax", label = "Glow at maximum",
-              tooltip = "The resource glows while it is full." }
-        )
+        GateList(On("look.classPower.enabled"), "Turn on Show class resource on target to use this.", Placement("look.classPower"))
     )),
 
     Section("classification", "Elite icon", "look.classification", Join(List(
