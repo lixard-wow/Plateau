@@ -105,16 +105,16 @@ Combo points, holy power, soul shards, chi, arcane charges, essence or runes, dr
 A page gathers the game's nameplate settings (which nameplates show, names over heads, off-screen plates, distance scaling and more). Plateau changes only the ones you change, remembers what they were, and puts them back on request: right-click a setting, reset the page, or type `/plt cvars restore`.
 
 ## The settings window
-Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Escape), just above **AddOns**, or the minimap button (on retail Plateau is also in the addon list next to the minimap). Switches on the Game settings page hide each of these.
+Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Escape), just above **AddOns**, or the minimap button (on retail Plateau is also in the addon list next to the minimap). Switches on the Plateau settings page (the gear button) hide each of these.
 
 - **Live preview.** A sample plate updates as you change things. Click any part to jump to that part's settings: the page opens and the exact control flashes, or the page title flashes when the part is the whole section (the cast bar, for example). Drag a part to move it: it snaps to spots that make sense and leaves a one pixel space. Hold Shift to place it anywhere, or turn **Snap** off.
 - **Nameplate types.** Enemy, Enemy player, Friendly, My target and My focus are stacked down the left. Enemy is the base. The others follow it and only differ where you change them, and the window takes the color of the type you pick.
-- **Preview follows your settings.** Whatever you turn on shows on the sample. A **Preview** button next to Reset this section picks the sample's cast (Cast bar page), enemy type and threat (Health bar page) or badge (Elite icon page); it only changes the preview.
+- **Preview follows your settings.** Whatever you turn on shows on the sample. A **Preview** button next to Reset this section picks the sample's cast (Cast bar page), enemy type and threat (Health bar colors page), threat (Threat page) or badge (Elite icon page); it only changes the preview.
 - **Undo and redo.** Every change is remembered and named ("Moved Raid target icon", "Look: Clean and flat"). Open the list to step back several at once.
 - **Search.** Finds any setting by name or by words in its description and scrolls it to the top. On the Help page it searches only the help topics.
 - **Pages.** One page per part of the nameplate, plus Looks at the top and Game settings and Help at the bottom.
 - **Apply to all plates.** Copies every setting and position on the current page from the type you are editing to all plates.
-- **Reset.** Right-click a setting to reset it, use **Reset this section**, or **Reset everything**.
+- **Reset.** Right-click a setting to reset it, use **Reset this section**, or **Reset everything** on the Profiles page.
 - **Help.** A page of 44 topics covering every page and the common how-tos.
 
 ## Profiles and looks
@@ -132,7 +132,7 @@ Since patch 12.0 the game hides some information from addons during combat and i
 
 - It never reads, compares or does math on a hidden value. It hands the value straight to the game's own functions, which can use it safely. That is why cast colors, aura filters and buff warnings keep working in dungeons and raids.
 - Some things the game simply does not allow. Friendly nameplates are locked in dungeons, raids and arenas, so Blizzard draws them there. The game hides who interrupts a channeled cast, so that name may be missing. Threat can be hidden in some fights, and a plate then keeps its normal color. A setting that depends on hidden information shows a warning icon, and its tooltip explains what happens.
-- Nothing runs on each nameplate every frame, and updates avoid creating tables, so memory churn stays low. The **Performance** section on the Game settings page shows the real numbers from the game's own profiler.
+- Nothing runs on each nameplate every frame, and updates avoid creating tables, so memory churn stays low. **Diagnostics** on the Help page shows the real numbers from the game's own profiler.
 
 ## Commands
 - `/plt` opens the settings.
@@ -152,7 +152,7 @@ Plateau is in English. Every string can be translated, and translations are welc
 
 ## Troubleshooting
 - **Something looks wrong after an update:** `/reload`. New files need a full game restart.
-- **A plate is the wrong color:** the colors on the Health bar page are checked top to bottom, and your target and focus colors win over all of them. Threat and tagged colors win over enemy type colors. Some settings are overridden for one nameplate type only. A dot in the left menu marks a page that differs from the default.
+- **A plate is the wrong color:** the colors on the Health bar colors page are checked top to bottom, and your target and focus colors win over all of them. Threat and tagged colors win over enemy type colors. Some settings are overridden for one nameplate type only. A dot in the left menu marks a page that differs from the default.
 - **An error appears:** copy it from BugSack (or the game's error window) and `/plt debug` output when you report it.
 - **Everything is a mess:** `/plt reset` for the current profile, or `/plt cvars restore` for the game's own settings.
 
