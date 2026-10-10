@@ -68,30 +68,25 @@ local function Pulse(border, on)
     end
 end
 
-local PUSH = 1.25
+local BOB = 6
+local TOWARD = { TOP = { 0, -BOB }, BOTTOM = { 0, BOB }, LEFT = { BOB, 0 }, RIGHT = { -BOB, 0 } }
 
-local function Bob(texture, origin)
+local function Bob(texture, side)
     local group = texture.bob
     if not group then
         group = texture:CreateAnimationGroup()
         group:SetLooping("BOUNCE")
-        local push = group:CreateAnimation("Scale")
-        if push.SetScaleFrom then
-            push:SetScaleFrom(1, 1)
-            push:SetScaleTo(PUSH, PUSH)
-        else
-            push:SetScale(PUSH, PUSH)
-        end
-        push:SetDuration(0.45)
-        push:SetSmoothing("IN_OUT")
-        group.push = push
+        group.move = group:CreateAnimation("Translation")
+        group.move:SetDuration(0.45)
+        group.move:SetSmoothing("IN_OUT")
         texture.bob = group
     end
-    if group.origin ~= origin then
+    if group.side ~= side then
         local playing = group:IsPlaying()
         group:Stop()
-        group.push:SetOrigin(origin, 0, 0)
-        group.origin = origin
+        local offset = TOWARD[side]
+        group.move:SetOffset(offset[1], offset[2])
+        group.side = side
         if playing then
             group:Play()
         end
