@@ -304,6 +304,11 @@ check(foundOn("only warn for buffs you can remove", "shield") and foundOn("warni
 check(foundOn("hidden spells", "auraMine") and foundOn("allowed spells", "auraCC") and foundOn("hidden spells", "auraPurge") and foundOn("allowed spells", "auraImportant"), "spell lists are searchable on every aura page")
 check(foundOn("hide on same-level normal enemies", "level"), "renamed Level settings are searchable")
 check(foundOn("use class colors for player names", "name") and foundOn("long names", "name"), "renamed Name settings are searchable")
+check(foundOn("hostile", "healthColors") and foundOn("mob", "size"), "hostile and mob find enemy settings")
+check(foundOn("aggro", "threatText") and foundOn("hp", "healthText"), "aggro finds Threat and hp finds Health text")
+check(foundOn("ally", "friendly") and foundOn("totem", "friendly"), "ally and totem find Friendly settings")
+check(foundOn("cc", "auraCC") and foundOn("combo points", "classPower"), "player shorthand finds crowd control and class resource")
+check(foundOn("prd", "game") and foundOn("line of sight", "fading"), "prd and line of sight find their settings")
 
 local helpTopics = nsOpt.helpTopics
 check(#helpTopics >= 40, "Help topics are loaded for the Help search")
