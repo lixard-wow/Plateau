@@ -1440,8 +1440,7 @@ ns.sections = {
             Gate(CVarToggle("nameplateShowEnemyPets", "Enemy pets", "Shows nameplates for enemy players' pets."), EnemiesOn, "Turn on Enemy nameplates to use this."),
             Gate(CVarToggle("nameplateShowEnemyGuardians", "Enemy guardians", "Shows nameplates for temporary helpers summoned by enemies."), EnemiesOn, "Turn on Enemy nameplates to use this."),
             Gate(CVarToggle("nameplateShowEnemyTotems", "Enemy totems", "Shows nameplates for enemy totems."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            CVarSlider("nameplateMaxDistance", "Maximum nameplate distance", 10, 60, 1, "How far away, in yards, a unit can be and still show a nameplate."),
-            { type = "Link", label = "Configure friendly nameplates on the Friendly nameplates page", target = { section = "friendly" } }
+            CVarSlider("nameplateMaxDistance", "Maximum nameplate distance", 10, 60, 1, "How far away, in yards, a unit can be and still show a nameplate.")
         ), GameExtras("personal"), GameExtras("soft"), List(
 
             { type = "Header", label = "Off-screen nameplates", collapsible = true, collapsed = true },
@@ -1464,7 +1463,6 @@ ns.sections = {
         { type = "Note", label = "Each nameplate uses its largest scale below; they don't stack. Combat scale multiplies the enemy type scale. The preview always shows normal size.", height = 32 },
         { type = "Toggle", path = "look.scaling.smooth", label = "Smooth size changes",
           tooltip = "Nameplates grow and shrink smoothly instead of snapping." },
-        { type = "Link", label = "Width and height are on the Health bar page", target = { section = "health", label = "Size" } },
         { type = "Header", label = "Enemy type scale" },
         { type = "Toggle", path = "look.scaling.enabled", label = "Scale by enemy type", wide = true,
           tooltip = "Sizes enemy nameplates by type, using the same types as the Health bar colors." },
@@ -1516,8 +1514,7 @@ ns.sections = {
 
         { type = "Header", label = "Size by distance" },
         CVarSlider("nameplateMinScale", "Distant nameplate scale", 0.5, 1, 0.05, "Size of nameplates at the maximum nameplate distance."),
-        CVarSlider("nameplateMaxScale", "Nearby nameplate scale", 0.5, 1.5, 0.05, "Size of nameplates right next to you."),
-        { type = "Link", label = "Friendly nameplate scale is on the Friendly page", target = { section = "friendly", label = "Friendly nameplates" } }
+        CVarSlider("nameplateMaxScale", "Nearby nameplate scale", 0.5, 1.5, 0.05, "Size of nameplates right next to you.")
     )),
 
     Page("fading", "Fading", FADING_PATHS, FADING_CVARS, List(
@@ -1655,7 +1652,6 @@ ns.sections = {
           tooltip = "Height of out-of-combat nameplates compared to normal." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
         Gate({ type = "ToggleColor", path = "look.idle.colorBar", colorPath = "look.idle.color", label = "Use one bar color",
           tooltip = "Colors every out-of-combat health bar this color, replacing type, threat and quest colors." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
-        { type = "Link", label = "Combat scale is on the Size page", target = { section = "size", label = "Combat scale" } },
         { type = "Header", label = "Show when out of combat" },
         Gate({ type = "Toggle", path = "look.idle.show.auras", label = "Auras",
           tooltip = "Shows auras on out-of-combat nameplates." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this."),
@@ -1687,7 +1683,6 @@ ns.sections = {
           tooltip = "Width of every nameplate. The cast bar matches it." },
         { type = "Slider", path = "look.plate.height", label = "Height", min = 4, max = 40,
           tooltip = "Height of the health bar." },
-        { type = "Link", label = "Scale settings are on the Size page", target = { section = "size", label = "Enemy type scale" } },
 
         { type = "Header", label = "Bar" },
         { type = "Dropdown", path = "look.health.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
@@ -1802,15 +1797,11 @@ ns.sections = {
     Section("healthColors", "Health bar colors", { "look.colors.tapped", "look.colors.showTapped", "look.colors.healthGradient", "look.colors.healthLow", "look.colors.healthFade", "look.colors.customReaction", "look.colors.hostile", "look.colors.neutral", "look.colors.friendly", "look.colors.classColors", "look.colors.mobTypes", "look.colors.mobTypesInstancesOnly", "look.colors.boss", "look.colors.bossColor", "look.colors.lieutenant", "look.colors.lieutenantColor", "look.colors.higher", "look.colors.higherColor", "look.colors.caster", "look.colors.casterColor", "look.colors.elite", "look.colors.eliteColor", "look.colors.trivial", "look.colors.trivialColor" }, List(
         { type = "Header", label = "Colorblind presets", first = true },
         { type = "Presets", presets = Plateau.presets.palettes },
-        { type = "Note", label = "Color priority: target or focus, tapped, threat, quest, enemy type or class, reaction. Each color below is in that order.", height = 32 },
+        { type = "Note", label = "Color priority: target or focus, tapped, threat (Threat page), quest (Quest icon page), enemy type or class, reaction. The colors below follow that order.", height = 32 },
 
         { type = "Header", label = "Tapped enemies" },
         { type = "ToggleColor", path = "look.colors.showTapped", colorPath = "look.colors.tapped", label = "Tapped by another player",
           tooltip = "Color for enemies tagged by another player. You won't receive loot or credit from them." },
-
-        { type = "Header", label = "Threat and quest" },
-        { type = "Link", label = "Threat colors are on the Threat page", target = { section = "threatText", label = "Threat colors" } },
-        { type = "Link", label = "Quest enemy color is on the Quest icon page", target = { section = "quest", label = "Quest enemy color" } },
 
         { type = "Header", label = "Enemy players" },
         { type = "Toggle", path = "look.colors.classColors", label = "Use class colors for enemy players",
@@ -1882,7 +1873,6 @@ ns.sections = {
         NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.subtitleSize", label = "Guild and title text size", min = 6, max = 16,
           tooltip = "The font size of guild names and NPC titles." })),
         { type = "Note", label = "In dungeons, raids and arenas the game draws friendly nameplates itself. Blizzard's friendly nameplates, at the bottom of this page, control those.", height = 32 },
-        { type = "Link", label = "Click-through friendly nameplates is on the Clickable area page", target = { section = "clicking", label = "Friendly nameplates" } },
 
         { type = "Header", label = "Friendly players" },
         Style.Limited(FriendlyToggle("look.friendly.players", "nameplateShowFriendlyPlayers", "Friendly players",
@@ -1927,7 +1917,6 @@ ns.sections = {
           tooltip = "The color of friendly NPC names." })),
         NameOnlyGate(FriendlyNpcsGate({ type = "ToggleColor", path = "look.friendly.npcTitle", colorPath = "look.friendly.npcTitleColor", label = "Show NPC titles",
           tooltip = "Shows an NPC's title, like <Banker>, on a smaller line under their name." })),
-        { type = "Link", label = "NPC names over heads are under Game settings", target = { section = "game", label = "Names over heads" } },
 
         { type = "Header", label = "Pets and minions" },
         Style.Limited(Gate({
@@ -1961,7 +1950,6 @@ ns.sections = {
               end
           end,
           tooltip = "Shows nameplates and names for friendly players' pets, totems and minions in dungeons and raids. Saved for your account." },
-        { type = "Link", label = "Names over pets and minions are under Game settings", target = { section = "game", label = "Names over heads" } },
 
         { type = "Header", label = "Full nameplate", visibleIf = FriendlyStyled },
         { type = "Note", label = "Used when Show names only is off. Everything else follows the regular nameplate settings.", height = 24, visibleIf = FriendlyStyled },
@@ -1969,7 +1957,6 @@ ns.sections = {
           tooltip = "Shows the elite, rare or boss icon on friendly nameplates." }),
         FriendlyGate({ type = "Toggle", path = "look.friendly.levelEnabled", label = "Show level", visibleIf = FriendlyStyled,
           tooltip = "Shows the friendly unit's level." }),
-        { type = "Link", label = "The health bar color is the Friendly swatch on the Health bar colors page", target = { section = "healthColors", label = "Reaction colors" }, visibleIf = FriendlyStyled },
 
         { type = "Header", label = "Raid target icon" },
         FriendlyGate({ type = "Toggle", path = "look.friendly.raidMarker.own", label = "Separate friendly position",
@@ -1991,7 +1978,6 @@ ns.sections = {
           tooltip = "Moves the raid icon left or right." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
         Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetY", label = "Vertical offset", min = -40, max = 40,
           tooltip = "Moves the raid icon up or down." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        { type = "Link", label = "Raid icon size and opacity are on the Raid target icon page", target = { section = "raidMarker", label = "Raid target icon" } },
 
         { type = "Header", label = "Blizzard's friendly nameplates" },
         { type = "Note", label = "Change the friendly nameplates the game draws, such as in dungeons, raids and arenas.", height = 24 },
@@ -2400,10 +2386,8 @@ ns.sections = {
         Gate({ type = "Slider", path = "look.target.glowSize", label = "Glow size", min = 2, max = 24,
           tooltip = "How far the glow spreads from the nameplate." }, On("look.target.glow"), "Turn on Show target glow to use this."),
         Gate({ type = "Toggle", path = "look.target.pulse", label = "Pulse glow and border",
-          tooltip = "Your target's glow and border slowly pulse brighter and dimmer." }, Any(On("look.target.ring"), On("look.target.glow")), "Turn on Show target border or Show target glow to use this."),
+          tooltip = "Your target's glow and border slowly pulse brighter and dimmer." }, Any(On("look.target.ring"), On("look.target.glow")), "Turn on Show target border or Show target glow to use this.")
 
-        { type = "Link", label = "Target scale is on the Size page", target = { section = "size", label = "Target scale" } },
-        { type = "Link", label = "Non-target fading is on the Fading page", target = { section = "fading", label = "Non-target fading" } }
     )),
 
     Section("focus", "Focus", "look.focus", List(
@@ -2461,7 +2445,6 @@ ns.sections = {
           tooltip = "How far the glow spreads from the nameplate." }, On("look.focus.glow"), "Turn on Show focus glow to use this."),
         Gate({ type = "Toggle", path = "look.focus.pulse", label = "Pulse glow and border",
           tooltip = "Your focus's glow and border slowly pulse brighter and dimmer." }, Any(On("look.focus.ring"), On("look.focus.glow")), "Turn on Show focus border or Show focus glow to use this."),
-        { type = "Link", label = "Focus scale is on the Size page", target = { section = "size", label = "Focus scale" } },
         { type = "Note", label = "When your target is also your focus, Target settings win. Focus bar settings fill in where Target's are off." }
     )),
 
@@ -2492,10 +2475,7 @@ ns.sections = {
           tooltip = "Shows a glow around the nameplate under your cursor." }
     ), List(
         Gate({ type = "Slider", path = "look.mouseover.glowSize", label = "Glow size", min = 2, max = 24,
-          tooltip = "How far the glow spreads from the nameplate." }, HoverGlowOn, HoverGlowReason),
-        { type = "Link", label = "Mouseover scale is on the Size page", target = { section = "size", label = "Mouseover scale" } },
-        { type = "Link", label = "Mouseover in front is on the Layering and stacking page", target = { section = "layering", label = "Nameplate layering" } },
-        { type = "Link", label = "Keep mouseover at full opacity is on the Fading page", target = { section = "fading", label = "Non-target fading" } }
+          tooltip = "How far the glow spreads from the nameplate." }, HoverGlowOn, HoverGlowReason)
     ))),
 
     Section("raidMarker", "Raid target icon", "look.raidMarker", Join(List(
@@ -2519,7 +2499,6 @@ ns.sections = {
               return "Turn on Color border by raid icon to use this."
           end)
     ), List(
-        { type = "Link", label = "Friendly nameplates can use their own raid icon position on the Friendly page", target = { section = "friendly", label = "Raid target icon" } }
     ))),
 
     Section("quest", "Quest icon", { "look.quest", "look.colors.quest", "look.colors.questColor", "look.colors.questExcludeBoss" }, Join(
@@ -2540,8 +2519,7 @@ ns.sections = {
         List(
         { type = "Header", label = "Quest enemy color" },
         { type = "ToggleColor", path = "look.colors.quest", colorPath = "look.colors.questColor", label = "Color quest enemies",
-          tooltip = "Colors the health bars of enemies needed for your quests. Threat, tapped, target and focus colors take priority." },
-        { type = "Link", label = "Other health bar colors are on the Health bar colors page", target = { section = "healthColors", label = "Colorblind presets" } }
+          tooltip = "Colors the health bars of enemies needed for your quests. Threat, tapped, target and focus colors take priority." }
         )
     )),
 
