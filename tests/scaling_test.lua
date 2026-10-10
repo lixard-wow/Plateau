@@ -67,7 +67,7 @@ end
 Configure({ boss = 1.2, lieutenant = 1.1, higher = 1.05, trivial = 0.8 })
 local trash = Plate({})
 Scaling:Apply(trash)
-check(trash.scale == 0.8, "ordinary trash follows the Minor enemies (trivial) scale")
+check(trash.scale == 0.8, "ordinary trash follows the Other enemies (trivial) scale")
 local bossPlate = Plate({ mobType = "boss" })
 Scaling:Apply(bossPlate)
 check(bossPlate.scale == 1.2, "a boss follows the boss scale")
