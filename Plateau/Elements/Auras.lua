@@ -727,15 +727,7 @@ local function Detach(plate)
 end
 
 local function SetsWanted()
-    local global = ns.DB and ns.DB.saved and ns.DB.saved.global
-    local test = global and global.poolTest
-    local target, buffer = SET_TARGET, SET_BUFFER
-    if test == "off" then
-        return false
-    elseif type(test) == "number" then
-        target, buffer = test, math.ceil(test / 2)
-    end
-    local want = setStats.built < target and target or buffer
+    local want = setStats.built < SET_TARGET and SET_TARGET or SET_BUFFER
     return #spareSets < want
 end
 
@@ -820,66 +812,6 @@ function Auras:Disable(plate)
 end
 
 function Auras:OnEvent()
-end
-
-local testParking = CreateFrame("Frame")
-testParking:Hide()
-
-local function TestStep(say, label, fn, ...)
-    local ok, err = pcall(fn, ...)
-    say(("%s: %s"):format(label, ok and "ok" or ("|cffff5555failed|r " .. tostring(err))))
-    return ok
-end
-
-function Auras:CombatTest(say)
-    local first = ns.Driver:GetPlate("target")
-    local second
-    ns.Driver:ForEachActive(function(plate)
-        if plate ~= first and not second and not plate.isFriendly then
-            second = plate
-        end
-    end)
-    if not (first and second) then
-        say(L["Aura test: target an enemy that has your debuffs, with at least one other enemy nameplate in view."])
-        return
-    end
-    local secret = ShouldAurasBeSecret and ShouldAurasBeSecret()
-    say(L["Aura test start: in combat %s, auras secret %s"]:format(tostring(InCombatLockdown()), tostring(secret)))
-    local group = GROUPS[1]
-    local container
-    if not TestStep(say, "1 create container", function()
-        container = CreateFrame("AuraContainer", nil, first.overlay, "CustomAuraContainerTemplate")
-    end) then return end
-    container.buttons, container.group, container.plate, container.state = {}, group, first, first.state
-    container.keys, container.filters, container.added = { "test1" }, {}, {}
-    TestStep(say, "2 add aura group", function()
-        container:AddAuraGroup("test1", group.parts[1].filter, { initializeFrame = Initializer(container, group), sortMethod = group.parts[1].sort })
-    end)
-    TestStep(say, "3 place and show on target", function()
-        container:SetFlowLayoutAxis(AnchorUtil.FlowLayoutAxis.Horizontal)
-        container:SetFlowLayoutAnchorPoint("BOTTOMLEFT")
-        container:SetFlowLayoutGrowthDirection(Flow.Right, Flow.Up)
-        container:SetPoint("BOTTOMLEFT", first, "TOPLEFT", 0, 30)
-        container:SetUnit(first.unit)
-        container:SetEnabled(true)
-    end)
-    C_Timer.After(4, function()
-        say(L["Aura test: moving the icons to another enemy now (in combat %s)"]:format(tostring(InCombatLockdown())))
-        TestStep(say, "4 move to other plate", function()
-            container:SetParent(second.overlay)
-            container:SetFrameLevel(second.overlay:GetFrameLevel() + 5)
-            container:ClearAllPoints()
-            container:SetPoint("BOTTOMLEFT", second, "TOPLEFT", 0, 30)
-            container:SetUnit(second.unit)
-        end)
-    end)
-    C_Timer.After(10, function()
-        TestStep(say, "5 turn off and park", function()
-            container:SetEnabled(false)
-            container:SetParent(testParking)
-        end)
-        say(L["Aura test done. Did the icons show above your target, then move to the other enemy? Check BugSack for errors."])
-    end)
 end
 
 local SAMPLE_ICONS = {

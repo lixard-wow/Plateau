@@ -761,21 +761,9 @@ local POOL_TARGET = { enemy = 24, friendly = 4 }
 local POOL_BUFFER = { enemy = 8, friendly = 2 }
 local built = { enemy = 0, friendly = 0 }
 
-local function PoolTest()
-    local global = ns.DB and ns.DB.saved and ns.DB.saved.global
-    return global and global.poolTest
-end
-
 local function PoolSize(state)
-    local test = PoolTest()
-    if test == "off" then
-        return 0, 0
-    end
     if state == "friendly" and not (views and views.enemy.friendly.enabled) then
         return 0, 0
-    end
-    if type(test) == "number" and state == "enemy" then
-        return test, math.ceil(test / 2)
     end
     return POOL_TARGET[state], POOL_BUFFER[state]
 end
@@ -1453,7 +1441,7 @@ end
 function Driver:PoolPlan()
     local enemyTarget, enemyBuffer = PoolSize("enemy")
     local friendlyTarget, friendlyBuffer = PoolSize("friendly")
-    return PoolTest(), enemyTarget, enemyBuffer, friendlyTarget, friendlyBuffer
+    return enemyTarget, enemyBuffer, friendlyTarget, friendlyBuffer
 end
 
 Driver:RegisterEvent("NAME_PLATE_UNIT_ADDED")

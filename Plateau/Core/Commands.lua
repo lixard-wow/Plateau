@@ -99,12 +99,8 @@ function ns.PerformanceLines()
         local builtTotal, attached, spare, on, all = ns.Driver:PoolStats()
         lines[#lines + 1] = L["Plates built: %d (%d on game nameplates, %d spare); elements on: %d of %d"]:format(builtTotal, attached, spare, on, all)
         if ns.Driver.PoolPlan then
-            local test, enemyTarget, enemyBuffer, friendlyTarget, friendlyBuffer = ns.Driver:PoolPlan()
-            if test == "off" then
-                lines[#lines + 1] = L["Spare plates prepared ahead: none (test mode: every plate is built when it's needed)"]
-            else
-                lines[#lines + 1] = L["Spare plates prepared ahead: %d enemy and %d friendly at first, then %d and %d kept ready"]:format(enemyTarget, friendlyTarget, enemyBuffer, friendlyBuffer)
-            end
+            local enemyTarget, enemyBuffer, friendlyTarget, friendlyBuffer = ns.Driver:PoolPlan()
+            lines[#lines + 1] = L["Spare plates prepared ahead: %d enemy and %d friendly at first, then %d and %d kept ready"]:format(enemyTarget, friendlyTarget, enemyBuffer, friendlyBuffer)
         end
         if ns.Driver.Demand then
             local demand, shown, session = ns.Driver:Demand()
@@ -347,7 +343,6 @@ local function Help()
     print("  " .. L["/plt minimap - show or hide the minimap button"])
     print("  " .. L["/plt debug - version, CPU and memory for bug reports"])
     print("  " .. L["/plt debug reset - start counting slow frames from now"])
-    print("  " .. L["/plt debug pool off | <number> | on - test building plates when needed, a set number ahead, or the normal way"])
     print("  " .. L["/plt reset - reset the active profile"])
     print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
 end
@@ -529,26 +524,6 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
         Say(L["Slow-frame counters reset."])
-    elseif command == "debug" and path == "auratest" then
-        ns.Elements.Auras:CombatTest(Say)
-    elseif command == "debug" and path == "pool" then
-        local value = words[3] and words[3]:lower()
-        local number = tonumber(value)
-        local global = ns.DB.saved.global
-        if value == "off" then
-            global.poolTest = "off"
-        elseif number then
-            global.poolTest = math.max(0, math.min(60, math.floor(number)))
-        else
-            global.poolTest = nil
-        end
-        if global.poolTest == "off" then
-            Say(L["Test mode: no spare plates are prepared ahead; every plate is built when it's needed. Type /reload to start clean."])
-        elseif global.poolTest then
-            Say(L["Test mode: %d spare enemy plates are prepared ahead. Type /reload to start clean."]:format(global.poolTest))
-        else
-            Say(L["Spare plates are back to normal. Type /reload to start clean."])
-        end
     elseif command == "debug" then
         Debug()
     elseif command == "cvars" and path == "restore" then

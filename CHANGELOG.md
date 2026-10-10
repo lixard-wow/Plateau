@@ -16,7 +16,6 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
 #### Added
 - **/plt debug shows how many nameplates you needed**: the most styled at once (in and out of combat), how many were built on the spot because no spare was ready and how long that took, and the fewest spare plates and aura sets left. Benchmark addons can read the same lines.
-- **/plt debug pool off, /plt debug pool <number> and /plt debug pool on** to test with no spares, a set number of spares, or the normal amount.
 
 ### 2026-10-08 smoother plates, class resource, off-tank color and new display options
 
