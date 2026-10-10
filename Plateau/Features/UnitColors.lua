@@ -450,8 +450,29 @@ local function UpdateRole()
     isTank = role == "TANK"
 end
 
+local function ReadInstance()
+    local instance, instanceType = IsInInstance()
+    inInstance = (instance == true and instanceType ~= "pvp" and instanceType ~= "arena")
+        or (C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress() == true) or false
+    inRaid = instance == true and instanceType == "raid"
+end
+
+local function Refresh()
+    local wasTank, wasInInstance, wasInRaid = isTank, inInstance, inRaid
+    UpdateRole()
+    ReadInstance()
+    if cfgs.enemy and (wasTank ~= isTank or wasInInstance ~= inInstance or wasInRaid ~= inRaid) then
+        ns.Driver:RequestRestyle(true, "role or instance changed")
+    end
+end
+
+local LATE_CHECKS = { 1, 4 }
+
 UnitColors:RegisterEvent("PLAYER_ENTERING_WORLD")
 UnitColors:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventValid("SCENARIO_UPDATE") then
+    UnitColors:RegisterEvent("SCENARIO_UPDATE")
+end
 UnitColors:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 UnitColors:RegisterEvent("PLAYER_LEVEL_UP")
 UnitColors:SetScript("OnEvent", function(_, event)
@@ -461,15 +482,10 @@ UnitColors:SetScript("OnEvent", function(_, event)
         end
         return
     end
-    local wasTank, wasInInstance, wasInRaid = isTank, inInstance, inRaid
-    UpdateRole()
+    Refresh()
     if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
-        local instance, instanceType = IsInInstance()
-        inInstance = (instance == true and instanceType ~= "pvp" and instanceType ~= "arena")
-            or (C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress() == true) or false
-        inRaid = instance == true and instanceType == "raid"
-    end
-    if cfgs.enemy and (wasTank ~= isTank or wasInInstance ~= inInstance or wasInRaid ~= inRaid) then
-        ns.Driver:RequestRestyle(true, "role or instance changed")
+        for i = 1, #LATE_CHECKS do
+            C_Timer.After(LATE_CHECKS[i], Refresh)
+        end
     end
 end)
