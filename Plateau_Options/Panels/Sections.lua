@@ -1932,8 +1932,9 @@ ns.sections = {
         { type = "Header", label = "Pets and minions" },
         Style.Limited(Gate({
             type = "Toggle",
-            label = "Friendly pets and minions",
-            tooltip = "Shows nameplates for friendly players' pets, totems and other minions. Off also hides the game's own. Needs a UI reload.",
+            label = "Show in the open world",
+            keywords = "pet pets minion minions totem friendly",
+            tooltip = "Shows nameplates for friendly players' pets, totems and minions outside dungeons and raids. Needs a UI reload.",
             get = function() return ns.Get("look.friendly.minions") == true end,
             set = function(value)
                 Plateau.DB:Set("look.friendly.minions", value == true)
@@ -1944,13 +1945,22 @@ ns.sections = {
                 ns.PromptReload()
             end,
         }, FriendlyOn, FriendlyOffReason), "friendly"),
-        CVarToggle("nameplateShowFriendlyPlayerMinions", "Friendly players' minions",
-            "Shows nameplates for friendly players' pets, totems and other minions on the nameplates the game draws."),
-        { type = "Toggle", label = "Hide friendly pets in dungeons and raids", visibleIf = function() return Plateau.InstancePets ~= nil end,
-          keywords = "pet pets minion minions totem names hide dungeon raid instance mythic",
-          get = function() return Plateau.InstancePets ~= nil and Plateau.InstancePets:IsOn() end,
-          set = function(value) Plateau.InstancePets:SetOn(value == true) end,
-          tooltip = "Hides other players' pets, totems and minions, and their names, in dungeons and raids. Saved for your account." },
+        { type = "Toggle", label = "Show in dungeons and raids", visibleIf = function() return Plateau.InstancePets ~= nil end,
+          keywords = "pet pets minion minions totem names hide dungeon raid instance mythic friendly",
+          get = function()
+              return CVars:UserValue("nameplateShowFriendlyPlayerMinions") == "1" and not Plateau.InstancePets:IsOn()
+          end,
+          set = function(value)
+              if value then
+                  if CVars:UserValue("nameplateShowFriendlyPlayerMinions") ~= "1" then
+                      CVars:Set("nameplateShowFriendlyPlayerMinions", "1")
+                  end
+                  Plateau.InstancePets:SetOn(false)
+              else
+                  Plateau.InstancePets:SetOn(true)
+              end
+          end,
+          tooltip = "Shows nameplates and names for friendly players' pets, totems and minions in dungeons and raids. Saved for your account." },
         { type = "Link", label = "Names over pets and minions are under Game settings", target = { section = "game", label = "Names over heads" } },
 
         { type = "Header", label = "Full nameplate", visibleIf = FriendlyStyled },
