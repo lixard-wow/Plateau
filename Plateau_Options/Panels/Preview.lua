@@ -330,7 +330,8 @@ local function AddHotspots(plate)
     Hotspot(plate, plate, "focus", "Focus", 1, 6)
     Hotspot(plate, plate, "mouseover", "Mouseover", 1, 6)
     Hotspot(plate, plate, "shield", "Buff warnings", 1, 6)
-    Hotspot(plate, plate.health, "health", "Health bar", 20, 0)
+    Hotspot(plate, plate.health, function() return sectionKey == "healthColors" and "healthColors" or "health" end,
+        function() return sectionKey == "healthColors" and "Health bar colors" or "Health bar" end, 20, 0)
     Hotspot(plate, plate.castbar, "castbar", "Cast bar", 60, 0, castbarDrag)
     Hotspot(plate, plate.healthText, "healthText", "Health text", 80, 3,
         Drag.PositionSpec({ path = "look.healthText", positionKey = "anchor", text = true, fixedGap = 3, region = plate.healthText, anchor = AtHealth(plate) })).setting = "Show health text"
@@ -367,8 +368,10 @@ local function AddHotspots(plate)
         Drag.PositionSpec({ path = "look.classPower", region = plate.classPower, anchor = AtPlate(plate), noRing = true }))
     Hotspot(plate, plate.forces, "forces", "Mythic+ enemy forces", 80, 3,
         Drag.PositionSpec({ path = "look.forces", region = plate.forces, anchor = AtPlate(plate) }))
-    Hotspot(plate, plate.threatText, "threatText", "Threat percent", 80, 3,
-        Drag.PositionSpec({ path = "look.threatText", region = plate.threatText, anchor = AtPlate(plate) })).fitText = true
+    local threatSpot = Hotspot(plate, plate.threatText, "threatText", "Threat percent", 80, 3,
+        Drag.PositionSpec({ path = "look.threatText", region = plate.threatText, anchor = AtPlate(plate) }))
+    threatSpot.fitText = true
+    threatSpot.setting = "Show threat percent"
     Hotspot(plate, plate.faction, "faction", "Faction icon", 80, 1,
         Drag.PositionSpec({ path = "look.faction", region = plate.faction, anchor = AtPlate(plate) }))
     Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true

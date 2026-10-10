@@ -1385,7 +1385,7 @@ local SIZE_PATHS = {
     "look.scaling.elite", "look.scaling.trivial", "look.scaling.focusGrow", "look.scaling.focusScale",
     "look.scaling.castPop", "look.scaling.castScale", "look.target.useBlizzardScale", "look.target.scale",
     "look.scaling.mouseoverGrow", "look.scaling.mouseoverScale", "look.scaling.friendlyScale", "look.scaling.smooth",
-    "look.plate.followBlizzardSize", "look.plate.pixelPerfect",
+    "look.plate.followBlizzardSize",
 }
 local SIZE_CVARS = { "nameplateSize", "nameplateAuraScale", "nameplateMinScale", "nameplateMaxScale" }
 local FADING_PATHS = { "look.range", "look.target.dimOthers", "look.target.dimCombatOnly", "look.target.dimSkipFriendly" }
@@ -1499,8 +1499,6 @@ ns.sections = {
         CVarSlider("nameplateMaxScale", "Nearby nameplate scale", 0.5, 1.5, 0.05, "Size of nameplates right next to you."),
 
         { type = "Header", label = "Extras" },
-        { type = "Toggle", path = "look.plate.pixelPerfect", label = "Pixel-perfect borders",
-          tooltip = "Keeps borders and glows crisp at every nameplate size." },
         { type = "Toggle", path = "look.scaling.mouseoverGrow", label = "Scale mouseover nameplate",
           tooltip = "Changes the size of the enemy nameplate under your cursor." },
         Gate({ type = "Slider", path = "look.scaling.mouseoverScale", label = "Mouseover scale", min = 0.5, max = 1.6, step = 0.05,
@@ -1682,16 +1680,19 @@ ns.sections = {
           tooltip = "Applies the out-of-combat look only inside instances, such as dungeons, raids and delves." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this.")
     )),
 
-    Section("health", "Health bar", { "look.health", "look.execute", "look.bossPhases", "look.plate.width", "look.plate.height", "look.shield.absorbs", "look.shield.absorbColor", "look.shield.absorbStyle", "look.shield.absorbPosition", "look.shield.absorbGlow", "look.colors.tapped", "look.colors.showTapped", "look.colors.healthGradient", "look.colors.healthLow", "look.colors.healthFade", "look.colors.customReaction", "look.colors.hostile", "look.colors.neutral", "look.colors.friendly", "look.colors.classColors", "look.colors.mobTypes", "look.colors.mobTypesInstancesOnly", "look.colors.boss", "look.colors.bossColor", "look.colors.lieutenant", "look.colors.lieutenantColor", "look.colors.higher", "look.colors.higherColor", "look.colors.caster", "look.colors.casterColor", "look.colors.elite", "look.colors.eliteColor", "look.colors.trivial", "look.colors.trivialColor", "look.colors.threat", "look.colors.showThreatGood", "look.colors.showThreatWarning", "look.colors.threatGood", "look.colors.threatWarning", "look.colors.threatDisplay", "look.colors.threatBad", "look.colors.showOffTank", "look.colors.offTankColor" }, List(
+    Section("health", "Health bar", { "look.health", "look.execute", "look.bossPhases", "look.plate.width", "look.plate.height", "look.plate.pixelPerfect", "look.shield.absorbs", "look.shield.absorbColor", "look.shield.absorbStyle", "look.shield.absorbPosition", "look.shield.absorbGlow" }, List(
         { type = "Header", label = "Size", first = true },
         { type = "Slider", path = "look.plate.width", label = "Width", min = 60, max = 300,
           tooltip = "Width of every nameplate. The cast bar matches it." },
         { type = "Slider", path = "look.plate.height", label = "Height", min = 4, max = 40,
           tooltip = "Height of the health bar." },
+        { type = "Link", label = "Scale settings are on the Size page", target = { section = "size", label = "Enemy type scale" } },
 
         { type = "Header", label = "Bar" },
         { type = "Dropdown", path = "look.health.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
           tooltip = "Fill texture of the health bar. Your target and focus can use their own on the Target and Focus pages." },
+        { type = "Toggle", path = "look.health.desaturate", label = "Desaturate texture",
+          tooltip = "Removes the texture's own color so bar colors show exactly." },
         { type = "Dropdown", path = "look.health.overlayPattern", label = "Overlay pattern", options = OverlayPatterns, unknown = "Custom pattern",
           tooltip = "A pattern drawn over the bar texture, tinted to match the bar." },
         Gate({ type = "Slider", path = "look.health.overlayAlpha", label = "Overlay opacity", min = 0, max = 1, step = 0.05,
@@ -1700,6 +1701,8 @@ ns.sections = {
           tooltip = "Difference between the pattern's light and dark parts. 0 is flat." }, Chosen("look.health.overlayPattern"), "Choose an overlay pattern to use this."),
         { type = "Color", path = "look.health.background", label = "Background color",
           tooltip = "Color of the unfilled portion of the health bar." },
+        { type = "Dropdown", path = "look.health.backgroundTexture", label = "Background texture", options = BackgroundBars, unknown = "Custom texture",
+          tooltip = "Texture of the empty part of the bar, tinted by Background color." },
         { type = "Dropdown", path = "look.health.borderStyle", label = "Border style", options = BorderStyles, unknown = "Custom border",
           tooltip = "Style of the border around the health bar. Tooltip styles suit taller bars." },
         { type = "Color", path = "look.health.border", label = "Border color", set = BorderColorSetter("look.health"),
@@ -1708,6 +1711,18 @@ ns.sections = {
           tooltip = "How thick the border is." }, BorderOn, "Choose a border style to use this."),
         Gate({ type = "Toggle", path = "look.health.borderInside", label = "Draw border inside",
           tooltip = "Draws the border inside the bar's edges instead of around them. Target, mouseover and buff warning borders follow." }, BorderOn, "Choose a border style to use this."),
+        { type = "Toggle", path = "look.plate.pixelPerfect", label = "Pixel-perfect borders",
+          tooltip = "Keeps borders and glows crisp at every nameplate size." },
+
+        { type = "Header", label = "Fill" },
+        { type = "Toggle", path = "look.health.smooth", label = "Smooth health changes",
+          tooltip = "Animates health changes instead of jumping." },
+        { type = "Dropdown", path = "look.health.fillDirection", label = "Fill direction", options = FILL_DIRECTIONS,
+          tooltip = "Direction the health bar fills." },
+        { type = "ToggleColor", path = "look.health.spark", colorPath = "look.health.sparkColor", label = "Show spark",
+          tooltip = "Shows a bright line at the edge of the health fill." },
+        Gate({ type = "Slider", path = "look.health.sparkWidth", label = "Spark thickness", min = 1, max = 8,
+          tooltip = "Thickness of the spark line." }, On("look.health.spark"), "Turn on Show spark to use this."),
 
         { type = "Header", label = "Absorbs" },
         { type = "ToggleColor", path = "look.shield.absorbs", colorPath = "look.shield.absorbColor", label = "Show absorbs",
@@ -1780,47 +1795,21 @@ ns.sections = {
           tooltip = "Up to four health percentages for bosses without their own lines, separated by commas." }, On("look.bossPhases.enabled"), BOSS_ON),
         Gate({ type = "Toggle", path = "look.bossPhases.instancesOnly", label = "Default lines only in dungeons and raids",
           tooltip = "Hides the default lines on open-world bosses." }, On("look.bossPhases.enabled"), BOSS_ON),
-        { type = "Note", label = "Built-in lines may not match every boss. Bosses that change phase on energy or a timer have no lines.", height = 32 },
+        { type = "Note", label = "Built-in lines may not match every boss. Bosses that change phase on energy or a timer have no lines.", height = 32 }
+    )),
 
-        { type = "Header", label = "Bar extras" },
-        { type = "Toggle", path = "look.health.smooth", label = "Smooth health changes",
-          tooltip = "Animates health changes instead of jumping." },
-        { type = "Dropdown", path = "look.health.fillDirection", label = "Fill direction", options = FILL_DIRECTIONS,
-          tooltip = "Direction the health bar fills." },
-        { type = "ToggleColor", path = "look.health.spark", colorPath = "look.health.sparkColor", label = "Show spark",
-          tooltip = "Shows a bright line at the edge of the health fill." },
-        Gate({ type = "Slider", path = "look.health.sparkWidth", label = "Spark thickness", min = 1, max = 8,
-          tooltip = "Thickness of the spark line." }, On("look.health.spark"), "Turn on Show spark to use this."),
-        { type = "Toggle", path = "look.health.desaturate", label = "Desaturate texture",
-          tooltip = "Removes the texture's own color so bar colors show exactly." },
-        { type = "Dropdown", path = "look.health.backgroundTexture", label = "Background texture", options = BackgroundBars, unknown = "Custom texture",
-          tooltip = "Texture of the empty part of the bar, tinted by Background color." },
-        { type = "Toggle", path = "look.colors.healthGradient", label = "Color by health",
-          tooltip = "Enemy health bars fade toward the low health color as they lose health." },
-        Gate({ type = "Color", path = "look.colors.healthLow", label = "Low health color",
-          tooltip = "Color the bar fades toward as health drops." }, On("look.colors.healthGradient"), "Turn on Color by health to use this."),
-        Gate({ type = "Slider", path = "look.colors.healthFade", label = "Fade strength", min = 0.1, max = 1, step = 0.05,
-          tooltip = "How close the bar gets to the low health color at 0 health. 1 reaches it fully." }, On("look.colors.healthGradient"), "Turn on Color by health to use this."),
-
-        { type = "Header", label = "Colorblind presets" },
+    Section("healthColors", "Health bar colors", { "look.colors.tapped", "look.colors.showTapped", "look.colors.healthGradient", "look.colors.healthLow", "look.colors.healthFade", "look.colors.customReaction", "look.colors.hostile", "look.colors.neutral", "look.colors.friendly", "look.colors.classColors", "look.colors.mobTypes", "look.colors.mobTypesInstancesOnly", "look.colors.boss", "look.colors.bossColor", "look.colors.lieutenant", "look.colors.lieutenantColor", "look.colors.higher", "look.colors.higherColor", "look.colors.caster", "look.colors.casterColor", "look.colors.elite", "look.colors.eliteColor", "look.colors.trivial", "look.colors.trivialColor" }, List(
+        { type = "Header", label = "Colorblind presets", first = true },
         { type = "Presets", presets = Plateau.presets.palettes },
-        { type = "Note", label = "Color priority: target or focus, tapped, threat, quest, enemy type or class, reaction.", height = 32 },
+        { type = "Note", label = "Color priority: target or focus, tapped, threat, quest, enemy type or class, reaction. Each color below is in that order.", height = 32 },
 
         { type = "Header", label = "Tapped enemies" },
         { type = "ToggleColor", path = "look.colors.showTapped", colorPath = "look.colors.tapped", label = "Tapped by another player",
           tooltip = "Color for enemies tagged by another player. You won't receive loot or credit from them." },
 
-        { type = "Header", label = "Threat" },
-        { type = "ToggleColor", path = "look.colors.threat", colorPath = "look.colors.threatBad", label = "Threat colors",
-          tooltip = "Colors enemies by threat in combat. This color means threat is wrong: a tank lost aggro, or anyone else has it." },
-        Gate({ type = "Dropdown", path = "look.colors.threatDisplay", label = "Show threat on", options = THREAT_DISPLAY,
-          tooltip = "Shows threat on the health bar, its border, or both." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.showThreatWarning", colorPath = "look.colors.threatWarning", label = "Threat warning color",
-          tooltip = "Used when threat is about to change hands." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood", label = "Threat safe color",
-          tooltip = "Used when threat is where it should be." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.showOffTank", colorPath = "look.colors.offTankColor", label = "Off-tank color",
-          tooltip = "Tanks only. Used for enemies held by another tank in your group." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
+        { type = "Header", label = "Threat and quest" },
+        { type = "Link", label = "Threat colors are on the Threat page", target = { section = "threatText", label = "Threat colors" } },
+        { type = "Link", label = "Quest enemy color is on the Quest icon page", target = { section = "quest", label = "Quest enemy color" } },
 
         { type = "Header", label = "Enemy players" },
         { type = "Toggle", path = "look.colors.classColors", label = "Use class colors for enemy players",
@@ -1852,7 +1841,15 @@ ns.sections = {
         Gate({ type = "Color", path = "look.colors.neutral", label = "Neutral",
           tooltip = "Color for neutral units." }, On("look.colors.customReaction"), "Turn on Custom reaction colors to use this."),
         Gate({ type = "Color", path = "look.colors.friendly", label = "Friendly",
-          tooltip = "Color for friendly units." }, On("look.colors.customReaction"), "Turn on Custom reaction colors to use this.")
+          tooltip = "Color for friendly units." }, On("look.colors.customReaction"), "Turn on Custom reaction colors to use this."),
+
+        { type = "Header", label = "Low health" },
+        { type = "Toggle", path = "look.colors.healthGradient", label = "Color by health",
+          tooltip = "Enemy health bars fade toward the low health color as they lose health." },
+        Gate({ type = "Color", path = "look.colors.healthLow", label = "Low health color",
+          tooltip = "Color the bar fades toward as health drops." }, On("look.colors.healthGradient"), "Turn on Color by health to use this."),
+        Gate({ type = "Slider", path = "look.colors.healthFade", label = "Fade strength", min = 0.1, max = 1, step = 0.05,
+          tooltip = "How close the bar gets to the low health color at 0 health. 1 reaches it fully." }, On("look.colors.healthGradient"), "Turn on Color by health to use this.")
     )),
 
     Friendly("friendly", "Friendly nameplates", "look.friendly", Join(List(
@@ -1926,7 +1923,7 @@ ns.sections = {
           tooltip = "Shows the elite, rare or boss icon on friendly nameplates." }),
         FriendlyGate({ type = "Toggle", path = "look.friendly.levelEnabled", label = "Show level", visibleIf = FriendlyStyled,
           tooltip = "Shows the friendly unit's level." }),
-        { type = "Link", label = "The health bar color is the Friendly swatch on the Health bar page", target = { section = "health", label = "Reaction colors" }, visibleIf = FriendlyStyled },
+        { type = "Link", label = "The health bar color is the Friendly swatch on the Health bar colors page", target = { section = "healthColors", label = "Reaction colors" }, visibleIf = FriendlyStyled },
 
         { type = "Header", label = "Extras" },
         FriendlyGate({ type = "Toggle", path = "look.friendly.hideInCombat", label = "Hide friendly nameplates in combat",
@@ -2530,9 +2527,20 @@ ns.sections = {
         GateList(On("look.forces.enabled"), "Turn on Show enemy forces to use this.", FontControls("look.forces"))
     )),
 
-    Section("threatText", "Threat percent", "look.threatText", Join(
+    Section("threatText", "Threat", { "look.threatText", "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.showThreatWarning", "look.colors.threatWarning", "look.colors.showThreatGood", "look.colors.threatGood", "look.colors.showOffTank", "look.colors.offTankColor" }, Join(
         List(
-            { type = "Header", label = "Threat percent", first = true },
+            { type = "Header", label = "Threat colors", first = true },
+            { type = "ToggleColor", path = "look.colors.threat", colorPath = "look.colors.threatBad", label = "Threat colors",
+              tooltip = "Colors enemies by threat in combat. This color means threat is wrong: a tank lost aggro, or anyone else has it." },
+            Gate({ type = "Dropdown", path = "look.colors.threatDisplay", label = "Show threat on", options = THREAT_DISPLAY,
+              tooltip = "Shows threat on the health bar, its border, or both." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
+            Gate({ type = "ToggleColor", path = "look.colors.showThreatWarning", colorPath = "look.colors.threatWarning", label = "Threat warning color",
+              tooltip = "Used when threat is about to change hands." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
+            Gate({ type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood", label = "Threat safe color",
+              tooltip = "Used when threat is where it should be." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
+            Gate({ type = "ToggleColor", path = "look.colors.showOffTank", colorPath = "look.colors.offTankColor", label = "Off-tank color",
+              tooltip = "Tanks only. Used for enemies held by another tank in your group." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
+            { type = "Header", label = "Threat percent" },
             { type = "Note", label = "Your threat on each enemy as a percentage. 100% means you have aggro. The game may hide this number on Retail.", height = 32 },
             { type = "Toggle", path = "look.threatText.enabled", label = "Show threat percent",
               tooltip = "Shows your threat on each enemy NPC as a percentage." },
@@ -2785,8 +2793,11 @@ end
 local NOT_SAVED = " Only the preview changes; nothing is saved, and it goes back to the default when you leave this page."
 local SECTION_PICKS = {
     castbar = { HeaderPick("cast", "Preview cast", PREVIEW_CASTS, "The kind of cast the preview plays while this page is open, so you can see each cast bar color." .. NOT_SAVED) },
-    health = {
+    healthColors = {
         HeaderPick("enemy", "Preview enemy", PREVIEW_ENEMIES, "The kind of enemy the preview shows, so you can see its color." .. NOT_SAVED),
+        HeaderPick("threat", "Preview threat", PREVIEW_THREAT, "The threat state the preview shows, so you can see its color." .. NOT_SAVED),
+    },
+    threatText = {
         HeaderPick("threat", "Preview threat", PREVIEW_THREAT, "The threat state the preview shows, so you can see its color." .. NOT_SAVED),
     },
     classification = { HeaderPick("badge", "Preview badge", PREVIEW_BADGES, "The badge the preview shows." .. NOT_SAVED) },

@@ -806,11 +806,11 @@ local OFF_MENU = Logic.OFF_MENU
 
 local RAIL_GROUPS = {
     { label = "Profile", keys = { "profiles" } },
-    { label = "Nameplates", keys = { "health", "healthText", "threatText", "name", "level", "castbar", "enemyPower" } },
+    { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces" } },
     { label = "Behavior", keys = { "size", "fading", "layering", "clicking" } },
     { label = "States", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
-    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction", "forces", "classPower" } },
+    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction" } },
     { label = "Friendly", keys = { "friendly" } },
     { label = "Game", keys = { "game" } },
     { label = "Help", keys = { "help" } },

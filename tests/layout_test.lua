@@ -61,11 +61,11 @@ end
 
 local groups = {
     { label = "Profile", keys = { "profiles" } },
-    { label = "Nameplates", keys = { "health", "healthText", "threatText", "name", "level", "castbar", "enemyPower" } },
+    { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces" } },
     { label = "Behavior", keys = { "size", "fading", "layering", "clicking" } },
     { label = "States", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
-    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction", "forces", "classPower" } },
+    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction" } },
     { label = "Friendly", keys = { "friendly" } },
     { label = "Game", keys = { "game" } },
     { label = "Help", keys = { "help" } },
@@ -77,17 +77,21 @@ local castPaths = {
     "look.castbar.readyColor", "look.castbar.notReadyColor", "look.castbar.importantReadyColor",
     "look.castbar.importantNotReadyColor", "look.castbar.uninterruptible", "look.castbar.importantUninterruptible",
 }
-local onCast, onHealth = paths(byKey.castbar), paths(byKey.health)
+local onCast, onHealth, onColors = paths(byKey.castbar), paths(byKey.health), paths(byKey.healthColors)
 for _, path in ipairs(castPaths) do
-    check(onCast[path] and not onHealth[path], path .. " is on Cast bar and not on Health bar")
+    check(onCast[path] and not onHealth[path] and not onColors[path], path .. " is on Cast bar and not on the health bar pages")
 end
 check(byKey.colors == nil, "there is no separate Colors page")
 local onQuest = paths(byKey.quest)
-for _, path in ipairs({ "look.colors.bossColor", "look.colors.casterColor", "look.colors.threatBad", "look.colors.hostile", "look.colors.tapped", "look.colors.classColors", "look.colors.mobTypes" }) do
-    check(onHealth[path], path .. " is on Health bar")
+for _, path in ipairs({ "look.colors.bossColor", "look.colors.casterColor", "look.colors.hostile", "look.colors.tapped", "look.colors.classColors", "look.colors.mobTypes", "look.colors.healthGradient" }) do
+    check(onColors[path] and not onHealth[path], path .. " is on Health bar colors")
+end
+local onThreat = paths(byKey.threatText)
+for _, path in ipairs({ "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.offTankColor", "look.threatText.enabled" }) do
+    check(onThreat[path] and not onHealth[path] and not onColors[path], path .. " is on Threat")
 end
 for _, path in ipairs({ "look.colors.quest", "look.colors.questColor", "look.colors.questExcludeBoss" }) do
-    check(onQuest[path] and not onHealth[path], path .. " is on Quest icon only")
+    check(onQuest[path] and not onHealth[path] and not onColors[path], path .. " is on Quest icon only")
 end
 local function hasHeader(section, label)
     for _, spec in ipairs(section.controls) do
@@ -108,6 +112,11 @@ end
 for _, path in ipairs(castPaths) do
     check(groupCovers(byKey.castbar, path) and not groupCovers(byKey.health, path), "resetting Cast bar covers " .. path .. " and resetting Health bar does not")
 end
+for _, path in ipairs({ "look.colors.bossColor", "look.colors.hostile", "look.colors.healthGradient" }) do
+    check(groupCovers(byKey.healthColors, path) and not groupCovers(byKey.health, path), "resetting Health bar colors covers " .. path .. " and resetting Health bar does not")
+end
+check(groupCovers(byKey.threatText, "look.colors.threatBad") and groupCovers(byKey.threatText, "look.threatText.enabled") and not groupCovers(byKey.healthColors, "look.colors.threatBad"), "resetting Threat covers threat colors and threat percent")
+check(groupCovers(byKey.health, "look.plate.pixelPerfect") and not groupCovers(byKey.size, "look.plate.pixelPerfect"), "resetting Health bar covers pixel-perfect borders")
 
 local onName, onHealthText = paths(byKey.name), paths(byKey.healthText)
 check(onName["look.enemyTarget.enabled"] and not onHealthText["look.enemyTarget.enabled"], "the enemy target toggle moved from Health text to Name")
@@ -271,7 +280,8 @@ end
 check(foundOn("cast bar colors", "castbar"), "cast bar colors are found on Cast bar")
 check(not foundOn("cast bar colors", "health") or foundOn("cast bar colors", "castbar"), "the moved cast colors point at Cast bar")
 check(foundOn("interrupt ready", "castbar") and not foundOn("interrupt ready", "health"), "Interrupt ready is only found on Cast bar")
-check(foundOn("enemy types", "health") and foundOn("reaction colors", "health") and foundOn("colorblind presets", "health"), "enemy type, reaction and palette colors are found on Health bar")
+check(foundOn("enemy types", "healthColors") and foundOn("reaction colors", "healthColors") and foundOn("colorblind presets", "healthColors"), "enemy type, reaction and palette colors are found on Health bar colors")
+check(foundOn("threat colors", "threatText") and foundOn("threat percent", "threatText"), "threat colors and threat percent are found on Threat")
 check(foundOn("color quest enemies", "quest"), "quest enemy color is found on Quest icon")
 check(foundOn("dim", "fading") and foundOn("fade", "fading"), "searching dim or fade finds the non-target opacity setting on Fading")
 for _, query in ipairs({ "transparency", "colour", "kick", "bigger", "healthbar", "pvp", "hitbox", "gray", "low health", "skull" }) do
