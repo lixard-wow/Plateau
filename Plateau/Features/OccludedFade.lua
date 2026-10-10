@@ -1,7 +1,7 @@
 local _, ns = ...
 
 local CVAR = "nameplateOccludedAlphaMult"
-local KINDS = { party = "dungeon", raid = "raid", scenario = "delve", pvp = "pvp", arena = "pvp" }
+local KINDS = { party = "dungeon", raid = "raid", scenario = "delve", delve = "delve", pvp = "pvp", arena = "pvp" }
 
 local OccludedFade = CreateFrame("Frame")
 ns.OccludedFade = OccludedFade

@@ -451,6 +451,7 @@ local function UpdateRole()
 end
 
 UnitColors:RegisterEvent("PLAYER_ENTERING_WORLD")
+UnitColors:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 UnitColors:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 UnitColors:RegisterEvent("PLAYER_LEVEL_UP")
 UnitColors:SetScript("OnEvent", function(_, event)
@@ -462,10 +463,11 @@ UnitColors:SetScript("OnEvent", function(_, event)
     end
     local wasTank, wasInInstance, wasInRaid = isTank, inInstance, inRaid
     UpdateRole()
-    if event == "PLAYER_ENTERING_WORLD" then
+    if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
         local instance, instanceType = IsInInstance()
-        inInstance = instance and (instanceType == "party" or instanceType == "raid" or instanceType == "scenario")
-        inRaid = instance and instanceType == "raid"
+        inInstance = (instance == true and instanceType ~= "pvp" and instanceType ~= "arena")
+            or (C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress() == true) or false
+        inRaid = instance == true and instanceType == "raid"
     end
     if cfgs.enemy and (wasTank ~= isTank or wasInInstance ~= inInstance or wasInRaid ~= inRaid) then
         ns.Driver:RequestRestyle(true, "role or instance changed")

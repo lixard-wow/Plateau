@@ -19,6 +19,7 @@ local INSTANCE_CONTENT = {
     party = "dungeon",
     raid = "raid",
     scenario = "delve",
+    delve = "delve",
     arena = "arena",
     pvp = "battleground",
 }
