@@ -545,6 +545,34 @@ end
 
 local claimTime = { count = 0, total = 0, slowest = 0, restyles = 0, versionRestyles = 0, framesOver1 = 0, worstFrame = 0, frameAt = nil, frameMs = 0, parts = {} }
 
+local shown = { enemy = 0, friendly = 0 }
+local demand = { peak = { enemy = 0, friendly = 0 }, combatPeak = { enemy = 0, friendly = 0 }, misses = 0, combatMisses = 0, missMs = 0, worstMiss = 0 }
+
+local function NotePeaks(combat)
+    combat = combat or InCombatLockdown()
+    for state, n in pairs(shown) do
+        if n > demand.peak[state] then
+            demand.peak[state] = n
+        end
+        if combat and n > demand.combatPeak[state] then
+            demand.combatPeak[state] = n
+        end
+    end
+end
+
+local function CountShown(plate, state)
+    local old = plate.countedAs
+    if old == state then return end
+    if old then
+        shown[old] = shown[old] - 1
+    end
+    plate.countedAs = state
+    if state then
+        shown[state] = shown[state] + 1
+        NotePeaks()
+    end
+end
+
 local function ClaimPart(key, started)
     local now = debugprofilestop()
     claimTime.parts[key] = (claimTime.parts[key] or 0) + now - started
@@ -618,6 +646,7 @@ local function Claim(plate, unit)
     if plate.state ~= baseState then
         plate.state = baseState
     end
+    CountShown(plate, baseState)
     t = ClaimPart("unit checks", t)
     if plate.styledAs ~= styleOf[baseState] or plate.styleVersion ~= styleVersion then
         claimTime.restyles = claimTime.restyles + 1
@@ -653,22 +682,34 @@ local function Claim(plate, unit)
     ClaimDone(claimStarted)
 end
 
-local function Watch(plate, unit)
+local watched = {}
+
+local function Watch(plate)
+    CountShown(plate, nil)
     plate.active = false
     plate:Hide()
     ns.Scaling:Reset(plate)
     plate.stackRegion:SetScale(1)
-    plate:RegisterUnitEvent("UNIT_FACTION", unit)
-    plate:RegisterUnitEvent("UNIT_FLAGS", unit)
 end
 
+local OnUnitAdded
+
 local function RecheckWatched()
-    for unit, plate in pairs(platesByUnit) do
-        if not plate.active and Claimable(unit) then
-            Claim(plate, unit)
+    for unit in pairs(watched) do
+        if Claimable(unit) then
+            OnUnitAdded(unit)
         end
     end
 end
+
+local watcher = CreateFrame("Frame")
+watcher:RegisterEvent("UNIT_FACTION")
+watcher:RegisterEvent("UNIT_FLAGS")
+watcher:SetScript("OnEvent", function(_, _, unit)
+    if unit and watched[unit] and Claimable(unit) then
+        OnUnitAdded(unit)
+    end
+end)
 
 function AddHandlers(plate, element, events)
     if not events then return end
@@ -719,9 +760,29 @@ local POOL_TARGET = { enemy = 16, friendly = 4 }
 local POOL_BUFFER = { enemy = 8, friendly = 2 }
 local built = { enemy = 0, friendly = 0 }
 
+local function PoolTest()
+    local global = ns.DB and ns.DB.saved and ns.DB.saved.global
+    return global and global.poolTest
+end
+
+local function PoolSize(state)
+    local test = PoolTest()
+    if test == "off" then
+        return 0, 0
+    end
+    if state == "friendly" and not (views and views.enemy.friendly.enabled) then
+        return 0, 0
+    end
+    if type(test) == "number" and state == "enemy" then
+        return test, math.ceil(test / 2)
+    end
+    return POOL_TARGET[state], POOL_BUFFER[state]
+end
+
 local function PoolWanted(state)
-    local target = built[state] < POOL_TARGET[state] and POOL_TARGET[state] or POOL_BUFFER[state]
-    return #pools[state] < target
+    local target, buffer = PoolSize(state)
+    local want = built[state] < target and target or buffer
+    return #pools[state] < want
 end
 local POOL_ORDER = { "enemy", "friendly" }
 local BUILD_BUDGET_MS = 3
@@ -841,8 +902,31 @@ end
 local function CreatePlate(base, unit)
     local preferred = (unit and not UnitCanAttack("player", unit)) and "friendly" or "enemy"
     local fallback = preferred == "enemy" and "friendly" or "enemy"
-    local plate = table.remove(pools[preferred]) or table.remove(pools[fallback]) or BuildPlate(preferred)
+    local plate = table.remove(pools[preferred]) or table.remove(pools[fallback])
+    local combat = InCombatLockdown()
+    if not plate then
+        local started = debugprofilestop()
+        plate = BuildPlate(preferred)
+        local ms = debugprofilestop() - started
+        demand.misses = demand.misses + 1
+        if combat then
+            demand.combatMisses = demand.combatMisses + 1
+        end
+        demand.missMs = demand.missMs + ms
+        if ms > demand.worstMiss then
+            demand.worstMiss = ms
+        end
+    end
+    local spare = #pools.enemy + #pools.friendly
+    if not demand.minSpare or spare < demand.minSpare then
+        demand.minSpare = spare
+    end
+    if combat and (not demand.minSpareCombat or spare < demand.minSpareCombat) then
+        demand.minSpareCombat = spare
+    end
+    local attachStarted = debugprofilestop()
     AssignBase(plate, base)
+    ClaimPart("attach", attachStarted)
     return plate
 end
 
@@ -922,37 +1006,48 @@ local function SwapToStyled(plate, base, state)
     return spare
 end
 
-local function OnUnitAdded(unit)
+function OnUnitAdded(unit)
     local base = GetNamePlateForUnit(unit)
     if not base then return end
 
     local claimable, hiddenMinion = Claimable(unit)
     local plate = platesByBase[base]
-    if not plate then
-        plate = CreatePlate(base, unit)
-    elseif claimable then
-        plate = SwapToStyled(plate, base, UnitCanAttack("player", unit) and "enemy" or "friendly")
-    end
-    plate.unit = unit
-    platesByUnit[unit] = plate
-
     if claimable then
-        Claim(plate, unit)
-    else
-        Watch(plate, unit)
-        if hiddenMinion then
-            HideBlizzardPlate(base)
+        watched[unit] = nil
+        if not plate then
+            plate = CreatePlate(base, unit)
+            if not InCombatLockdown() then
+                poolWarmer:Show()
+            end
         else
-            RestoreBlizzardPlate(base)
+            plate = SwapToStyled(plate, base, UnitCanAttack("player", unit) and "enemy" or "friendly")
         end
+        plate.unit = unit
+        platesByUnit[unit] = plate
+        Claim(plate, unit)
+        return
+    end
+
+    watched[unit] = true
+    if plate then
+        plate.unit = unit
+        platesByUnit[unit] = plate
+        Watch(plate)
+    end
+    if hiddenMinion then
+        HideBlizzardPlate(base)
+    else
+        RestoreBlizzardPlate(base)
     end
 end
 
 local function OnUnitRemoved(unit)
+    watched[unit] = nil
     local plate = platesByUnit[unit]
     if not plate then return end
     platesByUnit[unit] = nil
 
+    CountShown(plate, nil)
     plate:UnregisterAllEvents()
     plate.active = false
     plate.isTarget, plate.isFocus, plate.isPlayer, plate.isFriendly = false, false, false, false
@@ -1220,6 +1315,7 @@ function Driver:Restyle(reason)
                 ApplyEmphasis(plate)
             end
         elseif Claimable(unit) then
+            watched[unit] = nil
             Claim(plate, unit)
         end
     end
@@ -1229,6 +1325,7 @@ function Driver:Restyle(reason)
             OnUnitAdded(dropped[i])
         end
     end
+    RecheckWatched()
 
     for i = 1, #previews do
         local plate = previews[i]
@@ -1292,6 +1389,12 @@ function Driver:ResetClaimTime()
     claimTime.parts = {}
     claimTime.versionRestyles = 0
     swaps = 0
+    demand.misses, demand.combatMisses, demand.missMs, demand.worstMiss = 0, 0, 0, 0
+    demand.minSpare, demand.minSpareCombat = nil, nil
+    for state, n in pairs(shown) do
+        demand.peak[state] = n
+        demand.combatPeak[state] = 0
+    end
     for key in pairs(restyleReasons) do
         restyleReasons[key] = nil
     end
@@ -1313,15 +1416,27 @@ end
 function Driver:CountActive()
     local total, claimed = 0, 0
     for _, plate in pairs(platesByUnit) do
-        total = total + 1
         if plate.active then
+            total = total + 1
             claimed = claimed + 1
         end
+    end
+    for _ in pairs(watched) do
+        total = total + 1
     end
     return total, claimed
 end
 
-Driver:RegisterEvent("NAME_PLATE_CREATED")
+function Driver:Demand()
+    return demand, shown
+end
+
+function Driver:PoolPlan()
+    local enemyTarget, enemyBuffer = PoolSize("enemy")
+    local friendlyTarget, friendlyBuffer = PoolSize("friendly")
+    return PoolTest(), enemyTarget, enemyBuffer, friendlyTarget, friendlyBuffer
+end
+
 Driver:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 Driver:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 Driver:RegisterEvent("PLAYER_TARGET_CHANGED")
@@ -1343,6 +1458,11 @@ Driver:SetScript("OnEvent", function(_, event, arg)
     end
     if event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
         inCombat = event == "PLAYER_REGEN_DISABLED"
+        if inCombat then
+            NotePeaks(true)
+        else
+            poolWarmer:Show()
+        end
         if (dimCombatOnly and targetPlate) or hideFriendlyCombat then
             for _, plate in pairs(platesByUnit) do
                 if plate.active then
@@ -1380,7 +1500,5 @@ Driver:SetScript("OnEvent", function(_, event, arg)
         OnUnitAdded(arg)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         OnUnitRemoved(arg)
-    elseif not platesByBase[arg] then
-        CreatePlate(arg)
     end
 end)

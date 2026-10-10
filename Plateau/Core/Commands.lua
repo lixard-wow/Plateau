@@ -88,6 +88,22 @@ function ns.PerformanceLines()
     if ns.Driver.PoolStats then
         local builtTotal, attached, spare, on, all = ns.Driver:PoolStats()
         lines[#lines + 1] = L["Plates built: %d (%d on game nameplates, %d spare); elements on: %d of %d"]:format(builtTotal, attached, spare, on, all)
+        if ns.Driver.PoolPlan then
+            local test, enemyTarget, enemyBuffer, friendlyTarget, friendlyBuffer = ns.Driver:PoolPlan()
+            if test == "off" then
+                lines[#lines + 1] = L["Spare plates prepared ahead: none (test mode: every plate is built when it's needed)"]
+            else
+                lines[#lines + 1] = L["Spare plates prepared ahead: %d enemy and %d friendly at first, then %d and %d kept ready"]:format(enemyTarget, friendlyTarget, enemyBuffer, friendlyBuffer)
+            end
+        end
+        if ns.Driver.Demand then
+            local demand, shown = ns.Driver:Demand()
+            lines[#lines + 1] = L["Most nameplates styled at once: %d enemy, %d friendly (in combat: %d enemy, %d friendly)"]:format(demand.peak.enemy, demand.peak.friendly, demand.combatPeak.enemy, demand.combatPeak.friendly)
+            lines[#lines + 1] = L["Plates built on the spot because no spare was ready: %d (%d in combat), %.1f ms in total, %.1f ms slowest"]:format(demand.misses, demand.combatMisses, demand.missMs, demand.worstMiss)
+            if demand.minSpare then
+                lines[#lines + 1] = L["Fewest spare plates left: %d (in combat: %s)"]:format(demand.minSpare, demand.minSpareCombat and tostring(demand.minSpareCombat) or "-")
+            end
+        end
         if ns.Driver.BuildTime then
             local count, average, slowest, parts = ns.Driver:BuildTime()
             if count > 0 then
@@ -318,6 +334,7 @@ local function Help()
     print("  " .. L["/plt minimap - show or hide the minimap button"])
     print("  " .. L["/plt debug - version, CPU and memory for bug reports"])
     print("  " .. L["/plt debug reset - start counting slow frames from now"])
+    print("  " .. L["/plt debug pool off | <number> | on - test building plates when needed, a set number ahead, or the normal way"])
     print("  " .. L["/plt reset - reset the active profile"])
     print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
 end
@@ -499,6 +516,24 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
         Say(L["Slow-frame counters reset."])
+    elseif command == "debug" and path == "pool" then
+        local value = words[3] and words[3]:lower()
+        local number = tonumber(value)
+        local global = ns.DB.saved.global
+        if value == "off" then
+            global.poolTest = "off"
+        elseif number then
+            global.poolTest = math.max(0, math.min(60, math.floor(number)))
+        else
+            global.poolTest = nil
+        end
+        if global.poolTest == "off" then
+            Say(L["Test mode: no spare plates are prepared ahead; every plate is built when it's needed. Type /reload to start clean."])
+        elseif global.poolTest then
+            Say(L["Test mode: %d spare enemy plates are prepared ahead. Type /reload to start clean."]:format(global.poolTest))
+        else
+            Say(L["Spare plates are back to normal. Type /reload to start clean."])
+        end
     elseif command == "debug" then
         Debug()
     elseif command == "cvars" and path == "restore" then
