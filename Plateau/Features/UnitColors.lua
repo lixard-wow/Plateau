@@ -337,9 +337,9 @@ local MOB_LABELS = {
     boss = { label = "Bosses" },
     lieutenant = { label = "Lieutenants" },
     higher = { label = "Higher-level elites" },
-    trivial = { label = "Minor enemies" },
+    trivial = { label = "Other enemies" },
     caster = { label = "Casters" },
-    elite = { label = "Elites" },
+    elite = { label = "Other elites" },
 }
 
 function UnitColors:Explain(plate, unit)

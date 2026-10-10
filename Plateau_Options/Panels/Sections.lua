@@ -481,8 +481,8 @@ local SHORTEN_NAMES = {
     { value = "full", label = "Full name" },
     { value = "firstWord", label = "First word only  (Aelindra)" },
     { value = "lastWord", label = "Last word only  (Dawnsong)" },
-    { value = "abbreviate", label = "Initials + last word  (A. Dawnsong)" },
-    { value = "lastInitial", label = "First word + last initial  (Aelindra D.)" },
+    { value = "abbreviate", label = "Initial and last word  (A. Dawnsong)" },
+    { value = "lastInitial", label = "First word and last initial  (Aelindra D.)" },
     { value = "initials", label = "Both initials  (A.D.)" },
 }
 
@@ -495,15 +495,15 @@ local OVERFLOW_NAMES = {
 local function Placement(path)
     return
         { type = "Slider", path = path .. ".alpha", label = "Opacity", min = 0, max = 1, step = 0.05,
-          tooltip = "How see-through it is. 1 is fully solid." },
+          tooltip = "How solid it is. 1 is fully solid." },
         { type = "Dropdown", path = path .. ".position", label = "Position", options = SIDES,
-          tooltip = "Which side of the nameplate (measured from the health bar) this sits on, or on top of the bar." },
-        { type = "Slider", path = path .. ".gap", label = "Distance from the nameplate", min = 0, max = 20,
-          tooltip = "How far this sits from the nameplate's edge, in the direction of Position (inward for the Inside options, and no effect at Inside bar, center). Applied before the offsets." },
+          tooltip = "Which side of the health bar this sits on, or on top of it." },
+        { type = "Slider", path = path .. ".gap", label = "Distance", min = 0, max = 20,
+          tooltip = "Space between this and the edge of the health bar. Has no effect at Inside bar, center." },
         { type = "Slider", path = path .. ".offsetX", label = "Horizontal offset", min = -40, max = 40,
-          tooltip = "Nudges it left (negative) or right (positive) from the spot set by Position and distance." },
+          tooltip = "Moves it left or right." },
         { type = "Slider", path = path .. ".offsetY", label = "Vertical offset", min = -40, max = 40,
-          tooltip = "Nudges it down (negative) or up (positive) from the spot set by Position and distance." }
+          tooltip = "Moves it up or down." }
 end
 
 local function Section(key, title, group, controls)
@@ -910,9 +910,9 @@ end
 
 local function FriendlyOffReason()
     if not FriendlyOn() then
-        return "Style friendly nameplates with Plateau is off, so Blizzard draws friendly plates with its own settings."
+        return "Turn on Style friendly nameplates with Plateau to use this."
     end
-    return "Friendly players and Friendly NPCs are both off, so Blizzard draws these with its own settings."
+    return "Turn on Friendly players or Friendly NPCs to use this."
 end
 
 local function NameOnlyGate(spec)
@@ -1491,7 +1491,7 @@ ns.sections = {
         { type = "Header", label = "Blizzard nameplate size" },
         BaseSpec({ type = "Toggle", path = "look.plate.followBlizzardSize", label = "Use Blizzard nameplate sizing for enemies",
           tooltip = "Blizzard's Nameplate Size and Debuff Scale also resize enemy nameplates. Friendly nameplates always follow Nameplate Size." }),
-        CVarSlider("nameplateSize", "Nameplate size", 1, 5, 1, "Blizzard's Nameplate Size, from 1 (Small) to 5 (Huge). Also sets Friendly player name size."),
+        CVarSlider("nameplateSize", "Nameplate size", 1, 5, 1, "Blizzard's Nameplate Size, from 1 (Small) to 5 (Huge). Same setting as Blizzard nameplate size on the Friendly page."),
         CVarSlider("nameplateAuraScale", "Debuff scale", 0.7, 1.4, 0.1, "Blizzard's aura icon size. Plateau's auras follow it while Use Blizzard nameplate sizing for enemies is on."),
 
         { type = "Header", label = "Size by distance" },
@@ -1828,7 +1828,7 @@ ns.sections = {
 
         { type = "Header", label = "Enemy types" },
         { type = "Toggle", path = "look.colors.mobTypes", label = "Enemy type colors",
-          tooltip = "Colors enemies by type. An enemy that matches several types uses the first in this order: bosses, lieutenants, higher-level elites, minor enemies, casters, elites." },
+          tooltip = "Colors enemies by type. An enemy that matches several types uses the first in this order: bosses, lieutenants, higher-level elites, minor enemies, casters, other elites." },
         Gate({ type = "Toggle", path = "look.colors.mobTypesInstancesOnly", label = "Only in dungeons, raids and delves",
           tooltip = "Open-world enemies use reaction colors." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
         Gate({ type = "ToggleColor", path = "look.colors.boss", colorPath = "look.colors.bossColor", label = "Bosses",
@@ -1837,12 +1837,12 @@ ns.sections = {
           tooltip = "Enemies that use mana." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
         Gate({ type = "ToggleColor", path = "look.colors.lieutenant", colorPath = "look.colors.lieutenantColor", label = "Lieutenants",
           tooltip = "Lieutenants above your level, and elites two or more levels above you." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.elite", colorPath = "look.colors.eliteColor", label = "Elites",
-          tooltip = "Elites at or below your level." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
+        Gate({ type = "ToggleColor", path = "look.colors.elite", colorPath = "look.colors.eliteColor", label = "Other elites",
+          tooltip = "Elites that match no other type." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
         Gate({ type = "ToggleColor", path = "look.colors.higher", colorPath = "look.colors.higherColor", label = "Higher-level elites",
-          tooltip = "Elites above your level." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.trivial", colorPath = "look.colors.trivialColor", label = "Minor enemies",
-          tooltip = "Minor and trivial enemies, and any enemy that matches no other type." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
+          tooltip = "Elites one level above you." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
+        Gate({ type = "ToggleColor", path = "look.colors.trivial", colorPath = "look.colors.trivialColor", label = "Other enemies",
+          tooltip = "Minor enemies, and any enemy that matches no other type." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
 
         { type = "Header", label = "Reaction colors" },
         { type = "Toggle", path = "look.colors.customReaction", label = "Custom reaction colors",
@@ -1930,7 +1930,7 @@ ns.sections = {
 
         { type = "Header", label = "Extras" },
         FriendlyGate({ type = "Toggle", path = "look.friendly.hideInCombat", label = "Hide friendly nameplates in combat",
-          tooltip = "Fades out friendly nameplates during combat. They can still be clicked unless Click-through friendly plates is on." }),
+          tooltip = "Fades out friendly nameplates during combat. They can still be clicked unless Click-through friendly nameplates is on." }),
         FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.groupColor", colorPath = "look.friendly.groupNameColor", label = "Group member name color",
           tooltip = "Colors the names of party and raid members, replacing their class color." }),
         NameOnlyGate(FriendlyPlayersGate({ type = "ToggleColor", path = "look.friendly.guildLine", colorPath = "look.friendly.guildColor", label = "Show guild names",
@@ -2482,7 +2482,7 @@ ns.sections = {
           tooltip = "Friendly nameplates use their own raid icon position, set below. Size and opacity stay shared." }),
         Gate({ type = "Dropdown", path = "look.friendly.raidMarker.position", label = "Position", options = SIDES,
           tooltip = "Where the raid icon sits around a friendly health bar." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.gap", label = "Distance from the nameplate", min = 0, max = 20,
+        Gate({ type = "Slider", path = "look.friendly.raidMarker.gap", label = "Distance", min = 0, max = 20,
           tooltip = "Space between the raid icon and the friendly nameplate." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
         Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetX", label = "Horizontal offset", min = -40, max = 40,
           tooltip = "Moves the raid icon left or right." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
