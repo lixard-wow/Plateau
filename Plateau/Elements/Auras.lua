@@ -519,6 +519,40 @@ local function PartCount(group, index, groupDb, allBuffs)
 end
 Auras.PartCount = PartCount
 
+local function AddPart(container, group, index)
+    local part = group.parts[index]
+    local filter = part.filter .. (group.key == "important" and NAMEPLATE_ONLY or "")
+    container:AddAuraGroup(container.keys[index], filter, {
+        initializeFrame = Initializer(container, group),
+        sortMethod = part.sort,
+        candidateFilters = part.candidates,
+    })
+    container.added[index] = true
+    container.filters[index] = filter
+end
+
+function Auras:BuildStep(plate, db, deadline)
+    if plate.nameOnly then
+        return true
+    end
+    for _, group in ipairs(GROUPS) do
+        local container = plate.auras[group.key]
+        local groupDb = db[group.key]
+        local allBuffs = groupDb.allBuffs == true
+        for index in ipairs(container.keys) do
+            if not container.added[index] and PartCount(group, index, groupDb, allBuffs) > 0 then
+                if deadline and debugprofilestop() > deadline then
+                    return false
+                end
+                AddPart(container, group, index)
+                container.sortMethod = nil
+                container.filterSignature = nil
+            end
+        end
+    end
+    return true
+end
+
 function Auras:Style(plate, db)
     for _, group in ipairs(GROUPS) do
         local container = plate.auras[group.key]
@@ -546,15 +580,7 @@ function Auras:Style(plate, db)
         for index, key in ipairs(container.keys) do
             local count = (plate.preview or plate.nameOnly) and 0 or PartCount(group, index, groupDb, allBuffs)
             if count > 0 and not container.added[index] then
-                local part = group.parts[index]
-                local filter = part.filter .. nameplateOnly
-                container:AddAuraGroup(key, filter, {
-                    initializeFrame = Initializer(container, group),
-                    sortMethod = part.sort,
-                    candidateFilters = part.candidates,
-                })
-                container.added[index] = true
-                container.filters[index] = filter
+                AddPart(container, group, index)
                 added = true
             end
             if container.added[index] then

@@ -801,7 +801,7 @@ local function StartBuild(state)
     plate.built = {}
     AddOverlay(plate)
     plate.state = state
-    return { plate = plate, state = state, index = 1, spent = debugprofilestop() - started }
+    return { plate = plate, state = state, index = 1, stepIndex = 1, spent = debugprofilestop() - started }
 end
 
 local function RunBuild(job, deadline)
@@ -826,6 +826,25 @@ local function RunBuild(job, deadline)
         plate:SetScript("OnEvent", OnPlateEvent)
         if deadline and debugprofilestop() > deadline then
             return false
+        end
+    end
+    local look = views and views[job.state]
+    if look then
+        plate.nameOnly = job.state == "friendly" and views.enemy.friendly.nameOnly == true
+        while job.stepIndex <= #elements do
+            local element = elements[job.stepIndex]
+            if element.BuildStep and plate.built[element] and element.enabledIn[job.state] then
+                local started = debugprofilestop()
+                local done = element:BuildStep(plate, look[element.key], deadline)
+                AddPartTime(element, started)
+                if not done then
+                    return false
+                end
+            end
+            job.stepIndex = job.stepIndex + 1
+            if deadline and debugprofilestop() > deadline then
+                return false
+            end
         end
     end
     plate.timing = true
