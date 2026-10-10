@@ -53,7 +53,7 @@ ns.helpTopics = {
         category = "Getting started",
         title = "Resetting settings",
         keywords = "reset default restore revert clear start over everything",
-        text = "There are three levels of reset. Right-click a setting to reset just that one to its default. Reset this section, at the bottom of the window, resets the whole page you are on. Reset everything, in the same spot on the Profiles page, resets every setting in the active profile. Each of the last two asks you to click again to confirm.\n\nIf you only want to undo a recent mistake, Undo is gentler than a reset.",
+        text = "There are three levels of reset. Right-click a setting to reset just that one to its default. Reset this section, at the bottom of the window, resets the whole page you are on. Reset everything, in the same spot on the Profiles page, resets the active profile: a built-in look goes back to how it shipped, and any other profile to the defaults. Each of the last two asks you to click again to confirm.\n\nIf you only want to undo a recent mistake, Undo is gentler than a reset.",
     },
     {
         category = "Getting started",
@@ -281,7 +281,7 @@ ns.helpTopics = {
         category = "Commands",
         title = "Slash commands",
         keywords = "slash commands plt debug setup reset cvars",
-        text = "/plt opens the settings window.\n/plt setup opens the look picker from the first-time setup.\n/plt minimap shows or hides the minimap button.\n/plt debug shows the version, restrictions, CPU and memory, and how Plateau reads your target. Paste it when you report a bug.\n/plt reset puts every setting in the current profile back to its default.\n/plt cvars restore undoes every game nameplate setting Plateau changed.",
+        text = "/plt opens the settings window.\n/plt setup opens the look picker from the first-time setup.\n/plt minimap shows or hides the minimap button.\n/plt debug shows the version, restrictions, CPU and memory, and how Plateau reads your target. Paste it when you report a bug.\n/plt reset resets the active profile, the same as Reset everything.\n/plt cvars restore undoes every game nameplate setting Plateau changed.",
     },
 }
 

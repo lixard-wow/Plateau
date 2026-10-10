@@ -1260,6 +1260,12 @@ end
 function DB:Reset(path)
     if not path then
         Clear(self.profile, "states")
+        local entry = ns.Builtins and ns.Builtins.ByName(self.profileName)
+        if entry then
+            for valuePath, value in pairs(ns.Builtins.Values(entry)) do
+                Assign(valuePath, value)
+            end
+        end
         Changed()
         return true
     end

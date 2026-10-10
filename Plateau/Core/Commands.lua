@@ -318,7 +318,7 @@ local function Help()
     print("  " .. L["/plt minimap - show or hide the minimap button"])
     print("  " .. L["/plt debug - version, CPU and memory for bug reports"])
     print("  " .. L["/plt debug reset - start counting slow frames from now"])
-    print("  " .. L["/plt reset - put every setting in this profile back to its default"])
+    print("  " .. L["/plt reset - reset the active profile"])
     print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
 end
 

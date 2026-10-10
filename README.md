@@ -140,7 +140,7 @@ Since patch 12.0 the game hides some information from addons during combat and i
 - `/plt minimap` shows or hides the minimap button.
 - `/plt debug` prints the version, restrictions, memory and CPU numbers. Paste it when you report a bug.
 - `/plt debug reset` starts counting slow frames from now.
-- `/plt reset` puts every setting in the current profile back to its default.
+- `/plt reset` resets the active profile: a built-in look goes back to how it shipped, any other profile to the defaults.
 - `/plt cvars restore` undoes every game nameplate setting Plateau changed.
 
 ## Languages
