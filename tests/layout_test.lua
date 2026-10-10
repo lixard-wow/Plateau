@@ -291,8 +291,8 @@ check(foundOn("text on every aura icon", "auraAll"), "shared aura text is found 
 check(foundOn("maximum aura duration", "auraPurge") and foundOn("sort order", "auraCC"), "shared aura controls are found on each aura page")
 check(foundOn("only warn for buffs you can remove", "shield") and foundOn("warning priority", "shield"), "buff warning controls are searchable")
 check(foundOn("hidden spells", "auraMine") and foundOn("allowed spells", "auraCC") and foundOn("hidden spells", "auraPurge") and foundOn("allowed spells", "auraImportant"), "spell lists are searchable on every aura page")
-check(foundOn("hide level for same-level", "level"), "renamed Level settings are searchable")
-check(foundOn("use class colors for player names", "name") and foundOn("long name handling", "name"), "renamed Name settings are searchable")
+check(foundOn("hide on same-level normal enemies", "level"), "renamed Level settings are searchable")
+check(foundOn("use class colors for player names", "name") and foundOn("long names", "name"), "renamed Name settings are searchable")
 
 local helpTopics = nsOpt.helpTopics
 check(#helpTopics >= 40, "Help topics are loaded for the Help search")
