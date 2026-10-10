@@ -48,3 +48,5 @@ Text like `|cff8a93a6` … `|r` (a color) or `|T…|t` (an icon) must be copied 
 ## For developers
 
 `tests/make_locale_template.lua` rebuilds `localization/template.lua` from the code. Run it from the repository root after changing any player-facing text; the test suite fails while the template is out of date. Text shown to players must reach a lookup as one whole sentence: write `L["Active profile: %s"]:format(name)`, never `"Active profile: " .. name`.
+
+`/plt debug locale` turns on a check mode in game (it reloads the UI): every translatable piece of text shows wrapped in `[[double brackets]]`, so any English text without brackets is text a translator could never reach. Type it again to turn it off.

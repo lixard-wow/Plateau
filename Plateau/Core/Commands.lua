@@ -343,6 +343,7 @@ local function Help()
     print("  " .. L["/plt minimap - show or hide the minimap button"])
     print("  " .. L["/plt debug - version, CPU and memory for bug reports"])
     print("  " .. L["/plt debug reset - start counting slow frames from now"])
+    print("  " .. L["/plt debug locale - show translatable text in [[brackets]] to find text that can't be translated (reloads)"])
     print("  " .. L["/plt reset - reset the active profile"])
     print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
 end
@@ -524,6 +525,11 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
         Say(L["Slow-frame counters reset."])
+    elseif command == "debug" and path == "locale" then
+        local on = not ns.IsPseudoLocale()
+        ns.DB.saved.global.pseudoLocale = on or nil
+        ns.SetPseudoLocale(on)
+        ReloadUI()
     elseif command == "debug" then
         Debug()
     elseif command == "cvars" and path == "restore" then
