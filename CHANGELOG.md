@@ -6,6 +6,18 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-10 nameplates ready before the pull
+
+#### Changed
+- **Spare nameplates and aura sets are built ahead.** Plateau starts with 24 spare enemy nameplates and 24 spare sets of aura icons, styled while you're out of combat, so enemies that come into view in a pull use a ready plate instead of building one on the spot. In a 17-enemy Mythic+ pull nothing was built in combat, and the slowest nameplate set-up dropped from 13.8 ms to 1 ms.
+- **Spares refill after combat**, and after a spare is used out of combat, so the next pull starts with a full set.
+- **Units Plateau doesn't style no longer get a plate**, and name-only plates get no aura icons, so they cost nothing to keep.
+- **Background builds add aura groups one at a time**, so no single frame goes over the build budget.
+
+#### Added
+- **/plt debug shows how many nameplates you needed**: the most styled at once (in and out of combat), how many were built on the spot because no spare was ready and how long that took, and the fewest spare plates and aura sets left. Benchmark addons can read the same lines.
+- **/plt debug pool off, /plt debug pool <number> and /plt debug pool on** to test with no spares, a set number of spares, or the normal amount.
+
 ### 2026-10-08 smoother plates, class resource, off-tank color and new display options
 
 #### Changed
