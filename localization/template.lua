@@ -541,6 +541,7 @@ L["Fades out friendly nameplates during combat. They can still be clicked unless
 L["Fading holds every way a nameplate can fade: Range fading for enemies your interrupt can't reach, Non-target fading while you have a target, Behind walls and By distance. Non-target fading also holds its options: only in combat, skip friendly nameplates, and keep the mouseover nameplate at full opacity.\n\nUnder Behind walls, separate switches pick where it applies: the open world, dungeons, raids, delves and scenarios, and battlegrounds and arenas. Blizzard fading picks which nameplates use Blizzard's own fading, and whether disappearing nameplates fade out."] = "Fading holds every way a nameplate can fade: Range fading for enemies your interrupt can't reach, Non-target fading while you have a target, Behind walls and By distance. Non-target fading also holds its options: only in combat, skip friendly nameplates, and keep the mouseover nameplate at full opacity.\n\nUnder Behind walls, separate switches pick where it applies: the open world, dungeons, raids, delves and scenarios, and battlegrounds and arenas. Blizzard fading picks which nameplates use Blizzard's own fading, and whether disappearing nameplates fade out."
 L["Fading page"] = "Fading page"
 L["Familiar layout"] = "Familiar layout"
+L["Fewest spare aura sets left: %d (in combat: %s)"] = "Fewest spare aura sets left: %d (in combat: %s)"
 L["Fewest spare plates left: %d (in combat: %s)"] = "Fewest spare plates left: %d (in combat: %s)"
 L["Fill"] = "Fill"
 L["Fill direction"] = "Fill direction"

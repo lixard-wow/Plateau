@@ -28,6 +28,8 @@ function ns.ResetPerformanceCounts()
     local a, b, c = SlowCounts()
     baseline = a and { a, b, c } or nil
     if ns.Driver and ns.Driver.ResetClaimTime then ns.Driver:ResetClaimTime() end
+    local Auras = ns.Elements and ns.Elements.Auras
+    if Auras and Auras.ResetSetStats then Auras:ResetSetStats() end
 end
 
 function ns.CpuReadout()
@@ -87,8 +89,11 @@ function ns.PerformanceLines()
     end
     local Auras = ns.Elements and ns.Elements.Auras
     if Auras and Auras.SetStats then
-        local setsBuilt, setsCombat, inUse, spareSets = Auras:SetStats()
+        local setsBuilt, setsCombat, inUse, spareSets, minSpare, minSpareCombat = Auras:SetStats()
         lines[#lines + 1] = L["Aura sets: %d built (%d in combat), %d on plates, %d spare"]:format(setsBuilt, setsCombat, inUse, spareSets)
+        if minSpare then
+            lines[#lines + 1] = L["Fewest spare aura sets left: %d (in combat: %s)"]:format(minSpare, minSpareCombat and tostring(minSpareCombat) or "-")
+        end
     end
     if ns.Driver.PoolStats then
         local builtTotal, attached, spare, on, all = ns.Driver:PoolStats()

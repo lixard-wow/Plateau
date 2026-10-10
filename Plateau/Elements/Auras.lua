@@ -241,7 +241,7 @@ local spareSets = {}
 local setStats = { built = 0, combat = 0 }
 local auraVersion = 0
 local warming
-local SET_TARGET, SET_BUFFER = 16, 8
+local SET_TARGET, SET_BUFFER = 24, 8
 
 local function NewSet(state)
     local set = { containers = {} }
@@ -683,6 +683,13 @@ end
 
 local function Attach(plate)
     local set = table.remove(spareSets) or NewSet(plate.state)
+    local spare = #spareSets
+    if not setStats.minSpare or spare < setStats.minSpare then
+        setStats.minSpare = spare
+    end
+    if InCombatLockdown() and (not setStats.minSpareCombat or spare < setStats.minSpareCombat) then
+        setStats.minSpareCombat = spare
+    end
     set.plate = plate
     local level = plate.overlay:GetFrameLevel() + 1
     for _, container in pairs(set.containers) do
@@ -769,7 +776,11 @@ end
 
 function Auras:SetStats()
     local spare = #spareSets
-    return setStats.built, setStats.combat, setStats.built - spare - (warming and 1 or 0), spare
+    return setStats.built, setStats.combat, setStats.built - spare - (warming and 1 or 0), spare, setStats.minSpare, setStats.minSpareCombat
+end
+
+function Auras:ResetSetStats()
+    setStats.minSpare, setStats.minSpareCombat = nil, nil
 end
 
 function Auras:Enable(plate, unit)

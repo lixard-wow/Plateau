@@ -757,7 +757,7 @@ end
 
 local pools = { enemy = {}, friendly = {} }
 local swaps = 0
-local POOL_TARGET = { enemy = 16, friendly = 4 }
+local POOL_TARGET = { enemy = 24, friendly = 4 }
 local POOL_BUFFER = { enemy = 8, friendly = 2 }
 local built = { enemy = 0, friendly = 0 }
 
