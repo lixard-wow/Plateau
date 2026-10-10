@@ -44,7 +44,7 @@ local INTERRUPT_POSITIONS = {
 }
 
 local INTERRUPT_FORMATS = {
-    { value = "by", label = "Interrupted by Name" },
+    { value = "by", label = "Interrupted by <name>" },
     { value = "name", label = "Name only" },
     { value = "label", label = "Interrupted" },
 }
@@ -122,8 +122,8 @@ local AURA_ALIGN = {
 local HEALTH_FORMATS = {
     { value = "percent", label = "Percentage  (87%)" },
     { value = "value", label = "Value  (52.3K)" },
-    { value = "both", label = "Both  (52.3K | 87%)" },
-    { value = "paren", label = "Both  (52.3K (87%))" },
+    { value = "both", label = "Value | percent  (52.3K | 87%)" },
+    { value = "paren", label = "Value (percent)  (52.3K (87%))" },
     { value = "percentFirst", label = "Percent first  (87% | 52.3K)" },
     { value = "valueMax", label = "Value / max  (52.3K / 60K)" },
     { value = "missing", label = "Missing health  (-7.7K)" },
@@ -458,7 +458,7 @@ local AURA_SORT = {
 
 local ABSORB_POSITIONS = {
     { value = "after", label = "After health (Blizzard style)" },
-    { value = "right", label = "Over the bar, from the right edge" },
+    { value = "right", label = "From the right edge" },
 }
 
 local ALERT_TEXTURES = {
@@ -991,7 +991,7 @@ end
 
 local function HealthTextColorsReason()
     if not HealthTextOn() then return TEXT_ON end
-    return "Turn on Color by health remaining to use this."
+    return "Turn on Color text by health to use this."
 end
 
 local NAME_ON = "Turn on Show names to use this."
@@ -1010,7 +1010,7 @@ local function LevelOn()
     return ns.Get("look.level.enabled") == true
 end
 
-local RETAIL_NAME_NOTE = Plateau.flavor ~= "forever" and " Works in the open world. Inside dungeons, raids and Mythic+ the game hides enemy names from addons, so they show in full there." or ""
+local RETAIL_NAME_NOTE = Plateau.flavor ~= "forever" and " In dungeons, raids and Mythic+ names always show in full." or ""
 
 local function CastBorderOn()
     local style = ns.Get("look.castbar.borderStyle")
@@ -1029,7 +1029,7 @@ end
 
 local function PowerTextReason()
     if not PowerOn() then return POWER_ON end
-    return "Turn on Show power percentage to use this."
+    return "Turn on Show power text to use this."
 end
 
 local function StackingOn()
@@ -1086,7 +1086,7 @@ local PREVIEW_CASTS = {
     { value = "normal", label = "Normal cast" },
     { value = "important", label = "Important cast" },
     { value = "cantInterrupt", label = "Uninterruptible cast" },
-    { value = "importantStop", label = "Important, uninterruptible (CC required)" },
+    { value = "importantStop", label = "Important, uninterruptible" },
     { value = "kickCooldown", label = "Interrupt on cooldown" },
     { value = "interrupted", label = "Interrupted" },
 }
@@ -1095,8 +1095,8 @@ local PREVIEW_ENEMIES = {
     { value = "caster", label = "Caster" },
     { value = "boss", label = "Boss" },
     { value = "lieutenant", label = "Lieutenant" },
-    { value = "higher", label = "Elite" },
-    { value = "elite", label = "Melee enemy" },
+    { value = "higher", label = "Higher-level elite" },
+    { value = "elite", label = "Elite" },
     { value = "trivial", label = "Minor enemy" },
     { value = "enemyPlayer", label = "Enemy player" },
     { value = "neutral", label = "Neutral enemy" },
@@ -1107,7 +1107,7 @@ local PREVIEW_THREAT = {
     { value = "none", label = "No threat color" },
     { value = "bad", label = "Has aggro" },
     { value = "warning", label = "Losing aggro" },
-    { value = "good", label = "Secure threat" },
+    { value = "good", label = "Safe threat" },
 }
 
 local PREVIEW_BADGES = {
@@ -1686,65 +1686,65 @@ ns.sections = {
     Section("health", "Health bar", { "look.health", "look.execute", "look.bossPhases", "look.plate.width", "look.plate.height", "look.shield.absorbs", "look.shield.absorbColor", "look.shield.absorbStyle", "look.shield.absorbPosition", "look.shield.absorbGlow", "look.colors.tapped", "look.colors.showTapped", "look.colors.healthGradient", "look.colors.healthLow", "look.colors.healthFade", "look.colors.customReaction", "look.colors.hostile", "look.colors.neutral", "look.colors.friendly", "look.colors.classColors", "look.colors.mobTypes", "look.colors.mobTypesInstancesOnly", "look.colors.boss", "look.colors.bossColor", "look.colors.lieutenant", "look.colors.lieutenantColor", "look.colors.higher", "look.colors.higherColor", "look.colors.caster", "look.colors.casterColor", "look.colors.elite", "look.colors.eliteColor", "look.colors.trivial", "look.colors.trivialColor", "look.colors.threat", "look.colors.showThreatGood", "look.colors.showThreatWarning", "look.colors.threatGood", "look.colors.threatWarning", "look.colors.threatDisplay", "look.colors.threatBad", "look.colors.showOffTank", "look.colors.offTankColor" }, List(
         { type = "Header", label = "Size", first = true },
         { type = "Slider", path = "look.plate.width", label = "Width", min = 60, max = 300,
-          tooltip = "How wide every plate is. The cast bar follows this width. 140 fits most names without cutting them off." },
+          tooltip = "Width of every nameplate. The cast bar matches it." },
         { type = "Slider", path = "look.plate.height", label = "Height", min = 4, max = 40,
-          tooltip = "Thicker bars are easier to read in a big pull; thinner ones overlap less." },
+          tooltip = "Height of the health bar." },
 
         { type = "Header", label = "Bar" },
         { type = "Dropdown", path = "look.health.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
-          tooltip = "The fill texture for the health bar. Your target and focus can have their own texture and overlay pattern on the My target and My focus pages; those replace this one on those plates." },
+          tooltip = "Fill texture of the health bar. Your target and focus can use their own on the Target and Focus pages." },
         { type = "Dropdown", path = "look.health.overlayPattern", label = "Overlay pattern", options = OverlayPatterns, unknown = "Custom pattern",
-          tooltip = "Layers a Plateau checker or line pattern on top of the bar texture above, tinted to match its color. No overlay shows the texture alone." },
-        Gate({ type = "Slider", path = "look.health.overlayAlpha", label = "Overlay strength", min = 0, max = 1, step = 0.05,
-          tooltip = "How strong the overlay pattern shows on top of the bar texture." }, Chosen("look.health.overlayPattern"), "Choose an overlay pattern to use this."),
+          tooltip = "A pattern drawn over the bar texture, tinted to match the bar." },
+        Gate({ type = "Slider", path = "look.health.overlayAlpha", label = "Overlay opacity", min = 0, max = 1, step = 0.05,
+          tooltip = "How visible the overlay pattern is." }, Chosen("look.health.overlayPattern"), "Choose an overlay pattern to use this."),
         Gate({ type = "Slider", path = "look.health.overlayContrast", label = "Overlay contrast", min = 0, max = 1, step = 0.05,
-          tooltip = "How different the pattern's light and dark parts are from each other, separate from how strongly the whole pattern shows. 0 is flat, 1 is the sharpest the pattern gets." }, Chosen("look.health.overlayPattern"), "Choose an overlay pattern to use this."),
+          tooltip = "Difference between the pattern's light and dark parts. 0 is flat." }, Chosen("look.health.overlayPattern"), "Choose an overlay pattern to use this."),
         { type = "Color", path = "look.health.background", label = "Background color",
           tooltip = "Color of the unfilled portion of the health bar." },
         { type = "Dropdown", path = "look.health.borderStyle", label = "Border style", options = BorderStyles, unknown = "Custom border",
-          tooltip = "Tooltip styles have rounded corners, so they look squashed on very thin bars; raise the bar height or use Thin tooltip. The border color tints the art, so light colors show it best." },
+          tooltip = "Style of the border around the health bar. Tooltip styles suit taller bars." },
         { type = "Color", path = "look.health.border", label = "Border color", set = BorderColorSetter("look.health"),
-          tooltip = "The color of the border drawn around the health bar. Picking a color while the style is No border or the thickness is 0 turns on a 1 pixel border so you can see it. Click Okay in the color picker to keep a color; clicking outside it or pressing Escape cancels." },
+          tooltip = "Color of the border around the health bar. Picking a color with no border turns on a thin one." },
         Gate({ type = "Slider", path = "look.health.borderSize", label = "Border thickness", min = 0, max = 4,
           tooltip = "How thick the border is." }, BorderOn, "Choose a border style to use this."),
         Gate({ type = "Toggle", path = "look.health.borderInside", label = "Draw border inside",
-          tooltip = "Draw the border within the health bar's edges. Off wraps it around the outside instead. Target, mouseover and buff warning borders follow." }, BorderOn, "Choose a border style to use this."),
+          tooltip = "Draws the border inside the bar's edges instead of around them. Target, mouseover and buff warning borders follow." }, BorderOn, "Choose a border style to use this."),
 
         { type = "Header", label = "Absorbs" },
         { type = "ToggleColor", path = "look.shield.absorbs", colorPath = "look.shield.absorbColor", label = "Show absorbs",
-          tooltip = "How much damage the enemy's absorb shield will soak before its health goes down." },
+          tooltip = "Shows damage absorption shields on the health bar." },
         Gate({ type = "Dropdown", path = "look.shield.absorbPosition", label = "Absorb position", options = ABSORB_POSITIONS,
-          tooltip = "Over the bar from the right always shows the whole shield, even on an enemy at full health. After health is Blizzard's style: the shield fills the missing health, and a glow at the end of the bar shows when it's bigger than that." }, On("look.shield.absorbs"), "Turn on Show absorbs to use this."),
-        Gate({ type = "Toggle", path = "look.shield.absorbGlow", label = "Show absorb overflow glow",
-          tooltip = "Show a glow at the end of the health bar when absorbs extend beyond the bar." }, function() return ns.Get("look.shield.absorbs") == true and ns.Get("look.shield.absorbPosition") == "after" end, "Needs Show absorbs on and Absorb position set to After health."),
+          tooltip = "Where the shield is drawn. After health fills the missing health, like Blizzard's frames. From the right edge always shows the whole shield." }, On("look.shield.absorbs"), "Turn on Show absorbs to use this."),
+        Gate({ type = "Toggle", path = "look.shield.absorbGlow", label = "Show overflow glow",
+          tooltip = "Shows a glow at the end of the bar when the shield is larger than the missing health." }, function() return ns.Get("look.shield.absorbs") == true and ns.Get("look.shield.absorbPosition") == "after" end, "Needs Show absorbs on and Absorb position set to After health."),
         Gate({ type = "Dropdown", path = "look.shield.absorbStyle", label = "Absorb texture", options = AbsorbStyles, unknown = "Custom texture",
-          tooltip = "Blizzard is the game's own look: a soft fill with diagonal stripes. The Plateau lines and any bar texture work too; the color swatch tints it." }, On("look.shield.absorbs"), "Turn on Show absorbs to use this."),
+          tooltip = "Texture of the absorb shield, tinted by the Show absorbs color." }, On("look.shield.absorbs"), "Turn on Show absorbs to use this."),
 
         { type = "Header", label = "Execute indicator" },
-        { type = "ToggleColor", path = "look.execute.highlight", colorPath = "look.execute.color", label = "Color health bar below execute threshold",
-          tooltip = "Tints any enemy's health bar once its health drops below the Execute threshold set just below (20% unless you change it). It works the same for every class and spec and doesn't know your execute spells, so set the threshold to match yours. The marker lines further down are separate and don't move where the tint starts. The tint is drawn over any overlay pattern. Works in dungeons and raids: the game compares the health, Plateau never reads it." },
-        Gate({ type = "Slider", path = "look.execute.threshold", label = "Execute threshold (%)", min = 1, max = 90,
-          tooltip = "Health percentage below which the execute color is applied." }, On("look.execute.highlight"), "Turn on Color health bar below execute threshold to use this."),
+        { type = "ToggleColor", path = "look.execute.highlight", colorPath = "look.execute.color", label = "Execute range color",
+          tooltip = "Colors an enemy's health bar when its health is below the execute threshold. Set the threshold to match your execute spells." },
+        Gate({ type = "Slider", path = "look.execute.threshold", label = "Execute threshold", min = 1, max = 90,
+          tooltip = "Health percentage where execute range begins." }, On("look.execute.highlight"), "Turn on Execute range color to use this."),
         { type = "Header", label = "Health threshold markers" },
-        { type = "ToggleColor", path = "look.execute.lines", colorPath = "look.execute.lineColor", label = "Show health threshold markers",
-          tooltip = "Show markers at the specified health percentages. Set a marker to 0 to hide it." },
-        Gate({ type = "Slider", path = "look.execute.line1", label = "First marker (%, 0 = off)", min = 0, max = 99,
-          tooltip = "Health percent for the first marker line. 0 turns it off." }, On("look.execute.lines"), "Turn on Show health threshold markers to use this."),
-        Gate({ type = "Slider", path = "look.execute.line2", label = "Second marker (%, 0 = off)", min = 0, max = 99,
-          tooltip = "Health percent for the second marker line. 0 turns it off." }, On("look.execute.lines"), "Turn on Show health threshold markers to use this."),
+        { type = "ToggleColor", path = "look.execute.lines", colorPath = "look.execute.lineColor", label = "Show health markers",
+          tooltip = "Draws lines on the health bar at set health percentages." },
+        Gate({ type = "Slider", path = "look.execute.line1", label = "First marker", min = 0, max = 99,
+          tooltip = "Health percentage for the first marker. 0 hides it." }, On("look.execute.lines"), "Turn on Show health markers to use this."),
+        Gate({ type = "Slider", path = "look.execute.line2", label = "Second marker", min = 0, max = 99,
+          tooltip = "Health percentage for the second marker. 0 hides it." }, On("look.execute.lines"), "Turn on Show health markers to use this."),
         Gate({ type = "Slider", path = "look.execute.lineWidth", label = "Marker thickness", min = 1, max = 4,
-          tooltip = "How thick the marker lines are." }, On("look.execute.lines"), "Turn on Show health threshold markers to use this."),
+          tooltip = "Thickness of the marker lines." }, On("look.execute.lines"), "Turn on Show health markers to use this."),
 
         { type = "Header", label = "Boss phase lines" },
         { type = "ToggleColor", path = "look.bossPhases.enabled", colorPath = "look.bossPhases.color", label = "Show boss phase lines",
-          tooltip = "Draws lines on boss health bars where the fight changes phase. During a boss fight Plateau knows which boss it is and uses that boss's percentages; other bosses use the default lines below." },
+          tooltip = "Draws lines on boss health bars where the fight changes phase." },
         Gate({ type = "Slider", path = "look.bossPhases.lineWidth", label = "Phase line thickness", min = 1, max = 4,
-          tooltip = "How thick the boss phase lines are." }, On("look.bossPhases.enabled"), BOSS_ON),
+          tooltip = "Thickness of the boss phase lines." }, On("look.bossPhases.enabled"), BOSS_ON),
         Gate({ type = "Dropdown", label = "Boss", options = BossOptions,
           get = function() return selectedBoss end,
           set = function(value) selectedBoss = value end,
-          tooltip = "Pick a boss to see or change its phase lines. Bosses you have fought that aren't in the list appear at the bottom." }, On("look.bossPhases.enabled"), BOSS_ON),
-        Gate({ type = "SpellList", label = "Add a boss by encounter ID", empty = "Type an encounter ID, then a name if you like: 2654 Ara-Kara boss",
+          tooltip = "The boss whose phase lines you are editing. Bosses you have fought are added at the bottom." }, On("look.bossPhases.enabled"), BOSS_ON),
+        Gate({ type = "SpellList", label = "Add a boss", empty = "Encounter ID and optional name: 2654 Ara-Kara",
           get = function() return "" end,
           set = function(value)
               local id, name = (value or ""):match("^%s*(%d+)%s*[,%-:=]?%s*(.-)%s*$")
@@ -1755,105 +1755,105 @@ ns.sections = {
           end,
           describe = function(text)
               local id, name = (text or ""):match("^%s*(%d+)%s*[,%-:=]?%s*(.-)%s*$")
-              if not id then return "Type an encounter ID, then a name if you like: 2654 Ara-Kara boss" end
+              if not id then return "Encounter ID and optional name: 2654 Ara-Kara" end
               if name ~= "" then
                   return Plateau.T("Press Enter to add encounter %s (%s) and pick it above"):format(id, name)
               end
               return Plateau.T("Press Enter to add encounter %s and pick it above"):format(id)
           end,
-          tooltip = "Adds a boss you haven't fought yet so you can set its lines now. Encounter IDs are listed on sites like Wowhead (search the boss, look for Encounter ID). Bosses you fight are added on their own." }, On("look.bossPhases.enabled"), BOSS_ON),
-        Gate({ type = "SpellList", label = "Phase lines for this boss", empty = "No lines for this boss",
+          tooltip = "Adds a boss by encounter ID so you can set its lines before you fight it. Bosses you fight are added automatically." }, On("look.bossPhases.enabled"), BOSS_ON),
+        Gate({ type = "SpellList", label = "Phase lines", empty = "No lines for this boss",
           suffix = function() return BossName(selectedBoss) end,
           get = function() return Plateau.BossPhaseLines and Plateau.BossPhaseLines(selectedBoss) or "" end,
           set = function(value) if Plateau.SetBossPhaseLines then Plateau.SetBossPhaseLines(selectedBoss, value) end end,
           reset = function() if Plateau.SetBossPhaseLines then Plateau.SetBossPhaseLines(selectedBoss, nil) end end,
           describe = DescribeLines,
-          tooltip = "Health percentages, separated by commas, up to four, like 70, 40. Press Enter to save. Right-click to go back to Plateau's built-in percentages. Saved for your whole account." }, On("look.bossPhases.enabled"), BOSS_ON),
-        Gate({ type = "Dropdown", label = "Draw this boss's lines on", options = BOSS_TARGETS,
+          tooltip = "Up to four health percentages for this boss, separated by commas (70, 40). Right-click to restore the built-in lines. Shared by all your characters." }, On("look.bossPhases.enabled"), BOSS_ON),
+        Gate({ type = "Dropdown", label = "Show lines on", options = BOSS_TARGETS,
           get = function() return Plateau.BossPhaseTarget and Plateau.BossPhaseTarget(selectedBoss) or "boss" end,
           set = function(value) if Plateau.SetBossPhaseTarget then Plateau.SetBossPhaseTarget(selectedBoss, value) end end,
-          tooltip = "Bosses: only plates Plateau treats as a boss. Every enemy in the fight: all enemy plates while this encounter runs, for fights where the phase is on an add or pet, like Kystia Manaheart's Nibbles. The game hides which enemy is which in keys, so Plateau can't pick out just the pet." }, On("look.bossPhases.enabled"), BOSS_ON),
-        Gate({ type = "SpellList", label = "Default lines on other bosses", empty = "No default lines",
+          tooltip = "Bosses only, or every enemy in the encounter. Use every enemy when the phase depends on an add or pet." }, On("look.bossPhases.enabled"), BOSS_ON),
+        Gate({ type = "SpellList", label = "Default phase lines", empty = "No default lines",
           get = function() return ns.Get("look.bossPhases.defaults") or "" end,
           set = function(value) ns.Set("look.bossPhases.defaults", value) end,
           reset = function() Plateau.DB:Reset("look.bossPhases.defaults") end,
           describe = DescribeLines,
-          tooltip = "Lines for bosses without their own percentages, and for boss plates outside a boss fight. Health percentages separated by commas, up to four." }, On("look.bossPhases.enabled"), BOSS_ON),
+          tooltip = "Up to four health percentages for bosses without their own lines, separated by commas." }, On("look.bossPhases.enabled"), BOSS_ON),
         Gate({ type = "Toggle", path = "look.bossPhases.instancesOnly", label = "Default lines only in dungeons and raids",
-          tooltip = "Keeps the default lines off open-world bosses." }, On("look.bossPhases.enabled"), BOSS_ON),
-        { type = "Note", label = "Built-in percentages come from Season 2 guides. Sources disagree on The Hoardmonger and Adderis and Aspix, so check those in game. Most bosses change phase on energy or timers and have no lines.", height = 44 },
+          tooltip = "Hides the default lines on open-world bosses." }, On("look.bossPhases.enabled"), BOSS_ON),
+        { type = "Note", label = "Built-in lines may not match every boss. Bosses that change phase on energy or a timer have no lines.", height = 32 },
 
         { type = "Header", label = "Bar extras" },
         { type = "Toggle", path = "look.health.smooth", label = "Smooth health changes",
-          tooltip = "The bar slides to its new value instead of jumping. A new plate always starts at the right value." },
+          tooltip = "Animates health changes instead of jumping." },
         { type = "Dropdown", path = "look.health.fillDirection", label = "Fill direction", options = FILL_DIRECTIONS,
-          tooltip = "Which way the health bar fills. Absorbs, the overflow glow, the execute color and the threshold markers follow it." },
-        { type = "ToggleColor", path = "look.health.spark", colorPath = "look.health.sparkColor", label = "Health spark",
-          tooltip = "A thin bright line at the edge of the health fill, so the exact amount is easy to read. Hidden at full and empty health." },
+          tooltip = "Direction the health bar fills." },
+        { type = "ToggleColor", path = "look.health.spark", colorPath = "look.health.sparkColor", label = "Show spark",
+          tooltip = "Shows a bright line at the edge of the health fill." },
         Gate({ type = "Slider", path = "look.health.sparkWidth", label = "Spark thickness", min = 1, max = 8,
-          tooltip = "How wide the health spark line is." }, On("look.health.spark"), "Turn on Health spark to use this."),
-        { type = "Toggle", path = "look.health.desaturate", label = "Plain texture tint",
-          tooltip = "Removes the bar texture's own color so the bar shows your colors exactly. Helps with colored textures such as the Blizzard bars; flat textures look the same either way." },
+          tooltip = "Thickness of the spark line." }, On("look.health.spark"), "Turn on Show spark to use this."),
+        { type = "Toggle", path = "look.health.desaturate", label = "Desaturate texture",
+          tooltip = "Removes the texture's own color so bar colors show exactly." },
         { type = "Dropdown", path = "look.health.backgroundTexture", label = "Background texture", options = BackgroundBars, unknown = "Custom texture",
-          tooltip = "Texture for the empty part of the bar, tinted by Background color. Flat color uses the color alone." },
-        { type = "Toggle", path = "look.colors.healthGradient", label = "Color by health remaining",
-          tooltip = "Enemies keep the color they would normally have (reaction, enemy type, threat, quest, target or focus color) at full health and fade toward the low-health color as they lose health. Colors the game hides from addons, like some class colors, stay as they are. Not used on friendly plates." },
+          tooltip = "Texture of the empty part of the bar, tinted by Background color." },
+        { type = "Toggle", path = "look.colors.healthGradient", label = "Color by health",
+          tooltip = "Enemy health bars fade toward the low health color as they lose health." },
         Gate({ type = "Color", path = "look.colors.healthLow", label = "Low health color",
-          tooltip = "The color health bars fade toward as health runs out. Dark colors work like a shadow; bright ones like a warning." }, On("look.colors.healthGradient"), "Turn on Color by health remaining to use this."),
+          tooltip = "Color the bar fades toward as health drops." }, On("look.colors.healthGradient"), "Turn on Color by health to use this."),
         Gate({ type = "Slider", path = "look.colors.healthFade", label = "Fade strength", min = 0.1, max = 1, step = 0.05,
-          tooltip = "How far the color moves toward the low-health color by the time health is empty. 1 reaches it fully." }, On("look.colors.healthGradient"), "Turn on Color by health remaining to use this."),
+          tooltip = "How close the bar gets to the low health color at 0 health. 1 reaches it fully." }, On("look.colors.healthGradient"), "Turn on Color by health to use this."),
 
         { type = "Header", label = "Colorblind presets" },
         { type = "Presets", presets = Plateau.presets.palettes },
-        { type = "Note", label = "Color priority: Target or focus overrides (when enabled) beat everything. Then Tapped, then Threat (if enabled), then Quest enemies (if enabled) - which overrides enemy type and reaction colors below even though it's listed after them - then enemy type or class color, then Reaction as the fallback.", height = 60 },
+        { type = "Note", label = "Color priority: target or focus, tapped, threat, quest, enemy type or class, reaction.", height = 32 },
 
         { type = "Header", label = "Tapped enemies" },
         { type = "ToggleColor", path = "look.colors.showTapped", colorPath = "look.colors.tapped", label = "Tapped by another player",
-          tooltip = "The game's own tap-denial flag: another player (or their group) engaged this enemy first, so you won't get loot or quest credit from it." },
+          tooltip = "Color for enemies tagged by another player. You won't receive loot or credit from them." },
 
         { type = "Header", label = "Threat" },
-        { type = "ToggleColor", path = "look.colors.threat", colorPath = "look.colors.threatBad", label = "Enable threat colors",
-          tooltip = "The master switch for all threat coloring below. This color itself is the bad/wrong-aggro state: for a tank, an enemy you don't have; for damage or a healer, an enemy that has you. Only checked in combat." },
-        Gate({ type = "Dropdown", path = "look.colors.threatDisplay", label = "Threat color display", options = THREAT_DISPLAY,
-          tooltip = "Where threat colors show: the health bar fill, its border, or both. With the border, the bar keeps its normal color and only the outline warns you." }, On("look.colors.threat"), "Turn on Enable threat colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.showThreatWarning", colorPath = "look.colors.threatWarning", label = "Threat transition color",
-          tooltip = "A middle state between safe and bad. For a tank: you're about to lose the enemy to someone else, or about to pull it without meaning to. For damage or a healer: your threat is climbing toward pulling aggro, but hasn't yet. Off skips straight from safe to the bad color." }, On("look.colors.threat"), "Turn on Enable threat colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood", label = "Secure threat color",
-          tooltip = "The safe state. For a tank: you securely have the enemy, or another tank in your group does. For damage or a healer: the enemy isn't a threat risk for you right now - it doesn't have to be attacking you specifically. Off leaves these enemies with their normal color instead." }, On("look.colors.threat"), "Turn on Enable threat colors to use this."),
+        { type = "ToggleColor", path = "look.colors.threat", colorPath = "look.colors.threatBad", label = "Threat colors",
+          tooltip = "Colors enemies by threat in combat. This color means threat is wrong: a tank lost aggro, or anyone else has it." },
+        Gate({ type = "Dropdown", path = "look.colors.threatDisplay", label = "Show threat on", options = THREAT_DISPLAY,
+          tooltip = "Shows threat on the health bar, its border, or both." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
+        Gate({ type = "ToggleColor", path = "look.colors.showThreatWarning", colorPath = "look.colors.threatWarning", label = "Threat warning color",
+          tooltip = "Used when threat is about to change hands." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
+        Gate({ type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood", label = "Threat safe color",
+          tooltip = "Used when threat is where it should be." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
         Gate({ type = "ToggleColor", path = "look.colors.showOffTank", colorPath = "look.colors.offTankColor", label = "Off-tank color",
-          tooltip = "Tanks only: an enemy that another tank in your group is holding gets this color, so you can tell your co-tank's enemies apart from your own and from loose ones. Off treats them like your own secure enemies." }, On("look.colors.threat"), "Turn on Enable threat colors to use this."),
+          tooltip = "Tanks only. Used for enemies held by another tank in your group." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
 
         { type = "Header", label = "Enemy players" },
         { type = "Toggle", path = "look.colors.classColors", label = "Use class colors for enemy players",
-          tooltip = "Colors enemy players' health bars by their class instead of a flat reaction color." },
+          tooltip = "Colors enemy player health bars by class." },
 
         { type = "Header", label = "Enemy types" },
-        { type = "Toggle", path = "look.colors.mobTypes", label = "Use enemy type colors",
-          tooltip = "Turns on the type rows below: bosses, casters, lieutenants and so on each get their own color. An enemy matching more than one type uses whichever is highest in this list, skipping any type whose own color is switched off: Bosses, Lieutenants, Elites, Minor enemies, Casters, Melee enemies. The rows below are laid out in a different order." },
-        Gate({ type = "Toggle", path = "look.colors.mobTypesInstancesOnly", label = "Only in dungeons, raids, and delves",
-          tooltip = "Keeps type colors out of the open world, where every enemy just uses its reaction color instead." }, On("look.colors.mobTypes"), "Turn on Use enemy type colors to use this."),
+        { type = "Toggle", path = "look.colors.mobTypes", label = "Enemy type colors",
+          tooltip = "Colors enemies by type. An enemy that matches several types uses the first in this order: bosses, lieutenants, higher-level elites, minor enemies, casters, elites." },
+        Gate({ type = "Toggle", path = "look.colors.mobTypesInstancesOnly", label = "Only in dungeons, raids and delves",
+          tooltip = "Open-world enemies use reaction colors." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
         Gate({ type = "ToggleColor", path = "look.colors.boss", colorPath = "look.colors.bossColor", label = "Bosses",
-          tooltip = "Enemies flagged as bosses, including world bosses." }, On("look.colors.mobTypes"), "Turn on Use enemy type colors to use this."),
+          tooltip = "Bosses and world bosses." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
         Gate({ type = "ToggleColor", path = "look.colors.caster", colorPath = "look.colors.casterColor", label = "Casters",
-          tooltip = "Enemies that use mana." }, On("look.colors.mobTypes"), "Turn on Use enemy type colors to use this."),
+          tooltip = "Enemies that use mana." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
         Gate({ type = "ToggleColor", path = "look.colors.lieutenant", colorPath = "look.colors.lieutenantColor", label = "Lieutenants",
-          tooltip = "An elite above your level that also has more health than usual, or any elite two or more levels above you. Real bosses keep the Bosses color." }, On("look.colors.mobTypes"), "Turn on Use enemy type colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.elite", colorPath = "look.colors.eliteColor", label = "Melee enemies",
-          tooltip = "Elites at your level." }, On("look.colors.mobTypes"), "Turn on Use enemy type colors to use this."),
-        Gate({ type = "ToggleColor", path = "look.colors.higher", colorPath = "look.colors.higherColor", label = "Elites",
-          tooltip = "Elites above your level." }, On("look.colors.mobTypes"), "Turn on Use enemy type colors to use this."),
+          tooltip = "Lieutenants above your level, and elites two or more levels above you." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
+        Gate({ type = "ToggleColor", path = "look.colors.elite", colorPath = "look.colors.eliteColor", label = "Elites",
+          tooltip = "Elites at or below your level." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
+        Gate({ type = "ToggleColor", path = "look.colors.higher", colorPath = "look.colors.higherColor", label = "Higher-level elites",
+          tooltip = "Elites above your level." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
         Gate({ type = "ToggleColor", path = "look.colors.trivial", colorPath = "look.colors.trivialColor", label = "Minor enemies",
-          tooltip = "Weak enemies, plus most ordinary trash at your level." }, On("look.colors.mobTypes"), "Turn on Use enemy type colors to use this."),
+          tooltip = "Minor and trivial enemies, and any enemy that matches no other type." }, On("look.colors.mobTypes"), "Turn on Enemy type colors to use this."),
 
         { type = "Header", label = "Reaction colors" },
-        { type = "Toggle", path = "look.colors.customReaction", label = "Use custom reaction colors",
-          tooltip = "Off uses the game's own reaction colors. The swatches start at the game's colors; right-click one to go back. This is the lowest-priority color - anything covered by threat, quest, class, or enemy type colors above uses those instead." },
+        { type = "Toggle", path = "look.colors.customReaction", label = "Custom reaction colors",
+          tooltip = "Replaces the game's hostile, neutral and friendly colors. Right-click a color to restore the game's." },
         Gate({ type = "Color", path = "look.colors.hostile", label = "Hostile",
-          tooltip = "Color for enemies hostile to you, when not overridden by a type or threat color." }, On("look.colors.customReaction"), "Use custom reaction colors is off, so these use the game's own reaction colors."),
+          tooltip = "Color for hostile units." }, On("look.colors.customReaction"), "Turn on Custom reaction colors to use this."),
         Gate({ type = "Color", path = "look.colors.neutral", label = "Neutral",
-          tooltip = "Color for neutral units that aren't attacking you." }, On("look.colors.customReaction"), "Use custom reaction colors is off, so these use the game's own reaction colors."),
+          tooltip = "Color for neutral units." }, On("look.colors.customReaction"), "Turn on Custom reaction colors to use this."),
         Gate({ type = "Color", path = "look.colors.friendly", label = "Friendly",
-          tooltip = "Color for friendly units, when Use custom reaction colors is on." }, On("look.colors.customReaction"), "Use custom reaction colors is off, so these use the game's own reaction colors.")
+          tooltip = "Color for friendly units." }, On("look.colors.customReaction"), "Turn on Custom reaction colors to use this.")
     )),
 
     Friendly("friendly", "Friendly nameplates", "look.friendly", Join(List(
@@ -1965,16 +1965,16 @@ ns.sections = {
     Section("healthText", "Health text", "look.healthText", Join(List(
         { type = "Header", label = "Text", first = true },
         { type = "Toggle", path = "look.healthText.enabled", label = "Show health text",
-          tooltip = "Shows a number and/or percent for the current health on the bar." }
+          tooltip = "Shows health as a number or percentage on the bar." }
     ), GateList(HealthTextOn, TEXT_ON,
         { type = "Dropdown", path = "look.healthText.format", label = "Health format", options = HEALTH_FORMATS,
-          tooltip = "Percentage: just the percent, like 87%. Value: the current health, abbreviated, like 52.3K. Both, Percent first and Value / max combine them. Missing health and Missing percent show how much is gone. Percentages follow Percentage decimal places; numbers follow Value decimals." }
+          tooltip = "How health is shown." }
     ), List(
         Gate({ type = "Slider", path = "look.healthText.decimals", label = "Percentage decimal places", min = 0, max = 2,
-          tooltip = "Number of decimal places shown in health percentages, for example 1 shows 87.4% instead of 87%. Affects any format that includes a percentage." }, HealthTextPercent, HealthTextPercentReason)
+          tooltip = "Decimal places shown in health percentages." }, HealthTextPercent, HealthTextPercentReason)
     ), GateList(HealthTextOn, TEXT_ON,
         { type = "Color", path = "look.healthText.color", label = "Text color",
-          tooltip = "The color of the health text." },
+          tooltip = "Color of the health text." },
         { type = "Dropdown", path = "look.healthText.anchor", label = "Position", options = TEXT_POSITIONS,
           tooltip = "Where the health text sits on the health bar." },
         { type = "Slider", path = "look.healthText.offsetX", label = "Horizontal offset", min = -50, max = 50,
@@ -1986,78 +1986,78 @@ ns.sections = {
     ), GateList(HealthTextOn, TEXT_ON, FontControls("look.healthText")), List(
         { type = "Header", label = "Extras" }
     ), GateList(HealthTextOn, TEXT_ON,
-        { type = "Dropdown", path = "look.healthText.valuePrecision", label = "Value decimals", options = VALUE_PRECISION,
-          tooltip = "How health numbers are shortened. Standard is one decimal for thousands and two for millions." },
+        { type = "Dropdown", path = "look.healthText.valuePrecision", label = "Number format", options = VALUE_PRECISION,
+          tooltip = "How large health numbers are shortened." },
         { type = "Toggle", path = "look.healthText.percentSign", label = "Show % sign",
-          tooltip = "Off shows 87 instead of 87%." },
+          tooltip = "Shows a % sign after percentages." },
         { type = "Toggle", path = "look.healthText.hideFull", label = "Hide at full health",
-          tooltip = "The text appears once the enemy takes damage." },
+          tooltip = "Hides the text until the enemy takes damage." },
         { type = "Toggle", path = "look.healthText.targetOnly", label = "Only on my target",
-          tooltip = "Health text shows only on the enemy you are targeting." },
-        { type = "Toggle", path = "look.healthText.colorByHealth", label = "Color by health remaining",
-          tooltip = "The text fades from the full-health color to the low-health color as the enemy loses health. Separate from the health bar's own setting." }
+          tooltip = "Shows health text only on your target." },
+        { type = "Toggle", path = "look.healthText.colorByHealth", label = "Color text by health",
+          tooltip = "The text fades from the full health color to the low health color as health drops." }
     ), GateList(HealthTextColors, HealthTextColorsReason,
         { type = "Color", path = "look.healthText.colorHigh", label = "Full health color",
-          tooltip = "The text color at full health." },
+          tooltip = "Text color at full health." },
         { type = "Color", path = "look.healthText.colorMid", label = "Half health color",
-          tooltip = "The text color at half health." },
+          tooltip = "Text color at half health." },
         { type = "Color", path = "look.healthText.colorLow", label = "Low health color",
-          tooltip = "The text color as health runs out." }
+          tooltip = "Text color at low health." }
     ), GateList(HealthTextOn, TEXT_ON,
         { type = "ToggleColor", path = "look.healthText.executeColor", colorPath = "look.healthText.executeTextColor", label = "Execute range color",
-          tooltip = "The text turns this color below the execute threshold set on the Health bar page. Beats Color by health remaining." }
+          tooltip = "The text turns this color in execute range. The threshold is set on the Health bar page." }
     ))),
 
     Section("name", "Name", { "look.name", "look.enemyTarget" }, Join(List(
         { type = "Header", label = "Name", first = true },
-        { type = "Toggle", path = "look.name.enabled", label = "Show names" ,
-          tooltip = "Shows the unit's name on the plate." }
+        { type = "Toggle", path = "look.name.enabled", label = "Show names",
+          tooltip = "Shows the unit's name on the nameplate." }
     ), GateList(NameOn, NAME_ON,
         { type = "Color", path = "look.name.color", label = "Text color",
-          tooltip = "The color of the name. Class colors replace it for player names when Use class colors for player names is on and the game reveals the player's class; NPC names always use this color." },
+          tooltip = "Color of the name. Player names can use class colors instead." },
         { type = "Toggle", path = "look.name.classColors", label = "Use class colors for player names",
-          tooltip = "Colors player names by class, overriding Text color. NPC names, and players whose class the game hides, use Text color. Friendly players follow Class-color friendly player names on the Friendly nameplates page instead." },
+          tooltip = "Colors enemy player names by class. Friendly players are set on the Friendly nameplates page." },
         { type = "Dropdown", path = "look.name.position", label = "Position", options = NAME_POSITIONS,
           tooltip = "Where the name sits relative to the health bar." },
         { type = "Dropdown", path = "look.name.justify", label = "Text alignment", options = ALIGN,
-          tooltip = "Left, center or right, on the bar or above/below it. With Cut at the start, NPC names hug the right edge so the end stays visible; player names stay centered unless they need cutting." },
+          tooltip = "Aligns the name left, center or right." },
         { type = "Dropdown", path = "look.name.mode", label = "Shorten names", options = SHORTEN_NAMES, limited = Plateau.flavor ~= "forever" and Style.limited.names or nil,
-          tooltip = "Rewrites the name before it is fitted to the available width: the full name, the first or last word, or initials. Abbreviating never cuts letters off; Long name handling deals with a name that is still too wide afterwards. Applies to every enemy, player or NPC. Friendly nameplates have their own player and NPC settings on the Friendly nameplates page." .. RETAIL_NAME_NOTE },
-        { type = "Dropdown", label = "Long name handling", options = OVERFLOW_NAMES, path = "look.name.overflow",
-          tooltip = "Runs after Shorten names, on a name that is still wider than the available width (Maximum name width, or the plate width when that is 0). Do not truncate lets it run past the plate. Cut at the end or start truncates only the text that does not fit." },
-        { type = "Slider", path = "look.name.width", label = "Maximum name width (0 = plate width)", min = 0, max = 250,
+          tooltip = "Shortens enemy names to a word or initials." .. RETAIL_NAME_NOTE },
+        { type = "Dropdown", label = "Long names", options = OVERFLOW_NAMES, path = "look.name.overflow",
+          tooltip = "How names wider than the maximum width are cut." },
+        { type = "Slider", path = "look.name.width", label = "Maximum name width", min = 0, max = 250,
           visibleIf = function() return ns.Get("look.name.overflow") ~= "none" end,
-          tooltip = "The available width for the name; 0 uses the plate's width (a little less when the name is inside the bar). Names wider than this are truncated. With Cut at the start, \"Wastelander Phaseblade\" becomes \"...Phaseblade\" on every enemy." },
-        { type = "Slider", path = "look.name.gap", label = "Vertical offset", min = -10, max = 20,
-          tooltip = "Moves the name up or down. Above the bar and Below the bar: the gap between the name and the health bar's edge, so higher values move it away from the bar. Inside bar: positive moves it up. Inside bar, top: positive moves it down from the top edge. Negative values go the opposite way." }
+          tooltip = "Widest a name can be before it is cut. 0 uses the nameplate width." },
+        { type = "Slider", path = "look.name.gap", label = "Distance from bar", min = -10, max = 20,
+          tooltip = "Space between the name and the health bar. When the name is inside the bar, moves it up or down." }
     ), List(
         { type = "Header", label = "Font" }
     ), GateList(NameOn, NAME_ON, FontControls("look.name")), List(
         { type = "Header", label = "Extras" }
     ), GateList(NameOn, NAME_ON,
         { type = "Toggle", path = "look.name.targetOnly", label = "Only on my target",
-          tooltip = "Enemy names show only on the enemy you are targeting. Friendly names are not affected." },
+          tooltip = "Shows enemy names only on your target." },
         { type = "Toggle", path = "look.name.matchBar", label = "Match health bar color",
-          tooltip = "Enemy names take the health bar's current color, including threat, enemy type, class and health colors. Replaces Text color and class colors for names." },
+          tooltip = "Enemy names use the health bar's current color." },
         { type = "Toggle", path = "look.name.hideCasting", label = "Hide while casting",
-          tooltip = "Hides an enemy's name while its cast bar is showing, so the spell name and the enemy's name don't crowd each other." }
+          tooltip = "Hides an enemy's name while its cast bar is showing." }
     ), List(
         { type = "Header", label = "Enemy target name" },
         { type = "Toggle", path = "look.enemyTarget.enabled", label = "Show enemy target name",
-          tooltip = "Display the name of the enemy's current target when available - whoever it's actually targeting right now, like a tank or healer. This is separate from the Cast bar page's cast target, which tracks who a specific spell is aimed at. The game can hide who it is from addons in dungeons, but it still shows here." }
+          tooltip = "Shows who the enemy is targeting." }
     ), GateList(EnemyTargetOn, ENEMY_TARGET_ON,
         { type = "ToggleColor", path = "look.enemyTarget.classColors", colorPath = "look.enemyTarget.color", label = "Use class colors",
-          tooltip = "Color the enemy's target name by class when available. The swatch next to it is the fallback color, used both when this is off and when a class color isn't available (the target isn't a player, or their class can't be read).",
+          tooltip = "Colors the target's name by class. Otherwise it uses the color shown.",
           swatchLabel = "Custom target name color",
           swatchTooltip = "Used when Use class colors is off, or when a class color isn't available." },
         { type = "Dropdown", path = "look.enemyTarget.anchor", label = "Position", options = TEXT_POSITIONS,
-          tooltip = "Where this text sits on the health bar." },
+          tooltip = "Where the target's name sits on the health bar." },
         { type = "Slider", path = "look.enemyTarget.offsetX", label = "Horizontal offset", min = -50, max = 50,
           tooltip = "Nudges this text left (negative) or right (positive)." },
         { type = "Slider", path = "look.enemyTarget.offsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Nudges this text down (negative) or up (positive)." },
-        { type = "ToggleColor", path = "look.enemyTarget.meColor", colorPath = "look.enemyTarget.meColorValue", label = "Color when it's you",
-          tooltip = "The enemy's target name turns this color while the enemy is targeting you. Works in dungeons too: the game picks the color without telling Plateau who the target is." },
+        { type = "ToggleColor", path = "look.enemyTarget.meColor", colorPath = "look.enemyTarget.meColorValue", label = "Color when targeting you",
+          tooltip = "The target's name turns this color when the enemy is targeting you." },
         FontControls("look.enemyTarget")
     ))),
 
@@ -2066,14 +2066,14 @@ ns.sections = {
         { type = "Toggle", path = "look.level.enabled", label = "Show level",
           tooltip = "Shows the unit's level." }
     ), GateList(LevelOn, LEVEL_ON,
-        { type = "Toggle", path = "look.level.hideAtPlayerLevel", label = "Hide level for same-level non-elites",
-          tooltip = "Hides the level on any enemy that is not an elite, rare elite or boss when its level equals yours (plain rares included). Elites, rare elites and bosses always show their level, and so does any enemy of a different level." },
+        { type = "Toggle", path = "look.level.hideAtPlayerLevel", label = "Hide on same-level normal enemies",
+          tooltip = "Hides the level on non-elite enemies at your level." },
         { type = "Toggle", path = "look.level.showElitePlus", label = "Show + for elites",
-          tooltip = "Adds a + after the level of elites and rare elites, like 90+. Normal enemies and plain rares never get one, and bosses show ??." },
+          tooltip = "Adds + after the level of elites and rare elites (90+)." },
         { type = "Toggle", path = "look.level.colorByDifficulty", label = "Color by difficulty",
-          tooltip = "Colors the level by how hard the enemy is compared to your level, using the game's own difficulty colors (grey for trivial, then green, yellow, orange and red for much higher), like the target frame. Unknown (??) and boss levels are always red." },
+          tooltip = "Colors the level by difficulty, like the target frame." },
         { type = "Color", path = "look.level.color", label = "Custom level color",
-          tooltip = "The level text's color when Color by difficulty is off, or when the game can't supply a difficulty color. Unknown (??) and boss levels stay red." },
+          tooltip = "Level color when Color by difficulty is off. Boss and unknown levels stay red." },
         { type = "Dropdown", path = "look.level.anchor", label = "Position", options = LEVEL_POSITIONS,
           tooltip = "Where the level text sits on the bar." },
         { type = "Slider", path = "look.level.offsetX", label = "Horizontal offset", min = -50, max = 50,
@@ -2086,63 +2086,63 @@ ns.sections = {
         { type = "Header", label = "Extras" }
     ), GateList(LevelOn, LEVEL_ON,
         { type = "Toggle", path = "look.level.hideInInstances", label = "Hide in dungeons and raids",
-          tooltip = "Levels inside dungeons and raids are nearly always the same, so this hides them there." },
+          tooltip = "Hides levels in dungeons and raids." },
         { type = "Dropdown", path = "look.level.bossText", label = "Boss level text", options = BOSS_LEVEL_TEXT,
           tooltip = "What shows instead of a level on bosses and enemies whose level is hidden." },
-        { type = "Toggle", path = "look.level.markRares", label = "Mark rares",
-          tooltip = "Adds an r after the level of rares, like 90r, or 90r+ for rare elites." },
+        { type = "Toggle", path = "look.level.markRares", label = "Show r for rares",
+          tooltip = "Adds r after the level of rares (90r, or 90r+ for rare elites)." },
         { type = "Toggle", path = "look.level.hideTrivial", label = "Hide trivial levels",
-          tooltip = "Hides the level on grey enemies, the ones too low to give you experience." }
+          tooltip = "Hides the level on gray enemies too low to give experience." }
     ))),
 
     Section("castbar", "Cast bar", "look.castbar", Join(List(
         { type = "Header", label = "Size and spacing", first = true },
-        { type = "Slider", path = "look.castbar.width", label = "Width (0 = match health bar)", min = 0, max = 300,
-          tooltip = "0 keeps the cast bar exactly as wide as the health bar. Any other width is centered under it, spell icon included." },
-        { type = "Slider", path = "look.castbar.height", label = "Height (0 = match health bar)", min = 0, max = 30,
-          tooltip = "0 keeps the cast bar exactly as tall as the health bar. Any other height is its own fixed size." },
+        { type = "Slider", path = "look.castbar.width", label = "Width", min = 0, max = 300,
+          tooltip = "Width of the cast bar. 0 matches the health bar." },
+        { type = "Slider", path = "look.castbar.height", label = "Height", min = 0, max = 30,
+          tooltip = "Height of the cast bar. 0 matches the health bar." },
         { type = "Slider", path = "look.castbar.gap", label = "Health bar spacing", min = 0, max = 20,
-          tooltip = "How far the cast bar sits below the health bar. 0 places it flush against the health bar." },
+          tooltip = "Space between the cast bar and the health bar." },
 
         { type = "Header", label = "Bar" },
         { type = "Dropdown", path = "look.castbar.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
-          tooltip = "The fill texture for the cast bar." },
+          tooltip = "Fill texture of the cast bar." },
         { type = "Dropdown", path = "look.castbar.overlayPattern", label = "Overlay pattern", options = OverlayPatterns, unknown = "Custom pattern",
-          tooltip = "Layers a Plateau checker or line pattern on top of the bar texture above, tinted to match its color. No overlay shows the texture alone." },
+          tooltip = "A pattern drawn over the bar texture, tinted to match the bar." },
         Gate({ type = "Slider", path = "look.castbar.overlayContrast", label = "Overlay contrast", min = 0, max = 1, step = 0.05,
-          tooltip = "How different the pattern's light and dark parts are from each other, separate from how strongly the whole pattern shows. 0 is flat, 1 is the sharpest the pattern gets." }, Chosen("look.castbar.overlayPattern"), "Choose an overlay pattern to use this."),
-        Gate({ type = "Slider", path = "look.castbar.overlayAlpha", label = "Overlay strength", min = 0, max = 1, step = 0.05,
-          tooltip = "How strong the overlay pattern shows on top of the bar texture." }, Chosen("look.castbar.overlayPattern"), "Choose an overlay pattern to use this."),
+          tooltip = "Difference between the pattern's light and dark parts. 0 is flat." }, Chosen("look.castbar.overlayPattern"), "Choose an overlay pattern to use this."),
+        Gate({ type = "Slider", path = "look.castbar.overlayAlpha", label = "Overlay opacity", min = 0, max = 1, step = 0.05,
+          tooltip = "How visible the overlay pattern is." }, Chosen("look.castbar.overlayPattern"), "Choose an overlay pattern to use this."),
         { type = "Color", path = "look.castbar.background", label = "Background color",
           tooltip = "Color of the unfilled portion of the cast bar." },
         { type = "Dropdown", path = "look.castbar.borderStyle", label = "Border style", options = BorderStyles, unknown = "Custom border",
-          tooltip = "Tooltip styles have rounded corners, so they look squashed on very thin bars; raise the bar height or use Thin tooltip. The border color tints the art, so light colors show it best." },
+          tooltip = "Style of the border around the cast bar. Tooltip styles suit taller bars." },
         { type = "Color", path = "look.castbar.border", label = "Border color", set = BorderColorSetter("look.castbar"),
-          tooltip = "The color of the border drawn around the cast bar. Picking a color while the style is No border or the thickness is 0 turns on a 1 pixel border so you can see it. Click Okay in the color picker to keep a color; clicking outside it or pressing Escape cancels." },
+          tooltip = "Color of the border around the cast bar. Picking a color with no border turns on a thin one." },
         Gate({ type = "Slider", path = "look.castbar.borderSize", label = "Border thickness", min = 0, max = 4,
           tooltip = "How thick the border is." }, CastBorderOn, "Choose a border style to use this."),
         Gate({ type = "Toggle", path = "look.castbar.borderInside", label = "Draw border inside",
-          tooltip = "Draw the border within the cast bar's edges. Off wraps it around the outside instead." }, CastBorderOn, "Choose a border style to use this."),
+          tooltip = "Draws the border inside the bar's edges instead of around them." }, CastBorderOn, "Choose a border style to use this."),
         { type = "ToggleColor", path = "look.castbar.showSpark", colorPath = "look.castbar.sparkColor", label = "Show cast bar spark",
-          tooltip = "Show a bright highlight at the moving edge of the cast bar, in this color." },
+          tooltip = "Shows a bright line at the moving edge of the cast bar." },
 
         { type = "Header", label = "Spell icon" },
         { type = "Toggle", path = "look.castbar.showIcon", label = "Show spell icon",
-          tooltip = "Shows the spell's own icon next to the cast bar." },
+          tooltip = "Shows the spell's icon next to the cast bar." },
         Gate({ type = "Toggle", path = "look.castbar.iconSpan", label = "Extend icon across both bars",
-          tooltip = "Resizes the spell icon to fill the combined height of the health bar and cast bar, and sits beside the whole plate." }, On("look.castbar.showIcon"), "Turn on Show spell icon to use this."),
+          tooltip = "Makes the spell icon as tall as the health bar and cast bar together." }, On("look.castbar.showIcon"), "Turn on Show spell icon to use this."),
         Gate({ type = "Dropdown", path = "look.castbar.iconSide", label = "Icon position", options = ICON_SIDES,
           tooltip = "Which side of the bars the spell icon sits on." }, On("look.castbar.showIcon"), "Turn on Show spell icon to use this."),
 
         { type = "Header", label = "Interrupts" },
-        { type = "ToggleColor", path = "look.castbar.kickMarker", colorPath = "look.castbar.kickMarkerColor", label = "Show interrupt cooldown marker",
+        { type = "ToggleColor", path = "look.castbar.kickMarker", colorPath = "look.castbar.kickMarkerColor", label = "Show interrupt ready marker",
           set = function(value)
               ns.Set("look.castbar.kickMarker", value)
               if value and ns.ShowKickMarkerCast then
                   ns.ShowKickMarkerCast()
               end
           end,
-          tooltip = "While your interrupt is on cooldown but will come off cooldown before the cast finishes, a line marks the moment it becomes ready. No line means your interrupt is already ready, or won't be back in time. Tracks whichever interrupt spell your class (and, for some specs, your current pet) knows; if you don't know one, this never shows. The preview always shows it while this is on, so you can adjust it." },
+          tooltip = "Marks the point in the cast where your interrupt comes off cooldown. Shown only when it will be ready before the cast ends." },
         Gate({ type = "Slider", path = "look.castbar.kickMarkerWidth", label = "Marker thickness", min = 1, max = 6,
           set = function(value)
               ns.Set("look.castbar.kickMarkerWidth", value)
@@ -2150,42 +2150,42 @@ ns.sections = {
                   ns.ShowKickMarkerCast()
               end
           end,
-          tooltip = "How thick the interrupt cooldown marker line is." }, On("look.castbar.kickMarker"), "Turn on Show interrupt cooldown marker to use this."),
+          tooltip = "Thickness of the interrupt ready marker." }, On("look.castbar.kickMarker"), "Turn on Show interrupt ready marker to use this."),
 
         { type = "Header", label = "Important casts" },
         { type = "ToggleColor", path = "look.castbar.importantGlow", colorPath = "look.castbar.importantColor", label = "Highlight important casts",
-          tooltip = "Adds a glow around the cast bar for casts the game itself flags as important - usually the ones that wipe the group if they land. This includes important casts that can't be interrupted." },
+          tooltip = "Adds a glow to casts the game marks as important, including ones that can't be interrupted." },
         Gate({ type = "Slider", path = "look.castbar.glowSize", label = "Glow size", min = 0, max = 6,
-          tooltip = "How big the glow around an important cast is." }, On("look.castbar.importantGlow"), "Turn on Highlight important casts to use this."),
+          tooltip = "Size of the glow around important casts." }, On("look.castbar.importantGlow"), "Turn on Highlight important casts to use this."),
 
         { type = "Header", label = "Interrupted casts" },
         { type = "ToggleColor", path = "look.castbar.showInterrupter", colorPath = "look.castbar.interruptedColor", label = "Show interrupter name",
-          tooltip = "Shows the name of the player who interrupted the cast. The bar turns this color and reads \"Interrupted by <name>\" in class color. Names show for your party and raid; the game may hide other names." },
-        Gate({ type = "Slider", path = "look.castbar.interruptHold", label = "Display duration (seconds)", min = 0.3, max = 3, step = 0.1,
-          tooltip = "How long the interrupted-cast bar and message stay up before clearing." }, On("look.castbar.showInterrupter"), "Turn on Show interrupter name to use this."),
+          tooltip = "Shows who interrupted the cast, and turns the bar this color." },
+        Gate({ type = "Slider", path = "look.castbar.interruptHold", label = "Interrupted bar duration", min = 0.3, max = 3, step = 0.1,
+          tooltip = "Seconds the interrupted bar stays visible." }, On("look.castbar.showInterrupter"), "Turn on Show interrupter name to use this."),
 
         { type = "Header", label = "Cast bar colors" },
-        { type = "Note", label = "Cast bar colors reflect your interrupt's cooldown and whether the cast can be interrupted. Casts flagged as important by Blizzard use separate colors, including important casts that can only be stopped with crowd control. If your spec has no interrupt, casts that can be interrupted show the Interrupt ready colors, so you can call them out.", height = 44 },
+        { type = "Note", label = "Cast bar colors show whether your interrupt is ready and whether the cast can be interrupted. Important casts use their own colors.", height = 32 },
         { type = "Color", path = "look.castbar.readyColor", label = "Interrupt ready",
-          tooltip = "Cast bar color when your interrupt is off cooldown. This only checks cooldown - it doesn't know if you're in range or otherwise able to actually use it right now." },
+          tooltip = "Cast bar color when your interrupt is off cooldown. Range is not checked. Also used when you have no interrupt." },
         { type = "Color", path = "look.castbar.notReadyColor", label = "Interrupt on cooldown",
-          tooltip = "Cast bar color when your interrupt is still on cooldown." },
+          tooltip = "Cast bar color when your interrupt is on cooldown." },
         { type = "Color", path = "look.castbar.importantReadyColor", label = "Important cast: interrupt ready",
-          tooltip = "Like Interrupt ready, but for casts flagged important (usually dangerous ones)." },
+          tooltip = "Color for important casts when your interrupt is off cooldown." },
         { type = "Color", path = "look.castbar.importantNotReadyColor", label = "Important cast: interrupt on cooldown",
-          tooltip = "Like Interrupt on cooldown, but for casts flagged important." },
+          tooltip = "Color for important casts when your interrupt is on cooldown." },
         { type = "Color", path = "look.castbar.uninterruptible", label = "Uninterruptible cast",
-          tooltip = "The game says this cast can't be interrupted. Tints the bar over the interrupt colors and your bar texture, so a shielded cast always looks the same no matter your interrupt. It is solid by default; lower this color's opacity to let the cast color and bar texture show through." },
-        { type = "Color", path = "look.castbar.importantUninterruptible", label = "Important cast: uninterruptible, CC required",
-          tooltip = "Blizzard flags the cast as important and the game says it can't be interrupted. Both come straight from the game. This cast needs crowd control: stun, incapacitate or knockback it, break line of sight, or use a defensive. The game doesn't say whether CC will work on this enemy. Has its own opacity too, independent of Uninterruptible cast above." },
+          tooltip = "Color for casts that can't be interrupted. Lower its opacity to let the bar show through." },
+        { type = "Color", path = "look.castbar.importantUninterruptible", label = "Important cast: uninterruptible",
+          tooltip = "Color for important casts that can't be interrupted." },
 
         { type = "Header", label = "Text" },
         { type = "Dropdown", path = "look.castbar.textJustify", label = "Spell name alignment", options = ALIGN,
-          tooltip = "Where the spell name sits across the bar. The interrupted message follows it while its position is Where the spell name is (Interrupted text, under Extras)." },
+          tooltip = "Aligns the spell name on the bar." },
         { type = "Toggle", path = "look.castbar.showTimer", label = "Show remaining cast time",
-          tooltip = "Shows a countdown of the remaining cast time." },
-        Gate({ type = "Slider", path = "look.castbar.timerDecimalsBelow", label = "Decimal threshold (seconds)", min = 0, max = 60,
-          tooltip = "Below this many seconds remaining, the countdown switches to tenths of a second (2.4 instead of 2s). 0 never shows tenths." }, On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this."),
+          tooltip = "Shows the time left on the cast." },
+        Gate({ type = "Slider", path = "look.castbar.timerDecimalsBelow", label = "Show tenths below", min = 0, max = 60,
+          tooltip = "Seconds remaining when the timer starts showing tenths. 0 never shows them." }, On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this."),
         Gate({ type = "Dropdown", path = "look.castbar.timerPosition", label = "Cast timer position", options = SIDES,
           tooltip = "Where the cast timer sits on the bar." }, On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this."),
         Gate({ type = "Slider", path = "look.castbar.timerOffsetX", label = "Cast timer horizontal offset", min = -40, max = 40,
@@ -2193,18 +2193,18 @@ ns.sections = {
         Gate({ type = "Slider", path = "look.castbar.timerOffsetY", label = "Cast timer vertical offset", min = -40, max = 40,
           tooltip = "Nudges the cast timer down (negative) or up (positive)." }, On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this."),
         { type = "ToggleColor", path = "look.castbar.showTarget", colorPath = "look.castbar.targetColor", label = "Show cast target",
-          tooltip = "Show the name of the unit targeted by the spell when available." },
+          tooltip = "Shows who the spell is aimed at, when known." },
         Gate({ type = "Toggle", path = "look.castbar.targetClassColor", label = "Use class color for cast target",
-          tooltip = "Colors the cast target's name by their class instead of the color above. Only applies when the target is a player - the game only ever gives an addon the target's name for a player anyway." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
+          tooltip = "Colors the cast target's name by class." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
         Gate({ type = "Slider", path = "look.castbar.targetSize", label = "Cast target font size", min = 6, max = 20,
-          tooltip = "How big the cast target's name is." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
+          tooltip = "Size of the cast target's name." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
         Gate({ type = "Dropdown", path = "look.castbar.targetPosition", label = "Cast target position",
           options = (function()
               local list = { { value = "AFTERNAME", label = "Right after the spell name" } }
               for _, side in ipairs(SIDES) do list[#list + 1] = side end
               return list
           end)(),
-          tooltip = "Where the cast target's name sits on the bar. Right after the spell name puts both on one line, like Fireball  Jim; it reads best with Spell name alignment on Left." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
+          tooltip = "Where the cast target's name sits on the bar." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
         Gate({ type = "Slider", path = "look.castbar.targetOffsetX", label = "Cast target horizontal offset", min = -40, max = 40,
           tooltip = "Nudges the cast target's name left (negative) or right (positive)." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
         Gate({ type = "Slider", path = "look.castbar.targetOffsetY", label = "Cast target vertical offset", min = -40, max = 40,
@@ -2214,38 +2214,38 @@ ns.sections = {
 
         { type = "Header", label = "Extras" },
         { type = "Toggle", path = "look.castbar.showSpellName", label = "Show spell name",
-          tooltip = "Off leaves the spell name out, for slim bars where the timer is enough. Interrupted by <name> still shows." },
-        { type = "Toggle", path = "look.castbar.drainCasts", label = "Casts empty instead of fill",
-          tooltip = "A normal cast's bar starts full and drains as it finishes, the way channels already do. The interrupt marker follows." },
+          tooltip = "Shows the spell's name on the cast bar." },
+        { type = "Toggle", path = "look.castbar.drainCasts", label = "Drain cast bars",
+          tooltip = "Cast bars start full and empty as the cast finishes, like channels." },
         { type = "Toggle", path = "look.castbar.shieldIcon", label = "Shield icon on uninterruptible casts",
-          tooltip = "Shows a small shield over the spell icon (or the start of the bar when the icon is off) while a cast can't be interrupted, on top of the Uninterruptible cast tint." },
-        { type = "Dropdown", path = "look.castbar.showCasts", label = "Which casts to show", options = SHOW_CASTS,
-          tooltip = "All casts, only casts you can interrupt, or only casts the game flags as important. Hidden casts still count for Casting scale and other cast features." },
+          tooltip = "Shows a shield on the spell icon when a cast can't be interrupted." },
+        { type = "Dropdown", path = "look.castbar.showCasts", label = "Casts to show", options = SHOW_CASTS,
+          tooltip = "Which casts get a cast bar. Hidden casts still count for Casting scale." },
         { type = "Toggle", path = "look.castbar.cropIcon", label = "Crop icon edges",
-          tooltip = "Trims the spell icon's built-in border so only the art shows. Off shows the full icon." },
+          tooltip = "Trims the spell icon's border." },
         { type = "Toggle", path = "look.castbar.joinBorder", label = "Join cast bar to health bar",
-          tooltip = "The cast bar sits right under the health bar inside one shared border, with the health bar's bottom edge as the line between them. Health bar spacing is ignored while it's on. Needs the plain Pixel border on both bars and no enemy power bar between them; otherwise the bars stay apart. Pair it with Extend icon across both bars for a built-in spell icon." },
+          tooltip = "Joins the cast bar to the health bar inside one border. Needs the Pixel border on both bars." },
 
         { type = "Header", label = "Interrupted text" }
     ), GateList(On("look.castbar.showInterrupter"), "Turn on Show interrupter name to use this.",
-            { type = "Dropdown", path = "look.castbar.interruptFormat", label = "Interrupted text shows", options = INTERRUPT_FORMATS,
-              tooltip = "What the message on an interrupted cast says: Interrupted by and the player's name, just the name, or just Interrupted." },
+            { type = "Dropdown", path = "look.castbar.interruptFormat", label = "Interrupted message", options = INTERRUPT_FORMATS,
+              tooltip = "What an interrupted cast bar says." },
             { type = "Dropdown", path = "look.castbar.interruptPosition", label = "Interrupted text position", options = INTERRUPT_POSITIONS,
-              tooltip = "Where the interrupted message sits. Where the spell name is keeps it in the spell name's spot and follows Spell name alignment; any other choice gives it its own place." },
+              tooltip = "Where the interrupted message sits on the bar." },
             { type = "Slider", path = "look.castbar.interruptOffsetX", label = "Interrupted text horizontal offset", min = -60, max = 60,
               tooltip = "Nudges the interrupted message left (negative) or right (positive)." },
             { type = "Slider", path = "look.castbar.interruptOffsetY", label = "Interrupted text vertical offset", min = -60, max = 60,
               tooltip = "Nudges the interrupted message down (negative) or up (positive)." },
             { type = "Slider", path = "look.castbar.interruptSize", label = "Interrupted text font size", min = 6, max = 24,
-              tooltip = "How big the interrupted message is. It uses the cast bar's font and outline." },
+              tooltip = "Size of the interrupted message." },
             { type = "Color", path = "look.castbar.interruptTextColor", label = "Interrupted text color",
-              tooltip = "The color of the message. The player's name uses their class color when Class color for the name is on." },
+              tooltip = "Color of the interrupted message." },
             { type = "Toggle", path = "look.castbar.interruptClassColor", label = "Class color for the name",
-              tooltip = "Shows the interrupting player's name in their class color. The game may hide who interrupted for players outside your group; the name then shows in the text color, or the message reads Interrupted." },
-            { type = "Toggle", path = "look.castbar.interruptKeepName", label = "Keep showing the spell name",
-              tooltip = "Off replaces the spell name with the interrupted message. On keeps the spell name and shows the message separately, so move the message somewhere else with Interrupted text position." },
+              tooltip = "Shows the interrupter's name in their class color." },
+            { type = "Toggle", path = "look.castbar.interruptKeepName", label = "Keep spell name",
+              tooltip = "Keeps the spell name and shows the interrupted message in its own position." },
             { type = "ToggleColor", path = "look.castbar.interruptFlash", colorPath = "look.castbar.interruptFlashColor", label = "Flash when interrupted",
-              tooltip = "The cast bar flashes once in this color the moment a cast is interrupted, then fades into the interrupted color. The color's opacity sets how bright the flash starts." }))),
+              tooltip = "The cast bar flashes this color when a cast is interrupted." }))),
 
     Section("shield", "Buff warnings", { "look.shield.alertImportant", "look.shield.alertColor", "look.shield.alertDefensive", "look.shield.defensiveColor", "look.shield.alertEnrage", "look.shield.enrageColor", "look.shield.alertMagic", "look.shield.magicColor", "look.shield.alertOnlyMine", "look.shield.alertSize", "look.shield.alertTexture", "look.shield.alertTextureAlpha" }, List(
         { type = "Note", label = "Highlight enemy buffs with a colored border or health bar overlay on the nameplate itself. Buff icons are on Enemy buffs and Important auras.", height = 32 },
@@ -2533,11 +2533,11 @@ ns.sections = {
     Section("threatText", "Threat percent", "look.threatText", Join(
         List(
             { type = "Header", label = "Threat percent", first = true },
-            { type = "Note", label = "Your threat on each enemy as a percentage, where 100% means you have it or are about to pull it. The game shares this number on WoW Forever; on retail it may be hidden, and then nothing shows.", height = 44 },
+            { type = "Note", label = "Your threat on each enemy as a percentage. 100% means you have aggro. The game may hide this number on Retail.", height = 32 },
             { type = "Toggle", path = "look.threatText.enabled", label = "Show threat percent",
-              tooltip = "Shows your threat on each enemy NPC as a percentage. Players and friendly units never show it." },
+              tooltip = "Shows your threat on each enemy NPC as a percentage." },
             Gate({ type = "Toggle", path = "look.threatText.hideZero", label = "Hide at 0%",
-              tooltip = "Leaves the text off enemies you have no threat on yet. If the game hides the number, it always shows instead." }, On("look.threatText.enabled"), "Turn on Show threat percent to use this."),
+              tooltip = "Hides the text on enemies you have no threat on." }, On("look.threatText.enabled"), "Turn on Show threat percent to use this."),
             Gate({ type = "Color", path = "look.threatText.color", label = "Text color",
               tooltip = "Color of the threat percent text." }, On("look.threatText.enabled"), "Turn on Show threat percent to use this.")
         ),
@@ -2548,51 +2548,51 @@ ns.sections = {
 
     Section("enemyPower", "Enemy power bar", "look.enemyPower", Join(List(
         { type = "Header", label = "Display", first = true },
-        { type = "Note", label = "Display an enemy's mana, rage, energy, or other power on its nameplate. Power information may be unavailable for some enemies or encounters.", height = 44 },
+        { type = "Note", label = "Shows an enemy's mana, rage, energy or other power. Some enemies and encounters don't provide it.", height = 32 },
         { type = "Toggle", path = "look.enemyPower.enabled", label = "Show enemy power bar",
-          tooltip = "Adds a thin bar for the enemy's energy, rage, mana or other power to its nameplate." }
+          tooltip = "Adds a thin bar for the enemy's power to its nameplate." }
     ), GateList(PowerOn, POWER_ON,
-        { type = "Dropdown", path = "look.enemyPower.show", label = "Show it on", options = ENEMY_POWER_SHOW,
-          tooltip = "Every enemy: all enemy nameplates. My target only: just the enemy you're targeting. Bosses only: enemies Plateau classifies as bosses - the same classification Colors and Behavior use, based on the game's own boss flag, world boss status, and being a boss1-5 unit token." },
+        { type = "Dropdown", path = "look.enemyPower.show", label = "Show on", options = ENEMY_POWER_SHOW,
+          tooltip = "Which enemies get a power bar. Bosses are the same enemies as the Bosses health bar color." },
         { type = "Dropdown", path = "look.enemyPower.position", label = "Bar position", options = ENEMY_POWER_POSITIONS,
           tooltip = "Where the power bar sits relative to the health bar." },
         { type = "Slider", path = "look.enemyPower.height", label = "Height", min = 2, max = 20,
-          tooltip = "How tall the power bar is." },
-        { type = "Slider", path = "look.enemyPower.width", label = "Width (0 = match health bar)", min = 0, max = 300,
-          tooltip = "Set the power bar's width. Use 0 to match the health bar." },
+          tooltip = "Height of the power bar." },
+        { type = "Slider", path = "look.enemyPower.width", label = "Width", min = 0, max = 300,
+          tooltip = "Width of the power bar. 0 matches the health bar." },
         { type = "Slider", path = "look.enemyPower.offsetX", label = "Horizontal offset", min = -40, max = 40,
           tooltip = "Nudges the power bar left (negative) or right (positive)." },
         { type = "Slider", path = "look.enemyPower.offsetY", label = "Vertical offset", min = -40, max = 40,
           tooltip = "Nudges the power bar down (negative) or up (positive)." },
         { type = "Slider", path = "look.enemyPower.alpha", label = "Opacity", min = 0.1, max = 1, step = 0.05,
-          tooltip = "Set the power bar's opacity. Lower values make it more transparent. Affects the whole bar, including its background and percentage text, not just the fill." },
-        { type = "ToggleColor", path = "look.enemyPower.customColor", colorPath = "look.enemyPower.color", label = "Use custom power color",
-          tooltip = "Use the selected color instead of the power type's default color (rage red, energy yellow, and so on)." },
+          tooltip = "Opacity of the power bar and its text." },
+        { type = "ToggleColor", path = "look.enemyPower.customColor", colorPath = "look.enemyPower.color", label = "Custom power color",
+          tooltip = "Uses this color instead of the power type's usual color." },
         { type = "Color", path = "look.enemyPower.backgroundColor", label = "Background color",
           tooltip = "Color of the unfilled portion of the power bar." },
-        { type = "Toggle", path = "look.enemyPower.showText", label = "Show power percentage",
-          tooltip = "Display the enemy's current power as a percentage of its maximum, when available. Not every enemy exposes this; nothing prints if the game doesn't provide it." }
+        { type = "Toggle", path = "look.enemyPower.showText", label = "Show power text",
+          tooltip = "Shows the enemy's power on the bar, when available." }
     ), List(
         Gate({ type = "Slider", path = "look.enemyPower.textSize", label = "Font size", min = 6, max = 20,
-          tooltip = "Set the size of the power percentage text." }, PowerText, PowerTextReason)
+          tooltip = "Size of the power text." }, PowerText, PowerTextReason)
     ), List(
         { type = "Header", label = "Extras" }
     ), GateList(PowerOn, POWER_ON,
         { type = "Dropdown", path = "look.enemyPower.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
-          tooltip = "The fill texture for the power bar." },
+          tooltip = "Fill texture of the power bar." },
         { type = "ToggleColor", path = "look.enemyPower.border", colorPath = "look.enemyPower.borderColor", label = "Border",
-          tooltip = "A thin border around the power bar." },
+          tooltip = "Shows a thin border around the power bar." },
         { type = "Toggle", path = "look.enemyPower.smooth", label = "Smooth changes",
-          tooltip = "The bar slides to its new value instead of jumping." },
+          tooltip = "Animates power changes instead of jumping." },
         { type = "Toggle", path = "look.enemyPower.hideFull", label = "Hide at full power",
-          tooltip = "Hides the power bar while the enemy's power is full, so it appears once they start spending it." }
+          tooltip = "Hides the power bar while the enemy's power is full." }
     ), GateList(PowerText, PowerTextReason,
         { type = "Dropdown", path = "look.enemyPower.textFormat", label = "Text format", options = POWER_TEXT_FORMATS,
-          tooltip = "Percent, the current amount abbreviated, or both." },
+          tooltip = "How the power text is shown." },
         { type = "Dropdown", path = "look.enemyPower.textAnchor", label = "Text position", options = POWER_TEXT_ANCHORS,
           tooltip = "Where the text sits on the power bar." },
         { type = "Dropdown", path = "look.enemyPower.font", label = "Font", options = Fonts, unknown = "Custom font",
-          tooltip = "The typeface used for the power text." },
+          tooltip = "Font of the power text." },
         { type = "Dropdown", path = "look.enemyPower.outline", label = "Font outline", options = OUTLINES,
           tooltip = "The dark edge drawn around each letter, to keep it readable over any background." }
     ))),

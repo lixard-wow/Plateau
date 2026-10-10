@@ -336,16 +336,16 @@ local MOB_ORDER = { "boss", "lieutenant", "higher", "trivial", "caster", "elite"
 local MOB_LABELS = {
     boss = { label = "Bosses" },
     lieutenant = { label = "Lieutenants" },
-    higher = { label = "Elites" },
+    higher = { label = "Higher-level elites" },
     trivial = { label = "Minor enemies" },
     caster = { label = "Casters" },
-    elite = { label = "Melee" },
+    elite = { label = "Elites" },
 }
 
 function UnitColors:Explain(plate, unit)
     local cfg = cfgs[plate.state]
     if cfg.showTapped and UnitIsTapDenied(unit) then
-        return L["tagged by someone else (Colors: Tagged by someone else)"]
+        return L["tapped by another player (Health bar: Tapped by another player)"]
     end
     local reaction = UnitReaction(unit, "player")
     local function Reaction()
@@ -354,16 +354,16 @@ function UnitColors:Explain(plate, unit)
         end
         if cfg.customReaction then
             local kind = (reaction or 0) <= 3 and L["Hostile"] or reaction == 4 and L["Neutral"] or L["Friendly"]
-            return L["reaction %s: your %s color (Colors: Reaction)"]:format(tostring(reaction), kind)
+            return L["reaction %s: your %s color (Health bar: Reaction colors)"]:format(tostring(reaction), kind)
         end
         local kind = (reaction or 0) <= 3 and L["hostile"] or reaction == 4 and L["neutral"] or L["friendly"]
-        return L["reaction %s: the game's %s color (Colors: Use my own colors is off)"]:format(tostring(reaction), kind)
+        return L["reaction %s: the game's %s color (Health bar: Custom reaction colors is off)"]:format(tostring(reaction), kind)
     end
     if plate.isFriendly then
         return L["friendly plate: %s"]:format(Reaction())
     end
     if cfg.threat and cfg.threatDisplay ~= "border" and UnitAffectingCombat(unit) and ThreatColor(cfg, unit) then
-        return L["threat color (Colors: Threat)"]
+        return L["threat color (Health bar: Threat)"]
     end
     if UnitIsPlayer(unit) then
         if cfg.classColors then
@@ -383,7 +383,7 @@ function UnitColors:Explain(plate, unit)
             local mobType = MOB_ORDER[i]
             if plate.mobFlags and plate.mobFlags[mobType] and cfg[mobType] then
                 local label = L[MOB_LABELS[mobType].label]
-                return L["enemy type %s (Colors: %s)"]:format(label, label)
+                return L["enemy type %s (Health bar: %s)"]:format(label, label)
             end
         end
         local found = plate.mobType and MOB_LABELS[plate.mobType]
@@ -391,7 +391,7 @@ function UnitColors:Explain(plate, unit)
             return L["enemy type %s, but its box is off on the Health bar page, so: %s"]:format(L[found.label], Reaction())
         end
     elseif not cfg.mobTypes then
-        return L["Color enemies by what they are is off, so: %s"]:format(Reaction())
+        return L["Enemy type colors is off, so: %s"]:format(Reaction())
     else
         return L["enemy type colors are set to instances only, so: %s"]:format(Reaction())
     end
