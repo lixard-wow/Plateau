@@ -52,7 +52,7 @@ read_globals = {
     "UnitEmpoweredChannelDuration", "UnitExists", "UnitFrameUtil", "UnitGUID",
     "UnitGetDetailedHealPrediction", "UnitGetTotalAbsorbs", "UnitGroupRolesAssigned", "UnitHasPowerType",
     "UnitHealth", "UnitHealthMax", "UnitHealthPercent", "UnitInParty", "UnitIsBossMob", "UnitIsLieutenant",
-    "UnitIsPlayer", "UnitIsTapDenied", "UnitIsUnit", "UnitLevel", "UnitName", "UnitNameFromGUID",
+    "UnitIsFriend", "UnitIsPlayer", "UnitIsTapDenied", "UnitIsUnit", "UnitLevel", "UnitName", "UnitNameFromGUID",
     "UnitPlayerControlled", "UnitPower", "UnitPowerDisplayMod", "UnitPowerMax", "UnitPowerMissing",
     "UnitPowerPercent", "UnitPowerType", "UnitRace", "UnitReaction", "UnitSelectionColor", "UnitSex",
     "UnitShouldDisplaySpellTargetName", "UnitSpellTargetName", "UnitStat", "UnitThreatSituation",

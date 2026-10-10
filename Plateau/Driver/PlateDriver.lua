@@ -132,6 +132,10 @@ local function Claimable(unit)
     if UnitIsPlayer(unit) then
         return friendly.players
     end
+    local friend = UnitIsFriend("player", unit)
+    if not issecretvalue(friend) and not friend then
+        return false
+    end
     if IsMinion(unit) then
         if not friendly.minions then
             return false, true
@@ -160,6 +164,7 @@ local function RestoreBlizzardPlate(base)
     local unitFrame = base.UnitFrame
     if not (unitFrame and unitFrame.plateauStripped) then return end
     unitFrame.plateauStripped = nil
+    unitFrame:SetParent(base)
     local valid = C_EventUtils and C_EventUtils.IsEventValid
     for _, event in ipairs(BLIZZARD_FRAME_EVENTS) do
         if not valid or valid(event) then
