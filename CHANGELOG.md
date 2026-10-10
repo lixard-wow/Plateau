@@ -41,7 +41,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 - **Pixel-perfect borders** (Size page, on by default): borders, rings and glows are drawn in whole screen pixels at each nameplate's real size, so a 1 pixel border is exactly one pixel on every plate, including scaled friendly and target plates. They are only recalculated when a nameplate changes size, so there is no extra cost while you play.
 
 #### Fixed
-- **Animated target arrows move smoothly.** They were snapped to whole screen pixels, so their small bob moved in visible steps, and any restyle restarted the animation from the start.
+- **Animated target arrows move smoothly and hold still on moving enemies.** They were either snapped to whole screen pixels, so their small bob moved in visible steps, or placed between pixels, so they wobbled against the bar while the enemy walked. The built-in arrow styles now stay on whole pixels and slide their image inside, which is both smooth and steady; Blizzard's arrow styles slide smoothly as before. Any restyle no longer restarts the animation.
 - **The enemy's target name now shows on every mob in dungeons.** It only updated when the game reported a target change, which doesn't reliably happen in instances, so most plates stayed blank after a pull. It now also updates on threat and combat changes and a few times a second while you're in combat.
 - **Friendly names are all the same size.** In name-only mode some friendly player and NPC names showed smaller until you targeted or hovered them, because their plate never got its size set when it appeared.
 
