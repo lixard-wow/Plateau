@@ -71,7 +71,63 @@ end
 local BOB = 4
 local TOWARD = { TOP = { 0, -BOB }, BOTTOM = { 0, BOB }, LEFT = { BOB, 0 }, RIGHT = { -BOB, 0 } }
 
+local SLIDE_PERIOD = 0.45
+local ART_START, ART_TEXELS, CANVAS_TEXELS = 32, 64, 128
+local TIP_TOWARD = { TOP = "down", BOTTOM = "up", LEFT = "right", RIGHT = "left" }
+
+local function Slide(texture, offset)
+    local slide = texture.slide
+    local reach = math.min(BOB * ART_TEXELS / slide.size, ART_START)
+    local shift = math.min(offset * ART_TEXELS / slide.size, reach)
+    local low, high
+    if slide.sign < 0 then
+        low, high = ART_START - reach + shift, ART_START + ART_TEXELS + shift
+    else
+        low, high = ART_START - shift, ART_START + ART_TEXELS + reach - shift
+    end
+    local u0, u1 = low / CANVAS_TEXELS, high / CANVAS_TEXELS
+    local direction = slide.direction
+    if direction == "right" then
+        texture:SetTexCoord(u0, 0, u0, 1, u1, 0, u1, 1)
+    elseif direction == "left" then
+        texture:SetTexCoord(u1, 1, u1, 0, u0, 1, u0, 0)
+    elseif direction == "down" then
+        texture:SetTexCoord(u0, 1, u1, 1, u0, 0, u1, 0)
+    else
+        texture:SetTexCoord(u1, 0, u0, 0, u1, 1, u0, 1)
+    end
+end
+
+local sliding = {}
+local slideClock = 0
+local slider = CreateFrame("Frame")
+slider:Hide()
+slider:SetScript("OnUpdate", function(self, elapsed)
+    slideClock = (slideClock + elapsed) % (SLIDE_PERIOD * 2)
+    local t = slideClock / SLIDE_PERIOD
+    if t > 1 then
+        t = 2 - t
+    end
+    local offset = BOB * (1 - math.cos(math.pi * t)) / 2
+    local any = false
+    for texture in pairs(sliding) do
+        any = true
+        Slide(texture, offset)
+    end
+    if not any then
+        self:Hide()
+    end
+end)
+
 local function Bob(texture, side)
+    if texture.slide then
+        texture.slide.sign = texture.slide.direction == TIP_TOWARD[side] and 1 or -1
+        Slide(texture, 0)
+        if texture.bob then
+            texture.bob:Stop()
+        end
+        return
+    end
     local group = texture.bob
     if not group then
         group = texture:CreateAnimationGroup()
@@ -94,6 +150,18 @@ local function Bob(texture, side)
 end
 
 local function PlayBob(texture, on)
+    if texture and texture.slide then
+        if on and texture:IsShown() then
+            if not sliding[texture] then
+                sliding[texture] = true
+                slider:Show()
+            end
+        elseif sliding[texture] then
+            sliding[texture] = nil
+            Slide(texture, 0)
+        end
+        return
+    end
     local group = texture and texture.bob
     if not group then return end
     if on and texture:IsShown() then
@@ -113,10 +181,6 @@ local function EnsureArrows(set, plate)
     if not set.arrowLeft then
         set.arrowLeft = plate.overlay:CreateTexture(nil, "OVERLAY")
         set.arrowRight = plate.overlay:CreateTexture(nil, "OVERLAY")
-        for _, arrow in ipairs({ set.arrowLeft, set.arrowRight }) do
-            arrow:SetSnapToPixelGrid(false)
-            arrow:SetTexelSnappingBias(0)
-        end
     end
 end
 
@@ -156,10 +220,24 @@ end
 local function Point(texture, style, direction, size)
     if style.file then
         texture:SetTexture(style.file)
-        texture:SetRotation(ANGLES[direction])
-        texture:SetSize(size, size)
+        texture:SetRotation(0)
+        texture:SetSnapToPixelGrid(true)
+        texture:SetTexelSnappingBias(0)
+        local slide = texture.slide or { sign = 1 }
+        slide.direction, slide.size = direction, size
+        texture.slide = slide
+        if direction == "left" or direction == "right" then
+            texture:SetSize(size + BOB, size)
+        else
+            texture:SetSize(size, size + BOB)
+        end
+        Slide(texture, 0)
         return
     end
+    texture.slide = nil
+    sliding[texture] = nil
+    texture:SetSnapToPixelGrid(false)
+    texture:SetTexelSnappingBias(0)
     local atlas, rotation = style[direction], 0
     if not atlas then
         atlas = style.left
@@ -182,31 +260,32 @@ local function StyleSet(set, plate, db, borderSize)
         local style = ARROWS[db.arrowStyle] or ARROWS.chevronDouble
         local placement = PLACEMENTS[db.arrowPlacement] or PLACEMENTS["in"]
         local left, right = set.arrowLeft, set.arrowRight
+        local extend = style.file and BOB or 0
         left:ClearAllPoints()
         right:ClearAllPoints()
         if placement.top and placement.bottom then
             Point(left, style, placement.top, db.arrowSize)
             Point(right, style, placement.bottom, db.arrowSize)
-            left:SetPoint("BOTTOM", plate, "TOP", 0, db.arrowGap)
-            right:SetPoint("TOP", plate, "BOTTOM", 0, -db.arrowGap)
+            left:SetPoint("BOTTOM", plate, "TOP", 0, db.arrowGap - extend)
+            right:SetPoint("TOP", plate, "BOTTOM", 0, -db.arrowGap + extend)
             set.single = false
             Bob(left, "TOP")
             Bob(right, "BOTTOM")
         elseif placement.top then
             Point(left, style, placement.top, db.arrowSize)
-            left:SetPoint("BOTTOM", plate, "TOP", 0, db.arrowGap)
+            left:SetPoint("BOTTOM", plate, "TOP", 0, db.arrowGap - extend)
             set.single = true
             Bob(left, "TOP")
         elseif placement.bottom then
             Point(left, style, placement.bottom, db.arrowSize)
-            left:SetPoint("TOP", plate, "BOTTOM", 0, -db.arrowGap)
+            left:SetPoint("TOP", plate, "BOTTOM", 0, -db.arrowGap + extend)
             set.single = true
             Bob(left, "BOTTOM")
         else
             Point(left, style, placement.left, db.arrowSize)
             Point(right, style, placement.right, db.arrowSize)
-            left:SetPoint("RIGHT", plate, "LEFT", -db.arrowGap, 0)
-            right:SetPoint("LEFT", plate, "RIGHT", db.arrowGap, 0)
+            left:SetPoint("RIGHT", plate, "LEFT", -db.arrowGap + extend, 0)
+            right:SetPoint("LEFT", plate, "RIGHT", db.arrowGap - extend, 0)
             set.single = false
             Bob(left, "LEFT")
             Bob(right, "RIGHT")
