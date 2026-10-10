@@ -2364,7 +2364,7 @@ ns.sections = {
         Gate({ type = "Slider", path = "look.target.arrowGap", label = "Arrow distance", min = 0, max = 60,
           tooltip = "Distance between the arrows and the nameplate's edge." }, On("look.target.arrows"), "Turn on Show target arrows to use this."),
         Gate({ type = "Toggle", path = "look.target.animateArrows", label = "Animate arrows",
-          tooltip = "The arrows pulse gently, fading in and out." }, On("look.target.arrows"), "Turn on Show target arrows to use this."),
+          tooltip = "The arrows push toward the nameplate and back." }, On("look.target.arrows"), "Turn on Show target arrows to use this."),
 
         { type = "Header", label = "Corner brackets" },
         { type = "ToggleColor", path = "look.target.brackets", colorPath = "look.target.bracketColor", label = "Show target brackets",
@@ -2422,7 +2422,7 @@ ns.sections = {
         Gate({ type = "Slider", path = "look.focus.arrowGap", label = "Arrow distance", min = 0, max = 60,
           tooltip = "Distance between the arrows and the nameplate's edge." }, On("look.focus.arrows"), "Turn on Show focus arrows to use this."),
         Gate({ type = "Toggle", path = "look.focus.animateArrows", label = "Animate arrows",
-          tooltip = "The arrows pulse gently, fading in and out." }, On("look.focus.arrows"), "Turn on Show focus arrows to use this."),
+          tooltip = "The arrows push toward the nameplate and back." }, On("look.focus.arrows"), "Turn on Show focus arrows to use this."),
 
         { type = "Header", label = "Corner brackets" },
         { type = "ToggleColor", path = "look.focus.brackets", colorPath = "look.focus.bracketColor", label = "Show focus brackets",

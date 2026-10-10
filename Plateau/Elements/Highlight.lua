@@ -68,16 +68,34 @@ local function Pulse(border, on)
     end
 end
 
-local function Bob(texture)
-    if texture.bob then return end
-    local group = texture:CreateAnimationGroup()
-    group:SetLooping("BOUNCE")
-    local fade = group:CreateAnimation("Alpha")
-    fade:SetFromAlpha(1)
-    fade:SetToAlpha(0.35)
-    fade:SetDuration(0.6)
-    fade:SetSmoothing("IN_OUT")
-    texture.bob = group
+local PUSH = 1.25
+
+local function Bob(texture, origin)
+    local group = texture.bob
+    if not group then
+        group = texture:CreateAnimationGroup()
+        group:SetLooping("BOUNCE")
+        local push = group:CreateAnimation("Scale")
+        if push.SetScaleFrom then
+            push:SetScaleFrom(1, 1)
+            push:SetScaleTo(PUSH, PUSH)
+        else
+            push:SetScale(PUSH, PUSH)
+        end
+        push:SetDuration(0.45)
+        push:SetSmoothing("IN_OUT")
+        group.push = push
+        texture.bob = group
+    end
+    if group.origin ~= origin then
+        local playing = group:IsPlaying()
+        group:Stop()
+        group.push:SetOrigin(origin, 0, 0)
+        group.origin = origin
+        if playing then
+            group:Play()
+        end
+    end
 end
 
 local function PlayBob(texture, on)
@@ -173,26 +191,26 @@ local function StyleSet(set, plate, db, borderSize)
             left:SetPoint("BOTTOM", plate, "TOP", 0, db.arrowGap)
             right:SetPoint("TOP", plate, "BOTTOM", 0, -db.arrowGap)
             set.single = false
-            Bob(left)
-            Bob(right)
+            Bob(left, "TOP")
+            Bob(right, "BOTTOM")
         elseif placement.top then
             Point(left, style, placement.top, db.arrowSize)
             left:SetPoint("BOTTOM", plate, "TOP", 0, db.arrowGap)
             set.single = true
-            Bob(left)
+            Bob(left, "TOP")
         elseif placement.bottom then
             Point(left, style, placement.bottom, db.arrowSize)
             left:SetPoint("TOP", plate, "BOTTOM", 0, -db.arrowGap)
             set.single = true
-            Bob(left)
+            Bob(left, "BOTTOM")
         else
             Point(left, style, placement.left, db.arrowSize)
             Point(right, style, placement.right, db.arrowSize)
             left:SetPoint("RIGHT", plate, "LEFT", -db.arrowGap, 0)
             right:SetPoint("LEFT", plate, "RIGHT", db.arrowGap, 0)
             set.single = false
-            Bob(left)
-            Bob(right)
+            Bob(left, "LEFT")
+            Bob(right, "RIGHT")
         end
         local c = db.arrowColor
         local tinted = IsTinted(c)
