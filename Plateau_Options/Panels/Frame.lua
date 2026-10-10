@@ -908,10 +908,10 @@ Confirming(resetSection, "Reset this section", function()
     RefreshPage(pages[current.key])
 end)
 
-resetAll = Widgets.Button(sectionBar, "Reset everything", 150)
+resetAll = Widgets.Button(sectionBar, "Reset profile", 150)
 resetAll:SetPoint("RIGHT", -PAD, 0)
 resetAll:Hide()
-Confirming(resetAll, "Reset everything", function()
+Confirming(resetAll, "Reset profile", function()
     Plateau.DB:Reset(nil)
     if ns.RefreshAll then
         ns.RefreshAll()

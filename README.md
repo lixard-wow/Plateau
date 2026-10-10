@@ -114,7 +114,7 @@ Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Esca
 - **Search.** Finds any setting by name or by words in its description and scrolls it to the top. On the Help page it searches only the help topics.
 - **Pages.** One page per part of the nameplate, plus Looks at the top and Game settings and Help at the bottom.
 - **Apply to all plates.** Copies every setting and position on the current page from the type you are editing to all plates.
-- **Reset.** Right-click a setting to reset it, use **Reset this section**, or **Reset everything** on the Profiles page.
+- **Reset.** Right-click a setting to reset it, use **Reset this section**, or **Reset profile** on the Profiles page to reset the active profile.
 - **Help.** A page of 44 topics covering every page and the common how-tos.
 
 ## Profiles and looks

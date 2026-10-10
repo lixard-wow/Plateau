@@ -2773,7 +2773,7 @@ ns.sections = {
             { type = "Note", label = "Profiles store your nameplate look and your aura spell lists. Each character has its own default profile.", height = 24 },
             { type = "ProfileStatus", label = "Default profile", keywords = "active profile override reason pending switch character",
               tooltip = "The profile this character falls back to when no automatic rule applies. The active profile is the one every page edits." },
-            { type = "Header", label = "Manage profiles", keywords = "create new duplicate active rename copy settings from replace current delete restore built-in reset everything defaults start over" },
+            { type = "Header", label = "Manage profiles", keywords = "create new duplicate active rename copy settings from replace current delete restore built-in reset profile reset everything defaults start over" },
             { type = "ProfileActions", label = "Create profile", keywords = "new profile duplicate active rename profile copy settings from delete profile restore built-in",
               tooltip = "Create, duplicate, rename, copy settings between, delete and restore profiles." },
             { type = "Header", label = "Switch automatically", keywords = "content specialization override raid dungeon delve arena battleground open world no override" },

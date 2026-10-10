@@ -90,7 +90,7 @@ local DESCRIBE = {
         end
         return T("Several settings")
     end,
-    Reset = function(path) return path and T("Reset %s"):format(T(Label(path) or "a setting")) or T("Reset everything") end,
+    Reset = function(path) return path and T("Reset %s"):format(T(Label(path) or "a setting")) or T("Reset profile") end,
     ResetEverywhere = function(paths) return T("Reset %s"):format(T((type(paths) == "table" and Label(paths[1])) or "a setting")) end,
     SetSpecSpells = function() return T("Spell list") end,
     CVarSet = function(name) return T(Label("cvar." .. tostring(name))) or tostring(name) end,
