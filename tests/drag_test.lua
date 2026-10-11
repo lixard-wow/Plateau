@@ -32,6 +32,7 @@ function Frame:Hide() self.shown = false end
 function Frame:SetShown(shown) self.shown = shown and true or false end
 function Frame:GetEffectiveScale() return 1 end
 function Frame:ClearAllPoints() end
+function Frame:SetJustifyH(justify) self.justify = justify end
 function Frame:SetSize(w, h)
     local cx, cy = (self.l + self.r) / 2, (self.t + self.b) / 2
     self.l, self.r, self.t, self.b = cx - w / 2, cx + w / 2, cy + h / 2, cy - h / 2
@@ -215,6 +216,18 @@ for _, dot in ipairs(dots) do
     if dot.anchor == plate.name then nameSelf = true end
 end
 check(not nameSelf, "name never shows dots on its own text")
+check(saved["look.name.justify"] == "CENTER", "dropping the name in the middle third centers it")
+
+plate.nameClip:Rect(0, 100, 24, 12)
+db["look.name.position"] = "CENTER"
+db["look.name.gap"] = 0
+Drop(nameSpec, nameSpot, 50, 18, 12, 0)
+check(saved and saved["look.name.justify"] == "LEFT", "dragging the name to the left third aligns it left (got " .. tostring(saved and saved["look.name.justify"]) .. ")")
+check(plate.name.justify == "LEFT", "the name moves left while it's being dragged")
+
+plate.nameClip:Rect(0, 100, 24, 12)
+Drop(nameSpec, nameSpot, 50, 18, 92, 0)
+check(saved and saved["look.name.justify"] == "RIGHT", "dragging the name to the right third aligns it right")
 
 plate.nameClip:Rect(0, 100, 24, 12)
 plate.classPower:Rect(20, 70, -100, -106)

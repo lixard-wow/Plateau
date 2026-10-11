@@ -352,6 +352,9 @@ local function OnUpdate()
         return
     end
     local x, y = Cursor(spec.spot)
+    if spec.Track then
+        spec.Track()
+    end
     if spec.axis == "y" then
         x = spec.startX
     end
@@ -384,6 +387,7 @@ function Start(spec)
     end
     local x, y = Cursor(spec.spot)
     spec.startX = x
+    spec.dragJustify = nil
     spec.grabX = x - (left + right) / 2
     spec.grabY = y - (top + bottom) / 2
     active = spec
@@ -656,17 +660,42 @@ local NAME_SPOTS = {
 }
 
 function Drag.NameSpec(plate)
-    local positionPath, gapPath = "look.name.position", "look.name.gap"
+    local positionPath, gapPath, justifyPath = "look.name.position", "look.name.gap", "look.name.justify"
     local spec = {
         name = "look.name",
-        paths = { positionPath, gapPath },
+        paths = { positionPath, gapPath, justifyPath },
         axis = "y",
         keepSize = true,
     }
+    local function WithJustify(values)
+        if values and spec.dragJustify then
+            values[justifyPath] = spec.dragJustify
+        end
+        return values
+    end
+    function spec.Track()
+        if plate.nameOnly then return end
+        local left, right = plate:GetLeft(), plate:GetRight()
+        if not left then return end
+        local cx = GetCursorPosition() / plate:GetEffectiveScale()
+        local third = (right - left) / 3
+        local justify = cx < left + third and "LEFT" or cx > right - third and "RIGHT" or "CENTER"
+        if justify == spec.dragJustify then return end
+        spec.dragJustify = justify
+        local text = plate.name
+        local side = justify == "CENTER" and "" or justify
+        local point = (plate.nameTop or "") .. side
+        if point == "" then
+            point = "CENTER"
+        end
+        text:ClearAllPoints()
+        text:SetPoint(point, plate.nameClip, point)
+        text:SetJustifyH(justify)
+    end
     function spec.Mover()
         return plate.nameClip
     end
-    function spec.Place(_, cy)
+    local function Place(_, cy)
         local top, bottom = plate:GetTop(), plate:GetBottom()
         if not top then return nil end
         local half = plate.nameClip:GetHeight() / 2
@@ -686,6 +715,9 @@ function Drag.NameSpec(plate)
         if not bestId then return nil end
         return { [positionPath] = bestId, [gapPath] = Clamp(bestGap, -10, 30) }
     end
+    function spec.Place(cx, cy)
+        return WithJustify(Place(cx, cy))
+    end
     function spec.Candidates()
         local list = {}
         for _, spot in ipairs(NAME_SPOTS) do
@@ -701,7 +733,7 @@ function Drag.NameSpec(plate)
                 mx = ax,
                 my = my,
                 Values = function(_, dy)
-                    return { [positionPath] = spot.id, [gapPath] = Clamp(dy * spot.sign, -10, 30) }
+                    return WithJustify({ [positionPath] = spot.id, [gapPath] = Clamp(dy * spot.sign, -10, 30) })
                 end,
             }
         end
