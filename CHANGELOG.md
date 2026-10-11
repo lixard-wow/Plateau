@@ -9,7 +9,7 @@ The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 ### 2026-10-10 nameplates ready before the pull
 
 #### Changed
-- **Spare nameplates and aura sets are built ahead.** Plateau starts with 24 spare enemy nameplates and 24 spare sets of aura icons, styled while you're out of combat, so enemies that come into view in a pull use a ready plate instead of building one on the spot. In a 17-enemy Mythic+ pull nothing was built in combat, and the slowest nameplate set-up dropped from 13.8 ms to 1 ms.
+- **Spare nameplates and aura sets are built ahead.** Plateau starts with 24 spare enemy nameplates and 32 spare sets of aura icons, styled while you're out of combat, so enemies that come into view in a pull use a ready plate instead of building one on the spot. In a 17-enemy Mythic+ pull nothing was built in combat, and the slowest nameplate set-up dropped from 13.8 ms to 1 ms. Aura sets went from 24 to 32 after a 26-enemy Timewalking pull ran out of spares.
 - **Spares refill after combat**, and after a spare is used out of combat, so the next pull starts with a full set.
 - **Units Plateau doesn't style no longer get a plate**, and name-only plates get no aura icons, so they cost nothing to keep.
 - **Background builds add aura groups one at a time**, so no single frame goes over the build budget.
