@@ -98,7 +98,11 @@ function PersonalDisplay:IsOn()
 end
 
 function PersonalDisplay:SetOn(on)
-    ns.DB.saved.global.skinPersonal = on ~= false and nil or false
+    if on == false then
+        ns.DB.saved.global.skinPersonal = false
+    else
+        ns.DB.saved.global.skinPersonal = nil
+    end
     self:Update()
 end
 
