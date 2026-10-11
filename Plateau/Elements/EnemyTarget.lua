@@ -62,7 +62,7 @@ end
 
 local function Covered(plate)
     local bar = plate.castbar
-    return bar ~= nil and bar:IsShown() and bar.target:IsShown()
+    return not plate.enemyTargetPreview and bar ~= nil and bar:IsShown() and bar.target:IsShown()
 end
 
 function EnemyTarget:RefreshShown(plate)
@@ -138,6 +138,7 @@ function EnemyTarget:Preview(plate, state)
     end
     Paint(text, settings[plate.state], state.enemyTargetClass or UnitClassBase("player"), state.enemyTargetName == nil)
     text:SetText(state.enemyTargetName or UnitName("player"))
+    plate.enemyTargetPreview = true
     plate.enemyTargetFilled = true
     self:RefreshShown(plate)
 end
