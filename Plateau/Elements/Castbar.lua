@@ -401,6 +401,7 @@ function Castbar:Style(plate, db)
     local flashColor = db.interruptFlashColor
     bar.interruptFlash:SetColorTexture(flashColor[1], flashColor[2], flashColor[3], 1)
     bar.interruptFlash.fade:SetFromAlpha(flashColor[4] or 1)
+    bar.interruptFlash.key = table.concat({ flashColor[1], flashColor[2], flashColor[3], flashColor[4] or 1 }, ",")
 
     bar.border:SetStyle(db.borderStyle, bar)
     bar.border:SetColor(db.border[1], db.border[2], db.border[3], db.border[4])
@@ -834,6 +835,18 @@ function Castbar:Preview(plate, state)
         bar.kickClip:Hide()
         bar.glow:SetAlpha(0)
         bar.spark:Hide()
+    end
+    local flash = bar.interruptFlash
+    local flashKey = interrupted and s.interruptFlash and flash.key or nil
+    if flashKey ~= bar.previewFlashKey then
+        bar.previewFlashKey = flashKey
+        flash.anim:Stop()
+        if flashKey then
+            flash:Show()
+            flash.anim:Play()
+        else
+            flash:Hide()
+        end
     end
 
     if s.showTarget and cast.target and not interrupted then
