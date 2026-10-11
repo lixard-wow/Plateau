@@ -119,10 +119,39 @@ local targetTokens = setmetatable({}, { __index = function(tokens, unit)
     return token
 end })
 
+local otherTanks = {}
+
+local function IsTank(token)
+    local role = UnitGroupRolesAssigned(token)
+    if not issecretvalue(role) and role == "TANK" then return true end
+    if GetPartyAssignment then
+        local assigned = GetPartyAssignment("MAINTANK", token)
+        return not issecretvalue(assigned) and assigned == true
+    end
+    return false
+end
+
+local function UpdateTanks()
+    wipe(otherTanks)
+    local prefix = IsInRaid() and "raid" or "party"
+    for i = 1, GetNumGroupMembers() do
+        local token = prefix .. i
+        local exists, mine = UnitExists(token), UnitIsUnit(token, "player")
+        if not issecretvalue(exists) and exists and not issecretvalue(mine) and not mine and IsTank(token) then
+            otherTanks[#otherTanks + 1] = token
+        end
+    end
+end
+
 local function HeldByOtherTank(unit)
+    for i = 1, #otherTanks do
+        local status = UnitThreatSituation(otherTanks[i], unit)
+        if not issecretvalue(status) and status == 3 then
+            return true
+        end
+    end
     local target = targetTokens[unit]
-    local role = UnitGroupRolesAssigned(target)
-    if issecretvalue(role) or role ~= "TANK" then return false end
+    if not IsTank(target) then return false end
     local mine = UnitIsUnit(target, "player")
     return not issecretvalue(mine) and not mine
 end
@@ -475,7 +504,13 @@ if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventVali
 end
 UnitColors:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 UnitColors:RegisterEvent("PLAYER_LEVEL_UP")
+UnitColors:RegisterEvent("GROUP_ROSTER_UPDATE")
+UnitColors:RegisterEvent("PLAYER_ROLES_ASSIGNED")
 UnitColors:SetScript("OnEvent", function(_, event)
+    if event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ROLES_ASSIGNED" then
+        UpdateTanks()
+        return
+    end
     if event == "PLAYER_LEVEL_UP" then
         if cfgs.enemy then
             ns.Driver:RequestRestyle(true, "level up")
@@ -483,6 +518,9 @@ UnitColors:SetScript("OnEvent", function(_, event)
         return
     end
     Refresh()
+    if event == "PLAYER_ENTERING_WORLD" then
+        UpdateTanks()
+    end
     if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
         for i = 1, #LATE_CHECKS do
             C_Timer.After(LATE_CHECKS[i], Refresh)
