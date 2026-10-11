@@ -347,6 +347,7 @@ function Castbar:Configure(db, state)
     s.interruptHold = db.interruptHold
     s.interruptFormat = db.interruptFormat or "by"
     s.interruptClassColor = db.interruptClassColor ~= false
+    s.interruptTextColor = db.interruptTextColor or { 1, 1, 1, 1 }
     s.interruptKeepName = db.interruptKeepName == true
     s.interruptFlash = db.interruptFlash == true
     s.showSpellName = db.showSpellName ~= false
@@ -581,14 +582,41 @@ local function WriteInterrupter(text, s, name)
     end
 end
 
+local function SecretClassColor(guid)
+    if not (C_ClassColor and C_ClassColor.GetClassColor) then return nil end
+    local ok, class = pcall(ClassFromGUID, guid)
+    if not ok or class == nil then return nil end
+    local found, color = pcall(C_ClassColor.GetClassColor, class)
+    if found and color then
+        return color
+    end
+end
+
+local function WriteSecretInterrupter(text, s, name, guid)
+    local color = s.interruptClassColor and SecretClassColor(guid)
+    if not color then
+        WriteInterrupter(text, s, name)
+        return
+    end
+    local ok, wrapped = pcall(color.WrapTextInColorCode, color, name)
+    if ok and wrapped then
+        WriteInterrupter(text, s, wrapped)
+        return
+    end
+    WriteInterrupter(text, s, name)
+    text:SetTextColor(color.r, color.g, color.b, 1)
+end
+
 local function InterruptText(text, interruptedBy, s)
+    local hit = s.interruptTextColor
+    text:SetTextColor(hit[1], hit[2], hit[3], hit[4])
     if s.interruptFormat == "label" or (not issecretvalue(interruptedBy) and interruptedBy == nil) then
         text:SetText(INTERRUPTED_TEXT)
         return
     end
     local name = NameFromGUID(interruptedBy)
-    if issecretvalue(name) then
-        WriteInterrupter(text, s, name)
+    if issecretvalue(name) or issecretvalue(interruptedBy) then
+        WriteSecretInterrupter(text, s, name, interruptedBy)
         return
     end
     if not name or name == "" then
