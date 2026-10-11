@@ -171,18 +171,12 @@ function ClassPower:Style(plate, db)
     end
 end
 
-function ClassPower:Update(plate)
-    local holder = plate.classPower
-    local db = ns.DB.views[plate.state].classPower
-    if not (resource and plate.isTarget and not plate.isFriendly and db.enabled) then
-        holder:Hide()
-        return
-    end
+local function ActiveCount()
+    if not resource then return nil end
     if needsCat then
         local power = UnitPowerType("player")
         if issecretvalue(power) or power ~= POWER.Energy then
-            holder:Hide()
-            return
+            return nil
         end
     end
     if resource ~= RUNES then
@@ -191,14 +185,13 @@ function ClassPower:Update(plate)
             resourceMax = max
         end
     end
-    local count = math.min(resourceMax or DEFAULT_MAX[resource], MAX_PIPS)
-    if holder.count ~= count or holder.styledFor ~= db then
-        holder.styledFor = db
-        Layout(plate, db, count)
-    end
+    return math.min(resourceMax or DEFAULT_MAX[resource], MAX_PIPS)
+end
+
+local function FillPips(pips, count)
     if resource == RUNES then
         for i = 1, count do
-            local pip = holder.pips[i]
+            local pip = pips[i]
             local _, _, ready = GetRuneCooldown(i)
             pip:SetMinMaxValues(0, 1)
             pip:SetValue(1)
@@ -208,18 +201,39 @@ function ClassPower:Update(plate)
                 pip:SetAlpha(ready and 1 or 0.3)
             end
         end
-    else
-        local value = UnitPower("player", resource, true)
-        local known = not issecretvalue(value) and value
+        return nil
+    end
+    local value = UnitPower("player", resource, true)
+    for i = 1, count do
+        local pip = pips[i]
+        pip:SetMinMaxValues((i - 1) * displayMod, i * displayMod)
+        pip:SetValue(value)
+        pip:SetAlpha(1)
+    end
+    return not issecretvalue(value) and value or nil
+end
+
+function ClassPower:Update(plate)
+    local holder = plate.classPower
+    local db = ns.DB.views[plate.state].classPower
+    if not (resource and plate.isTarget and not plate.isFriendly and db.enabled) then
+        holder:Hide()
+        return
+    end
+    local count = ActiveCount()
+    if not count then
+        holder:Hide()
+        return
+    end
+    if holder.count ~= count or holder.styledFor ~= db then
+        holder.styledFor = db
+        Layout(plate, db, count)
+    end
+    local known = FillPips(holder.pips, count)
+    if resource ~= RUNES then
         if db.hideEmpty and known and known <= 0 then
             holder:Hide()
             return
-        end
-        for i = 1, count do
-            local pip = holder.pips[i]
-            pip:SetMinMaxValues((i - 1) * displayMod, i * displayMod)
-            pip:SetValue(value)
-            pip:SetAlpha(1)
         end
         holder.glow:SetShown(db.glowMax == true and known and known >= count * displayMod or false)
     end
@@ -262,9 +276,10 @@ end
 
 local listener = CreateFrame("Frame")
 local armed = false
+local watcher
 
 local function Arm()
-    local want = ClassPower.enabled == true and resource ~= nil
+    local want = (ClassPower.enabled == true or watcher ~= nil) and resource ~= nil
     if want == armed then return end
     armed = want
     if want then
@@ -285,6 +300,16 @@ end
 function ClassPower:Configured()
     Arm()
 end
+
+ns.ClassResource = {
+    Count = ActiveCount,
+    Fill = FillPips,
+    Color = Colors,
+    Watch = function(callback)
+        watcher = callback
+        Arm()
+    end,
+}
 
 listener:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 listener:RegisterEvent("PLAYER_TALENT_UPDATE")
@@ -307,6 +332,9 @@ listener:SetScript("OnEvent", function(_, event, unit, powerToken)
     local plate = ns.Driver:GetPlate("target")
     if plate and plate.built[ClassPower] then
         ClassPower:Update(plate)
+    end
+    if watcher then
+        watcher()
     end
 end)
 

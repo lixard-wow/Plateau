@@ -88,6 +88,79 @@ local function Apply(bar, look)
     end
 end
 
+local pips
+
+local function LayoutPips()
+    local count, look = pips.count, pips.look
+    if not (count and look) then return end
+    local health = look.health
+    local spacing = look.classPower.spacing + (health.borderInside and 0 or health.borderSize * 2)
+    local width = (pips:GetWidth() - (count - 1) * spacing) / count
+    if width <= 0 then return end
+    for i = 1, count do
+        local pip = pips.bars[i]
+        pip:ClearAllPoints()
+        pip:SetSize(width, pips:GetHeight())
+        pip:SetPoint("LEFT", (i - 1) * (width + spacing), 0)
+        pip:Show()
+    end
+    for i = count + 1, #pips.bars do
+        pips.bars[i]:Hide()
+    end
+end
+
+local function Pips(frame)
+    if pips then return pips end
+    pips = CreateFrame("Frame", nil, frame.ClassFrameContainer)
+    pips.bars = {}
+    pips:SetScript("OnSizeChanged", LayoutPips)
+    return pips
+end
+
+local function StylePips(frame, look, count)
+    local holder = Pips(frame)
+    local container = frame.ClassFrameContainer
+    local health = look.health
+    local outside = health.borderInside and 0 or health.borderSize
+    holder:ClearAllPoints()
+    holder:SetPoint("TOP", container, "TOP", 0, -(container.yOffset or 0) - outside)
+    holder:SetPoint("LEFT", frame.HealthBarsContainer, "LEFT")
+    holder:SetPoint("RIGHT", frame.HealthBarsContainer, "RIGHT")
+    holder:SetHeight(frame.PowerBar:GetHeight())
+    local red, green, blue = ns.ClassResource.Color(look.classPower)
+    for i = 1, count do
+        local pip = holder.bars[i]
+        if not pip then
+            pip = CreateFrame("StatusBar", nil, holder)
+            holder.bars[i] = pip
+        end
+        Apply(pip, look)
+        pip:SetStatusBarColor(red, green, blue, 1)
+    end
+    holder.count, holder.look = count, look
+    LayoutPips()
+end
+
+local function RefreshPips()
+    local frame = PersonalResourceDisplayFrame
+    local classFrame = frame and frame.classFrame
+    if not classFrame then return end
+    local on = PersonalDisplay:IsOn()
+    local count = on and ns.ClassResource.Count()
+    classFrame:SetAlpha(count and 0 or 1)
+    if not count then
+        if pips then pips:Hide() end
+        return
+    end
+    local look = ns.DB.views.enemy
+    if not pips or pips.count ~= count or pips.look ~= look or pips.styled ~= pips.version then
+        StylePips(frame, look, count)
+        pips.styled = pips.version
+    end
+    ns.ClassResource.Fill(pips.bars, count)
+    pips:Show()
+end
+
 local function Bars(frame)
     local container = frame.HealthBarsContainer
     return container and container.healthBar, frame.PowerBar, frame.AlternatePowerBar
@@ -120,6 +193,9 @@ function PersonalDisplay:Update()
                 ApplyTexture(alt, ns.DB.views.enemy.health)
             end
         end)
+        if frame.SetupClassBar then
+            hooksecurefunc(frame, "SetupClassBar", RefreshPips)
+        end
     end
     local health, power, alt = Bars(frame)
     for _, bar in ipairs({ health, power, alt }) do
@@ -129,6 +205,13 @@ function PersonalDisplay:Update()
             Restore(bar, skins[bar])
         end
     end
+    if ns.ClassResource then
+        ns.ClassResource.Watch(on and RefreshPips or nil)
+    end
+    if pips then
+        pips.version = (pips.version or 0) + 1
+    end
+    RefreshPips()
 end
 
 if ns.Driver and ns.Driver.OnRestyle then
