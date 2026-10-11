@@ -2,7 +2,7 @@ local _, ns = ...
 
 local L = ns.L
 
-local SCHEMA_VERSION = 24
+local SCHEMA_VERSION = 25
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -78,7 +78,28 @@ local function RenameProfile(db, OLD, NEW)
     end
 end
 
+local REMOVED_ARROWS = { tutorial = true, tutorialGlow = true, torghast = true, delve = true, delveSmall = true }
+
 local migrations = {
+    [25] = function(db)
+        local function Reset(look)
+            if type(look) ~= "table" then return end
+            for _, key in ipairs({ "target", "focus" }) do
+                local section = look[key]
+                if type(section) == "table" and REMOVED_ARROWS[section.arrowStyle] then
+                    section.arrowStyle = nil
+                end
+            end
+        end
+        for _, profile in pairs(db.profiles or {}) do
+            if type(profile) == "table" then
+                Reset(profile.look)
+                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
+                    Reset(override)
+                end
+            end
+        end
+    end,
     [24] = function(db)
         if type(db.global) == "table" then
             db.global.probe, db.global.probeWatch, db.global.probeVersion, db.global.probeUntil = nil, nil, nil, nil

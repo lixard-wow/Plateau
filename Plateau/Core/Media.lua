@@ -63,11 +63,6 @@ ns.arrowStyles = {
     chevronDouble = { file = ART .. "chevron-double.png" },
     triangle = { file = ART .. "triangle.png" },
     block = { file = ART .. "block.png" },
-    tutorial = { left = "NPE_ArrowLeft", right = "NPE_ArrowRight", down = "NPE_ArrowDown", up = "NPE_ArrowUp" },
-    tutorialGlow = { left = "NPE_ArrowLeftGlow", right = "NPE_ArrowRightGlow", down = "NPE_ArrowDownGlow", up = "NPE_ArrowUpGlow" },
-    torghast = { left = "TorghastDoor-ArrowLeft-32x32", right = "TorghastDoor-ArrowRight-32x32", down = "TorghastDoor-ArrowDown-32x32", up = "TorghastDoor-ArrowUp-32x32" },
-    delve = { left = "UI-Journeys-Delve-Arrow-Big-Left", down = "UI-Journeys-Delve-Arrow-down" },
-    delveSmall = { left = "UI-Journeys-Delve-Arrow-Small-Left" },
 }
 
 ns.media = LibStub and LibStub("LibSharedMedia-3.0", true)

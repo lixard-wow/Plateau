@@ -7,8 +7,6 @@ local BRIGHTEN_ALPHA = 0.25
 
 local ARROWS = ns.arrowStyles
 
-local ANGLES = { right = 0, left = math.pi, down = -math.pi / 2, up = math.pi / 2 }
-
 local PLACEMENTS = {
     ["in"] = { left = "right", right = "left" },
     out = { left = "left", right = "right" },
@@ -218,34 +216,19 @@ local function SizeToAtlas(texture, atlas, height)
 end
 
 local function Point(texture, style, direction, size)
-    if style.file then
-        texture:SetTexture(style.file)
-        texture:SetRotation(0)
-        texture:SetSnapToPixelGrid(true)
-        texture:SetTexelSnappingBias(0)
-        local slide = texture.slide or { sign = 1 }
-        slide.direction, slide.size = direction, size
-        texture.slide = slide
-        if direction == "left" or direction == "right" then
-            texture:SetSize(size + BOB, size)
-        else
-            texture:SetSize(size, size + BOB)
-        end
-        Slide(texture, 0)
-        return
-    end
-    texture.slide = nil
-    sliding[texture] = nil
-    texture:SetSnapToPixelGrid(false)
+    texture:SetTexture(style.file)
+    texture:SetRotation(0)
+    texture:SetSnapToPixelGrid(true)
     texture:SetTexelSnappingBias(0)
-    local atlas, rotation = style[direction], 0
-    if not atlas then
-        atlas = style.left
-        rotation = ANGLES[direction] - ANGLES.left
+    local slide = texture.slide or { sign = 1 }
+    slide.direction, slide.size = direction, size
+    texture.slide = slide
+    if direction == "left" or direction == "right" then
+        texture:SetSize(size + BOB, size)
+    else
+        texture:SetSize(size, size + BOB)
     end
-    texture:SetAtlas(atlas)
-    texture:SetRotation(rotation)
-    SizeToAtlas(texture, atlas, size)
+    Slide(texture, 0)
 end
 
 local function StyleSet(set, plate, db, borderSize)
@@ -260,7 +243,7 @@ local function StyleSet(set, plate, db, borderSize)
         local style = ARROWS[db.arrowStyle] or ARROWS.chevronDouble
         local placement = PLACEMENTS[db.arrowPlacement] or PLACEMENTS["in"]
         local left, right = set.arrowLeft, set.arrowRight
-        local extend = style.file and BOB or 0
+        local extend = BOB
         left:ClearAllPoints()
         right:ClearAllPoints()
         if placement.top and placement.bottom then

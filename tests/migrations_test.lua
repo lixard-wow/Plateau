@@ -9,7 +9,7 @@ local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 PlateauDB = { version = 1, profiles = { Default = { look = { highlight = { color = { 1, 0, 0, 1 }, size = 3 }, castbar = { height = 14 } } } }, profileKeys = {} }
 ns.DB:Init()
 local t = ns.DB.profile.look.target
-check(PlateauDB.version == 24, "schema bumped to the latest version")
+check(PlateauDB.version == 25, "schema bumped to the latest version")
 check(t.ringColor[1] == 1 and t.ringColor[2] == 0, "v1 ring color ends up in target.ringColor")
 check(t.ringSize == 3, "v1 ring size ends up in target.ringSize")
 check(rawget(ns.DB.profile.look, "highlight") == nil, "highlight group removed")
@@ -20,7 +20,7 @@ check(PlateauDB.profiles.Default.look.target.ringSize == 3, "migrated value surv
 
 PlateauDB = nil
 ns.DB:Init()
-check(PlateauDB.version == 24 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
+check(PlateauDB.version == 25 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
 
 PlateauDB = { version = 1, profiles = { Default = { look = { health = { tapped = { 0.2, 0.2, 0.9, 1 }, borderSize = 2 } } } }, profileKeys = {} }
 ns.DB:Init()
@@ -203,7 +203,7 @@ PlateauDB = { version = 15, profiles = {
 }, profileKeys = { ["Stalador - Iridikron"] = "On" } }
 ns.DB:Init()
 local on = PlateauDB.profiles.On.look.scaling
-check(PlateauDB.version == 24 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
+check(PlateauDB.version == 25 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
 check(on.layerByType == nil and on.layerOrder == nil and on.boss == 1.3, "v16: the old layering keys are removed and other scaling settings kept")
 check(PlateauDB.profiles.On.states.friendly.scaling.castFront == true and PlateauDB.profiles.On.states.friendly.scaling.layerByType == nil, "v16: state overrides are converted too")
 local off = PlateauDB.profiles.Off.look.scaling
@@ -255,4 +255,13 @@ ns.DB:Shutdown()
 PlateauDB = { version = 23, global = { probe = { { kind = "x" } }, probeWatch = 123, probeVersion = "0.1.0-beta", tourDone = true }, profiles = { Default = {} }, profileKeys = {} }
 ns.DB:Init()
 check(PlateauDB.global.probe == nil and PlateauDB.global.probeWatch == nil and PlateauDB.global.probeVersion == nil and PlateauDB.global.tourDone == true, "v24: the removed probe tool's log is cleared, other account settings kept")
+ns.DB:Shutdown()
+
+PlateauDB = { version = 24, profiles = {
+    Default = { look = { target = { arrowStyle = "torghast" }, focus = { arrowStyle = "triangle" } }, states = { friendly = { target = { arrowStyle = "delveSmall" } } } },
+}, profileKeys = {} }
+ns.DB:Init()
+local arrows = PlateauDB.profiles.Default
+check(rawget(arrows.look.target, "arrowStyle") == nil and arrows.look.target.arrowStyle == "chevronDouble" and arrows.states.friendly.target.arrowStyle == nil, "v25: removed Blizzard arrow styles go back to the default arrow, state overrides too")
+check(arrows.look.focus.arrowStyle == "triangle", "v25: Plateau's own arrow styles are kept")
 ns.DB:Shutdown()

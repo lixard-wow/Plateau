@@ -80,16 +80,10 @@ local ARROW_STYLES = {
     { value = "chevronDouble", label = "Double chevron" },
     { value = "triangle", label = "Solid triangle" },
     { value = "block", label = "Block arrow" },
-    { value = "tutorial", label = "Blizzard tutorial" },
-    { value = "tutorialGlow", label = "Blizzard tutorial (glowing)" },
-    { value = "torghast", label = "Torghast" },
-    { value = "delve", label = "Delve" },
-    { value = "delveSmall", label = "Delve (small)" },
 }
 
 for _, option in ipairs(ARROW_STYLES) do
-    local style = Plateau.arrowStyles[option.value]
-    option.icon = style.file and { file = style.file } or { atlas = style.right or style.left, rotation = style.right and 0 or math.pi }
+    option.icon = { file = Plateau.arrowStyles[option.value].file }
 end
 
 local ARROW_PLACEMENTS = {
