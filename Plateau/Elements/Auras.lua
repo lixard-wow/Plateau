@@ -241,7 +241,7 @@ local spareSets = {}
 local setStats = { built = 0, combat = 0 }
 local auraVersion = 0
 local warming
-local SET_TARGET, SET_BUFFER = 24, 8
+local SET_TARGET, SET_BUFFER = 32, 8
 
 local function NewSet(state)
     local set = { containers = {} }
