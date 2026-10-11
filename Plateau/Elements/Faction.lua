@@ -21,6 +21,7 @@ local onlyPvP = {}
 local Faction = {
     key = "faction",
     events = { "UNIT_FACTION" },
+    nameOnly = true,
 }
 ns.Elements = ns.Elements or {}
 ns.Elements.Faction = Faction
@@ -35,14 +36,28 @@ function Faction:Configure(db, state)
     onlyPvP[state] = db.onlyPvP == true
 end
 
+local function Place(plate)
+    local icon, db = plate.faction, plate.factionPlace
+    if not db then return end
+    if plate.nameOnly then
+        icon.slPlaceAnchor = nil
+        icon:ClearAllPoints()
+        icon:SetPoint("RIGHT", plate.name, "LEFT", -2, 0)
+    else
+        ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+    end
+end
+
 function Faction:Style(plate, db)
     local icon = plate.faction
     icon:SetSize(db.size, db.size)
     icon:SetAlpha(db.alpha)
-    ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+    plate.factionPlace = db
+    Place(plate)
 end
 
 function Faction:Enable(plate, unit)
+    Place(plate)
     self:Update(plate, unit)
 end
 
