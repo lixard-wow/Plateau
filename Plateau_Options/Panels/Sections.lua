@@ -1143,6 +1143,11 @@ local function GameExtras(group)
     elseif group == "personal" then
         list[1] = { type = "Header", label = "Personal resource display" }
         list[2] = CVarToggle("nameplateShowSelf", "Personal resource display", "Shows your health and power in a bar over your character.")
+        list[3] = { type = "Toggle", label = "Plateau style", visibleIf = function() return Plateau.PersonalDisplay ~= nil and PersonalResourceDisplayFrame ~= nil end,
+            keywords = "personal resource display skin style texture border background bar",
+            get = function() return Plateau.PersonalDisplay:IsOn() end,
+            set = function(value) Plateau.PersonalDisplay:SetOn(value) end,
+            tooltip = "Draws the personal resource display's health, power and extra power bars with this profile's health bar texture, background, border and health text font. Saved for your account." }
         Add(Gate(CVarToggle("nameplateShowAllPersonalAuras", "Show all personal auras", "Shows every buff and debuff on you on the personal resource display, not just important ones."),
             function() return CVars:Get("nameplateShowSelf") == "1" end, "Turn on Personal resource display to use this."), "nameplateShowAllPersonalAuras")
     elseif group == "soft" then

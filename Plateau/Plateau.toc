@@ -46,6 +46,7 @@ Features\Idle.lua
 Features\Range.lua
 Features\OccludedFade.lua
 Features\InstancePets.lua
+Features\PersonalDisplay.lua
 Elements\Health.lua
 Elements\HealthText.lua
 Elements\ThreatText.lua

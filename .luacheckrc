@@ -27,7 +27,7 @@ read_globals = {
     "C_ScenarioInfo", "C_Secrets", "C_SpecializationInfo", "C_Spell", "C_SpellBook", "C_StringUtil",
     "C_Texture", "C_Timer", "C_TooltipInfo", "C_UnitAuras", "ChatFrame1", "ColorPickerFrame",
     "CombatLogGetCurrentEventInfo", "Constants", "CopyTable", "CreateAbbreviateConfig", "CreateColor",
-    "CreateFrame", "CreateFromMixins", "CreateUnitHealPredictionCalculator", "CreateVector2D",
+    "CreateFrame", "CreateFromMixins", "PersonalResourceDisplayFrame", "CreateUnitHealPredictionCalculator", "CreateVector2D",
     "CurveConstants", "DAMAGE_TEXT_FONT", "DEFAULT_CHAT_FRAME", "ElvUI", "Enum", "EventUtil",
     "FOREIGN_SERVER_LABEL", "GAMEMENU_OPTIONS", "GameMenuFrame", "GameTooltip",
     "GameTooltip_SetDefaultAnchor", "GetAddOnMemoryUsage", "GetBuildInfo", "GetCoinTextureString",
