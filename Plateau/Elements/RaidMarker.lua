@@ -7,7 +7,7 @@ local ICON_TEXTURE = "Interface\\TargetingFrame\\UI-RaidTargetingIcons"
 local ROWS = RAID_TARGET_TEXTURE_ROWS or 4
 local COLUMNS = RAID_TARGET_TEXTURE_COLUMNS or 4
 
-local MARKER_COLORS = "Interface\\AddOns\\Plateau\\Art\\Indicators\\marker-colors"
+local MARKER_COLORS = "Interface\\AddOns\\Plateau\\Art\\Indicators\\marker-colors.png"
 
 local tint = {}
 
