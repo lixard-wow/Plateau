@@ -674,6 +674,12 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
     C_Timer.After(s.interruptHold, bar.holdCallback)
 end
 
+local HOLD_BREAKERS = {
+    UNIT_SPELLCAST_START = true,
+    UNIT_SPELLCAST_CHANNEL_START = true,
+    UNIT_SPELLCAST_EMPOWER_START = true,
+}
+
 function Castbar:OnEvent(plate, event, unit, _, _, _, interruptedBy)
     local s = settings[plate.state]
     local bar = plate.castbar
@@ -687,7 +693,7 @@ function Castbar:OnEvent(plate, event, unit, _, _, _, interruptedBy)
             return
         end
     end
-    if plate.castbar.holding and (event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_CHANNEL_STOP") then
+    if plate.castbar.holding and not HOLD_BREAKERS[event] then
         return
     end
     if event == "UNIT_SPELLCAST_INTERRUPTIBLE" then
