@@ -33,6 +33,7 @@ function Frame:SetShown(shown) self.shown = shown and true or false end
 function Frame:GetEffectiveScale() return 1 end
 function Frame:ClearAllPoints() end
 function Frame:SetJustifyH(justify) self.justify = justify end
+function Frame:SetClipsChildren(clips) self.clips = clips end
 function Frame:SetSize(w, h)
     local cx, cy = (self.l + self.r) / 2, (self.t + self.b) / 2
     self.l, self.r, self.t, self.b = cx - w / 2, cx + w / 2, cy + h / 2, cy - h / 2
@@ -208,26 +209,34 @@ db["look.name.gap"] = 2
 local nameSpot = NewFrame(plate)
 local nameSpec = Drag.NameSpec(plate)
 Drag.Register(nameSpot, nameSpec)
-dots = Drop(nameSpec, nameSpot, 50, 18, 50, 37)
-check(saved and saved["look.name.position"] == "TOP" and saved["look.name.gap"] == 20,
-    "name snaps its bottom 2px above the raid marker (got " .. tostring(saved and saved["look.name.position"]) .. " " .. tostring(saved and saved["look.name.gap"]) .. ")")
+dots = Drop(nameSpec, nameSpot, 50, 18, 19, 37)
+check(saved and saved["look.name.position"] == "TOP" and saved["look.name.gap"] == 17,
+    "name snaps its text 2px above the raid marker (got " .. tostring(saved and saved["look.name.position"]) .. " " .. tostring(saved and saved["look.name.gap"]) .. ")")
+check(saved["look.name.justify"] == "LEFT" and saved["look.name.offsetX"] == 0, "over the left of the bar the name aligns left with no offset")
 local nameSelf = false
 for _, dot in ipairs(dots) do
     if dot.anchor == plate.name then nameSelf = true end
 end
 check(not nameSelf, "name never shows dots on its own text")
-check(saved["look.name.justify"] == "CENTER", "dropping the name in the middle third centers it")
+check(plate.nameClip.clips == false, "the name isn't clipped while it's dragged")
 
-plate.nameClip:Rect(0, 100, 24, 12)
-db["look.name.position"] = "CENTER"
-db["look.name.gap"] = 0
-Drop(nameSpec, nameSpot, 50, 18, 12, 0)
-check(saved and saved["look.name.justify"] == "LEFT", "dragging the name to the left third aligns it left (got " .. tostring(saved and saved["look.name.justify"]) .. ")")
-check(plate.name.justify == "LEFT", "the name moves left while it's being dragged")
+local function NameDrop(toX, toY)
+    plate.name:Rect(30, 70, 21, 15)
+    Drop(nameSpec, nameSpot, 50, 18, toX, toY)
+    return saved or {}
+end
 
-plate.nameClip:Rect(0, 100, 24, 12)
-Drop(nameSpec, nameSpot, 50, 18, 92, 0)
-check(saved and saved["look.name.justify"] == "RIGHT", "dragging the name to the right third aligns it right")
+local left = NameDrop(25, 5)
+check(left["look.name.position"] == "CENTER" and left["look.name.justify"] == "LEFT" and left["look.name.offsetX"] == 0,
+    "dropping the name inside the bar near the left edge snaps it to Left (got " .. tostring(left["look.name.justify"]) .. " " .. tostring(left["look.name.offsetX"]) .. ")")
+
+local right = NameDrop(97, 5)
+check(right["look.name.justify"] == "RIGHT" and right["look.name.offsetX"] == 20,
+    "dropping the name past the right edge keeps where it was dropped (got " .. tostring(right["look.name.justify"]) .. " " .. tostring(right["look.name.offsetX"]) .. ")")
+
+local middle = NameDrop(60, 5)
+check(middle["look.name.justify"] == "CENTER" and middle["look.name.offsetX"] == 10,
+    "the name can sit anywhere sideways, not just left, center or right (got " .. tostring(middle["look.name.justify"]) .. " " .. tostring(middle["look.name.offsetX"]) .. ")")
 
 plate.nameClip:Rect(0, 100, 24, 12)
 plate.classPower:Rect(20, 70, -100, -106)

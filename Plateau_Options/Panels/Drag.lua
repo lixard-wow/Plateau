@@ -352,9 +352,6 @@ local function OnUpdate()
         return
     end
     local x, y = Cursor(spec.spot)
-    if spec.Track then
-        spec.Track()
-    end
     if spec.axis == "y" then
         x = spec.startX
     end
@@ -387,7 +384,9 @@ function Start(spec)
     end
     local x, y = Cursor(spec.spot)
     spec.startX = x
-    spec.dragJustify = nil
+    if spec.Begin then
+        spec.Begin()
+    end
     spec.grabX = x - (left + right) / 2
     spec.grabY = y - (top + bottom) / 2
     active = spec
@@ -653,93 +652,111 @@ end
 
 local NAME_NUDGE = DOT - 1
 local NAME_SPOTS = {
-    { id = "TOP", relPoint = "TOP", measure = "BOTTOM", sign = 1, dotX = 0, dotY = NAME_NUDGE },
-    { id = "BOTTOM", relPoint = "BOTTOM", measure = "TOP", sign = -1, dotX = 0, dotY = -NAME_NUDGE },
-    { id = "CENTER", relPoint = "CENTER", measure = "CENTER", sign = 1, dotX = -DOT - 2, dotY = 0 },
-    { id = "INSIDETOP", relPoint = "TOP", measure = "TOP", sign = -1, dotX = DOT + 2, dotY = -NAME_NUDGE },
+    { id = "TOP", relPoint = "TOP", measure = "BOTTOM", sign = 1, pad = 1, inset = 0, dotY = NAME_NUDGE },
+    { id = "BOTTOM", relPoint = "BOTTOM", measure = "TOP", sign = -1, pad = -1, inset = 0, dotY = -NAME_NUDGE },
+    { id = "CENTER", relPoint = "", measure = "", sign = 1, pad = 0, inset = 3, dotY = 0 },
+    { id = "INSIDETOP", relPoint = "TOP", measure = "TOP", sign = -1, pad = 0, inset = 3, dotY = -NAME_NUDGE },
 }
+local NAME_SIDES = {
+    { justify = "LEFT", side = "LEFT", dir = 1 },
+    { justify = "CENTER", side = "", dir = 0 },
+    { justify = "RIGHT", side = "RIGHT", dir = -1 },
+}
+local NAME_SHIFT = 150
+
+local function Point(vertical, side)
+    local point = vertical .. side
+    return point ~= "" and point or "CENTER"
+end
 
 function Drag.NameSpec(plate)
-    local positionPath, gapPath, justifyPath = "look.name.position", "look.name.gap", "look.name.justify"
+    local positionPath, gapPath, justifyPath, shiftPath = "look.name.position", "look.name.gap", "look.name.justify", "look.name.offsetX"
     local spec = {
         name = "look.name",
-        paths = { positionPath, gapPath, justifyPath },
-        axis = "y",
-        keepSize = true,
+        paths = { positionPath, gapPath, justifyPath, shiftPath },
     }
-    local function WithJustify(values)
-        if values and spec.dragJustify then
-            values[justifyPath] = spec.dragJustify
+    local function Pad()
+        return math.max(0, (plate.nameClip:GetHeight() - plate.name:GetHeight()) / 2)
+    end
+    local function Values(position, gap, justify, shift)
+        local values = { [positionPath] = position, [gapPath] = Clamp(gap, -10, 30) }
+        if not plate.nameOnly then
+            values[justifyPath] = justify
+            values[shiftPath] = Clamp(shift, -NAME_SHIFT, NAME_SHIFT)
         end
         return values
     end
-    function spec.Track()
-        if plate.nameOnly then return end
-        local left, right = plate:GetLeft(), plate:GetRight()
-        if not left then return end
-        local cx = GetCursorPosition() / plate:GetEffectiveScale()
-        local third = (right - left) / 3
-        local justify = cx < left + third and "LEFT" or cx > right - third and "RIGHT" or "CENTER"
-        if justify == spec.dragJustify then return end
-        spec.dragJustify = justify
-        local text = plate.name
-        local side = justify == "CENTER" and "" or justify
-        local point = (plate.nameTop or "") .. side
-        if point == "" then
-            point = "CENTER"
-        end
-        text:ClearAllPoints()
-        text:SetPoint(point, plate.nameClip, point)
-        text:SetJustifyH(justify)
+    function spec.Begin()
+        plate.nameClip:SetClipsChildren(false)
     end
     function spec.Mover()
-        return plate.nameClip
+        return plate.name
     end
-    local function Place(_, cy)
-        local top, bottom = plate:GetTop(), plate:GetBottom()
+    function spec.Place(cx, cy)
+        local left, right, top, bottom = plate:GetLeft(), plate:GetRight(), plate:GetTop(), plate:GetBottom()
         if not top then return nil end
-        local half = plate.nameClip:GetHeight() / 2
+        local halfW, halfH = plate.name:GetWidth() / 2, plate.name:GetHeight() / 2
+        local pad = Pad()
         local gaps = {
-            TOP = cy - half - top,
-            BOTTOM = bottom - cy - half,
+            TOP = cy - halfH - pad - top,
+            BOTTOM = bottom - cy - halfH - pad,
             CENTER = cy - (top + bottom) / 2,
-            INSIDETOP = top - cy - half,
+            INSIDETOP = top - cy - halfH,
         }
-        local bestId, bestGap
+        local bestSpot, bestGap
         for _, spot in ipairs(NAME_SPOTS) do
             local gap = gaps[spot.id]
             if gap >= -10.5 and gap <= 30.5 and (not bestGap or math.abs(gap) < math.abs(bestGap)) then
-                bestId, bestGap = spot.id, gap
+                bestSpot, bestGap = spot, gap
             end
         end
-        if not bestId then return nil end
-        return { [positionPath] = bestId, [gapPath] = Clamp(bestGap, -10, 30) }
-    end
-    function spec.Place(cx, cy)
-        return WithJustify(Place(cx, cy))
+        if not bestSpot then return nil end
+        local third = (right - left) / 3
+        local justify, shift
+        if cx < left + third then
+            justify, shift = "LEFT", cx - halfW - (left + bestSpot.inset)
+        elseif cx > right - third then
+            justify, shift = "RIGHT", cx + halfW - (right - bestSpot.inset)
+        else
+            justify, shift = "CENTER", cx - (left + right) / 2
+        end
+        if not freePlacement and Snapping() and math.abs(shift) <= SNAP then
+            shift = 0
+        end
+        return Values(bestSpot.id, bestGap, justify, shift)
     end
     function spec.Candidates()
         local list = {}
+        local pad = Pad()
         for _, spot in ipairs(NAME_SPOTS) do
-            local _, my = PointXY(plate.nameClip, spot.measure)
-            local ax = PointXY(plate, spot.relPoint)
-            list[#list + 1] = {
-                id = spot.id,
-                point = spot.measure,
-                anchor = plate,
-                relPoint = spot.relPoint,
-                dotX = spot.dotX,
-                dotY = spot.dotY,
-                mx = ax,
-                my = my,
-                Values = function(_, dy)
-                    return WithJustify({ [positionPath] = spot.id, [gapPath] = Clamp(dy * spot.sign, -10, 30) })
-                end,
-            }
+            for _, place in ipairs(NAME_SIDES) do
+                if not plate.nameOnly or place.dir == 0 then
+                    local point = Point(spot.measure, place.side)
+                    local mx, my = PointXY(plate.name, point)
+                    list[#list + 1] = {
+                        id = spot.id .. place.justify,
+                        point = point,
+                        anchor = plate,
+                        relPoint = Point(spot.relPoint, place.side),
+                        ox = spot.inset * place.dir,
+                        oy = pad * spot.pad,
+                        dotY = spot.dotY,
+                        mx = mx,
+                        my = my,
+                        Values = function(dx, dy)
+                            dx, dy = Offsets(dx, dy)
+                            return Values(spot.id, dy * spot.sign, place.justify, dx)
+                        end,
+                    }
+                end
+            end
         end
         return list
     end
-    function spec.Nudge(_, dy)
+    function spec.Nudge(dx, dy)
+        if dx ~= 0 and not plate.nameOnly then
+            return { [shiftPath] = Clamp((Get(shiftPath) or 0) + dx, -NAME_SHIFT, NAME_SHIFT) }
+        end
         if dy == 0 then return nil end
         local sign = Get(positionPath) == "BOTTOM" and -1 or 1
         return { [gapPath] = Clamp((Get(gapPath) or 0) + dy * sign, -10, 30) }

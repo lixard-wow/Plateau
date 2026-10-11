@@ -234,6 +234,7 @@ function Name:Style(plate, db)
         y = y + ns.DB.views.enemy.friendly.nameOffsetY
     end
     local justify = plate.nameOnly and "CENTER" or db.justify
+    local shift = plate.nameOnly and 0 or (db.offsetX or 0)
     local width = db.width or 0
     if width == 0 and plate.nameOnly then
         width = 300
@@ -248,10 +249,10 @@ function Name:Style(plate, db)
         end
         local point = vertical .. side
         local relativePoint = relative .. side
-        clip:SetPoint(point ~= "" and point or "CENTER", plate, relativePoint ~= "" and relativePoint or "CENTER", x, y)
+        clip:SetPoint(point ~= "" and point or "CENTER", plate, relativePoint ~= "" and relativePoint or "CENTER", x + shift, y)
     else
-        clip:SetPoint(vertical .. "LEFT", plate, relative .. "LEFT", inset, y)
-        clip:SetPoint(vertical .. "RIGHT", plate, relative .. "RIGHT", -inset, y)
+        clip:SetPoint(vertical .. "LEFT", plate, relative .. "LEFT", inset + shift, y)
+        clip:SetPoint(vertical .. "RIGHT", plate, relative .. "RIGHT", -inset + shift, y)
     end
 
     text:ClearAllPoints()

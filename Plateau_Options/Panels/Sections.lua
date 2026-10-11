@@ -2049,6 +2049,8 @@ ns.sections = {
           tooltip = "Aligns the name left, center or right." },
         { type = "Slider", path = "look.name.gap", label = "Distance from bar", min = -10, max = 30,
           tooltip = "Space between the name and the health bar. When the name is inside the bar, moves it up or down." },
+        { type = "Slider", path = "look.name.offsetX", label = "Sideways offset", min = -150, max = 150,
+          tooltip = "Moves the name left or right from where its alignment puts it." },
         { type = "Dropdown", path = "look.name.mode", label = "Shorten names", options = SHORTEN_NAMES, limited = Plateau.flavor ~= "forever" and Style.limited.names or nil,
           tooltip = "Shortens enemy names to a word or initials." .. RETAIL_NAME_NOTE },
         { type = "Dropdown", label = "Long names", options = OVERFLOW_NAMES, path = "look.name.overflow",

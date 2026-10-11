@@ -251,6 +251,7 @@ ns.defaults = {
             gap = 3,
             position = "TOP",
             justify = "CENTER",
+            offsetX = 0,
             mode = "full",
             npcMode = "full",
             classColors = true,

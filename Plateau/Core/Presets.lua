@@ -449,7 +449,7 @@ local function Default(path)
 end
 
 local LAYOUT = {
-    "look.name.position", "look.name.justify", "look.name.gap", "look.name.width", "look.name.overflow",
+    "look.name.position", "look.name.justify", "look.name.offsetX", "look.name.gap", "look.name.width", "look.name.overflow",
     "look.healthText.anchor", "look.healthText.offsetX", "look.healthText.offsetY",
     "look.level.anchor", "look.level.offsetX", "look.level.offsetY",
     "look.raidMarker.position", "look.raidMarker.gap", "look.raidMarker.offsetX", "look.raidMarker.offsetY",
