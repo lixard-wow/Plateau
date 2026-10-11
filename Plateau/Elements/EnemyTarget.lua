@@ -56,7 +56,17 @@ function EnemyTarget:Enable(plate, unit)
 end
 
 function EnemyTarget:Disable(plate)
+    plate.enemyTargetFilled = false
     plate.enemyTarget:Hide()
+end
+
+local function Covered(plate)
+    local bar = plate.castbar
+    return bar ~= nil and bar:IsShown() and bar.target:IsShown()
+end
+
+function EnemyTarget:RefreshShown(plate)
+    plate.enemyTarget:SetShown(plate.enemyTargetFilled == true and not Covered(plate))
 end
 
 function EnemyTarget:OnEvent(plate, _, unit)
@@ -89,12 +99,14 @@ end
 function EnemyTarget:Update(plate, unit)
     local text = plate.enemyTarget
     if plate.isFriendly then
+        plate.enemyTargetFilled = false
         text:Hide()
         return
     end
     local token = Token(unit)
     local name = ns.CleanName(UnitName(token))
     if not issecretvalue(name) and not name then
+        plate.enemyTargetFilled = false
         text:Hide()
         return
     end
@@ -113,18 +125,21 @@ function EnemyTarget:Update(plate, unit)
     end
     Paint(text, s, class, isMe)
     text:SetText(name)
-    text:Show()
+    plate.enemyTargetFilled = true
+    self:RefreshShown(plate)
 end
 
 function EnemyTarget:Preview(plate, state)
     local text = plate.enemyTarget
     if state.isFriendly then
+        plate.enemyTargetFilled = false
         text:Hide()
         return
     end
     Paint(text, settings[plate.state], state.enemyTargetClass or UnitClassBase("player"), state.enemyTargetName == nil)
     text:SetText(state.enemyTargetName or UnitName("player"))
-    text:Show()
+    plate.enemyTargetFilled = true
+    self:RefreshShown(plate)
 end
 
 local function RefreshAll()

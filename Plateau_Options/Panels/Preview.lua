@@ -90,7 +90,8 @@ local function Sample()
             icon = "Interface\\Icons\\Spell_Shadow_ShadowBolt",
             timer = "1.4",
             important = true,
-            target = playerName,
+            target = Plateau.T("Healer"),
+            targetClass = "PRIEST",
         },
     }
 end

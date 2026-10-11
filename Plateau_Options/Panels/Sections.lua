@@ -2070,7 +2070,7 @@ ns.sections = {
     ), GateList(NameOn, NAME_ON, FontControls("look.name")), List(
         { type = "Header", label = "Enemy target name" },
         { type = "Toggle", path = "look.enemyTarget.enabled", label = "Show enemy target name",
-          tooltip = "Shows who the enemy is targeting." }
+          tooltip = "Shows who the enemy is attacking, next to the health bar. Hidden while the cast bar shows a cast target, so the same name never shows twice." }
     ), GateList(EnemyTargetOn, ENEMY_TARGET_ON,
         { type = "ToggleColor", path = "look.enemyTarget.classColors", colorPath = "look.enemyTarget.color", label = "Use class colors",
           tooltip = "Colors the target's name by class. Otherwise it uses the color shown.",
@@ -2230,7 +2230,7 @@ ns.sections = {
 
         { type = "Header", label = "Cast target" },
         { type = "ToggleColor", path = "look.castbar.showTarget", colorPath = "look.castbar.targetColor", label = "Show cast target",
-          tooltip = "Shows who the spell is aimed at, when known." },
+          tooltip = "Shows who the spell being cast is aimed at, on the cast bar. This can be someone other than the enemy's target, like a healer being hit by a spell." },
         Gate({ type = "Toggle", path = "look.castbar.targetClassColor", label = "Use class color for cast target",
           tooltip = "Colors the cast target's name by class." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
         Gate({ type = "Slider", path = "look.castbar.targetSize", label = "Cast target font size", min = 6, max = 20,

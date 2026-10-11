@@ -76,6 +76,13 @@ local function SetColor(texture, color)
     texture:SetVertexColor(color[1], color[2], color[3], color[4])
 end
 
+local function TargetShownChanged(plate)
+    local enemyTarget = ns.Elements.EnemyTarget
+    if enemyTarget and ns.Runs(enemyTarget, plate) then
+        enemyTarget:RefreshShown(plate)
+    end
+end
+
 local function TargetTextColor(s, unit)
     if s.targetClassColor and RAID_CLASS_COLORS then
         local classFilename = UnitSpellTargetClass(unit)
@@ -546,6 +553,7 @@ function Castbar:Disable(plate)
         ns.Elements.Name:RefreshShown(plate)
     end
     bar:Hide()
+    TargetShownChanged(plate)
 end
 
 local function NameFromGUID(guid)
@@ -639,6 +647,7 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
     bar.glow:SetAlpha(0)
     bar.interrupted:Show()
     bar:Show()
+    TargetShownChanged(plate)
     local flash = bar.interruptFlash
     flash.anim:Stop()
     if s.interruptFlash then
@@ -759,6 +768,7 @@ function Castbar:Refresh(plate, unit, ending)
     else
         bar.target:Hide()
     end
+    TargetShownChanged(plate)
 
     bar.icon:SetTexture(texture)
     bar.text:SetText(s.showSpellName and name or "")
@@ -879,8 +889,8 @@ function Castbar:Preview(plate, state)
 
     if s.showTarget and cast.target and not interrupted then
         bar.target:SetText(cast.target)
-        if s.targetClassColor and RAID_CLASS_COLORS and RAID_CLASS_COLORS[UnitClassBase("player")] then
-            local color = RAID_CLASS_COLORS[UnitClassBase("player")]
+        local color = s.targetClassColor and RAID_CLASS_COLORS and RAID_CLASS_COLORS[cast.targetClass or UnitClassBase("player")]
+        if color then
             bar.target:SetTextColor(color.r, color.g, color.b, s.targetColor[4])
         else
             bar.target:SetTextColor(s.targetColor[1], s.targetColor[2], s.targetColor[3], s.targetColor[4])
@@ -891,6 +901,7 @@ function Castbar:Preview(plate, state)
     end
 
     bar:Show()
+    TargetShownChanged(plate)
 end
 
 ns.Driver:RegisterElement(Castbar)
