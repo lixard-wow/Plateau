@@ -393,7 +393,7 @@ local function AddHotspots(plate)
     castTarget.fitText = true
     castTarget.setting = "Show cast target"
     local castName = Hotspot(plate, plate.castbar.text, "castbar",
-        function() return picks.cast == "interrupted" and "Interrupted text" or "Spell name" end, 65, 1, castbarDrag)
+        function() return picks.cast == "interrupted" and "Interrupted text" or "Spell name" end, 65, 1, Drag.SpellNameSpec(plate))
     castName.fitText = true
     castName.setting = "Text"
     local castTimer = Hotspot(plate, plate.castbar.timer, "castbar", "Cast time", 65, 1,

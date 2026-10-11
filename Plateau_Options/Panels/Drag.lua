@@ -354,6 +354,8 @@ local function OnUpdate()
     local x, y = Cursor(spec.spot)
     if spec.axis == "y" then
         x = spec.startX
+    elseif spec.axis == "x" then
+        y = spec.startY
     end
     local mover = spec.Mover()
     local moverX, moverY = KeepInside(spec, mover, x - spec.grabX, y - spec.grabY)
@@ -383,7 +385,7 @@ function Start(spec)
         mover:SetSize(right - left, top - bottom)
     end
     local x, y = Cursor(spec.spot)
-    spec.startX = x
+    spec.startX, spec.startY = x, y
     if spec.Begin then
         spec.Begin()
     end
@@ -802,6 +804,56 @@ function Drag.CastbarSpec(plate)
     function spec.Nudge(_, dy)
         if dy == 0 then return nil end
         return { [gapPath] = Clamp((Get(gapPath) or 0) - dy, 0, 30) }
+    end
+    return spec
+end
+
+local SPELL_NAME_SPOTS = { "LEFT", "CENTER", "RIGHT" }
+
+function Drag.SpellNameSpec(plate)
+    local justifyPath = "look.castbar.textJustify"
+    local spec = {
+        name = "look.castbar",
+        paths = { justifyPath },
+        axis = "x",
+    }
+    function spec.Mover()
+        return plate.castbar.text
+    end
+    function spec.Candidates()
+        local bar = plate.castbar
+        local inset = Get("look.castbar.showTimer") and 30 or 3
+        local offsets = { LEFT = 3, CENTER = (3 - inset) / 2, RIGHT = -inset }
+        local list = {}
+        for _, justify in ipairs(SPELL_NAME_SPOTS) do
+            local mx, my = PointXY(bar.text, justify)
+            list[#list + 1] = {
+                id = justify,
+                point = justify,
+                anchor = bar,
+                relPoint = justify,
+                ox = offsets[justify],
+                oy = 0,
+                mx = mx,
+                my = my,
+                Values = function()
+                    return { [justifyPath] = justify }
+                end,
+            }
+        end
+        return list
+    end
+    function spec.Nudge(dx)
+        if dx == 0 then return nil end
+        local current = Get(justifyPath) or "LEFT"
+        for i, justify in ipairs(SPELL_NAME_SPOTS) do
+            if justify == current then
+                local nextJustify = SPELL_NAME_SPOTS[math.max(1, math.min(#SPELL_NAME_SPOTS, i + (dx > 0 and 1 or -1)))]
+                if nextJustify == current then return nil end
+                return { [justifyPath] = nextJustify }
+            end
+        end
+        return { [justifyPath] = "LEFT" }
     end
     return spec
 end

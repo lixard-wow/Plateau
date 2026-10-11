@@ -294,3 +294,18 @@ for _, dot in ipairs(dots) do
     if dot.anchor == plate.castbar then castDot = true end
 end
 check(not castDot, "enemy power bar shows no dots on the cast bar, which it pushes down")
+
+plate.castbar:Rect(0, 100, -2, -12)
+plate.castbar.text = Text(plate.castbar, 3, 43, -2, -12, 40, "LEFT")
+db["look.castbar.textJustify"] = "LEFT"
+db["look.castbar.showTimer"] = false
+local spellSpot = NewFrame(plate)
+local spellSpec = Drag.SpellNameSpec(plate)
+Drag.Register(spellSpot, spellSpec)
+dots = Drop(spellSpec, spellSpot, 23, -7, 80, -7)
+check(saved and saved["look.castbar.textJustify"] == "RIGHT",
+    "dragging the spell name to the right of the cast bar aligns it right (got " .. tostring(saved and saved["look.castbar.textJustify"]) .. ")")
+check(#dots == 3, "the spell name shows three dots: left, center and right (got " .. #dots .. ")")
+plate.castbar.text:Rect(3, 43, -2, -12)
+Drop(spellSpec, spellSpot, 23, -7, 50, -30)
+check(saved and saved["look.castbar.textJustify"] == "CENTER", "dragging it to the middle centers it, even if the mouse drifts off the bar")
