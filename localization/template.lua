@@ -1010,7 +1010,7 @@ L["Out of combat, under States, gives enemies that are not fighting their own lo
 L["Out-of-combat nameplates"] = "Out-of-combat nameplates"
 L["Out-of-range opacity"] = "Out-of-range opacity"
 L["Outlined and sharp"] = "Outlined and sharp"
-L["Outlines marked nameplates in the icon's color. Target and focus borders take priority."] = "Outlines marked nameplates in the icon's color. Target and focus borders take priority."
+L["Outlines marked nameplates in the icon's color. On your target and focus it sits just outside their border."] = "Outlines marked nameplates in the icon's color. On your target and focus it sits just outside their border."
 L["Outlines the area each nameplate keeps clear when stacking. Stays on until you turn it off or /reload."] = "Outlines the area each nameplate keeps clear when stacking. Stays on until you turn it off or /reload."
 L["Outlines the nameplate under your cursor."] = "Outlines the nameplate under your cursor."
 L["Outlines where clicks land on the preview and on nameplates. Turns off when you close this window."] = "Outlines where clicks land on the preview and on nameplates. Turns off when you close this window."

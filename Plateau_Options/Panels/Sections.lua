@@ -2490,7 +2490,7 @@ ns.sections = {
         { type = "Header", label = "Raid icon border" }
     ), GateList(On("look.raidMarker.enabled"), "Turn on Show raid target icons to use this.",
         { type = "Toggle", path = "look.raidMarker.tintBorder", label = "Color border by raid icon",
-          tooltip = "Outlines marked nameplates in the icon's color. Target and focus borders take priority." }
+          tooltip = "Outlines marked nameplates in the icon's color. On your target and focus it sits just outside their border." }
     ), List(
         Gate({ type = "Slider", path = "look.raidMarker.tintSize", label = "Raid icon border thickness", min = 1, max = 6,
           tooltip = "How thick the raid icon border is." }, function() return ns.Get("look.raidMarker.enabled") == true and ns.Get("look.raidMarker.tintBorder") == true end,

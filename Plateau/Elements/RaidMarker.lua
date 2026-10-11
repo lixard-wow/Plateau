@@ -36,12 +36,39 @@ function RaidMarker:Configure(db, state)
     tint[state] = db.tintBorder == true and db.tintSize or nil
 end
 
+local function OuterRing(plate)
+    local enemy = ns.DB.views.enemy
+    if plate.isTarget then
+        return enemy.target.ring and enemy.target.ringSize or 0
+    elseif plate.isFocus then
+        return enemy.focus.ring and enemy.focus.ringSize or 0
+    end
+    return 0
+end
+
+local function LayoutRing(plate)
+    local base = plate.markerRingBase
+    if not base then return end
+    local offset = base[2] + OuterRing(plate)
+    if plate.markerRingOffset == offset then return end
+    plate.markerRingOffset = offset
+    local previous = ns.pixelBorders
+    ns.pixelBorders = previous or ns.pixelPerfect
+    plate.markerRing:Layout(base[1], offset)
+    ns.pixelBorders = previous
+    local args = plate.pixelSet and plate.pixelSet[plate.markerRing]
+    if args then
+        args[2] = offset
+    end
+end
+
 local function ShowRing(plate, index)
     local ring = plate.markerRing
-    if not tint[plate.state] or type(index) == "nil" or plate.isTarget or plate.isFocus or plate.nameOnly then
+    if not tint[plate.state] or type(index) == "nil" or plate.nameOnly then
         ring:Hide()
         return
     end
+    LayoutRing(plate)
     ring:SetSpriteCell(MARKER_COLORS, index, ROWS, COLUMNS)
     ring:Show()
 end
@@ -51,7 +78,9 @@ function RaidMarker:Style(plate, db)
     icon:SetSize(db.size, db.size)
     icon:SetAlpha(db.alpha)
     ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
-    plate.markerRing:Layout(db.tintSize or 2, ns.HealthBorderOffset(ns.DB.views[plate.state]))
+    plate.markerRingBase = { db.tintSize or 2, ns.HealthBorderOffset(ns.DB.views[plate.state]) }
+    plate.markerRingOffset = nil
+    LayoutRing(plate)
 end
 
 function RaidMarker:Enable(plate, unit)
