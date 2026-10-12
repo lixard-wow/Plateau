@@ -680,10 +680,10 @@ end
 local function ChangeHint(spec, explain)
     if not explain then return nil end
     if spec.reset and not spec.paths then
-        return spec.resetLabel or "Right-click to reset to default."
+        return spec.resetLabel or "Right-click to reset to Plateau's default."
     end
     if #ns.SpecPaths(spec) == 0 then return nil end
-    return "Right-click to reset to default."
+    return "Right-click to reset to Plateau's default."
 end
 
 function Style.Tooltip(owner, spec)

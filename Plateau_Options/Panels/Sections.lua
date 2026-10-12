@@ -530,7 +530,7 @@ local function CVarSpec(kind, name, label, extra)
     spec.label = label
     spec.path = "cvar." .. name
     spec.reset = function() CVars:Release(name) end
-    spec.resetLabel = "Right-click to undo Plateau's change."
+    spec.resetLabel = "Right-click to reset to what it was before Plateau changed it."
     spec.gameSetting = true
     if kind == "Toggle" then
         spec.get = function() return CVars:Get(name) == "1" end
@@ -590,7 +590,7 @@ local function NpcNames()
                 CVars:Release(name)
             end
         end,
-        resetLabel = "Right-click to undo Plateau's change.",
+        resetLabel = "Right-click to reset to what it was before Plateau changed it.",
     }
 end
 
@@ -602,7 +602,7 @@ local function CVarBitToggle(name, index, label, tooltip)
         path = "cvar." .. name .. "." .. tostring(index),
         gameSetting = true,
         reset = function() CVars:Release(name) end,
-        resetLabel = "Right-click to undo Plateau's change.",
+        resetLabel = "Right-click to reset to what it was before Plateau changed it.",
         get = function()
             return index ~= nil and C_CVar.GetCVar(name) ~= nil and C_CVar.GetCVarBitfield(name, index) == true
         end,
@@ -713,7 +713,7 @@ local function BlizzardDrawn(friendly)
               get = function() return tonumber(CVars:Get("nameplateStyle")) end,
               set = function(value) CVars:Set("nameplateStyle", value) end,
               reset = function() CVars:Release("nameplateStyle") end,
-              resetLabel = "Right-click to undo Plateau's change.",
+              resetLabel = "Right-click to reset to what it was before Plateau changed it.",
               path = "cvar.nameplateStyle",
               gameSetting = true,
               tooltip = "The look of the nameplates the game draws." })
@@ -833,7 +833,7 @@ local function InstantMovement()
             end
         end,
         reset = function() CVars:Release("nameplateMotionSpeed") end,
-        resetLabel = "Right-click to undo Plateau's change.",
+        resetLabel = "Right-click to reset to what it was before Plateau changed it.",
     }
 end
 
@@ -1439,7 +1439,7 @@ local function OffScreen()
           get = function() return tonumber(CVars:Get("nameplateTargetRadialPosition")) or 0 end,
           set = function(value) CVars:Set("nameplateTargetRadialPosition", value) end,
           reset = function() CVars:Release("nameplateTargetRadialPosition") end,
-          resetLabel = "Right-click to undo Plateau's change.",
+          resetLabel = "Right-click to reset to what it was before Plateau changed it.",
           path = "cvar.nameplateTargetRadialPosition",
           gameSetting = true,
           tooltip = "Pins your target, or every enemy you are fighting, around the screen edge while off screen." },
