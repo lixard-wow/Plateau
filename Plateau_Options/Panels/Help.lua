@@ -107,7 +107,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Out of combat page",
         keywords = "out of combat idle combat scale opacity hide show",
-        text = "Out of combat, under Highlights, gives enemies that are not fighting their own look so the ones in combat stand out.\n\nCustomize out-of-combat nameplates makes them more see-through, narrower or shorter, or one flat bar color, everywhere or only in instances. Show when out of combat picks which of auras, health text, name, level and the icons they keep. It all switches back the moment the enemy enters combat. Your target, players and friendly nameplates are never changed. Combat scale, which sizes enemies in and out of combat, is on the Size page.",
+        text = "Out of combat, under Targets, gives enemies that are not fighting their own look so the ones in combat stand out.\n\nCustomize out-of-combat nameplates makes them more see-through, narrower or shorter, or one flat bar color, everywhere or only in instances. Show when out of combat picks which of auras, health text, name, level and the icons they keep. It all switches back the moment the enemy enters combat. Your target, players and friendly nameplates are never changed. Combat scale, which sizes enemies in and out of combat, is on the Size page.",
     },
     {
         category = "Pages",
@@ -196,8 +196,8 @@ ns.helpTopics = {
     {
         category = "Pages",
         title = "Target, Focus and Mouseover pages",
-        keywords = "highlight highlights states target focus mouseover arrows brackets glow border recolor opacity",
-        text = "Target, Focus, Mouseover and Out of combat each have their own page under Highlights in the left menu.\n\nYour target can have a colored border, a recolored health bar with its own texture and overlay pattern, a brighter bar, arrows, corner brackets and a soft glow. Arrows and brackets take any color you choose, and have styles, sizes and spacing from the nameplate. Target scale is on the Size page, and fading the other nameplates while you have a target is on the Fading page.\n\nYour focus has the same choices. When a unit is both your target and focus, Target settings take priority.\n\nMouseover highlights the nameplate under your cursor with a brighter bar, a border and a glow. Its scale, layering and opacity are on the Size, Layering and stacking, and Fading pages.",
+        keywords = "highlight highlights states targets target focus mouseover arrows brackets glow border recolor opacity",
+        text = "Target, Focus, Mouseover and Out of combat each have their own page under Targets in the left menu.\n\nYour target can have a colored border, a recolored health bar with its own texture and overlay pattern, a brighter bar, arrows, corner brackets and a soft glow. Arrows and brackets take any color you choose, and have styles, sizes and spacing from the nameplate. Target scale is on the Size page, and fading the other nameplates while you have a target is on the Fading page.\n\nYour focus has the same choices. When a unit is both your target and focus, Target settings take priority.\n\nMouseover highlights the nameplate under your cursor with a brighter bar, a border and a glow. Its scale, layering and opacity are on the Size, Layering and stacking, and Fading pages.",
     },
     {
         category = "Pages",

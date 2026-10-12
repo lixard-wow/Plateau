@@ -63,7 +63,7 @@ local groups = {
     { label = "Profile", keys = { "profiles" } },
     { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces" } },
     { label = "Behavior", keys = { "showing", "size", "fading", "layering", "clicking" } },
-    { label = "Highlights", keys = { "target", "focus", "mouseover", "combat" } },
+    { label = "Targets", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
     { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction" } },
     { label = "Friendly", keys = { "friendly" } },
