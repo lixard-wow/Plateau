@@ -570,6 +570,9 @@ local function Migrate(db)
         end
     end
     db.version = SCHEMA_VERSION
+    if type(db.global) == "table" then
+        db.global.skinPersonal, db.global.cvarLog = nil, nil
+    end
     return failures
 end
 

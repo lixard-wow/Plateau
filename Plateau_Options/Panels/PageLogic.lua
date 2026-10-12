@@ -205,7 +205,6 @@ local SYNONYMS = {
     { "quest", "objective objectives" },
     { "class resource", "combo points holy power soul shards chi runes essence arcane charges pips" },
     { "power", "energy rage mana resource" },
-    { "personal resource", "prd personal bar player bar" },
     { "pet", "pets minion minions totem totems guardian guardians companion" },
     { "minion", "pet pets totem totems" },
     { "realm", "server" },

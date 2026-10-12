@@ -1141,16 +1141,6 @@ local function GameExtras(group)
     end
     if group == "names" then
         Add(CVarToggle("UnitNameFocused", "Always show your target's name", "Shows your target's name over its head even when names over heads are off."), "UnitNameFocused")
-    elseif group == "personal" then
-        list[1] = { type = "Header", label = "Personal resource display", first = true }
-        list[2] = CVarToggle("nameplateShowSelf", "Personal resource display", "Shows your health and power in a bar over your character.")
-        list[3] = { type = "Toggle", label = "Plateau style", visibleIf = function() return Plateau.PersonalDisplay ~= nil and PersonalResourceDisplayFrame ~= nil end,
-            keywords = "personal resource display skin style texture border background bar",
-            get = function() return Plateau.PersonalDisplay:IsOn() end,
-            set = function(value) Plateau.PersonalDisplay:SetOn(value) end,
-            tooltip = "Draws the personal resource display's health, power and extra power bars with this profile's health bar texture, background, border and health text font. Saved for your account." }
-        Add(Gate(CVarToggle("nameplateShowAllPersonalAuras", "Show all personal auras", "Shows every buff and debuff on you on the personal resource display, not just important ones."),
-            function() return CVars:Get("nameplateShowSelf") == "1" end, "Turn on Personal resource display to use this."), "nameplateShowAllPersonalAuras")
     elseif group == "soft" then
         Add(CVarToggle("SoftTargetIconEnemy", "Soft target icon: enemies", "Shows an icon over the enemy you are soft-targeting with action targeting or a controller."), "SoftTargetIconEnemy")
         Add(CVarToggle("SoftTargetIconFriend", "Soft target icon: friends", "Shows an icon over the friendly unit you are soft-targeting."), "SoftTargetIconFriend")
@@ -1424,7 +1414,6 @@ local NAME_CVARS = { "UnitNameOwn", "UnitNameNonCombatCreatureName", "UnitNameFr
     "UnitNameInteractiveNPC", "UnitNameNPC", "ShowQuestUnitCircles" }
 local SHOWING_CVARS = { "nameplateShowAll", "nameplateShowEnemies", "nameplateShowEnemyMinus", "nameplateShowEnemyMinions",
     "nameplateShowEnemyPets", "nameplateShowEnemyGuardians", "nameplateShowEnemyTotems", "nameplateMaxDistance" }
-local PERSONAL_CVARS = { "nameplateShowSelf", "nameplateShowAllPersonalAuras" }
 local SOFT_CVARS = { "SoftTargetIconEnemy", "SoftTargetIconFriend", "SoftTargetIconInteract", "SoftTargetNameplateSize" }
 
 local function NamesOverHeads()
@@ -2666,8 +2655,6 @@ ns.sections = {
         )),
         GateList(On("look.classPower.enabled"), "Turn on Show class resource on target to use this.", Placement("look.classPower"))
     )),
-
-    Page("personal", "Personal resource display", {}, PERSONAL_CVARS, GameExtras("personal")),
 
     Section("classification", "Elite icon", "look.classification", Join(List(
         { type = "Header", label = "Elite, rare and boss icon", first = true },

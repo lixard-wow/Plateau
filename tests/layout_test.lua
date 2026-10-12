@@ -61,7 +61,7 @@ end
 
 local groups = {
     { label = "Profile", keys = { "profiles" } },
-    { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces", "personal" } },
+    { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces" } },
     { label = "Behavior", keys = { "showing", "size", "fading", "layering", "clicking" } },
     { label = "States", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
@@ -304,10 +304,9 @@ check(foundOn("hostile", "healthColors") and foundOn("mob", "size"), "hostile an
 check(foundOn("aggro", "threatText") and foundOn("hp", "healthText"), "aggro finds Threat and hp finds Health text")
 check(foundOn("ally", "friendly") and foundOn("totem", "friendly"), "ally and totem find Friendly settings")
 check(foundOn("cc", "auraCC") and foundOn("combo points", "classPower"), "player shorthand finds crowd control and class resource")
-check(foundOn("prd", "personal") and foundOn("line of sight", "fading"), "prd and line of sight find their settings")
+check(byKey.personal == nil and foundOn("line of sight", "fading"), "there is no personal resource display page and line of sight finds its setting")
 check(labelsOf(byKey.name)["Show your name"] and labelsOf(byKey.name)["NPC names"] and labelsOf(byKey.name)["Show enemy minion names"], "names over heads are on the Name page")
 check(labelsOf(byKey.showing)["Always show nameplates"] and labelsOf(byKey.showing)["Enemy minions"] and labelsOf(byKey.showing)["Maximum nameplate distance"], "which nameplates show has its own page")
-check(labelsOf(byKey.personal)["Personal resource display"] and labelsOf(byKey.personal)["Plateau style"], "the personal resource display has its own page")
 check(labelsOf(byKey.target)["Soft target icon: enemies"] ~= nil or C_CVar.GetCVar("SoftTargetIconEnemy") == nil, "soft target icons are on the Target page")
 check(labelsOf(byKey.layering)["Keep enemies in combat on screen"] and labelsOf(byKey.layering)["Pin off-screen nameplates"], "off-screen nameplates are on Layering and stacking")
 local friendlyLabels = labelsOf(byKey.friendly)

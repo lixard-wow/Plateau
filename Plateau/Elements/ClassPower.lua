@@ -276,10 +276,9 @@ end
 
 local listener = CreateFrame("Frame")
 local armed = false
-local watcher
 
 local function Arm()
-    local want = (ClassPower.enabled == true or watcher ~= nil) and resource ~= nil
+    local want = ClassPower.enabled == true and resource ~= nil
     if want == armed then return end
     armed = want
     if want then
@@ -300,16 +299,6 @@ end
 function ClassPower:Configured()
     Arm()
 end
-
-ns.ClassResource = {
-    Count = ActiveCount,
-    Fill = FillPips,
-    Color = Colors,
-    Watch = function(callback)
-        watcher = callback
-        Arm()
-    end,
-}
 
 listener:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 listener:RegisterEvent("PLAYER_TALENT_UPDATE")
@@ -332,9 +321,6 @@ listener:SetScript("OnEvent", function(_, event, unit, powerToken)
     local plate = ns.Driver:GetPlate("target")
     if plate and plate.built[ClassPower] then
         ClassPower:Update(plate)
-    end
-    if watcher then
-        watcher()
     end
 end)
 
