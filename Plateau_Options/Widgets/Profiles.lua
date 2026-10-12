@@ -765,6 +765,9 @@ function ns.Widgets.ShareProfile(parent)
             importMessage:SetText(reason)
         end
         frame:Layout()
+        if ns.RefreshAll then
+            ns.RefreshAll()
+        end
     end)
     Style.Tooltip(import, { label = "Import profile", tooltip = "Saves the pasted string as a new profile. Nothing changes if the string is invalid." })
 
@@ -808,16 +811,6 @@ function ns.Widgets.ShareProfile(parent)
         importHeading:ClearAllPoints()
         importHeading:SetPoint("TOPLEFT", 0, -y)
         y = y + 24
-        importLabel:ClearAllPoints()
-        importLabel:SetPoint("TOPLEFT", 0, -y)
-        y = y + 18
-        importBox:ClearAllPoints()
-        importBox:SetPoint("TOPLEFT", 0, -y)
-        y = y + SHARE_BOX_HEIGHT + 4
-        importMessage:ClearAllPoints()
-        importMessage:SetPoint("TOPLEFT", 0, -y)
-        importMessage:SetWidth(width)
-        y = y + 34
         nameLabel:ClearAllPoints()
         nameLabel:SetPoint("TOPLEFT", 0, -(y + 4))
         nameBox:ClearAllPoints()
@@ -826,10 +819,20 @@ function ns.Widgets.ShareProfile(parent)
         activateToggle:ClearAllPoints()
         activateToggle:SetPoint("TOPLEFT", 0, -y)
         activateToggle:SetWidth(ns.layout.column)
-        y = y + 32
+        y = y + 36
+        importLabel:ClearAllPoints()
+        importLabel:SetPoint("TOPLEFT", 0, -y)
+        y = y + 18
+        importBox:ClearAllPoints()
+        importBox:SetPoint("TOPLEFT", 0, -y)
+        y = y + SHARE_BOX_HEIGHT + 8
         import:ClearAllPoints()
         import:SetPoint("TOPLEFT", 0, -y)
-        y = y + 30
+        importMessage:ClearAllPoints()
+        importMessage:SetPoint("TOPLEFT", SHARE_BUTTON + 12, -(y + 2))
+        importMessage:SetWidth(math.max(80, width - SHARE_BUTTON - 12))
+        local message = importMessage:GetText() ~= nil and importMessage:GetText() ~= "" and importMessage:GetStringHeight() or 0
+        y = y + math.max(30, message + 6)
         frame:SetHeight(y)
     end
 
