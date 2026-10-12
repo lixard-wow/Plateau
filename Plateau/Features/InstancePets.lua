@@ -37,6 +37,16 @@ function InstancePets:Update()
     end
 end
 
+function ns.CVars:OnOverrideChanged(name, value)
+    if value ~= "1" or not InstancePets:IsOn() then return end
+    for _, cvar in ipairs(CVARS) do
+        if cvar == name then
+            InstancePets:SetOn(false)
+            return
+        end
+    end
+end
+
 InstancePets:RegisterEvent("PLAYER_ENTERING_WORLD")
 InstancePets:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 InstancePets:RegisterEvent("PLAYER_REGEN_ENABLED")

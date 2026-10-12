@@ -8,6 +8,13 @@ local CVars = CreateFrame("Frame")
 ns.CVars = CVars
 
 local pending = false
+local writing = false
+
+local function Write(name, value)
+    writing = true
+    SetCVar(name, value)
+    writing = false
+end
 
 local function ValuesEqual(a, b)
     if a == b then return true end
@@ -43,7 +50,7 @@ local function SetLive(store, name, value)
         return
     end
     if not ValuesEqual(GetCVar(name), value) then
-        SetCVar(name, value)
+        Write(name, value)
     end
 end
 
@@ -56,7 +63,7 @@ function CVars:Apply()
     local store = Store()
     for name, override in pairs(store.override) do
         if not ValuesEqual(GetCVar(name), override.value) then
-            SetCVar(name, override.value)
+            Write(name, override.value)
         end
     end
     for name, value in pairs(store.restore) do
@@ -98,7 +105,7 @@ function CVars:Set(name, value)
         store.restore[name] = store.managed[name] == nil and value or nil
         pending = true
     else
-        SetCVar(name, value)
+        Write(name, value)
     end
 end
 
@@ -118,7 +125,7 @@ function CVars:Release(name)
             store.restore[name] = original
             pending = true
         else
-            SetCVar(name, original)
+            Write(name, original)
         end
     end
 end
@@ -134,7 +141,7 @@ function CVars:Override(name, value)
     end
     override.value = value
     if not ValuesEqual(GetCVar(name), value) then
-        SetCVar(name, value)
+        Write(name, value)
     end
     return true
 end
@@ -146,7 +153,7 @@ function CVars:ClearOverride(name)
     if InCombatLockdown() then return false end
     store.override[name] = nil
     if override.user ~= nil and not ValuesEqual(GetCVar(name), override.user) then
-        SetCVar(name, override.user)
+        Write(name, override.user)
     end
     return true
 end
@@ -199,6 +206,9 @@ function CVars:Adopt(name)
     if override then
         if ValuesEqual(live, override.value) then return end
         override.user = live
+        if not writing and self.OnOverrideChanged then
+            self:OnOverrideChanged(name, live)
+        end
     end
     local managed = store.managed[name]
     if managed == nil or ValuesEqual(live, managed) then return end
@@ -218,7 +228,7 @@ local function RestoreOverrides(forget)
             store.override[name] = nil
         else
             if not ValuesEqual(GetCVar(name), override.user) then
-                SetCVar(name, override.user)
+                Write(name, override.user)
             end
             if forget and ValuesEqual(GetCVar(name), override.user) then
                 store.override[name] = nil
