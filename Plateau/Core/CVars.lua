@@ -109,6 +109,34 @@ function CVars:Set(name, value)
     end
 end
 
+local BITS_PER_BYTE = 6
+local PADDING = 64
+
+function CVars.WithBit(value, index, on)
+    local bits = {}
+    for position = 2, #value do
+        local byte = value:byte(position) % PADDING
+        for offset = 0, BITS_PER_BYTE - 1 do
+            bits[(position - 2) * BITS_PER_BYTE + offset] = byte % 2 == 1
+            byte = math.floor(byte / 2)
+        end
+    end
+    bits[index - 1] = on and true or false
+    local count = math.max(#value - 1, math.floor((index - 1) / BITS_PER_BYTE) + 1)
+    local out = { value:sub(1, 1) }
+    for group = 0, count - 1 do
+        local byte = 0
+        for offset = BITS_PER_BYTE - 1, 0, -1 do
+            byte = byte * 2 + (bits[group * BITS_PER_BYTE + offset] and 1 or 0)
+        end
+        out[#out + 1] = string.char(byte + PADDING)
+    end
+    while #out > 1 and out[#out] == string.char(PADDING) do
+        out[#out] = nil
+    end
+    return table.concat(out)
+end
+
 function CVars:IsManaged(name)
     return Store().managed[name] ~= nil
 end

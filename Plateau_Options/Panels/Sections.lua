@@ -604,12 +604,9 @@ local function CVarBitToggle(name, index, label, tooltip)
             return index ~= nil and C_CVar.GetCVar(name) ~= nil and C_CVar.GetCVarBitfield(name, index) == true
         end,
         set = function(value)
-            if index == nil or C_CVar.GetCVar(name) == nil or InCombatLockdown() then return end
-            local before = C_CVar.GetCVar(name)
-            C_CVar.SetCVarBitfield(name, index, value)
-            local after = C_CVar.GetCVar(name)
-            C_CVar.SetCVar(name, before)
-            CVars:Set(name, after)
+            local current = C_CVar.GetCVar(name)
+            if index == nil or current == nil or current == "" or InCombatLockdown() then return end
+            CVars:Set(name, CVars.WithBit(current, index, value))
         end,
     }
 end
@@ -682,7 +679,7 @@ local function BlizzardDrawn(friendly)
     local function Bits(cvar, enum, entries)
         if not (C_CVar.GetCVar(cvar) and enum) then return end
         for _, entry in ipairs(entries) do
-            if enum[entry[1]] and entry.shown ~= false and (entry.friendly == true) == (friendly == true) then
+            if enum[entry[1]] and entry.shown ~= false and (entry.both or (entry.friendly == true) == (friendly == true)) then
                 Add(CVarBitToggle(cvar, enum[entry[1]], entry[2], entry[3]))
             end
         end
@@ -758,10 +755,10 @@ local function BlizzardDrawn(friendly)
         Add(CVarSlider("nameplateDebuffPadding", "Debuff padding", 0, 50, 1, "Space between buff and debuff icons on the nameplates the game draws."))
     end
     Bits("nameplateSimplifiedTypes", Enum.NamePlateSimplifiedType, {
-        { "Minion", "Simplify minions", "Draws pets, guardians and totems as small simplified nameplates." },
-        { "MinusMob", "Simplify minor enemies", "Draws minor enemies as small simplified nameplates." },
-        { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", friendly = true },
-        { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", friendly = true },
+        { "Minion", "Simplify minions", "Draws pets, guardians and totems as small simplified nameplates.", both = true },
+        { "MinusMob", "Simplify minor enemies", "Draws minor enemies as small simplified nameplates.", both = true },
+        { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", both = true },
+        { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", both = true },
     })
     Toggle("nameplateShowFriendlyClassColor", "Class colors: friendly players", "Colors friendly player health bars by class on the nameplates the game draws.", true)
     Toggle("nameplateShowClassColor", "Class colors: enemy players", "Colors enemy player health bars by class on the nameplates the game draws.")
