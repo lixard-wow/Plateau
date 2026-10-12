@@ -231,13 +231,13 @@ function ns.Widgets.ConfirmPrompt()
     local title = Style.Text(box, 15, C.heading)
     title:SetPoint("TOPLEFT", 20, -16)
 
-    local text = Style.Text(box, 11, C.muted)
+    local text = Style.Text(box, 12, C.text)
     text:SetPoint("TOPLEFT", 20, -46)
     text:SetWidth(400)
     text:SetWordWrap(true)
 
     local onConfirm
-    local confirm = ns.Widgets.PrimaryButton(box, "Confirm", 150, function()
+    local confirm = ns.Widgets.Button(box, "Confirm", 150, function()
         box:Hide()
         if onConfirm then
             onConfirm()
