@@ -739,7 +739,7 @@ function ns.Widgets.ShareProfile(parent)
         set = function(value) activate = value == true end,
     })
 
-    local import = ns.Widgets.PrimaryButton(frame, "Import profile", SHARE_BUTTON, function()
+    local import = ns.Widgets.Button(frame, "Import profile", SHARE_BUTTON, function()
         local ok, name, state = Plateau.DB:ImportProfile(nameBox:GetText(), importEdit:GetText(), activate)
         if ok then
             local color = C.muted

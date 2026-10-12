@@ -22,6 +22,26 @@ local exported = ns.Share.Decode(text)
 check(exported.look.colors.elite ~= nil and exported.look.colors.eliteColor ~= nil, "export carries every setting, not just changes")
 check(type(text) == "string" and text:sub(1, 5) == "!SL1!" and not text:find("[^%w%(%)!]"), "export is printable")
 
+local offPaths = { "look.level.enabled", "look.castbar.showIcon", "look.target.ring", "look.friendly.npcs", "look.auras.cc.dispelBorder" }
+for _, path in ipairs(offPaths) do
+    DB:Set(path, false)
+end
+local offText = DB:ExportProfile()
+check(DB:ImportProfile("Switched off", offText, false), "a profile with switches turned off imports")
+local offLook = DB.saved.profiles["Switched off"].look
+local allOff = true
+for _, path in ipairs(offPaths) do
+    local value = offLook
+    for part in path:gsub("^look%.", ""):gmatch("[^.]+") do
+        value = type(value) == "table" and value[part]
+    end
+    if value ~= false then allOff = false end
+end
+check(allOff, "settings turned off stay off after export and import")
+for _, path in ipairs(offPaths) do
+    DB:Reset(path)
+end
+text = DB:ExportProfile()
 check(DB:ImportProfile("Shared", text, true), "import creates a profile")
 check(DB.profileName == "Shared", "import switches to it")
 check(DB.views.enemy.castbar.height == 18 and DB.views.enemy.castbar.readyColor[2] == 1, "base look imported")

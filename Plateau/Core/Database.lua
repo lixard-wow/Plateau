@@ -969,7 +969,10 @@ end
 local function FullLook(defaults, saved)
     local full = {}
     for key, default in pairs(defaults) do
-        local value = type(saved) == "table" and rawget(saved, key) or nil
+        local value
+        if type(saved) == "table" then
+            value = rawget(saved, key)
+        end
         if type(default) == "table" and default[1] == nil then
             full[key] = FullLook(default, value)
         elseif type(value) == "table" then
