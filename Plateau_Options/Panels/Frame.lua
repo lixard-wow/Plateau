@@ -1011,9 +1011,11 @@ local function RailHeader(group)
         if current and groupOf[current.key] == group then
             openGroup = group
             LayoutRail()
-        else
-            Select(group.buttons[1].section)
+            return
         end
+        local remembered = Plateau.DB.saved.global.railLast
+        local key = type(remembered) == "table" and remembered[group.label]
+        Select(groupOf[key] == group and sectionsByKey[key] or group.buttons[1].section)
     end)
     return header
 end
@@ -1044,8 +1046,13 @@ end
 
 function OpenRailFor(key)
     local group = groupOf[key]
-    if group and openGroup ~= group then
+    if group then
         openGroup = group
+        local global = Plateau.DB.saved.global
+        if type(global.railLast) ~= "table" then
+            global.railLast = {}
+        end
+        global.railLast[group.label] = key
     end
     LayoutRail()
 end
