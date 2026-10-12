@@ -795,7 +795,7 @@ local RAIL_GROUPS = {
     { label = "Profile", keys = { "profiles" } },
     { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces" } },
     { label = "Behavior", keys = { "showing", "size", "fading", "layering", "clicking" } },
-    { label = "States", keys = { "target", "focus", "mouseover", "combat" } },
+    { label = "Highlights", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
     { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction" } },
     { label = "Friendly", keys = { "friendly" } },
@@ -1005,14 +1005,15 @@ local function RailHeader(group)
     header:SetScript("OnClick", function()
         if openGroup == group then
             openGroup = nil
-        else
-            openGroup = group
-            if #group.buttons == 1 then
-                Select(group.buttons[1].section)
-                return
-            end
+            LayoutRail()
+            return
         end
-        LayoutRail()
+        if current and groupOf[current.key] == group then
+            openGroup = group
+            LayoutRail()
+        else
+            Select(group.buttons[1].section)
+        end
     end)
     return header
 end

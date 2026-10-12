@@ -2797,7 +2797,7 @@ ns.sections = {
             { type = "ShareProfile", label = "Export active profile", keywords = "import profile profile export string paste a plateau profile string activate after import profile name",
               tooltip = "Export the active profile as a text string, or import a string as a new profile." },
             { type = "Header", label = "What a profile includes", collapsible = true, collapsed = true, keywords = "scope saved shared game settings spell lists automatic rules export" },
-            { type = "Note", label = "In a profile: every Plateau setting on the Nameplates, Behavior, States, Auras, Icons and Friendly pages. Blizzard's own settings, which some of those pages also show, are not part of a profile.", height = 32 },
+            { type = "Note", label = "In a profile: every Plateau setting on the Nameplates, Behavior, Highlights, Auras, Icons and Friendly pages. Blizzard's own settings, which some of those pages also show, are not part of a profile.", height = 32 },
             { type = "Note", label = "Aura spell lists (Hidden spells and Allowed spells) are saved in the profile and per specialization, so a different profile or specialization shows a different set.", height = 32 },
             { type = "Note", label = "Not in a profile: your default profile and the automatic switching rules (saved per character), Blizzard's nameplate settings (saved once for your account and shared by every profile and character), Plateau settings (the gear button), and boss phase lines (saved for your account). Export and import carry the look, the aura spell lists and your boss phase lines; importing adds those boss lines to yours.", height = 58 }
         ),
