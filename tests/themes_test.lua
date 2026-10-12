@@ -60,3 +60,20 @@ for key, theme in pairs(retail.THEMES) do
     check(not theme.headerFill or type(theme.colors.header) == "table", key .. " has a header color when its header is filled")
 end
 check(retail.THEMES.ledger.colors.title[1] > 0.9 and retail.THEMES.ledger.brackets == true, "Artisan Ledger uses PKT's gold title and corner brackets")
+
+local reset = Load("mainline")
+local resetPaths, refreshed, menus = nil, 0, 0
+Plateau.DB.ResetEverywhere = function(_, paths) resetPaths = paths end
+MenuUtil = { CreateContextMenu = function() menus = menus + 1 end }
+local hooks = {}
+local frame = { HookScript = function(_, name, fn) hooks[name] = fn end }
+reset.RightClickReset(frame, { label = "Height", path = "look.castbar.height" }, function() refreshed = refreshed + 1 end)
+hooks.OnMouseUp(frame, "LeftButton")
+check(resetPaths == nil, "left-click does not reset")
+hooks.OnMouseUp(frame, "RightButton")
+check(resetPaths and resetPaths[1] == "look.castbar.height" and refreshed == 1 and menus == 0, "right-click resets the setting straight away, with no menu")
+local custom = 0
+local hooks2 = {}
+reset.RightClickReset({ HookScript = function(_, name, fn) hooks2[name] = fn end }, { label = "CVar", reset = function() custom = custom + 1 end }, function() end)
+hooks2.OnMouseUp(nil, "RightButton")
+check(custom == 1 and menus == 0, "settings with their own reset also reset straight away")

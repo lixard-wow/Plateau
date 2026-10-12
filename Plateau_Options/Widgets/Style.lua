@@ -416,18 +416,6 @@ local function AfterChange(refresh)
     end
 end
 
-local function OpenMenu(owner, spec, refresh)
-    local DB = Plateau.DB
-    local paths = ns.SpecPaths(spec)
-    MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateTitle(spec.label or "")
-        root:CreateButton("Reset to default", function()
-            DB:ResetEverywhere(paths)
-            AfterChange(refresh)
-        end)
-    end)
-end
-
 function Style.RightClickReset(frame, spec, refresh)
     frame:HookScript("OnMouseUp", function(self, button)
         if button ~= "RightButton" then return end
@@ -436,9 +424,10 @@ function Style.RightClickReset(frame, spec, refresh)
             refresh()
             return
         end
-        if #ns.SpecPaths(spec) == 0 then return end
-        GameTooltip:Hide()
-        OpenMenu(self, spec, refresh)
+        local paths = ns.SpecPaths(spec)
+        if #paths == 0 then return end
+        Plateau.DB:ResetEverywhere(paths)
+        AfterChange(refresh)
     end)
 end
 
