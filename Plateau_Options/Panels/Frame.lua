@@ -513,37 +513,20 @@ local closeButton = Widgets.Button(frame, "Close", 100, function() frame:Hide() 
 closeButton:SetPoint("BOTTOMRIGHT", -PAD, 11)
 
 local Select, UpdateChrome, RevealRail
-local profileButton = Widgets.Button(frame, "", 250)
+local profileButton = CreateFrame("Frame", nil, frame)
+profileButton:SetSize(250, 22)
 profileButton:SetPoint("BOTTOMLEFT", RAIL + PAD, 11)
-Style.DropArrow(profileButton)
-local profile = profileButton.label
-profileButton:SetScript("OnClick", function(self)
-    local options = {}
-    for _, name in ipairs(Plateau.DB:ListProfiles()) do
-        options[#options + 1] = { value = name, label = Plateau.Builtins.Label(name) }
-    end
-    ns.ShowList(self, options, Plateau.DB.profileName, function(value)
-        if value == false then
-            for _, section in ipairs(ns.sections) do
-                if section.key == "profiles" and Select then
-                    Select(section)
-                end
-            end
-            return
-        end
-        if value ~= Plateau.DB.profileName or value ~= Plateau.DB:DefaultProfile() then
-            Plateau.DB:ActivateProfile(value)
-            ns.UpdateProfileLabel()
-            ns.RefreshAll()
-        end
-    end, { width = 220, up = true, pinned = { value = false, label = "Manage profiles..." } })
-end)
-profileButton:HookScript("OnEnter", function(self)
+profileButton:EnableMouse(true)
+local profile = Style.Text(profileButton, 12, C.muted)
+profile:SetPoint("LEFT")
+profile:SetPoint("RIGHT")
+profile:SetJustifyH("LEFT")
+profileButton:SetScript("OnEnter", function(self)
     local status = Plateau.AutoProfile:Status()
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
     local accent = Style.StateColor()
     GameTooltip:SetText(T("Active profile: %s"):format(status.active), accent[1], accent[2], accent[3])
-    GameTooltip:AddLine(T("Every page edits this profile. Click to switch; your choice also becomes your default."), 1, 1, 1, true)
+    GameTooltip:AddLine(T("Every page edits this profile. Switch profiles on the Looks or Profiles page."), 1, 1, 1, true)
     GameTooltip:AddLine(T("Default profile: %s"):format(status.default), 1, 1, 1, true)
     if status.overridden then
         GameTooltip:AddLine(T("Active because of: %s. Automatic switching can replace your choice when you change zone or specialization."):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
@@ -553,7 +536,7 @@ profileButton:HookScript("OnEnter", function(self)
     end
     GameTooltip:Show()
 end)
-profileButton:HookScript("OnLeave", function() GameTooltip:Hide() end)
+profileButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 local Confirming = ns.Widgets.Confirm
 

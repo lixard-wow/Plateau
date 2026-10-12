@@ -122,7 +122,7 @@ A profile holds every look setting, including your per-type changes. Each charac
 
 - **Looks** are six ready-made profiles shown as live cards: Minimal (the default), Familiar layout, Classic unit frames, Compact, Clean and flat, and Bold and crisp. Press Use this look on a card to switch to it. **Restore a built-in profile** puts one back to how it shipped.
 - **Switch automatically.** Choose a profile for the open world, dungeons, raids, and delves and scenarios, or per specialization. Content-specific profiles beat specialization profiles, your default profile is the fallback, and automatic switches wait until combat ends.
-- **Manage** them from the button at the bottom left of the window, or the Profiles page: start fresh, copy the current one, copy another into this one, delete.
+- **Manage** them on the Profiles page; the bottom left of the window shows which one is active: start fresh, copy the current one, copy another into this one, delete.
 
 ## Sharing a profile
 On the Profiles page, **Export active profile** gives you a text string with every setting. On another computer, paste it into the import box and click **Import profile**. A name is optional, and the profile is used right away. You can choose whether your per-type changes come along. An import never replaces an existing profile.
