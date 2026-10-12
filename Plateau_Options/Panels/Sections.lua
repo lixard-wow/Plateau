@@ -531,6 +531,7 @@ local function CVarSpec(kind, name, label, extra)
     spec.path = "cvar." .. name
     spec.reset = function() CVars:Release(name) end
     spec.resetLabel = "Right-click to undo Plateau's change."
+    spec.gameSetting = true
     if kind == "Toggle" then
         spec.get = function() return CVars:Get(name) == "1" end
         spec.set = function(value) CVars:Set(name, value and "1" or "0") end
@@ -566,6 +567,7 @@ local function NpcNames()
         type = "Dropdown",
         label = "NPC names",
         options = NPC_NAME_OPTIONS,
+        gameSetting = true,
         tooltip = "Chooses which NPCs show their names over their heads.",
         get = function()
             local function On(name) return CVars:Get(name) == "1" end
@@ -598,6 +600,7 @@ local function CVarBitToggle(name, index, label, tooltip)
         label = label,
         tooltip = tooltip,
         path = "cvar." .. name .. "." .. tostring(index),
+        gameSetting = true,
         reset = function() CVars:Release(name) end,
         resetLabel = "Right-click to undo Plateau's change.",
         get = function()
@@ -679,7 +682,7 @@ local function BlizzardDrawn(friendly)
     local function Bits(cvar, enum, entries)
         if not (C_CVar.GetCVar(cvar) and enum) then return end
         for _, entry in ipairs(entries) do
-            if enum[entry[1]] and entry.shown ~= false and (entry.both or (entry.friendly == true) == (friendly == true)) then
+            if enum[entry[1]] and entry.shown ~= false and (entry.friendly == true) == (friendly == true) then
                 Add(CVarBitToggle(cvar, enum[entry[1]], entry[2], entry[3]))
             end
         end
@@ -692,7 +695,7 @@ local function BlizzardDrawn(friendly)
 
     if not friendly then
         Add({ type = "Header", label = "Blizzard-drawn nameplates", collapsible = true, collapsed = true })
-        Add({ type = "Note", label = "These only change nameplates the game draws itself. The friendly ones are on the Friendly page.", height = 24 })
+        Add({ type = "Note", label = "These only change enemy nameplates the game draws itself, for units Plateau doesn't style.", height = 24 })
         if C_CVar.GetCVar("nameplateStyle") and Enum.NamePlateStyle then
             local style = Enum.NamePlateStyle
             local options = {
@@ -712,6 +715,7 @@ local function BlizzardDrawn(friendly)
               reset = function() CVars:Release("nameplateStyle") end,
               resetLabel = "Right-click to undo Plateau's change.",
               path = "cvar.nameplateStyle",
+              gameSetting = true,
               tooltip = "The look of the nameplates the game draws." })
         end
     end
@@ -755,10 +759,10 @@ local function BlizzardDrawn(friendly)
         Add(CVarSlider("nameplateDebuffPadding", "Debuff padding", 0, 50, 1, "Space between buff and debuff icons on the nameplates the game draws."))
     end
     Bits("nameplateSimplifiedTypes", Enum.NamePlateSimplifiedType, {
-        { "Minion", "Simplify minions", "Draws pets, guardians and totems as small simplified nameplates.", both = true },
-        { "MinusMob", "Simplify minor enemies", "Draws minor enemies as small simplified nameplates.", both = true },
-        { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", both = true },
-        { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", both = true },
+        { "Minion", "Simplify minions", "Draws pets, guardians and totems as small simplified nameplates.", friendly = true },
+        { "MinusMob", "Simplify minor enemies", "Draws minor enemies as small simplified nameplates.", friendly = true },
+        { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", friendly = true },
+        { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", friendly = true },
     })
     Toggle("nameplateShowFriendlyClassColor", "Class colors: friendly players", "Colors friendly player health bars by class on the nameplates the game draws.", true)
     Toggle("nameplateShowClassColor", "Class colors: enemy players", "Colors enemy player health bars by class on the nameplates the game draws.")
@@ -1138,7 +1142,7 @@ local function GameExtras(group)
     if group == "names" then
         Add(CVarToggle("UnitNameFocused", "Always show your target's name", "Shows your target's name over its head even when names over heads are off."), "UnitNameFocused")
     elseif group == "personal" then
-        list[1] = { type = "Header", label = "Personal resource display" }
+        list[1] = { type = "Header", label = "Personal resource display", first = true }
         list[2] = CVarToggle("nameplateShowSelf", "Personal resource display", "Shows your health and power in a bar over your character.")
         list[3] = { type = "Toggle", label = "Plateau style", visibleIf = function() return Plateau.PersonalDisplay ~= nil and PersonalResourceDisplayFrame ~= nil end,
             keywords = "personal resource display skin style texture border background bar",
@@ -1370,6 +1374,22 @@ local function AuraTextControls()
     )
 end
 
+local function WithCVars(section, cvars)
+    section.reset = function()
+        if type(section.group) == "table" then
+            for _, path in ipairs(section.group) do
+                Plateau.DB:Reset(path)
+            end
+        else
+            Plateau.DB:Reset(section.group)
+        end
+        for _, name in ipairs(cvars) do
+            CVars:Release(name)
+        end
+    end
+    return section
+end
+
 local function Page(key, title, paths, cvars, controls)
     local section = Section(key, title, paths, controls)
     if cvars then
@@ -1397,7 +1417,47 @@ local SIZE_CVARS = { "nameplateSize", "nameplateAuraScale", "nameplateMinScale",
 local FADING_PATHS = { "look.range", "look.target.dimOthers", "look.target.dimCombatOnly", "look.target.dimSkipFriendly" }
 local FADING_CVARS = { "nameplateOccludedAlphaMult", "nameplateMinAlpha", "nameplatePlayRemovalAnimation" }
 local LAYERING_PATHS = { "look.scaling.castFront", "look.plate.stackSpace", "look.scaling.mouseoverFront", "look.plate.offsetY" }
-local LAYERING_CVARS = { "nameplateStackingTypes", "nameplateOverlapV", "nameplateOverlapH", "nameplateMotionSpeed", "nameplateOtherAtBase" }
+local LAYERING_CVARS = { "nameplateStackingTypes", "nameplateOverlapV", "nameplateOverlapH", "nameplateMotionSpeed", "nameplateOtherAtBase",
+    "nameplateShowOffscreen", "nameplateTargetRadialPosition", "nameplateTopInset", "nameplateBottomInset" }
+local NAME_CVARS = { "UnitNameOwn", "UnitNameNonCombatCreatureName", "UnitNameFriendlyPlayerName", "UnitNameFriendlyMinionName",
+    "UnitNameEnemyPlayerName", "UnitNameEnemyMinionName", "UnitNameFocused", "UnitNameFriendlySpecialNPCName", "UnitNameHostleNPC",
+    "UnitNameInteractiveNPC", "UnitNameNPC", "ShowQuestUnitCircles" }
+local SHOWING_CVARS = { "nameplateShowAll", "nameplateShowEnemies", "nameplateShowEnemyMinus", "nameplateShowEnemyMinions",
+    "nameplateShowEnemyPets", "nameplateShowEnemyGuardians", "nameplateShowEnemyTotems", "nameplateMaxDistance" }
+local PERSONAL_CVARS = { "nameplateShowSelf", "nameplateShowAllPersonalAuras" }
+local SOFT_CVARS = { "SoftTargetIconEnemy", "SoftTargetIconFriend", "SoftTargetIconInteract", "SoftTargetNameplateSize" }
+
+local function NamesOverHeads()
+    return Join(List(
+        { type = "Header", label = "Names over heads" },
+        { type = "Note", label = "Names the game shows over characters' heads, separate from nameplates. These are Blizzard's Names options.", height = 24 },
+        CVarToggle("UnitNameOwn", "Show your name", "Shows your character's name over your head."),
+        NpcNames(),
+        CVarToggle("UnitNameNonCombatCreatureName", "Show critter and companion names", "Shows names over critters, battle pets and companions."),
+        CVarToggle("UnitNameFriendlyPlayerName", "Show friendly player names", "Shows names over friendly players' heads."),
+        CVarToggle("UnitNameFriendlyMinionName", "Show friendly minion names", "Shows names over friendly players' pets, totems and other minions."),
+        CVarToggle("UnitNameEnemyPlayerName", "Show enemy player names", "Shows names over enemy players' heads."),
+        CVarToggle("UnitNameEnemyMinionName", "Show enemy minion names", "Shows names over enemy players' pets, totems and other minions.")
+    ), GameExtras("names"))
+end
+
+local function OffScreen()
+    return List(
+        { type = "Header", label = "Off-screen nameplates", collapsible = true, collapsed = true },
+        CVarToggle("nameplateShowOffscreen", "Keep enemies in combat on screen",
+            "Pins nameplates of enemies in combat with your group to the screen edge while they are off screen."),
+        { type = "Dropdown", label = "Pin off-screen nameplates", options = RADIAL,
+          get = function() return tonumber(CVars:Get("nameplateTargetRadialPosition")) or 0 end,
+          set = function(value) CVars:Set("nameplateTargetRadialPosition", value) end,
+          reset = function() CVars:Release("nameplateTargetRadialPosition") end,
+          resetLabel = "Right-click to undo Plateau's change.",
+          path = "cvar.nameplateTargetRadialPosition",
+          gameSetting = true,
+          tooltip = "Pins your target, or every enemy you are fighting, around the screen edge while off screen." },
+        CVarSlider("nameplateTopInset", "Top screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the top of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5."),
+        CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the bottom of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5.")
+    )
+end
 local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
 local COMBAT_PATHS = { "look.idle" }
 local TARGET_LOOK = {}
@@ -1408,51 +1468,18 @@ for _, key in ipairs({ "ring", "ringColor", "ringSize", "colorBar", "barColor", 
 end
 
 ns.sections = {
-    {
-        key = "game",
-        title = "Game settings",
-        reset = function()
-            CVars:ReleaseAll()
-        end,
-        controls = Join(List(
-            { type = "Note", label = "Changes Blizzard's own nameplate settings. Right-click a setting to undo Plateau's change, or type /plt cvars restore to undo them all. This restores your previous values, not Blizzard's defaults.", height = 32 },
-
-            { type = "Header", label = "Names over heads" },
-            { type = "Note", label = "Names shown over characters' heads. These are Blizzard's Names options.", height = 24 },
-            CVarToggle("UnitNameOwn", "Show your name", "Shows your character's name over your head."),
-            NpcNames(),
-            CVarToggle("UnitNameNonCombatCreatureName", "Show critter and companion names", "Shows names over critters, battle pets and companions."),
-            CVarToggle("UnitNameFriendlyPlayerName", "Show friendly player names", "Shows names over friendly players' heads."),
-            CVarToggle("UnitNameFriendlyMinionName", "Show friendly minion names", "Shows names over friendly players' pets, totems and other minions."),
-            CVarToggle("UnitNameEnemyPlayerName", "Show enemy player names", "Shows names over enemy players' heads."),
-            CVarToggle("UnitNameEnemyMinionName", "Show enemy minion names", "Shows names over enemy players' pets, totems and other minions.")
-        ), GameExtras("names"), List(
-
-            { type = "Header", label = "Which nameplates show" },
-            CVarToggle("nameplateShowAll", "Always show nameplates", "Shows nameplates at all times. Off: only during combat."),
-            CVarToggle("nameplateShowEnemies", "Enemy nameplates", "Shows nameplates for enemies. Off hides all of them."),
-            Gate(CVarToggle("nameplateShowEnemyMinus", "Minor enemies", "Shows nameplates for minor enemies, the weakest trash units."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            Gate(CVarToggle("nameplateShowEnemyMinions", "Enemy minions", "Shows nameplates for enemy pets, totems and other minions."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            Gate(CVarToggle("nameplateShowEnemyPets", "Enemy pets", "Shows nameplates for enemy players' pets."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            Gate(CVarToggle("nameplateShowEnemyGuardians", "Enemy guardians", "Shows nameplates for temporary helpers summoned by enemies."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            Gate(CVarToggle("nameplateShowEnemyTotems", "Enemy totems", "Shows nameplates for enemy totems."), EnemiesOn, "Turn on Enemy nameplates to use this."),
-            CVarSlider("nameplateMaxDistance", "Maximum nameplate distance", 10, 60, 1, "How far away, in yards, a unit can be and still show a nameplate.")
-        ), GameExtras("personal"), GameExtras("soft"), List(
-
-            { type = "Header", label = "Off-screen nameplates", collapsible = true, collapsed = true },
-            CVarToggle("nameplateShowOffscreen", "Keep enemies in combat on screen",
-                "Pins nameplates of enemies in combat with your group to the screen edge while they are off screen."),
-            { type = "Dropdown", label = "Pin off-screen nameplates", options = RADIAL,
-              get = function() return tonumber(CVars:Get("nameplateTargetRadialPosition")) or 0 end,
-              set = function(value) CVars:Set("nameplateTargetRadialPosition", value) end,
-              reset = function() CVars:Release("nameplateTargetRadialPosition") end,
-              resetLabel = "Right-click to undo Plateau's change.",
-              path = "cvar.nameplateTargetRadialPosition",
-              tooltip = "Pins your target, or every enemy you are fighting, around the screen edge while off screen." },
-            CVarSlider("nameplateTopInset", "Top screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the top of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5."),
-            CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the bottom of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5.")
-        ), BlizzardDrawn()),
-    },
+    Page("showing", "Which nameplates show", {}, SHOWING_CVARS, List(
+        { type = "Header", label = "Which nameplates show", first = true },
+        { type = "Note", label = "Which units get a nameplate at all. Friendly players and NPCs are on the Friendly page.", height = 24 },
+        CVarToggle("nameplateShowAll", "Always show nameplates", "Shows nameplates at all times. Off: only during combat."),
+        CVarToggle("nameplateShowEnemies", "Enemy nameplates", "Shows nameplates for enemies. Off hides all of them."),
+        Gate(CVarToggle("nameplateShowEnemyMinus", "Minor enemies", "Shows nameplates for minor enemies, the weakest trash units."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+        Gate(CVarToggle("nameplateShowEnemyMinions", "Enemy minions", "Shows nameplates for enemy pets, totems and other minions."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+        Gate(CVarToggle("nameplateShowEnemyPets", "Enemy pets", "Shows nameplates for enemy players' pets."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+        Gate(CVarToggle("nameplateShowEnemyGuardians", "Enemy guardians", "Shows nameplates for temporary helpers summoned by enemies."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+        Gate(CVarToggle("nameplateShowEnemyTotems", "Enemy totems", "Shows nameplates for enemy totems."), EnemiesOn, "Turn on Enemy nameplates to use this."),
+        CVarSlider("nameplateMaxDistance", "Maximum nameplate distance", 10, 60, 1, "How far away, in yards, a unit can be and still show a nameplate.")
+    )),
 
     Page("size", "Size", SIZE_PATHS, SIZE_CVARS, List(
         { type = "Header", label = "Nameplate scale", first = true },
@@ -1564,7 +1591,7 @@ ns.sections = {
         CVarToggle("nameplatePlayRemovalAnimation", "Fade out disappearing nameplates", "Nameplates fade out instead of vanishing.")
     )),
 
-    Page("layering", "Layering and stacking", LAYERING_PATHS, LAYERING_CVARS, List(
+    Page("layering", "Layering and stacking", LAYERING_PATHS, LAYERING_CVARS, Join(List(
         { type = "Header", label = "Nameplate layering", first = true },
         { type = "Toggle", path = "look.scaling.castFront", label = "Casting enemies in front", wide = true,
           keywords = "layering priority order caster casters cast in front draw over overlap",
@@ -1609,7 +1636,7 @@ ns.sections = {
         BaseSpec({ type = "Slider", path = "look.plate.offsetY", label = "Nameplate vertical offset", min = -60, max = 60,
           tooltip = "Moves nameplates up or down from their usual spot. Doesn't change stacking or nameplates the game draws itself." }),
         CVarToggle("nameplateOtherAtBase", "Position nameplates at feet", "Shows nameplates at units' feet instead of above their heads.")
-    )),
+    ), OffScreen())),
 
     Page("clicking", "Clickable area", CLICK_PATHS, nil, List(
         { type = "Header", label = "Clickable area", first = true },
@@ -1977,7 +2004,7 @@ ns.sections = {
         { type = "Note", label = "Change the friendly nameplates the game draws, such as in dungeons, raids and arenas.", height = 24 },
         CVarToggle("nameplateShowOnlyNameForFriendlyPlayerUnits", "Only show friendly player names",
             "Shows only names on friendly players' nameplates the game draws, such as in dungeons and raids. Follower dungeon companions keep their bars.")
-    ), BlizzardDrawn(true))),
+    ), BlizzardDrawn(true), BlizzardDrawn())),
 
     Section("healthText", "Health text", "look.healthText", Join(List(
         { type = "Header", label = "Text", first = true },
@@ -2028,7 +2055,7 @@ ns.sections = {
         { type = "Header", label = "Font" }
     ), GateList(HealthTextOn, TEXT_ON, FontControls("look.healthText")))),
 
-    Section("name", "Name", { "look.name", "look.enemyTarget" }, Join(List(
+    WithCVars(Section("name", "Name", { "look.name", "look.enemyTarget" }, Join(List(
         { type = "Header", label = "Name", first = true },
         { type = "Toggle", path = "look.name.enabled", label = "Show names",
           tooltip = "Shows the unit's name on the nameplate." }
@@ -2082,7 +2109,7 @@ ns.sections = {
           tooltip = "Nudges this text down (negative) or up (positive)." }
     ), List(
         { type = "Header", label = "Enemy target font" }
-    ), GateList(EnemyTargetOn, ENEMY_TARGET_ON, FontControls("look.enemyTarget")))),
+    ), GateList(EnemyTargetOn, ENEMY_TARGET_ON, FontControls("look.enemyTarget")), NamesOverHeads())), NAME_CVARS),
 
     Section("level", "Level", "look.level", Join(List(
         { type = "Header", label = "Level", first = true },
@@ -2326,7 +2353,7 @@ ns.sections = {
     AuraPage("auraImportant", "Important auras", "look.auras.important", "important",
         "Shows buffs the game flags as important on enemies.", 24,
         "Show important auras", "Shows icons for buffs the game flags as important on the enemy, except your own. A buff shows here or under Enemy buffs, not both."),
-    Section("target", "Target", TARGET_LOOK, List(
+    WithCVars(Section("target", "Target", TARGET_LOOK, Join(List(
         { type = "Header", label = "Border", first = true },
         { type = "ToggleColor", path = "look.target.ring", colorPath = "look.target.ringColor", label = "Show target border",
           swatchLabel = "Target border color", swatchTooltip = "The color of the border around your target.",
@@ -2384,7 +2411,7 @@ ns.sections = {
         Gate({ type = "Toggle", path = "look.target.pulse", label = "Pulse glow and border",
           tooltip = "Your target's glow and border slowly pulse brighter and dimmer." }, Any(On("look.target.ring"), On("look.target.glow")), "Turn on Show target border or Show target glow to use this.")
 
-    )),
+    ), GameExtras("soft"))), SOFT_CVARS),
 
     Section("focus", "Focus", "look.focus", List(
         { type = "Header", label = "Border", first = true },
@@ -2640,6 +2667,8 @@ ns.sections = {
         GateList(On("look.classPower.enabled"), "Turn on Show class resource on target to use this.", Placement("look.classPower"))
     )),
 
+    Page("personal", "Personal resource display", {}, PERSONAL_CVARS, GameExtras("personal")),
+
     Section("classification", "Elite icon", "look.classification", Join(List(
         { type = "Header", label = "Elite, rare and boss icon", first = true },
         { type = "Toggle", path = "look.classification.enabled", label = "Show elite icon",
@@ -2783,7 +2812,7 @@ ns.sections = {
             { type = "Header", label = "What a profile includes", collapsible = true, collapsed = true, keywords = "scope saved shared game settings spell lists automatic rules export" },
             { type = "Note", label = "In a profile: every Plateau setting on the Nameplates, Behavior, States, Auras, Icons and Friendly pages. Blizzard's own settings, which some of those pages also show, are not part of a profile.", height = 32 },
             { type = "Note", label = "Aura spell lists (Hidden spells and Allowed spells) are saved in the profile and per specialization, so a different profile or specialization shows a different set.", height = 32 },
-            { type = "Note", label = "Not in a profile: your default profile and the automatic switching rules (saved per character), the Blizzard nameplate settings on Game settings (saved once for your account and shared by every profile and character), Plateau settings (the gear button), and boss phase lines (saved for your account). Export and import carry the look, the aura spell lists and your boss phase lines; importing adds those boss lines to yours.", height = 58 }
+            { type = "Note", label = "Not in a profile: your default profile and the automatic switching rules (saved per character), Blizzard's nameplate settings (saved once for your account and shared by every profile and character), Plateau settings (the gear button), and boss phase lines (saved for your account). Export and import carry the look, the aura spell lists and your boss phase lines; importing adds those boss lines to yours.", height = 58 }
         ),
     },
 }

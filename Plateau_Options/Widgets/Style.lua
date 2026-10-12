@@ -707,6 +707,9 @@ function Style.Tooltip(owner, spec)
         GameTooltip:SetText(T(spec.label) or "", accent[1], accent[2], accent[3])
         if explain then
             GameTooltip:AddLine(T(spec.tooltip), 1, 1, 1, true)
+            if spec.gameSetting then
+                GameTooltip:AddLine(T("Game setting: also changes Blizzard's Options."), 0.6, 0.6, 0.6, true)
+            end
         end
         if spec.limited then
             local warn = Style.colors.warn

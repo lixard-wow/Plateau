@@ -112,7 +112,7 @@ Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Esca
 - **Preview follows your settings.** Whatever you turn on shows on the sample. A **Preview** button next to Reset this section picks the sample's cast (Cast bar page), enemy type and threat (Health bar colors page), threat (Threat page) or badge (Elite icon page); it only changes the preview.
 - **Undo and redo.** Every change is remembered and named ("Moved Raid target icon", "Look: Clean and flat"). Open the list to step back several at once.
 - **Search.** Finds any setting by name or by words in its description and scrolls it to the top. On the Help page it searches only the help topics.
-- **Pages.** One page per part of the nameplate, plus Looks at the top and Game settings and Help at the bottom.
+- **Pages.** One page per part of the nameplate, plus Looks at the top and Help at the bottom. Blizzard's own nameplate settings sit on the page they belong to.
 - **Apply to all plates.** Copies every setting and position on the current page from the type you are editing to all plates.
 - **Reset.** Right-click a setting to reset it, use **Reset this section**, or **Reset profile** on the Profiles page to reset the active profile.
 - **Help.** A page of 44 topics covering every page and the common how-tos.

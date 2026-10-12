@@ -9,7 +9,7 @@ function CreateColor(r, g, b, a) return { r = r, g = g, b = b, a = a } end
 GameTooltip = { SetOwner = function() end, SetText = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
 local stub = setmetatable({}, { __index = function() return function() return stub end end })
 function CreateFrame() return stub end
-Enum = setmetatable({ NamePlateStackType = { Enemy = 1, Friendly = 2 } }, { __index = function() return {} end })
+Enum = setmetatable({ NamePlateStackType = { Enemy = 1, Friendly = 2 }, NamePlateSimplifiedType = { None = 0, Minion = 1, MinusMob = 2, FriendlyPlayer = 3, FriendlyNpc = 4 } }, { __index = function() return {} end })
 C_CVar = setmetatable({}, { __index = function() return function() return "0" end end })
 C_Timer = { After = function() end }
 C_Spell = setmetatable({}, { __index = function() return function() end end })
@@ -61,13 +61,12 @@ end
 
 local groups = {
     { label = "Profile", keys = { "profiles" } },
-    { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces" } },
-    { label = "Behavior", keys = { "size", "fading", "layering", "clicking" } },
+    { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces", "personal" } },
+    { label = "Behavior", keys = { "showing", "size", "fading", "layering", "clicking" } },
     { label = "States", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
     { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction" } },
     { label = "Friendly", keys = { "friendly" } },
-    { label = "Game", keys = { "game" } },
     { label = "Help", keys = { "help" } },
 }
 local problems = Logic.RailProblems(groups, sections)
@@ -156,14 +155,14 @@ for key, section in pairs(byKey) do
     end
 end
 
-local game = byKey.game
-local gameGroups = Logic.AssignGroups(game.controls)
-local advanced = { "Off-screen nameplates", "Blizzard-drawn nameplates" }
-for _, label in ipairs(advanced) do
-    local index, spec = Logic.FindControl(game, label, true)
-    check(index ~= nil and spec.collapsible == true and spec.collapsed == true, label .. " is a collapsed advanced section on Game settings")
+check(byKey.game == nil, "the separate Game settings page is gone")
+local advanced = { { "Off-screen nameplates", "layering" }, { "Blizzard-drawn nameplates", "friendly" } }
+for _, entry in ipairs(advanced) do
+    local label, key = entry[1], entry[2]
+    local index, spec = Logic.FindControl(byKey[key], label, true)
+    check(index ~= nil and spec.collapsible == true and spec.collapsed == true, label .. " is a collapsed advanced section on " .. key)
     local count = 0
-    for _, g in pairs(gameGroups) do
+    for _, g in pairs(Logic.AssignGroups(byKey[key].controls)) do
         if g == index then count = count + 1 end
     end
     check(count > 0, label .. " contains controls")
@@ -175,12 +174,9 @@ local function labelsOf(section)
     end
     return set
 end
-local gameLabels = labelsOf(game)
 local addonLabels = labelsOf(byKey.addon)
-check(not gameLabels["Show settings tooltips"] and not gameLabels["Settings window theme"], "Plateau preferences left Game settings")
 check(addonLabels["Settings window theme"] and addonLabels["Settings window scale"] and addonLabels["Text font"] and addonLabels["Heading font"] and addonLabels["Show settings tooltips"] and addonLabels["Show Plateau in game menu"], "the gear page holds theme, scale, fonts and the other preferences")
 check(Logic.OFF_MENU.addon == true, "the gear page stays off the sidebar")
-check(not gameLabels["Refresh statistics"] and not hasHeader(game, "Performance"), "performance controls left Game settings")
 local diagIndex, diagSpec = Logic.FindKeyed(byKey.help, "diagnostics")
 check(diagIndex ~= nil and diagSpec.collapsible == true and diagSpec.searchable == true, "Help has a collapsible, searchable Diagnostics section")
 
@@ -308,7 +304,26 @@ check(foundOn("hostile", "healthColors") and foundOn("mob", "size"), "hostile an
 check(foundOn("aggro", "threatText") and foundOn("hp", "healthText"), "aggro finds Threat and hp finds Health text")
 check(foundOn("ally", "friendly") and foundOn("totem", "friendly"), "ally and totem find Friendly settings")
 check(foundOn("cc", "auraCC") and foundOn("combo points", "classPower"), "player shorthand finds crowd control and class resource")
-check(foundOn("prd", "game") and foundOn("line of sight", "fading"), "prd and line of sight find their settings")
+check(foundOn("prd", "personal") and foundOn("line of sight", "fading"), "prd and line of sight find their settings")
+check(labelsOf(byKey.name)["Show your name"] and labelsOf(byKey.name)["NPC names"] and labelsOf(byKey.name)["Show enemy minion names"], "names over heads are on the Name page")
+check(labelsOf(byKey.showing)["Always show nameplates"] and labelsOf(byKey.showing)["Enemy minions"] and labelsOf(byKey.showing)["Maximum nameplate distance"], "which nameplates show has its own page")
+check(labelsOf(byKey.personal)["Personal resource display"] and labelsOf(byKey.personal)["Plateau style"], "the personal resource display has its own page")
+check(labelsOf(byKey.target)["Soft target icon: enemies"] ~= nil or C_CVar.GetCVar("SoftTargetIconEnemy") == nil, "soft target icons are on the Target page")
+check(labelsOf(byKey.layering)["Keep enemies in combat on screen"] and labelsOf(byKey.layering)["Pin off-screen nameplates"], "off-screen nameplates are on Layering and stacking")
+local friendlyLabels = labelsOf(byKey.friendly)
+check(friendlyLabels["Simplify minions"] and friendlyLabels["Simplify minor enemies"] and friendlyLabels["Simplify friendly players"] and friendlyLabels["Simplify friendly NPCs"], "all four simplify options sit together on Friendly")
+local simplifyCount = 0
+for _, section in ipairs(sections) do
+    for _, spec in ipairs(section.controls) do
+        if spec.label == "Simplify minions" then simplifyCount = simplifyCount + 1 end
+    end
+end
+check(simplifyCount == 1, "each simplify option is listed once")
+local gameTagged = 0
+for _, spec in ipairs(byKey.showing.controls) do
+    if spec.gameSetting then gameTagged = gameTagged + 1 end
+end
+check(gameTagged >= 2, "Blizzard settings are tagged as game settings")
 
 local helpTopics = nsOpt.helpTopics
 check(#helpTopics >= 40, "Help topics are loaded for the Help search")
@@ -346,13 +361,12 @@ check(not hasPath("target", "look.target.dimOthers"), "non-target opacity left t
 check(not groupCovers(byKey.target, "look.target.dimOthers") and not groupCovers(byKey.target, "look.target.scale"), "resetting Target no longer resets settings that moved to Fading and Size")
 check(groupCovers(byKey.fading, "look.target.dimOthers") and groupCovers(byKey.size, "look.target.scale"), "resetting Fading and Size covers the settings they now hold")
 check(not groupCovers(byKey.size, "look.scaling.castFront") and groupCovers(byKey.layering, "look.scaling.castFront"), "resetting Size does not touch Casting enemies in front")
-check(hasHeader(game, "Blizzard-drawn nameplates") and not hasHeader(byKey.friendly, "Blizzard-drawn nameplates") and hasHeader(byKey.friendly, "Blizzard's friendly nameplates"), "Blizzard-drawn enemy settings are on Game settings and the friendly ones on Friendly")
-check(not hasHeader(game, "Other nameplate addons") and hasHeader(byKey.addon, "Other nameplate addons"), "the addon conflict list is on Plateau settings")
+check(hasHeader(byKey.friendly, "Blizzard-drawn nameplates") and hasHeader(byKey.friendly, "Blizzard's friendly nameplates"), "all Blizzard-drawn nameplate settings are on Friendly")
+check(hasHeader(byKey.addon, "Other nameplate addons"), "the addon conflict list is on Plateau settings")
 for _, path in ipairs({ "look.friendly.raidMarker.own", "look.friendly.raidMarker.position", "look.scaling.friendlyScale" }) do
     check(hasPath("friendly", path) and groupCovers(byKey.friendly, path), path .. " is on Friendly and reset with it")
 end
 check(not hasPath("raidMarker", "look.friendly.raidMarker.own") and not hasPath("size", "look.scaling.friendlyScale"), "friendly raid icon placement and scale left Raid target icon and Size")
-check(not hasHeader(game, "Stacking and movement") and not hasHeader(game, "Occlusion"), "stacking and fading left Game settings")
 check(foundOn("casting enemies in front", "layering") and foundOn("priority", "layering") and foundOn("range fading", "fading") and foundOn("enemy type scale", "size"), "the moved sections are searchable on their new pages")
 
 local function ranked(query)

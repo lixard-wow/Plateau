@@ -35,7 +35,7 @@ local STEPS = {
         target = "menu",
         place = "right",
         title = "The pages",
-        text = "Each page holds one part of the nameplate. A dot beside a page means it differs from the default. Blizzard's own nameplate settings are on Game settings.",
+        text = "Each page holds one part of the nameplate. A dot beside a page means it differs from the default. Blizzard's own nameplate settings sit on the page they belong to.",
     },
     {
         target = "search",
