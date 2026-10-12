@@ -38,7 +38,7 @@ read_globals = {
     "GetRuneCooldown", "GetSpecialization", "GetSpecializationInfo", "GetSpecializationRole",
     "GetSpellCooldown", "GetSpellInfo", "GetTime", "GetVersatilityBonus", "HideUIPanel", "INTERRUPTED",
     "InCombatLockdown", "InterfaceOptionsFrame_OpenToCategory", "InterfaceOptions_AddCategory", "IsInGroup",
-    "IsInInstance", "IsInRaid", "IsMouseButtonDown", "IsShiftKeyDown", "LibDeflate", "LibStub",
+    "IsControlKeyDown", "IsInInstance", "IsInRaid", "IsMouseButtonDown", "IsShiftKeyDown", "LibDeflate", "LibStub",
     "MenuResponse", "MenuUtil", "Mixin", "NPC_NAMES_DROPDOWN_ALL", "NPC_NAMES_DROPDOWN_HOSTILE",
     "NPC_NAMES_DROPDOWN_INTERACTIVE", "NPC_NAMES_DROPDOWN_NONE", "NPC_NAMES_DROPDOWN_TRACKED",
     "NUM_BAG_SLOTS", "NamePlateConstants", "NamePlateFriendlyFrameOptions", "PixelUtil", "PlateauConflicts",

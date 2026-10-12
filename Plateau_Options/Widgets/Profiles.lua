@@ -699,11 +699,40 @@ function ns.Widgets.ShareProfile(parent)
     local exportLabel = Style.Text(frame, 12, C.muted)
     exportLabel:SetText("Profile export string")
     local exportHelp = Style.Text(frame, 11, C.muted)
-    exportHelp:SetText("Click the box, press Ctrl+A, then Ctrl+C to copy.")
+    exportHelp:SetText("Click the box, press Ctrl+A, then Ctrl+C to copy. The box clears once it's copied.")
     exportHelp:SetWordWrap(true)
+    local exportCopied = Style.Text(frame, 11, C.muted)
+    exportCopied:SetText("Copied. Paste it with Ctrl+V.")
+    local copied = false
+
+    local function ClearExport()
+        exported = false
+        exportEdit:SetText("")
+        exportEdit:ClearFocus()
+        frame:Layout()
+        if ns.RefreshAll then
+            ns.RefreshAll()
+        end
+    end
+    exportEdit:SetScript("OnKeyDown", function(_, key)
+        if key == "C" and IsControlKeyDown() and exported then
+            copied = true
+            C_Timer.After(0, ClearExport)
+        end
+    end)
+    frame:SetScript("OnHide", function()
+        copied = false
+        if exported then
+            exported = false
+            exportEdit:SetText("")
+            frame:Layout()
+        end
+    end)
+
     local export = ns.Widgets.Button(frame, "Export active profile", SHARE_BUTTON, function()
         exportEdit:SetText(Plateau.DB:ExportProfile())
         exported = true
+        copied = false
         frame:Layout()
         if ns.RefreshAll then
             ns.RefreshAll()
@@ -791,6 +820,9 @@ function ns.Widgets.ShareProfile(parent)
         y = y + 22
         export:ClearAllPoints()
         export:SetPoint("TOPLEFT", 0, -y)
+        exportCopied:ClearAllPoints()
+        exportCopied:SetPoint("LEFT", export, "RIGHT", 12, 0)
+        exportCopied:SetShown(copied and not exported)
         y = y + 30
         exportLabel:SetShown(exported)
         exportBox:SetShown(exported)

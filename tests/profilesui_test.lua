@@ -170,3 +170,34 @@ check(pcall(auto.Refresh, auto), "the automatic switching block refreshes")
 
 local share = nsOpt.Widgets.ShareProfile(newStub())
 check(pcall(share.Refresh, share), "the share block refreshes")
+local shareEdits, shareButtons = {}, {}
+for _, f in ipairs(created) do
+    if f.scripts and f.scripts.OnKeyDown then shareEdits[#shareEdits + 1] = f end
+    if f.scripts and f.scripts.OnClick then shareButtons[#shareButtons + 1] = f end
+end
+local exportBox = shareEdits[#shareEdits]
+local exportButton
+for _, b in ipairs(shareButtons) do
+    if rawget(b, "label") and rawget(b.label, "text") == "Export active profile" then exportButton = b end
+end
+if exportButton and exportBox then
+    exportButton.scripts.OnClick(exportButton)
+    check(exportBox:GetText():sub(1, 5) == "!SL1!", "export fills the box")
+    local pending = {}
+    local oldAfter = C_Timer.After
+    C_Timer.After = function(_, fn) pending[#pending + 1] = fn end
+    IsControlKeyDown = function() return false end
+    exportBox.scripts.OnKeyDown(exportBox, "C")
+    check(#pending == 0 and exportBox:GetText() ~= "", "pressing C alone keeps the string")
+    IsControlKeyDown = function() return true end
+    exportBox.scripts.OnKeyDown(exportBox, "C")
+    check(exportBox:GetText() ~= "", "the string stays until the copy finishes")
+    for _, fn in ipairs(pending) do fn() end
+    check(exportBox:GetText() == "", "the export string clears after Ctrl+C")
+    C_Timer.After = oldAfter
+    exportButton.scripts.OnClick(exportButton)
+    share.scripts.OnHide(share)
+    check(exportBox:GetText() == "", "leaving the page clears the export string")
+else
+    check(false, "found the export box and button")
+end
