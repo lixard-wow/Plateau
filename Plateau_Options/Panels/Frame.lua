@@ -512,7 +512,7 @@ footerLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
 local closeButton = Widgets.Button(frame, "Close", 100, function() frame:Hide() end)
 closeButton:SetPoint("BOTTOMRIGHT", -PAD, 11)
 
-local Select, UpdateChrome, RevealRail
+local Select, UpdateChrome, RevealRail, OpenRailFor
 local profileButton = CreateFrame("Frame", nil, frame)
 profileButton:SetSize(250, 22)
 profileButton:SetPoint("BOTTOMLEFT", RAIL + PAD, 11)
@@ -765,6 +765,9 @@ function Select(section)
     scroll:SetVerticalScroll(0)
     page:Show()
     RefreshPage(page)
+    if OpenRailFor then
+        OpenRailFor(section.key)
+    end
     if railButtons[section.key] then
         railButtons[section.key]:SetSelected(true)
         RevealRail(railButtons[section.key])
@@ -799,7 +802,7 @@ local RAIL_GROUPS = {
     { label = "Help", keys = { "help" } },
 }
 local RAIL_ROW = 21
-local RAIL_HEADER = 20
+local RAIL_HEADER = 28
 
 local railScroll = CreateFrame("ScrollFrame", nil, rail)
 railScroll:SetPoint("TOPLEFT", 0, -(RAIL_TOP + 1))
@@ -837,13 +840,10 @@ for _, section in ipairs(ns.sections) do
     sectionsByKey[section.key] = section
 end
 
-local function RailButton(section, y)
+local function RailButton(section)
     local tint = Style.StateColor()
     local button = CreateFrame("Button", nil, railContent)
     button:SetHeight(RAIL_ROW)
-    button:SetPoint("TOPLEFT", 0, -y)
-    button:SetPoint("TOPRIGHT", 0, -y)
-    button.y = y
 
     local hover = Style.Fill(button, C.hover)
     hover:Hide()
@@ -871,6 +871,7 @@ local function RailButton(section, y)
     button:SetScript("OnLeave", function(self) hover:SetShown(self.selected) end)
     button:SetScript("OnClick", function() Select(section) end)
     railButtons[section.key] = button
+    return button
 end
 
 ns.railGroups = RAIL_GROUPS
@@ -949,31 +950,105 @@ function ns.UpdatePickButtons(section)
     end
 end
 
-local railHeaders = {}
-local railY = PAD / 2
+local railGroups = {}
+local railLoose = {}
+local groupOf = {}
+local openGroup
+
+local function PlaceRailRow(row, y)
+    row:ClearAllPoints()
+    row:SetPoint("TOPLEFT", 0, -y)
+    row:SetPoint("TOPRIGHT", 0, -y)
+    row.y = y
+end
+
+local function LayoutRail()
+    local y = PAD / 2
+    for _, group in ipairs(railGroups) do
+        PlaceRailRow(group.header, y)
+        y = y + RAIL_HEADER
+        local open = openGroup == group
+        group.header.arrow:SetRotation(open and 0 or math.pi / 2)
+        for _, button in ipairs(group.buttons) do
+            button:SetShown(open)
+            if open then
+                PlaceRailRow(button, y)
+                y = y + RAIL_ROW
+            end
+        end
+    end
+    for _, button in ipairs(railLoose) do
+        PlaceRailRow(button, y)
+        y = y + RAIL_ROW
+    end
+    railContent:SetHeight(y + PAD / 2)
+    UpdateRailThumb()
+end
+
+local function RailHeader(group)
+    local header = CreateFrame("Button", nil, railContent)
+    header:SetHeight(RAIL_HEADER)
+    local hover = Style.Fill(header, C.hover)
+    hover:Hide()
+    local tint = Style.StateColor()
+    local label = Style.Text(header, 11, tint)
+    label:SetPoint("LEFT", PAD - 4, 0)
+    label:SetText(T(group.label):upper())
+    local arrow = header:CreateTexture(nil, "OVERLAY")
+    arrow:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\Icons\\icon_chevron_down")
+    arrow:SetSize(10, 10)
+    arrow:SetPoint("RIGHT", -12, 0)
+    arrow:SetVertexColor(tint[1], tint[2], tint[3])
+    header.arrow = arrow
+    header:SetScript("OnEnter", function() hover:Show() end)
+    header:SetScript("OnLeave", function() hover:Hide() end)
+    header:SetScript("OnClick", function()
+        if openGroup == group then
+            openGroup = nil
+        else
+            openGroup = group
+            if #group.buttons == 1 then
+                Select(group.buttons[1].section)
+                return
+            end
+        end
+        LayoutRail()
+    end)
+    return header
+end
+
 local placed = {}
-for _, group in ipairs(RAIL_GROUPS) do
-    local header = Style.Text(railContent, 11, Style.StateColor())
-    header:SetPoint("TOPLEFT", PAD - 4, -(railY + 7))
-    railHeaders[#railHeaders + 1] = header
-    header:SetText(T(group.label):upper())
-    railY = railY + RAIL_HEADER
-    for _, key in ipairs(group.keys) do
+for _, entry in ipairs(RAIL_GROUPS) do
+    local group = { label = entry.label, buttons = {} }
+    for _, key in ipairs(entry.keys) do
         local section = sectionsByKey[key]
         if section then
-            RailButton(section, railY)
+            local button = RailButton(section)
+            button.section = section
+            group.buttons[#group.buttons + 1] = button
+            groupOf[key] = group
             placed[key] = true
-            railY = railY + RAIL_ROW
         end
+    end
+    if #group.buttons > 0 then
+        group.header = RailHeader(group)
+        railGroups[#railGroups + 1] = group
     end
 end
 for _, section in ipairs(ns.sections) do
     if not placed[section.key] and not OFF_MENU[section.key] then
-        RailButton(section, railY)
-        railY = railY + RAIL_ROW
+        railLoose[#railLoose + 1] = RailButton(section)
     end
 end
-railContent:SetHeight(railY + PAD / 2)
+
+function OpenRailFor(key)
+    local group = groupOf[key]
+    if group and openGroup ~= group then
+        openGroup = group
+    end
+    LayoutRail()
+end
+LayoutRail()
 local function FitHeight()
     if minimized then return end
     frame:SetHeight(math.min(HEIGHT, (UIParent:GetHeight() - 40) / frame:GetScale()))
