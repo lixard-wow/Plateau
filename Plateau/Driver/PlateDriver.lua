@@ -913,11 +913,24 @@ local function AnchorPlate(plate, base)
     plate:SetPoint("CENTER", base, "CENTER", 0, plateOffsetY)
 end
 
+local function MatchHiderScale(base)
+    local scale = base:GetEffectiveScale()
+    if issecretvalue(scale) or not scale or scale < 0.3 then return end
+    if hider.matched ~= scale then
+        hider.matched = scale
+        hider:SetScale(scale)
+    end
+end
+
 local function AssignBase(plate, base)
     plate:SetParent(base)
     AnchorPlate(plate, base)
     plate.base = base
     ns.Scaling:Attach(plate)
+    MatchHiderScale(base)
+    if ns.RepixelPlate then
+        ns.RepixelPlate(plate)
+    end
     local stackRegion = plate.stackRegion
     stackRegion:SetParent(base)
     if stackRegion.width then
