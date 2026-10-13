@@ -1432,8 +1432,8 @@ local function OffScreen()
           path = "cvar.nameplateTargetRadialPosition",
           gameSetting = true,
           tooltip = "Pins your target, or every enemy you are fighting, around the screen edge while off screen." },
-        CVarSlider("nameplateTopInset", "Top screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the top of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5."),
-        CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the bottom of the screen. 0.10 is 10% of the screen height. Works from patch 12.1.5.")
+        CVarSlider("nameplateTopInset", "Top screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the top of the screen. 0.10 is 10% of the screen height."),
+        CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the bottom of the screen. 0.10 is 10% of the screen height.")
     )
 end
 local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
@@ -1608,7 +1608,7 @@ ns.sections = {
 
         { type = "Header", label = "Movement" },
         InstantMovement(),
-        CVarSlider("nameplateMotionSpeed", "Movement speed", 0, 1, 0.01, "How fast nameplates slide into place when stacking. Requires patch 12.1.5."),
+        CVarSlider("nameplateMotionSpeed", "Movement speed", 0, 1, 0.01, "How fast nameplates slide into place when stacking."),
 
         { type = "Header", label = "Position" },
         BaseSpec({ type = "Slider", path = "look.plate.offsetY", label = "Nameplate vertical offset", min = -60, max = 60,
