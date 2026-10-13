@@ -937,9 +937,11 @@ end)
 
 local function SyncHiderScale()
     local scale = UIParent:GetEffectiveScale()
-    if issecretvalue(scale) or not scale or scale < 0.2 or hider.matched == scale then return end
-    hider.matched = scale
-    hider:SetScale(scale)
+    if issecretvalue(scale) or not scale or scale < 0.2 then return end
+    if hider.matched ~= scale then
+        hider.matched = scale
+        hider:SetScale(scale)
+    end
     if not ns.RepixelPlate then return end
     for _, list in pairs(pools) do
         for i = 1, #list do
@@ -947,8 +949,10 @@ local function SyncHiderScale()
         end
     end
     for _, plate in pairs(platesByBase) do
-        if not plate.active then
-            ns.RepixelPlate(plate)
+        ns.RepixelPlate(plate)
+        if plate.active then
+            settling[plate] = SETTLE_FRAMES
+            settler:Show()
         end
     end
 end
