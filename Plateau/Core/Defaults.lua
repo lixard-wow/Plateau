@@ -150,6 +150,12 @@ ns.defaults = {
             offsetY = 0,
             alpha = 1,
             showProgress = false,
+            progress = {
+                position = "TOPRIGHT",
+                gap = 2,
+                offsetX = 18,
+                offsetY = 0,
+            },
         },
         threatText = {
             enabled = false,

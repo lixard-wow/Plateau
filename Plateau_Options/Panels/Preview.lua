@@ -374,6 +374,8 @@ local function AddHotspots(plate)
         Drag.PositionSpec({ path = "look.classification", region = plate.classification, anchor = AtPlate(plate) }))
     Hotspot(plate, plate.quest, "quest", "Quest icon", 80, 1,
         Drag.PositionSpec({ path = "look.quest", region = plate.quest, anchor = AtPlate(plate) }))
+    Hotspot(plate, plate.questProgress, "quest", "Quest progress", 81, 2,
+        Drag.PositionSpec({ path = "look.quest.progress", text = true, region = plate.questProgress, anchor = AtPlate(plate) })).fitText = true
     Hotspot(plate, plate.enemyPowerBar, "enemyPower", "Enemy power bar", 85, 1, Drag.EnemyPowerSpec(plate))
     Hotspot(plate, plate.classPower, "classPower", "Class resource", 80, 2,
         Drag.PositionSpec({ path = "look.classPower", region = plate.classPower, anchor = AtPlate(plate), noRing = true }))

@@ -30,7 +30,6 @@ function Quest:Create(plate)
     icon:Hide()
     plate.quest = icon
     local text = plate.overlay:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
     text:Hide()
     plate.questProgress = text
 end
@@ -60,6 +59,8 @@ function Quest:Style(plate, db)
     icon:SetAtlas(AtlasValid(db.style) and db.style or "QuestNormal")
     icon:SetSize(db.size, db.size)
     ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+    local place = db.progress
+    ns.PlaceText(plate.questProgress, plate, place.position, place.gap, place.offsetX, place.offsetY)
     ns.ApplyFont(plate.questProgress, STANDARD_TEXT_FONT, math.max(8, math.floor(db.size * 0.55)), "OUTLINE")
 end
 

@@ -2511,11 +2511,25 @@ ns.sections = {
         Gate({ type = "Dropdown", path = "look.quest.style", label = "Icon style", options = QUEST_ICONS,
           tooltip = "The quest icon's artwork." }, On("look.quest.enabled"), "Turn on Show quest icon to use this."),
         Gate({ type = "Slider", path = "look.quest.size", label = "Icon size", min = 8, max = 40,
-          tooltip = "Size of the quest icon." }, On("look.quest.enabled"), "Turn on Show quest icon to use this."),
-        Gate({ type = "Toggle", path = "look.quest.showProgress", label = "Show objective progress",
-          tooltip = "Shows quest progress, like 3/8, beside the icon. May be hidden inside instances." }, On("look.quest.enabled"), "Turn on Show quest icon to use this.")
+          tooltip = "Size of the quest icon." }, On("look.quest.enabled"), "Turn on Show quest icon to use this.")
         ),
         GateList(On("look.quest.enabled"), "Turn on Show quest icon to use this.", Placement("look.quest")),
+        List(
+        { type = "Header", label = "Objective progress" },
+        Gate({ type = "Toggle", path = "look.quest.showProgress", label = "Show objective progress",
+          tooltip = "Shows quest progress, like 3/8, near the quest icon. It has its own position, so you can move it apart from the icon. May be hidden inside instances." },
+          On("look.quest.enabled"), "Turn on Show quest icon to use this.")
+        ),
+        GateList(function() return ns.Get("look.quest.enabled") == true and ns.Get("look.quest.showProgress") == true end,
+            "Turn on Show objective progress to use this.",
+            { type = "Dropdown", path = "look.quest.progress.position", label = "Progress position", options = TEXT_POSITIONS,
+              tooltip = "Where the progress count sits on the nameplate. Drag it in the preview to move it freely." },
+            { type = "Slider", path = "look.quest.progress.gap", label = "Progress distance", min = 0, max = 20,
+              tooltip = "Space between the progress count and the edge of the health bar." },
+            { type = "Slider", path = "look.quest.progress.offsetX", label = "Progress horizontal offset", min = -40, max = 40,
+              tooltip = "Moves the progress count left or right." },
+            { type = "Slider", path = "look.quest.progress.offsetY", label = "Progress vertical offset", min = -40, max = 40,
+              tooltip = "Moves the progress count up or down." }),
         List(
         { type = "Header", label = "Quest enemy color" },
         { type = "ToggleColor", path = "look.colors.quest", colorPath = "look.colors.questColor", label = "Color quest enemies",

@@ -318,6 +318,8 @@ for _, section in ipairs(sections) do
     end
 end
 check(simplifyCount == 1, "each simplify option is listed once")
+local questLabels = labelsOf(byKey.quest)
+check(questLabels["Position"] and questLabels["Progress position"] and questLabels["Progress horizontal offset"], "the quest icon and its progress count each have their own position")
 local gameTagged = 0
 for _, spec in ipairs(byKey.showing.controls) do
     if spec.gameSetting then gameTagged = gameTagged + 1 end
