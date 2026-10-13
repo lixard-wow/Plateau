@@ -1228,6 +1228,18 @@ local AURA_TEXT_POINTS = {
     { value = "BOTTOMRIGHT", label = "Bottom right" },
 }
 
+local function CasterNamesSupported()
+    return C_AuraContainerUtil ~= nil and C_AuraContainerUtil.ProcessCustomAuraButtonCasterNameOptions ~= nil
+end
+
+local AURA_CASTER_POINTS = {
+    { value = "BELOW", label = "Below the icon" },
+    { value = "ABOVE", label = "Above the icon" },
+    { value = "BOTTOM", label = "Bottom of the icon" },
+    { value = "TOP", label = "Top of the icon" },
+    { value = "CENTER", label = "Center" },
+}
+
 local function AuraWhichControls(path, groupKey)
     return List(
         { type = "Header", label = "Which auras" },
@@ -1270,6 +1282,7 @@ local function AuraLayoutControls(path)
 end
 
 local function AuraIconControls(path, withPandemic)
+    local casterOn = function() return CasterNamesSupported() and ns.Get(path .. ".showCaster") == true end
     local controls = List(
         { type = "Header", label = "Icon" },
         { type = "Toggle", path = path .. ".showTimer", label = "Show remaining time",
@@ -1284,6 +1297,17 @@ local function AuraIconControls(path, withPandemic)
           tooltip = "How big the stack count text is." }, On(path .. ".showStacks"), "Turn on Show stack count to use this."),
         Gate({ type = "Dropdown", path = path .. ".stackPosition", label = "Stack count position", options = AURA_TEXT_POINTS,
           tooltip = "Where the stack count sits on each icon." }, On(path .. ".showStacks"), "Turn on Show stack count to use this."),
+        Gate({ type = "Toggle", path = path .. ".showCaster", label = "Show caster name",
+          tooltip = "Shows who cast each aura. The game fills in the name, so it may stay blank where the game hides who cast it. Names wider than the icon are cut short." },
+          CasterNamesSupported, "This version of the game can't show caster names."),
+        Gate({ type = "Slider", path = path .. ".casterSize", label = "Caster name font size", min = 6, max = 16,
+          tooltip = "How big the caster name text is." }, casterOn, "Turn on Show caster name to use this."),
+        Gate({ type = "Dropdown", path = path .. ".casterPosition", label = "Caster name position", options = AURA_CASTER_POINTS,
+          tooltip = "Where the caster name sits, outside or on each icon." }, casterOn, "Turn on Show caster name to use this."),
+        Gate({ type = "Toggle", path = path .. ".casterClassColors", label = "Class-colored caster names",
+          tooltip = "Colors each caster name by the caster's class." }, casterOn, "Turn on Show caster name to use this."),
+        Gate({ type = "Toggle", path = path .. ".casterRealm", label = "Add realm to caster names",
+          tooltip = "Adds the caster's realm after the name, for players from other realms." }, casterOn, "Turn on Show caster name to use this."),
         { type = "Toggle", path = path .. ".swipe", label = "Cooldown swipe",
           tooltip = "Shows a dark sweep over each icon as the aura runs out." },
         { type = "Slider", path = path .. ".borderSize", label = "Icon border thickness", min = 0, max = 3,

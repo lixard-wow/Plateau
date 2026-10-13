@@ -87,6 +87,21 @@ local function PlaceText(text, button, point)
     text:SetPoint(CORNER_OFFSETS[point] and point or "CENTER", button, CORNER_OFFSETS[point] and point or "CENTER", offset[1], offset[2])
 end
 
+local CASTER_OUTSIDE = {
+    BELOW = { "TOP", "BOTTOM", 0, -1 },
+    ABOVE = { "BOTTOM", "TOP", 0, 1 },
+}
+
+local function PlaceCaster(text, button, point)
+    local outside = CASTER_OUTSIDE[point]
+    if outside then
+        text:ClearAllPoints()
+        text:SetPoint(outside[1], button, outside[2], outside[3], outside[4])
+    else
+        PlaceText(text, button, point)
+    end
+end
+
 local SHAPE_HEIGHTS = { square = 1, wide = 0.75, flat = 0.62 }
 
 local function Shape(db)
@@ -133,6 +148,19 @@ local function StyleButton(button, group, container)
     button.dispel:SetAlpha(db.dispelBorder and 1 or 0)
     if button.pandemic then
         button.pandemic:SetAlpha(db.pandemic and 1 or 0)
+    end
+    local caster = button.caster
+    if caster then
+        PlaceCaster(caster, button, db.casterPosition)
+        caster:SetWidth(size + (db.spacing or 0))
+        ns.ApplyFont(caster, config.font, db.casterSize or 8, config.outline)
+        ns.ApplyShadow(caster, config.shadow)
+        button:ClearCasterName()
+        if db.showCaster then
+            button:SetCasterName(caster, { useClassColors = db.casterClassColors ~= false, showRealmName = db.casterRealm == true })
+        else
+            caster:Hide()
+        end
     end
 end
 
@@ -206,6 +234,11 @@ local function Initializer(container, group)
         button.timer:SetPoint("CENTER", 0, 0)
         button.stacks = cooldown:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         button.stacks:SetPoint("BOTTOMRIGHT", 2, -1)
+        if button.SetCasterName then
+            button.caster = cooldown:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            button.caster:SetWordWrap(false)
+            button.caster:Hide()
+        end
 
         local dispel = cooldown:CreateTexture(nil, "OVERLAY", nil, 7)
         dispel:SetPoint("TOPLEFT", button, "TOPLEFT", -1, 1)
@@ -856,6 +889,26 @@ end
 
 local SAMPLE_BORDER = { mine = nil, cc = { 0.8, 0.2, 0.8, 1 }, purge = { 0.2, 0.6, 1, 1 }, important = { 1, 0.8, 0.2, 1 } }
 
+local function CasterNamesSupported()
+    return C_AuraContainerUtil ~= nil and C_AuraContainerUtil.ProcessCustomAuraButtonCasterNameOptions ~= nil
+end
+
+local function CasterSample(db)
+    local name, realm = UnitFullName("player")
+    name = name or UNKNOWNOBJECT
+    if db.casterRealm and realm and realm ~= "" then
+        name = name .. "-" .. realm
+    end
+    if db.casterClassColors ~= false then
+        local _, class = UnitClass("player")
+        local color = class and RAID_CLASS_COLORS[class]
+        if color then
+            name = color:WrapTextInColorCode(name)
+        end
+    end
+    return name
+end
+
 local function FakeGroup(plate, key)
     plate.fakeAuras = plate.fakeAuras or {}
     local fake = plate.fakeAuras[key]
@@ -874,6 +927,8 @@ local function FakeGroup(plate, key)
         icon.timer:SetPoint("CENTER")
         icon.stacks = icon:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         icon.stacks:SetPoint("BOTTOMRIGHT", 2, -1)
+        icon.caster = icon:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        icon.caster:SetWordWrap(false)
         fake.icons[i] = icon
     end
     plate.fakeAuras[key] = fake
@@ -966,6 +1021,14 @@ function Auras:Preview(plate, state)
                     icon.timer:SetShown(db.showTimer)
                     icon.stacks:SetText(i == 2 and "3" or "")
                     icon.stacks:SetShown(db.showStacks)
+                    local showCaster = db.showCaster == true and CasterNamesSupported()
+                    if showCaster then
+                        PlaceCaster(icon.caster, icon, db.casterPosition)
+                        icon.caster:SetWidth(db.size + db.spacing)
+                        ns.ApplyFont(icon.caster, config.font, db.casterSize or 8, config.outline)
+                        icon.caster:SetText(CasterSample(db))
+                    end
+                    icon.caster:SetShown(showCaster)
                     icon:Show()
                 else
                     icon:Hide()
