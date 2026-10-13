@@ -374,12 +374,32 @@ local driver = CreateFrame("Frame")
 driver:Hide()
 driver:SetScript("OnUpdate", OnUpdate)
 
+local function Settle(spec)
+    local mover, points = spec.movedRegion, spec.savedPoints
+    spec.movedRegion, spec.savedPoints = nil, nil
+    if not (mover and points) or mover.slPlaceAnchor ~= nil then return end
+    mover:ClearAllPoints()
+    for _, point in ipairs(points) do
+        mover:SetPoint(point[1], point[2], point[3], point[4], point[5])
+    end
+    mover.slPlaceAnchor, mover.slPlaceKey, mover.slPlaceGap, mover.slPlaceX, mover.slPlaceY =
+        points.anchor, points.key, points.gap, points.x, points.y
+end
+
 function Start(spec)
     local mover = spec.Mover()
     local left, right, top, bottom = mover:GetLeft(), mover:GetRight(), mover:GetTop(), mover:GetBottom()
     if not left then
         pressed = nil
         return
+    end
+    if mover.slPlaceAnchor ~= nil then
+        local points = { anchor = mover.slPlaceAnchor, key = mover.slPlaceKey, gap = mover.slPlaceGap, x = mover.slPlaceX, y = mover.slPlaceY }
+        for i = 1, mover:GetNumPoints() do
+            points[i] = { mover:GetPoint(i) }
+        end
+        spec.movedRegion, spec.savedPoints = mover, points
+        mover.slPlaceAnchor = nil
     end
     if spec.keepSize then
         mover:SetSize(right - left, top - bottom)
@@ -406,12 +426,14 @@ function Stop(spec)
     local candidate, dx, dy = Nearest(AllCandidates(spec))
     if not candidate then
         Apply({})
+        Settle(spec)
         return
     end
     freePlacement = not Snapping()
     local values = candidate.Values(dx, dy)
     freePlacement = false
     Apply(values)
+    Settle(spec)
 end
 
 function Drag.Cancel()
@@ -420,10 +442,12 @@ function Drag.Cancel()
         driver:Hide()
         return
     end
+    local spec = active
     active = nil
     driver:Hide()
     HideDots()
     Apply({})
+    Settle(spec)
 end
 
 local function Nudge(dx, dy)

@@ -38,9 +38,11 @@ function Frame:SetSize(w, h)
     local cx, cy = (self.l + self.r) / 2, (self.t + self.b) / 2
     self.l, self.r, self.t, self.b = cx - w / 2, cx + w / 2, cy + h / 2, cy - h / 2
 end
+function Frame:GetNumPoints() return self.anchor and 1 or 0 end
+function Frame:GetPoint() return self.point, self.anchor, self.anchorPoint, self.anchorX, self.anchorY end
 function Frame:SetPoint(point, rel, relPoint, x, y)
     if type(rel) ~= "table" then return end
-    self.anchor, self.anchorPoint, self.anchorX, self.anchorY = rel, relPoint, x or 0, y or 0
+    self.point, self.anchor, self.anchorPoint, self.anchorX, self.anchorY = point, rel, relPoint, x or 0, y or 0
     local w, h = self:GetWidth(), self:GetHeight()
     local ax, ay = PointOf(rel, relPoint)
     ax, ay = ax + (x or 0), ay + (y or 0)
@@ -309,3 +311,34 @@ check(#dots == 3, "the spell name shows three dots: left, center and right (got 
 plate.castbar.text:Rect(3, 43, -2, -12)
 Drop(spellSpec, spellSpot, 23, -7, 50, -30)
 check(saved and saved["look.castbar.textJustify"] == "CENTER", "dragging it to the middle centers it, even if the mouse drifts off the bar")
+
+db["look.quest.position"] = "TOPRIGHT"
+db["look.quest.gap"] = 2
+db["look.quest.offsetX"] = 0
+db["look.quest.offsetY"] = 0
+local questIcon = NewFrame(plate):Rect(0, 14, 14, 0)
+coreNs.PlaceIcon(questIcon, plate, "TOPRIGHT", 2, 0, 0)
+local homeL, homeT = questIcon.l, questIcon.t
+local questSpot = NewFrame(plate)
+local questSpec = Drag.PositionSpec({ path = "look.quest", region = questIcon, anchor = function() return plate end })
+Drag.Register(questSpot, questSpec)
+local cx, cy = (questIcon.l + questIcon.r) / 2, (questIcon.t + questIcon.b) / 2
+Drag.SetSnapEnabled(false)
+cursorX, cursorY, mouseDown = cx, cy, true
+Drag.Press(questSpec, questSpot)
+cursorX = cx + 10
+Tick()
+Tick()
+cursorX = cx
+Tick()
+mouseDown = false
+Tick()
+Drag.SetSnapEnabled(true)
+check(questIcon.anchor == plate and math.abs(questIcon.l - homeL) < 0.01 and math.abs(questIcon.t - homeT) < 0.01,
+    "an icon dropped back where it was is re-attached to the plate, not left pinned to the screen")
+ns.RefreshAll = function()
+    coreNs.PlaceIcon(questIcon, plate, db["look.quest.position"], db["look.quest.gap"], db["look.quest.offsetX"], db["look.quest.offsetY"])
+end
+Drop(questSpec, questSpot, cx, cy, cx - 60, cy)
+check(questIcon.anchor == plate and questIcon.l < homeL - 30, "an icon dropped somewhere new is drawn there, attached to the plate")
+ns.RefreshAll = nil
