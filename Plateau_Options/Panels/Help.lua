@@ -95,7 +95,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Layering and stacking page",
         keywords = "layering stacking stack overlap order spacing movement slide front",
-        text = "Layering decides which nameplate is in front where nameplates overlap. Casting enemies in front draws a casting enemy over its neighbors, with your target still on top; otherwise nearer nameplates draw over farther ones. Mouseover in front puts the nameplate under your cursor above all others.\n\nStacking holds the stacking switches, the spacing presets and Show stacking boxes, which draws the area the game keeps apart. Stacking bounds and spacing decide how much of each nameplate counts. Movement holds Instant movement and how fast nameplates slide. Position moves nameplates up or down, or to units' feet.",
+        text = "Layering decides which nameplate is in front where nameplates overlap. Casting enemies in front draws a casting enemy over its neighbors, with your target still on top; otherwise nearer nameplates draw over farther ones. Mouseover in front puts the nameplate under your cursor above all others.\n\nStacking holds the stacking switches, the spacing presets and Show stacking boxes, which draws the area the game keeps apart. Stacking bounds and spacing decide how much of each nameplate counts. Movement holds Instant movement and how fast nameplates slide. Position moves nameplates up or down.",
     },
     {
         category = "Pages",

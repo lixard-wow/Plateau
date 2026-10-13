@@ -1612,8 +1612,7 @@ ns.sections = {
 
         { type = "Header", label = "Position" },
         BaseSpec({ type = "Slider", path = "look.plate.offsetY", label = "Nameplate vertical offset", min = -60, max = 60,
-          tooltip = "Moves nameplates up or down from their usual spot. Doesn't change stacking or nameplates the game draws itself." }),
-        CVarToggle("nameplateOtherAtBase", "Position nameplates at feet", "Shows nameplates at units' feet instead of above their heads.")
+          tooltip = "Moves nameplates up or down from their usual spot. Doesn't change stacking or nameplates the game draws itself." })
     ), OffScreen())),
 
     Page("clicking", "Clickable area", CLICK_PATHS, nil, List(

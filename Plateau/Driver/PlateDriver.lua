@@ -1323,7 +1323,8 @@ function Driver:Restyle(reason)
     ns.pixelPerfect = views.enemy.plate.pixelPerfect ~= false
     dimCombatOnly = views.enemy.target.dimCombatOnly == true
     local offsetY = views.enemy.plate.offsetY or 0
-    if offsetY ~= plateOffsetY then
+    local offsetMoved = offsetY ~= plateOffsetY
+    if offsetMoved then
         plateOffsetY = offsetY
         for base, plate in pairs(platesByBase) do
             AnchorPlate(plate, base)
@@ -1337,7 +1338,7 @@ function Driver:Restyle(reason)
     gameFadeEnemy = gameFade ~= "friendly"
     gameFadeFriendly = gameFade ~= "enemy"
     local clickThrough = views.enemy.plate.clickThroughFriendly == true
-    local hitTestChanged = clickThrough ~= clickThroughFriendly
+    local hitTestChanged = clickThrough ~= clickThroughFriendly or offsetMoved
     clickThroughFriendly = clickThrough
     local types = Enum.NamePlateSimplifiedType
     local hasSimplified = types ~= nil and C_CVar.GetCVar(SIMPLIFIED_CVAR) ~= nil
