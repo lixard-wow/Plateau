@@ -1869,7 +1869,7 @@ ns.sections = {
         FriendlyGate({ type = "Toggle", path = "look.friendly.nameOnly", label = "Show names only",
           tooltip = "Hides the health bar on friendly nameplates and shows only the name. In dungeons and raids, use Only show friendly player names." }),
         NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.nameOffsetY", limited = Style.limited.friendly, label = "Name vertical offset", min = -60, max = 60,
-          tooltip = "Moves the name up or down." })),
+          tooltip = "Moves the name up or down. The clickable area moves with it." })),
         NameOnlyGate(FriendlyGate({ type = "Slider", path = "look.friendly.subtitleSize", label = "Guild and title text size", min = 6, max = 16,
           tooltip = "The font size of guild names and NPC titles." })),
         { type = "Note", label = "In dungeons, raids and arenas the game draws friendly nameplates itself. Blizzard's friendly nameplates, at the bottom of this page, control those.", height = 32 },

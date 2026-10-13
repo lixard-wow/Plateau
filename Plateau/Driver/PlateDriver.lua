@@ -294,6 +294,9 @@ local function StylePlate(plate)
     SizePlate(plate, look)
     local click, size = plate.clickArea, views.enemy.plate
     local shift = size.clickOffsetY or 0
+    if plate.nameOnly then
+        shift = shift + (views.enemy.friendly.nameOffsetY or 0)
+    end
     local cast = look.castbar
     local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
     local extra = size.clickCastBar and (castHeight + cast.gap + cast.borderSize * 2) or 0
