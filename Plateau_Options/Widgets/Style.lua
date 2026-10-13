@@ -68,7 +68,7 @@ Style.THEMES = {
         headerFill = true,
         uppercaseTitle = true,
         stripe = true,
-        settingsIcon = "icon_sliders",
+        settingsIcon = "icon_gear",
         groups = { look = Hex("#4fbf8f"), casts = Hex("#a98cf0"), highlights = Hex("#e0a03a"), setup = Hex("#6fa8e8") },
     },
     ledger = {

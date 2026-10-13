@@ -6,6 +6,11 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-13 gear settings button
+
+#### Changed
+- **The settings button is a gear on every theme.** Workbench used to show a sliders icon.
+
 ### 2026-10-10 nameplates ready before the pull
 
 #### Changed
