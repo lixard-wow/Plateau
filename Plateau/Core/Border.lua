@@ -228,6 +228,23 @@ function ns.SnapPlateSize(plate)
     end
 end
 
+local function RoundTree(frame, enabled)
+    frame:SetRoundLayoutToNearestPixel(enabled)
+    for _, region in ipairs({ frame:GetRegions() }) do
+        region:SetRoundLayoutToNearestPixel(enabled)
+    end
+    for _, child in ipairs({ frame:GetChildren() }) do
+        if not child:IsForbidden() and child:GetObjectType() ~= "AuraContainer" then
+            RoundTree(child, enabled)
+        end
+    end
+end
+
+function ns.RoundLayout(frame)
+    if not frame.SetRoundLayoutToNearestPixel or frame.preview then return end
+    RoundTree(frame, ns.pixelPerfect == true)
+end
+
 function ns.RepixelPlate(plate)
     local set = plate.pixelSet
     if not set or not ns.pixelPerfect then return end

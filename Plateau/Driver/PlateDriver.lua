@@ -861,6 +861,7 @@ local function RunBuild(job, deadline)
     plate.timing = true
     StylePlate(plate)
     plate.timing = nil
+    ns.RoundLayout(plate)
     return true
 end
 
@@ -1035,6 +1036,7 @@ poolWarmer:SetScript("OnUpdate", function(self)
         stale[plate] = nil
         if not plate.active and plate.styleVersion ~= styleVersion then
             StylePlate(plate)
+            ns.RoundLayout(plate)
         end
         if debugprofilestop() > started + BUILD_BUDGET_MS then
             return
@@ -1385,6 +1387,7 @@ function Driver:Restyle(reason)
     for _, plate in pairs(platesByUnit) do
         if plate.active then
             StylePlate(plate)
+            ns.RoundLayout(plate)
         end
     end
     for _, plate in pairs(platesByBase) do

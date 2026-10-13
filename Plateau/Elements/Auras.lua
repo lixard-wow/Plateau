@@ -232,6 +232,7 @@ local function Initializer(container, group)
         if configs[container.state] then
             StyleButton(button, group, container)
         end
+        ns.RoundLayout(button)
     end
 end
 
@@ -584,6 +585,9 @@ local function StyleSet(set, state, db)
             if container.added[index] then
                 container:SetAuraGroupLayout(key, { elementSpacing = groupDb.spacing, lineSpacing = groupDb.spacing })
                 container:SetAuraGroupMaxFrameCount(key, count)
+                if container.SetAuraGroupEnabled then
+                    container:SetAuraGroupEnabled(key, count > 0)
+                end
             end
         end
         if added then
