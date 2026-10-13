@@ -695,7 +695,7 @@ local function BlizzardDrawn(friendly)
 
     if not friendly then
         Add({ type = "Header", label = "Blizzard-drawn nameplates", collapsible = true, collapsed = true })
-        Add({ type = "Note", label = "These only change enemy nameplates the game draws itself, for units Plateau doesn't style.", height = 24 })
+        Add({ type = "Note", label = "These change enemy nameplates the game draws itself, for units Plateau doesn't style, unless a setting says otherwise.", height = 24 })
         if C_CVar.GetCVar("nameplateStyle") and Enum.NamePlateStyle then
             local style = Enum.NamePlateStyle
             local options = {
@@ -760,7 +760,7 @@ local function BlizzardDrawn(friendly)
     end
     Bits("nameplateSimplifiedTypes", Enum.NamePlateSimplifiedType, {
         { "Minion", "Simplify minions", "Draws pets, guardians and totems as small simplified nameplates.", friendly = true },
-        { "MinusMob", "Simplify minor enemies", "Draws minor enemies as small simplified nameplates.", friendly = true },
+        { "MinusMob", "Simplify minor enemies", "Draws minor enemies as small simplified nameplates. The game shrinks the whole nameplate, so Plateau's bars for these mobs get smaller too." },
         { "FriendlyPlayer", "Simplify friendly players", "Draws friendly players as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", friendly = true },
         { "FriendlyNpc", "Simplify friendly NPCs", "Draws friendly NPCs as small nameplates without name, health text or auras. Your target keeps its name. Also applies to Plateau's nameplates.", friendly = true },
     })
