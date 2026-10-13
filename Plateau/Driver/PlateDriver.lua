@@ -512,12 +512,28 @@ local function OverOwnFrames(plate)
     return false
 end
 
+local HOVER_GRACE = 0.25
+local hoverLostAt
+
 local function SetMouseover(plate)
-    if plate == mouseoverPlate then return end
-    if not plate and mouseoverPlate and mouseoverPlate.active and OverOwnFrames(mouseoverPlate) then
-        mouseWatcher:Show()
-        return
+    if plate then
+        hoverLostAt = nil
     end
+    if plate == mouseoverPlate then return end
+    if not plate and mouseoverPlate and mouseoverPlate.active then
+        if OverOwnFrames(mouseoverPlate) then
+            hoverLostAt = nil
+            mouseWatcher:Show()
+            return
+        end
+        local now = GetTime()
+        hoverLostAt = hoverLostAt or now
+        if now - hoverLostAt < HOVER_GRACE then
+            mouseWatcher:Show()
+            return
+        end
+    end
+    hoverLostAt = nil
     if mouseoverPlate then
         NotifyMouseover(mouseoverPlate, false)
     end
@@ -531,7 +547,7 @@ end
 local sinceCheck = 0
 mouseWatcher:SetScript("OnUpdate", function(_, elapsed)
     sinceCheck = sinceCheck + elapsed
-    if sinceCheck < 0.1 then return end
+    if sinceCheck < 0.1 and not hoverLostAt then return end
     sinceCheck = 0
     SetMouseover(FindPlate("mouseover"))
 end)

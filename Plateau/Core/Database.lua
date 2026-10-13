@@ -571,7 +571,7 @@ local function Migrate(db)
     end
     db.version = SCHEMA_VERSION
     if type(db.global) == "table" then
-        db.global.skinPersonal, db.global.cvarLog = nil, nil
+        db.global.skinPersonal, db.global.cvarLog, db.global.hoverLog = nil, nil, nil
     end
     return failures
 end
