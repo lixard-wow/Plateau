@@ -913,23 +913,61 @@ local function AnchorPlate(plate, base)
     plate:SetPoint("CENTER", base, "CENTER", 0, plateOffsetY)
 end
 
-local function MatchHiderScale(base)
-    local scale = base:GetEffectiveScale()
-    if issecretvalue(scale) or not scale or scale < 0.3 then return end
-    if hider.matched ~= scale then
-        hider.matched = scale
-        hider:SetScale(scale)
+local SETTLE_FRAMES = 5
+local settling = {}
+local settler = CreateFrame("Frame")
+settler:Hide()
+settler:SetScript("OnUpdate", function(self)
+    local any = false
+    for plate, frames in pairs(settling) do
+        if plate.active then
+            ns.RepixelPlate(plate)
+        end
+        if frames <= 1 or not plate.active then
+            settling[plate] = nil
+        else
+            settling[plate] = frames - 1
+            any = true
+        end
+    end
+    if not any then
+        self:Hide()
+    end
+end)
+
+local function SyncHiderScale()
+    local scale = UIParent:GetEffectiveScale()
+    if issecretvalue(scale) or not scale or scale < 0.2 or hider.matched == scale then return end
+    hider.matched = scale
+    hider:SetScale(scale)
+    if not ns.RepixelPlate then return end
+    for _, list in pairs(pools) do
+        for i = 1, #list do
+            ns.RepixelPlate(list[i])
+        end
+    end
+    for _, plate in pairs(platesByBase) do
+        if not plate.active then
+            ns.RepixelPlate(plate)
+        end
     end
 end
+SyncHiderScale()
+local scaleWatcher = CreateFrame("Frame")
+scaleWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+scaleWatcher:RegisterEvent("UI_SCALE_CHANGED")
+scaleWatcher:RegisterEvent("DISPLAY_SIZE_CHANGED")
+scaleWatcher:SetScript("OnEvent", SyncHiderScale)
 
 local function AssignBase(plate, base)
     plate:SetParent(base)
     AnchorPlate(plate, base)
     plate.base = base
     ns.Scaling:Attach(plate)
-    MatchHiderScale(base)
-    if ns.RepixelPlate then
+    if ns.RepixelPlate and not plate.preview then
         ns.RepixelPlate(plate)
+        settling[plate] = SETTLE_FRAMES
+        settler:Show()
     end
     local stackRegion = plate.stackRegion
     stackRegion:SetParent(base)
