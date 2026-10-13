@@ -142,7 +142,7 @@ ns.defaults = {
         },
         quest = {
             enabled = true,
-            style = ns.flavor == "forever" and "QuestNormal" or "UI-QuestPoiCampaign-QuestBang",
+            style = ns.flavor == "forever" and "QuestNormal" or "Quest-Campaign-Available",
             size = 14,
             position = "TOPRIGHT",
             gap = 2,

@@ -395,35 +395,24 @@ local ENEMY_POWER_POSITIONS = {
     { value = "below", label = "Below health bar" },
 }
 
-local QUEST_ICONS = {
+local QUEST_ICONS = {}
+
+local QUEST_ICON_CHOICES = {
+    { value = "Quest-Campaign-Available", label = "Campaign quest" },
+    { value = "importantavailablequesticon", label = "Important quest" },
     { value = "QuestNormal", label = "Yellow exclamation mark" },
+    { value = "Quest-DailyCampaign-Available", label = "Daily campaign quest" },
+    { value = "UI-QuestPoiLegendary-QuestBang", label = "Legendary quest" },
+    { value = "UI-QuestPoiRecurring-QuestBang", label = "Repeatable quest" },
+    { value = "quest-wrapper-available", label = "Meta quest" },
+    { value = "Quest-In-Progress-Icon-yellow", label = "Quest in progress" },
     { value = "QuestObjective", label = "Quest objective" },
+    { value = "questlog-questtypeicon-quest", label = "Quest log icon" },
+    { value = "UI-QuestIcon-TurnIn-Normal", label = "Quest turn-in" },
+    { value = "worldquest-questmarker-questbang", label = "World quest" },
 }
 
-if Plateau.flavor ~= "forever" then
-    table.insert(QUEST_ICONS, 1, { value = "UI-QuestPoiCampaign-QuestBang", label = "Campaign quest" })
-    table.insert(QUEST_ICONS, 2, { value = "UI-QuestPoiImportant-QuestBang", label = "Important quest" })
-    table.insert(QUEST_ICONS, 3, { value = "UI-QuestPoiLegendary-QuestBang", label = "Legendary quest" })
-    table.insert(QUEST_ICONS, 4, { value = "UI-QuestPoiRecurring-QuestBang", label = "Repeatable quest" })
-end
-
-local MORE_QUEST_ICONS = {
-    { value = "QuestDaily", label = "Daily quest (blue exclamation)" },
-    { value = "SmallQuestBang", label = "Small exclamation mark" },
-    { value = "capPts-questbang-blue", label = "Blue exclamation mark" },
-    { value = "worldquest-questmarker-questbang", label = "World quest exclamation" },
-    { value = "Islands-QuestBang", label = "Islands exclamation" },
-    { value = "QuestBonusObjective", label = "Bonus objective" },
-    { value = "UI-DailyQuestPoiCampaign-QuestBang", label = "Daily campaign quest" },
-    { value = "UI-QuestPoiWrapper-QuestBang", label = "Wrapper quest" },
-    { value = "Quest-Campaign-Available", label = "Campaign quest (map style)" },
-    { value = "quest-important-available", label = "Important quest (map style)" },
-    { value = "quest-legendary-available", label = "Legendary quest (map style)" },
-    { value = "quest-recurring-available", label = "Repeatable quest (map style)" },
-    { value = "quest-wrapper-available", label = "Wrapper quest (map style)" },
-}
-
-for _, option in ipairs(MORE_QUEST_ICONS) do
+for _, option in ipairs(QUEST_ICON_CHOICES) do
     if not (C_Texture and C_Texture.GetAtlasInfo) or C_Texture.GetAtlasInfo(option.value) then
         QUEST_ICONS[#QUEST_ICONS + 1] = option
     end

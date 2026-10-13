@@ -2,7 +2,7 @@ local _, ns = ...
 
 local L = ns.L
 
-local SCHEMA_VERSION = 25
+local SCHEMA_VERSION = 26
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -80,7 +80,31 @@ end
 
 local REMOVED_ARROWS = { tutorial = true, tutorialGlow = true, torghast = true, delve = true, delveSmall = true }
 
+local RETIRED_QUEST_ICONS = {
+    ["UI-QuestPoiCampaign-QuestBang"] = "Quest-Campaign-Available",
+    ["UI-QuestPoiImportant-QuestBang"] = "importantavailablequesticon",
+    ["quest-important-available"] = "importantavailablequesticon",
+    ["UI-QuestPoiWrapper-QuestBang"] = "quest-wrapper-available",
+    ["UI-DailyQuestPoiCampaign-QuestBang"] = "Quest-DailyCampaign-Available",
+    ["quest-legendary-available"] = "UI-QuestPoiLegendary-QuestBang",
+    ["quest-recurring-available"] = "UI-QuestPoiRecurring-QuestBang",
+    ["QuestDaily"] = "UI-QuestPoiRecurring-QuestBang",
+    ["SmallQuestBang"] = "QuestNormal",
+    ["capPts-questbang-blue"] = "QuestNormal",
+    ["Islands-QuestBang"] = "QuestNormal",
+    ["QuestBonusObjective"] = "QuestObjective",
+}
+
 local migrations = {
+    [26] = function(db)
+        for _, profile in pairs(db.profiles or {}) do
+            local look = type(profile) == "table" and profile.look
+            local quest = type(look) == "table" and look.quest
+            if type(quest) == "table" and RETIRED_QUEST_ICONS[quest.style] then
+                quest.style = RETIRED_QUEST_ICONS[quest.style]
+            end
+        end
+    end,
     [25] = function(db)
         local function Reset(look)
             if type(look) ~= "table" then return end
