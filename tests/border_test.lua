@@ -1,8 +1,8 @@
 local ns = {}
 local function Texture()
     local t = { points = {}, shown = true }
-    function t:SetSnapToPixelGrid() end
-    function t:SetTexelSnappingBias() end
+    function t:SetSnapToPixelGrid(v) self.snap = v end
+    function t:SetTexelSnappingBias(v) self.bias = v end
     function t:ClearAllPoints() self.points = {} end
     function t:SetPoint(...) self.points[#self.points + 1] = { ... } end
     function t:SetHeight(v) self.height = v end
@@ -35,6 +35,11 @@ check(glow.corners[1].shown and glow.corners[1].width == 8 and glow.corners[1].t
 local top = glow.edges[1].points
 check(top[1][4] == -1 and top[2][4] == 1, "the top strip stops at the corners instead of running past them")
 check(glow.corners[2].color[4] == 0.75, "corners take the glow color")
+local snapped = glow.edges[1].snap == true
+for i = 1, 4 do
+    snapped = snapped and glow.corners[i].snap == true and glow.corners[i].bias == 0
+end
+check(snapped, "glow corners stay on the pixel grid like the strips, so a moving glow does not shimmer")
 glow:SetAlpha(0.4)
 check(glow.corners[3].alpha == 0.4, "pulsing fades the corners with the strips")
 glow:Hide()
