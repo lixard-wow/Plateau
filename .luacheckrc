@@ -33,7 +33,7 @@ read_globals = {
     "GameTooltip_SetDefaultAnchor", "GetAddOnMemoryUsage", "GetBuildInfo", "GetCoinTextureString",
     "GetCombatRating", "GetCombatRatingBonus", "GetCreatureDifficultyColor", "GetCritChance",
     "GetCursorPosition", "GetDifficultyInfo", "GetHaste", "GetInstanceInfo", "GetInventoryItemID",
-    "GetInventoryItemLink", "GetItemInfo", "GetLocale", "GetMastery", "GetMasteryEffect",
+    "GetInventoryItemLink", "GetItemInfo", "GetLocale", "GetMastery", "GetMasteryEffect", "GetMouseFoci",
     "GetNumGroupMembers", "GetNumSpecializations", "GetRaidRosterInfo", "GetRaidTargetIndex", "GetRealmName",
     "GetRuneCooldown", "GetSpecialization", "GetSpecializationInfo", "GetSpecializationRole",
     "GetSpellCooldown", "GetSpellInfo", "GetTime", "GetVersatilityBonus", "HideUIPanel", "INTERRUPTED",

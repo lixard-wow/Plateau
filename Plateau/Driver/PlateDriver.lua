@@ -493,8 +493,31 @@ end
 local mouseWatcher = CreateFrame("Frame")
 mouseWatcher:Hide()
 
+local function OverOwnFrames(plate)
+    local foci = GetMouseFoci and GetMouseFoci()
+    if type(foci) ~= "table" then return false end
+    for _, focus in ipairs(foci) do
+        local frame, depth = focus, 0
+        while frame and depth < 8 do
+            if frame.IsForbidden and frame:IsForbidden() then
+                break
+            end
+            if frame == plate then
+                return true
+            end
+            frame = frame.GetParent and frame:GetParent()
+            depth = depth + 1
+        end
+    end
+    return false
+end
+
 local function SetMouseover(plate)
     if plate == mouseoverPlate then return end
+    if not plate and mouseoverPlate and mouseoverPlate.active and OverOwnFrames(mouseoverPlate) then
+        mouseWatcher:Show()
+        return
+    end
     if mouseoverPlate then
         NotifyMouseover(mouseoverPlate, false)
     end
