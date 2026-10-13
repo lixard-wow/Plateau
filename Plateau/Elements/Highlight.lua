@@ -193,7 +193,7 @@ end
 
 local function CreateSet(plate)
     local set = {}
-    set.ring = ns.CreateBorder(plate, plate, "BACKGROUND", -8)
+    set.ring = ns.CreateBorder(plate, plate, "BACKGROUND", -5)
     set.glow = ns.CreateBorder(plate, plate, "BACKGROUND", -8)
     if plate.preview then
         EnsureArrows(set, plate)

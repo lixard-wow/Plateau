@@ -12,9 +12,9 @@ ns.Elements = ns.Elements or {}
 ns.Elements.Mouseover = Mouseover
 
 function Mouseover:Create(plate)
-    plate.hoverRing = ns.CreateBorder(plate, plate, "BACKGROUND", -8)
+    plate.hoverRing = ns.CreateBorder(plate, plate, "BACKGROUND", -4)
     plate.hoverRing:Hide()
-    plate.hoverGlow = ns.CreateBorder(plate, plate, "BACKGROUND", -8)
+    plate.hoverGlow = ns.CreateBorder(plate, plate, "BACKGROUND", -7)
     plate.hoverGlow:Hide()
     local wash = plate.health:CreateTexture(nil, "ARTWORK", nil, 6)
     wash:SetTexture(BRIGHTEN_TEXTURE)

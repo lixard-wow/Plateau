@@ -28,7 +28,7 @@ function RaidMarker:Create(plate)
     icon:SetTexture(ICON_TEXTURE)
     icon:Hide()
     plate.raidMarker = icon
-    plate.markerRing = ns.CreateBorder(plate, plate, "BACKGROUND", -8)
+    plate.markerRing = ns.CreateBorder(plate, plate, "BACKGROUND", -6)
     plate.markerRing:Hide()
 end
 
