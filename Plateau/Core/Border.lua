@@ -211,12 +211,30 @@ function Border:Layout(size, offset, inside)
     self:SetShown(self.shown ~= false)
 end
 
+function ns.SnapPlateSize(plate)
+    local width, height = plate.rawWidth, plate.rawHeight
+    if not width then return end
+    if ns.pixelPerfect and not plate.preview and PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
+        local scale = plate:GetEffectiveScale()
+        if not issecretvalue(scale) and scale >= MIN_PIXEL_SCALE then
+            local pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
+            width = math.max(1, math.floor(width / pixel + 0.5)) * pixel
+            height = math.max(1, math.floor(height / pixel + 0.5)) * pixel
+        end
+    end
+    if plate.sizedWidth ~= width or plate.sizedHeight ~= height then
+        plate.sizedWidth, plate.sizedHeight = width, height
+        plate:SetSize(width, height)
+    end
+end
+
 function ns.RepixelPlate(plate)
     local set = plate.pixelSet
     if not set or not ns.pixelPerfect then return end
     local scale = plate:GetEffectiveScale()
     if plate.pixelScale == scale then return end
     plate.pixelScale = scale
+    ns.SnapPlateSize(plate)
     local previous = ns.pixelBorders
     ns.pixelBorders = true
     for border, args in pairs(set) do

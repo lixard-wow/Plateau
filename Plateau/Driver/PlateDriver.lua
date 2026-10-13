@@ -243,7 +243,8 @@ end
 local function SizePlate(plate, look)
     local simplified = plate.simplifiedSize or 1
     local width, height = look.plate.width * (plate.idleW or 1) * simplified, look.plate.height * (plate.idleH or 1) * simplified
-    plate:SetSize(width, height)
+    plate.rawWidth, plate.rawHeight = width, height
+    ns.SnapPlateSize(plate)
     local above, below = StackSpace(look, views.enemy.plate.stackSpace)
     local stackRegion = plate.stackRegion
     local stackHeight = height + above + below

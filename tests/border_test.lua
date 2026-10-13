@@ -110,3 +110,21 @@ seam:Show()
 check(not seam.edges[1].shown and seam.edges[2].shown, "the hidden edge stays hidden when the border is shown again")
 seam:SetEdgeHidden(1, false)
 check(seam.edges[1].shown, "unjoining brings the top edge back")
+
+issecretvalue = issecretvalue or function() return false end
+PixelUtil = { GetPixelToUIUnitFactor = function() return 0.5333 end }
+local sized = { rawWidth = 125, rawHeight = 11, GetEffectiveScale = function() return 1 end }
+function sized:SetSize(w, h) self.w, self.h = w, h end
+ns.pixelPerfect = true
+ns.SnapPlateSize(sized)
+local pixelsWide, pixelsHigh = sized.w / 0.5333, sized.h / 0.5333
+check(math.abs(pixelsWide - math.floor(pixelsWide + 0.5)) < 1e-6 and math.abs(pixelsHigh - math.floor(pixelsHigh + 0.5)) < 1e-6, "a nameplate is sized to whole screen pixels, so its edges do not shimmer as it moves")
+check(math.abs(sized.w - 125) <= 0.5333 / 2 + 1e-9, "the snapped width is within half a pixel of the setting")
+local calls = 0
+function sized:SetSize(w, h) calls = calls + 1 end
+ns.SnapPlateSize(sized)
+check(calls == 0, "an unchanged size is not set again")
+local previewPlate = { rawWidth = 125, rawHeight = 11, preview = true, GetEffectiveScale = function() return 1 end }
+function previewPlate:SetSize(w, h) self.w = w end
+ns.SnapPlateSize(previewPlate)
+check(previewPlate.w == 125, "the settings preview keeps the exact size")
