@@ -350,6 +350,29 @@ setupWatcher:SetScript("OnEvent", function(_, event)
     end
 end)
 
+local function Layers()
+    local levels = {}
+    local bases = C_NamePlate.GetNamePlates()
+    for _, base in ipairs(bases) do
+        local level = base:GetFrameLevel()
+        if not issecretvalue(level) then
+            levels[#levels + 1] = level
+        end
+    end
+    table.sort(levels)
+    Say(L["Nameplate layers:"])
+    print("  plates " .. #bases .. ": " .. table.concat(levels, " "))
+    for _, base in ipairs(bases) do
+        for _, child in ipairs({ base:GetChildren() }) do
+            if child.stackRegion and child.active then
+                print(("  %s cast=%s band=%s base=%s/%s plate=%s/%s"):format(tostring(child.unit), tostring(child.casting),
+                    tostring(child.band), tostring(base:GetFrameLevel()), tostring(base:GetFrameStrata()),
+                    tostring(child:GetFrameLevel()), tostring(child:GetFrameStrata())))
+            end
+        end
+    end
+end
+
 local function Help()
     Say(L["Commands:"])
     print("  " .. L["/plt - open the settings"])
@@ -539,6 +562,8 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
         Say(L["Slow-frame counters reset."])
+    elseif command == "debug" and path == "layers" then
+        Layers()
     elseif command == "debug" and path == "locale" then
         OpenLocalePicker()
     elseif command == "debug" then
