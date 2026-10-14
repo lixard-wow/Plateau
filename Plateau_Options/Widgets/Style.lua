@@ -118,7 +118,7 @@ Style.THEMES = {
         groups = { look = Hex("#c9a35a"), casts = Hex("#b9825a"), highlights = Hex("#9fc58a"), setup = Hex("#8fa3b0") },
     },
     classic = {
-        name = "Lixard Classic",
+        name = "Slate",
         desc = "The house style of Lixard's addons: near-black, square edges and gold.",
         body = SOURCE,
         heading = SOURCE_BOLD,

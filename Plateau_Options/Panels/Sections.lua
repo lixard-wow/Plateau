@@ -2759,7 +2759,7 @@ ns.sections = {
             { type = "Conflicts" },
             { type = "Header", label = "Settings window" },
             { type = "Dropdown", label = "Settings window theme",
-              options = { { value = "workbench", label = "Workbench" }, { value = "ledger", label = "Artisan Ledger" }, { value = "classic", label = "Lixard Classic" } },
+              options = { { value = "workbench", label = "Workbench" }, { value = "ledger", label = "Artisan Ledger" }, { value = "classic", label = "Slate" } },
               get = function() return Style.ThemeKey() end,
               set = function(value)
                   if value ~= Style.ThemeKey() then

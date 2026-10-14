@@ -22,9 +22,9 @@ check(forever.font:find("SourceSans3", 1, true) and forever.headingFont:find("Ci
 
 local classic = Load("mainline", "classic")
 check(classic.ThemeKey() == "classic", "a saved theme choice is used")
-check(classic.RADIUS == 0, "Lixard Classic has square corners")
-check(math.abs(classic.colors.accent[1] - 0.25) < 1e-9 and math.abs(classic.colors.accent[3] - 0.92) < 1e-9, "Lixard Classic highlights in the class color of the character you're on")
-check(classic.StateColor() == classic.colors.accent and classic.groupColors.look == classic.colors.accent, "Lixard Classic's toggles, sliders and section colors follow the class color")
+check(classic.RADIUS == 0, "Slate has square corners")
+check(math.abs(classic.colors.accent[1] - 0.25) < 1e-9 and math.abs(classic.colors.accent[3] - 0.92) < 1e-9, "Slate highlights in the class color of the character you're on")
+check(classic.StateColor() == classic.colors.accent and classic.groupColors.look == classic.colors.accent, "Slate's toggles, sliders and section colors follow the class color")
 check(math.abs(classic.THEMES.classic.colors.accent[1] - 0.78) < 1e-9, "the theme itself keeps the gold accent for when no class is known")
 check(math.abs(retail.colors.accent[1] - 0.25) > 0.01, "other themes keep their own accent")
 
