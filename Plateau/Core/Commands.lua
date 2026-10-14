@@ -379,6 +379,30 @@ local function Layers()
     end
 end
 
+local function WatchCasts()
+    Say(L["Watching casting nameplates for 20 seconds."])
+    local ticks = 0
+    local ticker
+    ticker = C_Timer.NewTicker(0.5, function()
+        ticks = ticks + 1
+        for _, base in ipairs(C_NamePlate.GetNamePlates()) do
+            for _, child in ipairs({ base:GetChildren() }) do
+                if child.stackRegion and child.active and child.casting then
+                    local bar = child.castbar
+                    print(("  %s band=%s lifted=%s important=%s scale=%.3f/%.3f castbar=%.1fx%.1f shown=%s health=%.1f"):format(
+                        tostring(child.unit), tostring(child.band), tostring(child.lifted), tostring(child.importantCast),
+                        child:GetEffectiveScale(), base:GetEffectiveScale(), bar:GetWidth(), bar:GetHeight(),
+                        tostring(bar:IsShown()), child.health:GetHeight()))
+                end
+            end
+        end
+        if ticks >= 40 then
+            ticker:Cancel()
+            Say(L["Done watching."])
+        end
+    end)
+end
+
 local function SinkTarget()
     local base = C_NamePlate.GetNamePlateForUnit("target")
     local plate
@@ -592,6 +616,8 @@ SlashCmdList.PLATEAU = function(input)
         Say(L["Slow-frame counters reset."])
     elseif command == "debug" and path == "layers" then
         Layers()
+    elseif command == "debug" and path == "watch" then
+        WatchCasts()
     elseif command == "debug" and path == "sink" then
         SinkTarget()
     elseif command == "debug" and path == "locale" then
