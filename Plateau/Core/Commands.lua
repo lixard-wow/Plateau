@@ -362,21 +362,19 @@ local function Layers()
     table.sort(levels)
     Say(L["Nameplate layers:"])
     print("  plates " .. #bases .. ": " .. table.concat(levels, " "))
-    for _, base in ipairs(bases) do
-        for _, child in ipairs({ base:GetChildren() }) do
-            if child.stackRegion and child.active then
-                local health = child.health and child.health:GetFrameLevel()
-                local baseScale = base:GetEffectiveScale()
-                print(("    lifted=%s secret=%s base=%s plate=%s castbar=%s"):format(tostring(child.lifted), tostring(issecretvalue(baseScale)),
-                    issecretvalue(baseScale) and "?" or ("%.3f"):format(baseScale), ("%.3f"):format(child:GetEffectiveScale()),
-                    child.castbar and ("%.1f"):format(child.castbar:GetHeight()) or "-"))
-                local overlay = child.overlay and child.overlay:GetFrameLevel()
-                print(("  %s cast=%s band=%s base=%s/%s plate=%s/%s health=%s overlay=%s"):format(tostring(child.unit), tostring(child.casting),
-                    tostring(child.band), tostring(base:GetFrameLevel()), tostring(base:GetFrameStrata()),
-                    tostring(child:GetFrameLevel()), tostring(child:GetFrameStrata()), tostring(health), tostring(overlay)))
-            end
-        end
-    end
+    ns.Driver:ForEachActive(function(child)
+        local base = child.base
+        if not base then return end
+        local health = child.health and child.health:GetFrameLevel()
+        local overlay = child.overlay and child.overlay:GetFrameLevel()
+        print(("  %s cast=%s band=%s base=%s/%s plate=%s/%s health=%s overlay=%s"):format(tostring(child.unit), tostring(child.casting),
+            tostring(child.band), tostring(base:GetFrameLevel()), tostring(base:GetFrameStrata()),
+            tostring(child:GetFrameLevel()), tostring(child:GetFrameStrata()), tostring(health), tostring(overlay)))
+        local baseScale = base:GetEffectiveScale()
+        print(("    lifted=%s secret=%s base=%s plate=%s castbar=%s"):format(tostring(child.lifted), tostring(issecretvalue(baseScale)),
+            issecretvalue(baseScale) and "?" or ("%.3f"):format(baseScale), ("%.3f"):format(child:GetEffectiveScale()),
+            child.castbar and ("%.1f"):format(child.castbar:GetHeight()) or "-"))
+    end)
 end
 
 local function WatchCasts()
@@ -385,17 +383,16 @@ local function WatchCasts()
     local ticker
     ticker = C_Timer.NewTicker(0.5, function()
         ticks = ticks + 1
-        for _, base in ipairs(C_NamePlate.GetNamePlates()) do
-            for _, child in ipairs({ base:GetChildren() }) do
-                if child.stackRegion and child.active and child.casting then
-                    local bar = child.castbar
-                    print(("  %s band=%s lifted=%s important=%s scale=%.3f/%.3f castbar=%.1fx%.1f shown=%s health=%.1f"):format(
-                        tostring(child.unit), tostring(child.band), tostring(child.lifted), tostring(child.importantCast),
-                        child:GetEffectiveScale(), base:GetEffectiveScale(), bar:GetWidth(), bar:GetHeight(),
-                        tostring(bar:IsShown()), child.health:GetHeight()))
-                end
+        ns.Driver:ForEachActive(function(child)
+            local base = child.base
+            if child.casting and base then
+                local bar = child.castbar
+                print(("  %s band=%s lifted=%s important=%s scale=%.3f/%.3f castbar=%.1fx%.1f shown=%s health=%.1f"):format(
+                    tostring(child.unit), tostring(child.band), tostring(child.lifted), tostring(child.importantCast),
+                    child:GetEffectiveScale(), base:GetEffectiveScale(), bar:GetWidth(), bar:GetHeight(),
+                    tostring(bar:IsShown()), child.health:GetHeight()))
             end
-        end
+        end)
         if ticks >= 40 then
             ticker:Cancel()
             Say(L["Done watching."])
@@ -404,13 +401,7 @@ local function WatchCasts()
 end
 
 local function SinkTarget()
-    local base = C_NamePlate.GetNamePlateForUnit("target")
-    local plate
-    for _, child in ipairs(base and { base:GetChildren() } or {}) do
-        if child.stackRegion and child.active then
-            plate = child
-        end
-    end
+    local plate = ns.Driver:GetPlate("target")
     if not plate then
         Say(L["Target an enemy with a Plateau nameplate first."])
         return
