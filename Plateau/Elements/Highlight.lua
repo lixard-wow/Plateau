@@ -218,7 +218,7 @@ end
 local function Point(texture, style, direction, size)
     texture:SetTexture(style.file)
     texture:SetRotation(0)
-    texture:SetSnapToPixelGrid(true)
+    texture:SetSnapToPixelGrid(false)
     texture:SetTexelSnappingBias(0)
     local slide = texture.slide or { sign = 1 }
     slide.direction, slide.size = direction, size
