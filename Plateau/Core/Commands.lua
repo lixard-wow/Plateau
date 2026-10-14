@@ -365,9 +365,11 @@ local function Layers()
     for _, base in ipairs(bases) do
         for _, child in ipairs({ base:GetChildren() }) do
             if child.stackRegion and child.active then
-                print(("  %s cast=%s band=%s base=%s/%s plate=%s/%s"):format(tostring(child.unit), tostring(child.casting),
+                local health = child.health and child.health:GetFrameLevel()
+                local overlay = child.overlay and child.overlay:GetFrameLevel()
+                print(("  %s cast=%s band=%s base=%s/%s plate=%s/%s health=%s overlay=%s"):format(tostring(child.unit), tostring(child.casting),
                     tostring(child.band), tostring(base:GetFrameLevel()), tostring(base:GetFrameStrata()),
-                    tostring(child:GetFrameLevel()), tostring(child:GetFrameStrata())))
+                    tostring(child:GetFrameLevel()), tostring(child:GetFrameStrata()), tostring(health), tostring(overlay)))
             end
         end
     end
