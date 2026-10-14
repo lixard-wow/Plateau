@@ -269,7 +269,7 @@ ns.helpTopics = {
         category = "How do I",
         title = "Stop nameplates overlapping",
         keywords = "overlap stacking stack spacing slide crowded",
-        text = "Open Layering and stacking. Under Stacking, click a preset, then click it again to apply it: Tight, Balanced or Spread out. They change only the spacing between nameplates. Turn on Show stacking boxes to see the area the game keeps apart. If nameplates overlap because your name or cast bar takes extra room, change Stacking bounds to include it. Turn on Instant movement under Movement if you also want nameplates to jump straight to their spot.",
+        text = "Open Layering and stacking. Under Stacking, click a preset to apply it: Tight, Balanced or Spread out. They change only the spacing between nameplates. Turn on Show stacking boxes to see the area the game keeps apart. If nameplates overlap because your name or cast bar takes extra room, change Stacking bounds to include it. Turn on Instant movement under Movement if you also want nameplates to jump straight to their spot.",
     },
     {
         category = "How do I",

@@ -428,7 +428,7 @@ function ns.Widgets.Presets(parent, spec)
             end
         end)
         button:SetScript("OnClick", function(self)
-            if not armed then
+            if not armed and not spec.instant then
                 armed = true
                 self.label:SetText("Click to apply")
                 self.label:SetTextColor(C.warn[1], C.warn[2], C.warn[3])

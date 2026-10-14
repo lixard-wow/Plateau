@@ -1580,9 +1580,9 @@ ns.sections = {
         { type = "Header", label = "Stacking" },
         CVarBitToggle("nameplateStackingTypes", STACK.Enemy, "Stack enemy nameplates", "Enemy nameplates move apart instead of overlapping."),
         CVarBitToggle("nameplateStackingTypes", STACK.Friendly, "Stack friendly nameplates", "Friendly nameplates move apart instead of overlapping."),
-        Gate({ type = "Presets", presets = STACK_PRESETS, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack",
+        Gate({ type = "Presets", presets = STACK_PRESETS, instant = true, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack",
           tooltip = "Ready-made spacing between stacked nameplates." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
-        { type = "Note", label = "Click a preset twice to apply it. The underlined preset is in use.", height = 24 },
+        { type = "Note", label = "Click a preset to apply it. The underlined preset is in use.", height = 24 },
         Gate({ type = "Toggle", label = "Show stacking boxes",
           get = function() return ns.stackBoxesOn == true end,
           set = function(value)
