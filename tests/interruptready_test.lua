@@ -2,7 +2,9 @@ local known = {}
 local remaining = {}
 local now = 1
 function GetTime() return now end
-function issecretvalue() return false end
+local secret = false
+local cooling = {}
+function issecretvalue(v) return secret and type(v) == "number" end
 function UnitClassBase() return "PALADIN" end
 Enum = { SpellBookSpellBank = { Player = 0, Pet = 1 }, LuaCurveType = { Step = 1 } }
 local function Duration(id)
@@ -13,6 +15,7 @@ local function Duration(id)
 end
 C_Spell = {
     GetSpellCooldownDuration = function(id) return Duration(id) end,
+    GetSpellCooldown = function(id) return { isActive = cooling[id] == true, isOnGCD = false } end,
     GetSpellName = function() return nil end,
 }
 C_SpellBook = {
@@ -23,8 +26,9 @@ C_SpellBook = {
 C_CurveUtil = {
     CreateCurve = function() return { numeric = true, AddPoint = function() end } end,
 }
+local onEvent
 function CreateFrame()
-    return { RegisterEvent = function() end, RegisterUnitEvent = function() end, SetScript = function() end }
+    return { RegisterEvent = function() end, RegisterUnitEvent = function() end, SetScript = function(_, _, f) onEvent = f end }
 end
 local ns = {}
 assert(loadfile("Plateau/Features/InterruptReady.lua"))("Plateau", ns)
@@ -56,3 +60,24 @@ IR:Refresh()
 remaining[31935] = 0
 now = 6
 check(IR:GetSpellID() == 31935 and IR:IsTracking(), "with only Avenger's Shield known, it is tracked on its own")
+
+known[96231], known[31935] = true, true
+IR:Refresh()
+secret = true
+remaining[96231], remaining[31935] = 10, 0
+cooling[96231], cooling[31935] = true, false
+onEvent(IR, "SPELL_UPDATE_COOLDOWN")
+now = 7
+check(IR:GetCooldown().id == 31935, "in combat with hidden timers, Rebuke on cooldown and Avenger's Shield ready: Avenger's Shield is used")
+cooling[96231], cooling[31935] = false, true
+onEvent(IR, "SPELL_UPDATE_COOLDOWN")
+now = 8
+check(IR:GetCooldown().id == 96231, "in combat with hidden timers, Avenger's Shield on cooldown: Rebuke is used")
+cooling[96231], cooling[31935] = true, true
+onEvent(IR, "SPELL_UPDATE_COOLDOWN")
+now = 9
+check(IR:GetCooldown().id == 96231, "in combat with hidden timers, both on cooldown: Rebuke is shown")
+cooling[96231], cooling[31935] = false, false
+onEvent(IR, "SPELL_UPDATE_COOLDOWN")
+now = 10
+check(IR:GetSpellID() == 31935, "in combat with hidden timers, both ready: Avenger's Shield wins for its reach")

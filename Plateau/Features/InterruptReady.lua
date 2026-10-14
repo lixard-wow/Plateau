@@ -1,6 +1,7 @@
 local _, ns = ...
 
 local GetSpellCooldownDuration = C_Spell.GetSpellCooldownDuration
+local GetSpellCooldown = C_Spell.GetSpellCooldown
 local IsSpellKnown = C_SpellBook.IsSpellKnown
 local issecretvalue = issecretvalue
 local PLAYER_BANK = Enum.SpellBookSpellBank.Player
@@ -53,10 +54,26 @@ local remainingCurve
 local curves = {}
 local cooldownAt, cooldown
 local colorAt, colors = {}, {}
+local busy = {}
+
+local function Busy(id)
+    local info = GetSpellCooldown(id)
+    return info ~= nil and info.isActive == true and info.isOnGCD ~= true
+end
+
+local function UpdateBusy()
+    if not spellID then return end
+    busy[spellID] = Busy(spellID)
+    for i = 1, #extraIDs do
+        busy[extraIDs[i]] = Busy(extraIDs[i])
+    end
+    cooldownAt = nil
+end
 
 function InterruptReady:Refresh()
     spellID, activeID = nil, nil
     cooldownAt = nil
+    busy = {}
     for i = #extraIDs, 1, -1 do
         extraIDs[i] = nil
     end
@@ -81,6 +98,7 @@ function InterruptReady:Refresh()
         spellID = table.remove(extraIDs, 1)
     end
     activeID = spellID
+    UpdateBusy()
 end
 
 function InterruptReady:SetColors(state, kind, ready, notReady)
@@ -139,12 +157,23 @@ function InterruptReady:GetCooldown()
     local best, bestID = Duration(spellID), spellID
     if best and extraIDs[1] then
         local bestRemaining = Remaining(best)
-        for i = 1, #extraIDs do
-            local id = extraIDs[i]
-            local duration = Duration(id)
-            local remaining = duration and Remaining(duration)
-            if remaining and bestRemaining and remaining <= bestRemaining then
-                best, bestID, bestRemaining = duration, id, remaining
+        if bestRemaining then
+            for i = 1, #extraIDs do
+                local id = extraIDs[i]
+                local duration = Duration(id)
+                local remaining = duration and (Remaining(duration) or (not busy[id] and 0) or nil)
+                if remaining and remaining <= bestRemaining then
+                    best, bestID, bestRemaining = duration, id, remaining
+                end
+            end
+        else
+            for i = 1, #extraIDs do
+                local id = extraIDs[i]
+                local duration = not busy[id] and Duration(id)
+                if duration then
+                    best, bestID = duration, id
+                    break
+                end
             end
         end
     end
@@ -174,4 +203,11 @@ end
 InterruptReady:RegisterEvent("PLAYER_LOGIN")
 InterruptReady:RegisterEvent("SPELLS_CHANGED")
 InterruptReady:RegisterUnitEvent("UNIT_PET", "player")
-InterruptReady:SetScript("OnEvent", InterruptReady.Refresh)
+InterruptReady:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+InterruptReady:SetScript("OnEvent", function(self, event)
+    if event == "SPELL_UPDATE_COOLDOWN" then
+        UpdateBusy()
+    else
+        self:Refresh()
+    end
+end)
