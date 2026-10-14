@@ -234,7 +234,7 @@ local function RoundTree(frame, enabled)
         region:SetRoundLayoutToNearestPixel(enabled)
     end
     for _, child in ipairs({ frame:GetChildren() }) do
-        if not child:IsForbidden() and child:GetObjectType() ~= "AuraContainer" then
+        if not child:IsForbidden() and not child.AddAuraGroup and not child.AddAuraSlot then
             RoundTree(child, enabled)
         end
     end
