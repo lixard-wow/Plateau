@@ -429,43 +429,71 @@ local function SnapTargets(dragged)
     return list
 end
 
-local editOutline = CreateFrame("Frame", nil, panel)
-editOutline:SetFrameLevel(outline:GetFrameLevel() - 1)
-Style.Border(editOutline, C.accent)
-Style.ThemedBorder(editOutline)
-editOutline:SetAlpha(0.6)
-editOutline:Hide()
+local editOutlines = {}
+local TOUCH = 4
+
+local function EditOutline(index)
+    local frame = editOutlines[index]
+    if not frame then
+        frame = CreateFrame("Frame", nil, panel)
+        frame:SetFrameLevel(outline:GetFrameLevel() - 1)
+        Style.Border(frame, C.accent)
+        Style.ThemedBorder(frame)
+        frame:SetAlpha(0.6)
+        editOutlines[index] = frame
+    end
+    return frame
+end
+
+local function Touching(a, b)
+    return a[1] <= b[2] + TOUCH and b[1] <= a[2] + TOUCH and a[4] <= b[3] + TOUCH and b[4] <= a[3] + TOUCH
+end
 
 local function UpdateEditing()
-    local left, right, top, bottom, scale
+    local boxes, scale = {}, nil
     if sectionKey then
         for _, spot in ipairs(spots) do
             if spot:IsShown() and Resolve(spot.sectionKey) == sectionKey then
                 local l, r, t, b = Bounds(spot)
                 if l then
                     scale = spot:GetEffectiveScale()
-                    left = left and math.min(left, l) or l
-                    right = right and math.max(right, r) or r
-                    top = top and math.max(top, t) or t
-                    bottom = bottom and math.min(bottom, b) or b
+                    boxes[#boxes + 1] = { l, r, t, b }
                 end
             end
         end
     end
-    if not left then
-        editOutline:Hide()
-        return
+    local merged = true
+    while merged do
+        merged = false
+        for i = #boxes, 2, -1 do
+            for j = 1, i - 1 do
+                local a, b = boxes[j], boxes[i]
+                if Touching(a, b) then
+                    a[1], a[2] = math.min(a[1], b[1]), math.max(a[2], b[2])
+                    a[3], a[4] = math.max(a[3], b[3]), math.min(a[4], b[4])
+                    table.remove(boxes, i)
+                    merged = true
+                    break
+                end
+            end
+        end
     end
     local panelLeft, panelBottom = panel:GetLeft(), panel:GetBottom()
-    if not panelLeft or not panelBottom then
-        editOutline:Hide()
-        return
+    local count = 0
+    if scale and panelLeft and panelBottom then
+        local ratio = scale / panel:GetEffectiveScale()
+        for i, box in ipairs(boxes) do
+            local frame = EditOutline(i)
+            frame:ClearAllPoints()
+            frame:SetPoint("TOPLEFT", panel, "BOTTOMLEFT", (box[1] - 2) * ratio - panelLeft, (box[3] + 2) * ratio - panelBottom)
+            frame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMLEFT", (box[2] + 2) * ratio - panelLeft, (box[4] - 2) * ratio - panelBottom)
+            frame:Show()
+            count = i
+        end
     end
-    local ratio = scale / panel:GetEffectiveScale()
-    editOutline:ClearAllPoints()
-    editOutline:SetPoint("TOPLEFT", panel, "BOTTOMLEFT", (left - 2) * ratio - panelLeft, (top + 2) * ratio - panelBottom)
-    editOutline:SetPoint("BOTTOMRIGHT", panel, "BOTTOMLEFT", (right + 2) * ratio - panelLeft, (bottom - 2) * ratio - panelBottom)
-    editOutline:Show()
+    for i = count + 1, #editOutlines do
+        editOutlines[i]:Hide()
+    end
 end
 
 local function UpdateHotspots()

@@ -423,6 +423,19 @@ function Stop(spec)
     driver:Hide()
     HideDots()
 
+    if spec.Place and not Snapping() then
+        local mover = spec.Mover()
+        local left, right, top, bottom = mover:GetLeft(), mover:GetRight(), mover:GetTop(), mover:GetBottom()
+        freePlacement = true
+        local values = left and spec.Place((left + right) / 2, (top + bottom) / 2)
+        freePlacement = false
+        if values then
+            Apply(values)
+            Settle(spec)
+            return
+        end
+    end
+
     local candidate, dx, dy = Nearest(AllCandidates(spec))
     if not candidate then
         Apply({})
