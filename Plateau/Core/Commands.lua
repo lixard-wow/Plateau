@@ -375,6 +375,28 @@ local function Layers()
     end
 end
 
+local function SinkTarget()
+    local base = C_NamePlate.GetNamePlateForUnit("target")
+    local plate
+    for _, child in ipairs(base and { base:GetChildren() } or {}) do
+        if child.stackRegion and child.active then
+            plate = child
+        end
+    end
+    if not plate then
+        Say(L["Target an enemy with a Plateau nameplate first."])
+        return
+    end
+    plate:SetFrameLevel(1)
+    Say(L["Your target's nameplate is pushed to the bottom for 10 seconds."])
+    C_Timer.After(10, function()
+        if plate.active then
+            ns.Scaling:Apply(plate)
+        end
+        Say(L["Your target's nameplate is back in place."])
+    end)
+end
+
 local function Help()
     Say(L["Commands:"])
     print("  " .. L["/plt - open the settings"])
@@ -566,6 +588,8 @@ SlashCmdList.PLATEAU = function(input)
         Say(L["Slow-frame counters reset."])
     elseif command == "debug" and path == "layers" then
         Layers()
+    elseif command == "debug" and path == "sink" then
+        SinkTarget()
     elseif command == "debug" and path == "locale" then
         OpenLocalePicker()
     elseif command == "debug" then
