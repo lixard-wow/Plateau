@@ -1741,8 +1741,17 @@ ns.sections = {
         { type = "Header", label = "Bar" },
         { type = "Dropdown", path = "look.health.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
           tooltip = "Fill texture of the health bar. Your target and focus can use their own on the Target and Focus pages." },
-        { type = "Toggle", path = "look.health.desaturate", label = "Desaturate texture",
-          tooltip = "Removes the texture's own color so bar colors show exactly." },
+        Gate({ type = "Toggle", path = "look.health.desaturate", label = "Desaturate texture",
+          tooltip = "Removes the texture's own color so bar colors show exactly. Only changes textures that have color of their own, like some Blizzard and shared media textures." },
+          function()
+              local value = ns.Get("look.health.texture")
+              if not value or value == "" or value == "Interface\\Buttons\\WHITE8X8" then return false end
+              for _, texture in ipairs(Plateau.barTextures) do
+                  if texture.value == value then return false end
+              end
+              return true
+          end,
+          "Plateau textures and Flat are already grey, so there is nothing to desaturate. Pick a colored texture to use this."),
         { type = "Dropdown", path = "look.health.overlayPattern", label = "Overlay pattern", options = OverlayPatterns, unknown = "Custom pattern",
           tooltip = "A pattern drawn over the bar texture, tinted to match the bar." },
         Gate({ type = "Slider", path = "look.health.overlayAlpha", label = "Overlay opacity", min = 0, max = 1, step = 0.05,
