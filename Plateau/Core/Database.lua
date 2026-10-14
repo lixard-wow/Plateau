@@ -2,7 +2,7 @@ local _, ns = ...
 
 local L = ns.L
 
-local SCHEMA_VERSION = 26
+local SCHEMA_VERSION = 27
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -96,6 +96,22 @@ local RETIRED_QUEST_ICONS = {
 }
 
 local migrations = {
+    [27] = function(db)
+        local function Clear(look)
+            local health = type(look) == "table" and look.health
+            if type(health) == "table" then
+                health.desaturate = nil
+            end
+        end
+        for _, profile in pairs(db.profiles or {}) do
+            if type(profile) == "table" then
+                Clear(profile.look)
+                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
+                    Clear(override)
+                end
+            end
+        end
+    end,
     [26] = function(db)
         for _, profile in pairs(db.profiles or {}) do
             local look = type(profile) == "table" and profile.look

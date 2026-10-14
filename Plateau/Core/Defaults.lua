@@ -33,7 +33,6 @@ ns.defaults = {
             spark = false,
             sparkColor = { 1, 1, 1, 0.9 },
             sparkWidth = 2,
-            desaturate = false,
             backgroundTexture = "",
         },
         colors = {

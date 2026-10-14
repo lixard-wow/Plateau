@@ -9,7 +9,7 @@ local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 PlateauDB = { version = 1, profiles = { Default = { look = { highlight = { color = { 1, 0, 0, 1 }, size = 3 }, castbar = { height = 14 } } } }, profileKeys = {} }
 ns.DB:Init()
 local t = ns.DB.profile.look.target
-check(PlateauDB.version == 26, "schema bumped to the latest version")
+check(PlateauDB.version == 27, "schema bumped to the latest version")
 check(t.ringColor[1] == 1 and t.ringColor[2] == 0, "v1 ring color ends up in target.ringColor")
 check(t.ringSize == 3, "v1 ring size ends up in target.ringSize")
 check(rawget(ns.DB.profile.look, "highlight") == nil, "highlight group removed")
@@ -20,7 +20,7 @@ check(PlateauDB.profiles.Default.look.target.ringSize == 3, "migrated value surv
 
 PlateauDB = nil
 ns.DB:Init()
-check(PlateauDB.version == 26 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
+check(PlateauDB.version == 27 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
 
 PlateauDB = { version = 1, profiles = { Default = { look = { health = { tapped = { 0.2, 0.2, 0.9, 1 }, borderSize = 2 } } } }, profileKeys = {} }
 ns.DB:Init()
@@ -203,7 +203,7 @@ PlateauDB = { version = 15, profiles = {
 }, profileKeys = { ["Stalador - Iridikron"] = "On" } }
 ns.DB:Init()
 local on = PlateauDB.profiles.On.look.scaling
-check(PlateauDB.version == 26 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
+check(PlateauDB.version == 27 and on.castFront == true, "v16: priority layering on becomes Casting enemies in front on")
 check(on.layerByType == nil and on.layerOrder == nil and on.boss == 1.3, "v16: the old layering keys are removed and other scaling settings kept")
 check(PlateauDB.profiles.On.states.friendly.scaling.castFront == true and PlateauDB.profiles.On.states.friendly.scaling.layerByType == nil, "v16: state overrides are converted too")
 local off = PlateauDB.profiles.Off.look.scaling

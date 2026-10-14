@@ -1741,20 +1741,6 @@ ns.sections = {
         { type = "Header", label = "Bar" },
         { type = "Dropdown", path = "look.health.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
           tooltip = "Fill texture of the health bar. Your target and focus can use their own on the Target and Focus pages." },
-        Gate({ type = "Toggle", path = "look.health.desaturate", label = "Desaturate texture",
-          tooltip = "Removes the texture's own color so bar colors show exactly. Also applies to the target and focus textures. Only changes textures that have color of their own, like some Blizzard and shared media textures." },
-          function()
-              for _, path in ipairs({ "look.health.texture", "look.target.texture", "look.focus.texture" }) do
-                  local value = ns.Get(path)
-                  local colored = value and value ~= "" and value ~= "Interface\\Buttons\\WHITE8X8"
-                  for _, texture in ipairs(Plateau.barTextures) do
-                      if texture.value == value then colored = false end
-                  end
-                  if colored then return true end
-              end
-              return false
-          end,
-          "Plateau textures and Flat are already grey, so there is nothing to desaturate. Pick a colored texture here or on the Target or Focus page to use this."),
         { type = "Dropdown", path = "look.health.overlayPattern", label = "Overlay pattern", options = OverlayPatterns, unknown = "Custom pattern",
           tooltip = "A pattern drawn over the bar texture, tinted to match the bar." },
         Gate({ type = "Slider", path = "look.health.overlayAlpha", label = "Overlay opacity", min = 0, max = 1, step = 0.05,
@@ -2407,7 +2393,7 @@ ns.sections = {
           swatchLabel = "Target bar color", swatchTooltip = "The health bar color used for your target.",
           tooltip = "Colors your target's health bar, whatever its type." },
         { type = "Dropdown", path = "look.target.texture", label = "Target bar texture", options = HighlightBars, unknown = "Custom texture",
-          tooltip = "Health bar texture for your target. To remove a colored texture's own tint, turn on Desaturate texture on the Health bar page." },
+          tooltip = "Health bar texture for your target." },
         { type = "Dropdown", path = "look.target.overlayPattern", label = "Overlay pattern", options = OverlayPatterns, unknown = "Custom pattern",
           tooltip = "Adds a checker or line pattern over your target's bar texture." },
         Gate({ type = "Slider", path = "look.target.overlayAlpha", label = "Overlay opacity", min = 0, max = 1, step = 0.05,
@@ -2467,7 +2453,7 @@ ns.sections = {
           swatchLabel = "Focus bar color", swatchTooltip = "The health bar color used for your focus.",
           tooltip = "Colors your focus's health bar, whatever its type." },
         { type = "Dropdown", path = "look.focus.texture", label = "Focus bar texture", options = HighlightBars, unknown = "Custom texture",
-          tooltip = "Health bar texture for your focus. To remove a colored texture's own tint, turn on Desaturate texture on the Health bar page." },
+          tooltip = "Health bar texture for your focus." },
         { type = "Dropdown", path = "look.focus.overlayPattern", label = "Overlay pattern", options = OverlayPatterns, unknown = "Custom pattern",
           tooltip = "Adds a checker or line pattern over your focus's bar texture." },
         Gate({ type = "Slider", path = "look.focus.overlayAlpha", label = "Overlay opacity", min = 0, max = 1, step = 0.05,

@@ -16,7 +16,7 @@ local baseTexture = {}
 local targetOverlay, targetOverlayAlpha, targetOverlayContrast
 local focusOverlay, focusOverlayAlpha, focusOverlayContrast
 local baseOverlay, baseOverlayAlpha, baseOverlayContrast = {}, {}, {}
-local smooth, desaturate, spark = {}, {}, {}
+local smooth, spark = {}, {}
 local fades = {}
 
 local function FadeCurve(fade, r, g, b, a)
@@ -89,7 +89,6 @@ function Health:Configure(db, state)
     baseOverlayAlpha[state] = db.overlayAlpha
     baseOverlayContrast[state] = db.overlayContrast
     smooth[state] = db.smooth == true and SMOOTH or nil
-    desaturate[state] = db.desaturate == true
     spark[state] = db.spark == true
     local colors = ns.DB.views[state] and ns.DB.views[state].colors
     if colors and colors.healthGradient and C_CurveUtil and C_CurveUtil.CreateColorCurve then
@@ -127,7 +126,6 @@ local function ApplyTexture(plate)
     if bar.texture ~= texture then
         bar.texture = texture
         ns.SetBarTexture(bar, texture)
-        bar:SetStatusBarDesaturated(desaturate[plate.state] == true)
     end
     local overlay, overlayAlpha, overlayContrast = ResolveOverlay(plate)
     if bar.overlay ~= overlay or bar.overlayAlphaValue ~= overlayAlpha or bar.overlayContrastValue ~= overlayContrast then
