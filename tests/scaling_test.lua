@@ -8,6 +8,16 @@ function CreateFrame()
     function frame:Hide() self.shown = false end
     function frame:Show() self.shown = true end
     function frame:SetShown(shown) self.shown = shown and true or false end
+    function frame:IsShown() return self.shown end
+    function frame:SetSize() end
+    function frame:SetPoint() end
+    function frame:SetAllPoints() end
+    function frame:SetFrameStrata() end
+    function frame:SetScale(scale) self.scale = scale end
+    function frame:SetAlpha(alpha) self.alpha = alpha end
+    function frame:GetEffectiveScale() return 1 end
+    function frame:SetFrameLevel(level) self.level = level end
+    function frame:GetFrameLevel() return self.level or 0 end
     frames[#frames + 1] = frame
     return frame
 end
@@ -43,6 +53,7 @@ local function Plate(fields)
     function plate:SetFrameStrata(strata) self.strata = strata end
     function plate:GetFrameStrata() return self.strata end
     function plate:GetChildren() return end
+    function plate:SetParent(parent) self.parent = parent end
     plate.stackRegion = {}
     function plate.stackRegion:SetScale(scale) self.scale = scale end
     for k, v in pairs(fields or {}) do plate[k] = v end
@@ -54,6 +65,8 @@ local function Base(level)
     function base:GetFrameLevel() return self.level end
     function base:GetEffectiveScale() return self.scale end
     function base:GetFrameStrata() return self.strata end
+    function base:GetEffectiveAlpha() return 1 end
+    function base:IsVisible() return true end
     return base
 end
 
@@ -145,14 +158,14 @@ end
 local idle = Band({ mobType = "boss" })
 check(idle.band == 0 and idle.level == 106, "an enemy that isn't casting stays in the game's order, whatever its type")
 local caster = Band({ mobType = "trivial", casting = true })
-check(caster.band == 1 and caster.level == 106 + 200, "a casting enemy moves one band up, 200 levels higher")
+check(caster.band == 1 and caster.parent == caster.holder and caster.level == 201, "a casting enemy is lifted onto the front layer, one band up")
 check(Band({ isTarget = true }).band == 2, "your target sits above casting enemies")
 check(Band({ isTarget = true, casting = true }).band == 2, "a casting target stays at the target band")
 check(Band({ isFocus = true }).band == 0, "focus gets no special layer")
 check(Band({ isPlayer = true, casting = true }).band == 1, "a casting enemy player comes forward too")
 check(Band({ isFriendly = true, casting = true }).band == 0, "friendly plates are never raised for casting")
 check(Band({ isFriendly = true, isTarget = true }).band == 0, "a friendly target keeps the game's order")
-check(idle.strata == "MEDIUM" and caster.strata == "MEDIUM", "layering changes levels only, never strata")
+check(idle.strata == "MEDIUM" and caster.strata == "BACKGROUND", "a lifted plate sits in the background strata, above nameplates but under the rest of the interface")
 
 local near1 = Live({ mobType = "elite", base = Base(110) })
 local far1 = Live({ mobType = "elite", base = Base(101) })
@@ -274,3 +287,14 @@ Scaling:Apply(orphan)
 orphan.appliedScale = nil
 ok = pcall(animator.scripts.OnUpdate, animator, 0.016)
 check(ok, "the size animation skips a plate that lost its target size")
+
+Configure({ importantFront = true })
+check(Band({ casting = true, importantCast = true }).band == 1, "important casts in front: an important cast is lifted")
+check(Band({ casting = true, importantCast = false }).band == 0, "important casts in front: an ordinary cast stays in the game's order")
+check(Band({ isTarget = true }).band == 2, "important casts in front: your target still sits above casters")
+local dropped = Band({ casting = true, importantCast = true })
+dropped.casting = false
+Scaling:Apply(dropped)
+check(dropped.band == 0 and dropped.parent == dropped.base and not dropped.lifted, "when the cast ends the plate drops back onto its game nameplate")
+Configure({ castFront = true, importantFront = true })
+check(Band({ casting = true, importantCast = false }).band == 1, "all casting enemies in front includes ordinary casts")

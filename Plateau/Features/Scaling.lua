@@ -26,10 +26,81 @@ end
 
 local BAND = 200
 
+local liftRoot
+local lifted = {}
+local lifter = CreateFrame("Frame")
+lifter:Hide()
+
+local function SyncHolder(plate)
+    local holder, base = plate.holder, plate.base
+    local scale, rootScale = base:GetEffectiveScale(), liftRoot:GetEffectiveScale()
+    if not issecretvalue(scale) and not issecretvalue(rootScale) and rootScale > 0 then
+        scale = scale / rootScale
+        if holder.syncScale ~= scale then
+            holder.syncScale = scale
+            holder:SetScale(scale)
+        end
+    end
+    local alpha = base:GetEffectiveAlpha()
+    if not issecretvalue(alpha) and holder.syncAlpha ~= alpha then
+        holder.syncAlpha = alpha
+        holder:SetAlpha(alpha)
+    end
+    local shown = base:IsVisible()
+    if not issecretvalue(shown) and holder:IsShown() ~= shown then
+        holder:SetShown(shown)
+    end
+end
+
+lifter:SetScript("OnUpdate", function()
+    for plate in pairs(lifted) do
+        SyncHolder(plate)
+    end
+end)
+
+local function Lift(plate)
+    if not liftRoot then
+        liftRoot = CreateFrame("Frame", nil, WorldFrame)
+        liftRoot:SetAllPoints()
+        liftRoot:SetFrameStrata("BACKGROUND")
+    end
+    local holder = plate.holder
+    if not holder then
+        holder = CreateFrame("Frame", nil, liftRoot)
+        holder:SetSize(1, 1)
+        holder:SetPoint("CENTER")
+        plate.holder = holder
+    end
+    holder.syncScale, holder.syncAlpha = nil, nil
+    lifted[plate] = true
+    plate.lifted = true
+    SyncHolder(plate)
+    plate:SetParent(holder)
+    if plate:GetFrameStrata() ~= "BACKGROUND" then
+        plate:SetFrameStrata("BACKGROUND")
+    end
+    lifter:Show()
+end
+
+local function Drop(plate, reparent)
+    lifted[plate] = nil
+    plate.lifted = nil
+    if plate.holder then
+        plate.holder:Hide()
+    end
+    if reparent and plate.base then
+        plate:SetParent(plate.base)
+    end
+    if not next(lifted) then
+        lifter:Hide()
+    end
+end
+
 local function PlaceLevel(plate)
-    local baseLevel, current = plate.base:GetFrameLevel(), plate:GetFrameLevel()
+    local anchor = plate.lifted and plate.holder or plate.base
+    local baseLevel, current = anchor:GetFrameLevel(), plate:GetFrameLevel()
     if issecretvalue(baseLevel) or issecretvalue(current) then return end
-    local level = baseLevel + 1 + (plate.band or 0) * BAND
+    local level = baseLevel + 1
     if current ~= level then
         plate:SetFrameLevel(level)
     end
@@ -37,6 +108,17 @@ end
 
 local function SetBand(plate, band)
     plate.band = band
+    if band > 0 then
+        if not plate.lifted then
+            Lift(plate)
+        end
+        local level = band * BAND
+        if plate.holder:GetFrameLevel() ~= level then
+            plate.holder:SetFrameLevel(level)
+        end
+    elseif plate.lifted then
+        Drop(plate, true)
+    end
     PlaceLevel(plate)
 end
 
@@ -158,10 +240,10 @@ function Scaling:Apply(plate)
     if s and plate.active then
         if s.mouseoverFront and plate.isMouseover then
             band = BAND_MOUSEOVER
-        elseif s.castFront and not plate.isFriendly then
+        elseif (s.castFront or s.importantFront) and not plate.isFriendly then
             if plate.isTarget then
                 band = BAND_TARGET
-            elseif plate.casting == true then
+            elseif plate.casting == true and (s.castFront or plate.importantCast ~= false) then
                 band = BAND_CASTING
             end
         end
@@ -171,11 +253,18 @@ end
 
 function Scaling:Attach(plate)
     plate.band = nil
+    if plate.lifted then
+        Drop(plate, false)
+    end
     PlaceLevel(plate)
 end
 
 function Scaling:Reset(plate)
     animating[plate] = nil
+    if plate.lifted then
+        Drop(plate, true)
+    end
+    plate.band = nil
     plate.appliedScale, plate.appliedStack, plate.shownScale = nil, nil, nil
 end
 
@@ -196,6 +285,7 @@ function Scaling:Configure(db, state)
     s.castPop = db.castPop
     s.castScale = db.castScale
     s.castFront = db.castFront == true
+    s.importantFront = db.importantFront == true
     s.combatEnabled = db.combatEnabled
     s.combatScale = db.combatScale
     s.idleScale = db.idleScale

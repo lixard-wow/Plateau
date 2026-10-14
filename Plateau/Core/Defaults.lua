@@ -340,6 +340,7 @@ ns.defaults = {
             castPop = false,
             castScale = 1.15,
             castFront = false,
+            importantFront = false,
             combatEnabled = false,
             combatScale = 1.1,
             idleScale = 0.9,

@@ -1445,7 +1445,7 @@ local SIZE_PATHS = {
 local SIZE_CVARS = { "nameplateSize", "nameplateAuraScale", "nameplateMinScale", "nameplateMaxScale" }
 local FADING_PATHS = { "look.range", "look.target.dimOthers", "look.target.dimCombatOnly", "look.target.dimSkipFriendly" }
 local FADING_CVARS = { "nameplateOccludedAlphaMult", "nameplateMinAlpha", "nameplatePlayRemovalAnimation" }
-local LAYERING_PATHS = { "look.scaling.castFront", "look.plate.stackSpace", "look.scaling.mouseoverFront", "look.plate.offsetY" }
+local LAYERING_PATHS = { "look.scaling.castFront", "look.scaling.importantFront", "look.plate.stackSpace", "look.scaling.mouseoverFront", "look.plate.offsetY" }
 local LAYERING_CVARS = { "nameplateStackingTypes", "nameplateOverlapV", "nameplateOverlapH", "nameplateMotionSpeed", "nameplateOtherAtBase",
     "nameplateShowOffscreen", "nameplateTargetRadialPosition", "nameplateTopInset", "nameplateBottomInset" }
 local NAME_CVARS = { "UnitNameOwn", "UnitNameNonCombatCreatureName", "UnitNameFriendlyPlayerName", "UnitNameFriendlyMinionName",
@@ -1621,9 +1621,13 @@ ns.sections = {
 
     Page("layering", "Layering and stacking", LAYERING_PATHS, LAYERING_CVARS, Join(List(
         { type = "Header", label = "Nameplate layering", first = true },
-        { type = "Toggle", path = "look.scaling.castFront", label = "Casting enemies in front", wide = true,
+        { type = "Toggle", path = "look.scaling.castFront", label = "All casting enemies in front", wide = true,
           keywords = "layering priority order caster casters cast in front draw over overlap",
-          tooltip = "Casting enemies draw over nearby nameplates. Your target stays on top." },
+          tooltip = "Every casting enemy draws over nearby nameplates while it casts. Your target stays on top." },
+        Gate({ type = "Toggle", path = "look.scaling.importantFront", label = "Important casts in front", wide = true,
+          keywords = "layering priority order important dangerous cast in front draw over overlap",
+          tooltip = "Enemies casting an important spell, one the game marks as dangerous if not stopped, draw over nearby nameplates. Where the game hides which spell is being cast, like Mythic+ and raids, every cast counts as important. Your target stays on top." },
+          Off("look.scaling.castFront"), "All casting enemies in front already includes important casts."),
         { type = "Toggle", path = "look.scaling.mouseoverFront", label = "Mouseover in front",
           tooltip = "The nameplate under your cursor draws above all others, including your target." },
 

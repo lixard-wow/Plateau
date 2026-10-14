@@ -1092,6 +1092,7 @@ local function SwapToStyled(plate, base, state)
     if not spare then
         return plate
     end
+    ns.Scaling:Reset(plate)
     platesByBase[base] = nil
     plate.base = nil
     plate:Hide()
