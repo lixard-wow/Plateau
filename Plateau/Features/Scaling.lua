@@ -34,6 +34,9 @@ lifter:Hide()
 local function SyncHolder(plate)
     local holder, base = plate.holder, plate.base
     local scale, rootScale = base:GetEffectiveScale(), liftRoot:GetEffectiveScale()
+    if issecretvalue(scale) then
+        scale = UIParent:GetEffectiveScale()
+    end
     if not issecretvalue(scale) and not issecretvalue(rootScale) and rootScale > 0 then
         scale = scale / rootScale
         if holder.syncScale ~= scale then

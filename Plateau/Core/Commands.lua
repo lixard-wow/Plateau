@@ -366,6 +366,10 @@ local function Layers()
         for _, child in ipairs({ base:GetChildren() }) do
             if child.stackRegion and child.active then
                 local health = child.health and child.health:GetFrameLevel()
+                local baseScale = base:GetEffectiveScale()
+                print(("    lifted=%s secret=%s base=%s plate=%s castbar=%s"):format(tostring(child.lifted), tostring(issecretvalue(baseScale)),
+                    issecretvalue(baseScale) and "?" or ("%.3f"):format(baseScale), ("%.3f"):format(child:GetEffectiveScale()),
+                    child.castbar and ("%.1f"):format(child.castbar:GetHeight()) or "-"))
                 local overlay = child.overlay and child.overlay:GetFrameLevel()
                 print(("  %s cast=%s band=%s base=%s/%s plate=%s/%s health=%s overlay=%s"):format(tostring(child.unit), tostring(child.casting),
                     tostring(child.band), tostring(base:GetFrameLevel()), tostring(base:GetFrameStrata()),
