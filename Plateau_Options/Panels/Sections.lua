@@ -1608,7 +1608,8 @@ ns.sections = {
 
         { type = "Header", label = "Movement" },
         InstantMovement(),
-        CVarSlider("nameplateMotionSpeed", "Movement speed", 0, 1, 0.01, "How fast nameplates slide into place when stacking."),
+        Gate(CVarSlider("nameplateMotionSpeed", "Slide speed", 0.05, 1, 0.01, "How much of the way to its stacked spot a nameplate moves each frame. Low values glide slowly and can look like overlapping while a pack moves; 1 jumps straight there. It never goes to 0, because nameplates would stop moving apart."),
+            StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
 
         { type = "Header", label = "Position" },
         BaseSpec({ type = "Slider", path = "look.plate.offsetY", label = "Nameplate vertical offset", min = -60, max = 60,
