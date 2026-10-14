@@ -1,10 +1,35 @@
 local _, ns = ...
 
-local CVARS = { "nameplateShowFriendlyPlayerMinions", "UnitNameFriendlyMinionName" }
+local PLATE_CVARS = { "nameplateShowFriendlyPlayerMinions", "nameplateShowFriendlyPlayerPets",
+    "nameplateShowFriendlyPlayerGuardians", "nameplateShowFriendlyPlayerTotems" }
+local CVARS = { "UnitNameFriendlyMinionName", "UnitNameFriendlyPetName", "UnitNameFriendlyGuardianName",
+    "UnitNameFriendlyTotemName" }
+for _, name in ipairs(PLATE_CVARS) do
+    CVARS[#CVARS + 1] = name
+end
 local INSTANCES = { party = true, raid = true }
 
 local InstancePets = CreateFrame("Frame")
 ns.InstancePets = InstancePets
+
+function InstancePets:PlatesShown()
+    for _, name in ipairs(PLATE_CVARS) do
+        local value = ns.CVars:UserValue(name)
+        if value ~= nil and value ~= "1" then
+            return false
+        end
+    end
+    return true
+end
+
+function InstancePets:ShowPlates()
+    for _, name in ipairs(PLATE_CVARS) do
+        local value = ns.CVars:UserValue(name)
+        if value ~= nil and value ~= "1" then
+            ns.CVars:Set(name, "1")
+        end
+    end
+end
 
 function InstancePets:IsOn()
     return ns.DB.saved.global.hideInstancePets == true

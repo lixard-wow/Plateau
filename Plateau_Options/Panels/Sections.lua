@@ -1935,13 +1935,11 @@ ns.sections = {
         { type = "Toggle", label = "Show in dungeons and raids", visibleIf = function() return Plateau.InstancePets ~= nil end,
           keywords = "pet pets minion minions totem names hide dungeon raid instance mythic friendly",
           get = function()
-              return CVars:UserValue("nameplateShowFriendlyPlayerMinions") == "1" and not Plateau.InstancePets:IsOn()
+              return Plateau.InstancePets:PlatesShown() and not Plateau.InstancePets:IsOn()
           end,
           set = function(value)
               if value then
-                  if CVars:UserValue("nameplateShowFriendlyPlayerMinions") ~= "1" then
-                      CVars:Set("nameplateShowFriendlyPlayerMinions", "1")
-                  end
+                  Plateau.InstancePets:ShowPlates()
                   Plateau.InstancePets:SetOn(false)
               else
                   Plateau.InstancePets:SetOn(true)

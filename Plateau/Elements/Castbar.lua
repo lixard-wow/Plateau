@@ -271,8 +271,9 @@ function Castbar:Create(plate)
     local fade = flashAnim:CreateAnimation("Alpha")
     fade:SetFromAlpha(1)
     fade:SetToAlpha(0)
-    fade:SetDuration(0.45)
-    fade:SetSmoothing("OUT")
+    fade:SetStartDelay(0.3)
+    fade:SetDuration(0.5)
+    fade:SetSmoothing("IN")
     flashAnim:SetScript("OnFinished", function() flash:Hide() end)
     flash.anim, flash.fade = flashAnim, fade
     bar.interruptFlash = flash
@@ -407,8 +408,7 @@ function Castbar:Style(plate, db)
     local hit = db.interruptedColor
     bar.interrupted.fill:SetColorTexture(hit[1], hit[2], hit[3], hit[4])
     local flashColor = db.interruptFlashColor
-    bar.interruptFlash:SetColorTexture(flashColor[1], flashColor[2], flashColor[3], 1)
-    bar.interruptFlash.fade:SetFromAlpha(flashColor[4] or 1)
+    bar.interruptFlash:SetColorTexture(flashColor[1], flashColor[2], flashColor[3], flashColor[4] or 1)
     bar.interruptFlash.key = table.concat({ flashColor[1], flashColor[2], flashColor[3], flashColor[4] or 1 }, ",")
 
     bar.border:SetStyle(db.borderStyle, bar)
