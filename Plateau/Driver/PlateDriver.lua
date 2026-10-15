@@ -529,7 +529,7 @@ local function OverOwnFrames(plate)
     return false
 end
 
-local HOVER_GRACE = 0.25
+local HOVER_GRACE = 0.1
 local hoverLostAt
 
 local function SetMouseover(plate)
