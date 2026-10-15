@@ -551,6 +551,9 @@ function Castbar:Disable(plate)
         plate.casting = false
         ns.Scaling:Apply(plate)
         ns.Elements.Name:RefreshShown(plate)
+        if plate.rangeAlpha ~= 1 then
+            ns.Driver:RefreshAlpha(plate)
+        end
     end
     bar:Hide()
     TargetShownChanged(plate)
@@ -668,6 +671,9 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
         plate.casting = false
         ns.Scaling:Apply(plate)
         ns.Elements.Name:RefreshShown(plate)
+        if plate.rangeAlpha ~= 1 then
+            ns.Driver:RefreshAlpha(plate)
+        end
     end
     bar.holdToken = bar.holdToken + 1
     bar.pendingHoldToken = bar.holdToken
@@ -804,6 +810,9 @@ function Castbar:Refresh(plate, unit, ending)
         plate.casting = true
         ns.Scaling:Apply(plate)
         ns.Elements.Name:RefreshShown(plate)
+        if plate.rangeAlpha ~= 1 then
+            ns.Driver:RefreshAlpha(plate)
+        end
     end
     UpdateKickMarker(bar)
     bar:Show()

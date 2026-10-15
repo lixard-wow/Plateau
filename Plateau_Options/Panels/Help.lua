@@ -89,7 +89,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Fading page",
         keywords = "fading fade opacity occluded hidden walls line of sight range distance transparent",
-        text = "Fading holds every way a nameplate can fade: Range fading for enemies your interrupt can't reach, Non-target fading while you have a target, Behind walls and By distance. Non-target fading also holds its options: only in combat, skip friendly nameplates, and keep the mouseover nameplate at full opacity.\n\nUnder Behind walls, separate switches pick where it applies: the open world, dungeons, raids, delves and scenarios, and battlegrounds and arenas. Blizzard fading picks which nameplates use Blizzard's own fading, and whether disappearing nameplates fade out.",
+        text = "Fading holds every way a nameplate can fade: Range fading for enemies your interrupt can't reach (casting enemies always stay at full opacity), Non-target fading while you have a target, Behind walls and By distance. Non-target fading also holds its options: only in combat, skip friendly nameplates, and keep the mouseover nameplate at full opacity.\n\nUnder Behind walls, separate switches pick where it applies: the open world, dungeons, raids, delves and scenarios, and battlegrounds and arenas. Blizzard fading picks which nameplates use Blizzard's own fading, and whether disappearing nameplates fade out.",
     },
     {
         category = "Pages",

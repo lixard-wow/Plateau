@@ -1571,9 +1571,9 @@ ns.sections = {
     Page("fading", "Fading", FADING_PATHS, FADING_CVARS, List(
         { type = "Header", label = "Range fading", first = true },
         { type = "Toggle", path = "look.range.enabled", label = "Fade nameplates outside interrupt range",
-          tooltip = "Fades enemies you are too far away to interrupt." },
+          tooltip = "Fades enemies you are too far away to interrupt. An enemy that starts casting comes back to full opacity until the cast ends." },
         Gate({ type = "Slider", path = "look.range.alpha", label = "Out-of-range opacity", min = 0.1, max = 1, step = 0.05,
-          tooltip = "Opacity of enemies outside your interrupt range. Nameplates never fade if you know no interrupt." }, On("look.range.enabled"), "Turn on Fade nameplates outside interrupt range to use this."),
+          tooltip = "Opacity of enemies outside your interrupt range. Casting enemies always stay at full opacity. Nameplates never fade if you know no interrupt." }, On("look.range.enabled"), "Turn on Fade nameplates outside interrupt range to use this."),
 
         { type = "Header", label = "Non-target fading" },
         { type = "Slider", path = "look.target.dimOthers", label = "Non-target opacity", keywords = "dim dimming dimmed dim others fade faded other plates nameplates friendly transparent", min = 0.2, max = 1, step = 0.05,

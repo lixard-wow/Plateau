@@ -444,7 +444,7 @@ local function Dims(plate)
 end
 
 function Driver:RefreshAlpha(plate)
-    local range = (mouseoverFull and plate.isMouseover) and 1 or (plate.rangeAlpha or 1)
+    local range = ((mouseoverFull and plate.isMouseover) or plate.casting == true) and 1 or (plate.rangeAlpha or 1)
     local alpha = range * (plate.idleAlpha or 1)
     if not plate.preview then
         if targetPlate and not plate.isTarget and Dims(plate) then
