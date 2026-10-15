@@ -368,7 +368,7 @@ end
 
 function Castbar:Style(plate, db)
     local bar = plate.castbar
-    local height, gap, size = (db.height and db.height > 0) and db.height or plate:GetHeight(), db.gap, db.borderSize
+    local height, gap, size = (db.height and db.height > 0) and db.height or plate.rawHeight or plate:GetHeight(), db.gap, db.borderSize
     local look = ns.DB.views[plate.state]
     local joined = db.joinBorder and (plate.castShift or 0) == 0 and (db.borderStyle or "pixel") == "pixel"
         and look and (look.health.borderStyle or "pixel") == "pixel"
@@ -380,7 +380,7 @@ function Castbar:Style(plate, db)
     local iconOffset = (db.showIcon and not span) and (height + gap) or 0
 
     local iconRight = db.iconSide == "RIGHT"
-    local total = (db.width and db.width > 0) and db.width or plate:GetWidth()
+    local total = (db.width and db.width > 0) and db.width or plate.rawWidth or plate:GetWidth()
     local barWidth = math.max(10, total - iconOffset)
     bar:ClearAllPoints()
     if db.width and db.width > 0 then
