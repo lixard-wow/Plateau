@@ -548,12 +548,35 @@ local function SetMouseover(plate)
     mouseWatcher:SetShown(plate ~= nil)
 end
 
+local cursorLeft = false
+local CURSOR_NONE = Enum.WorldCursorAnchorType and Enum.WorldCursorAnchorType.None or 0
+
+local function CurrentHover()
+    if cursorLeft then return nil end
+    return FindPlate("mouseover")
+end
+
+local function OnWorldCursor(anchorType)
+    if issecretvalue(anchorType) then return end
+    cursorLeft = anchorType == CURSOR_NONE
+    if not cursorLeft then
+        SetMouseover(FindPlate("mouseover"))
+        return
+    end
+    hoverLostAt = nil
+    if mouseoverPlate then
+        NotifyMouseover(mouseoverPlate, false)
+        mouseoverPlate = nil
+    end
+    mouseWatcher:Hide()
+end
+
 local sinceCheck = 0
 mouseWatcher:SetScript("OnUpdate", function(_, elapsed)
     sinceCheck = sinceCheck + elapsed
     if sinceCheck < 0.1 and not hoverLostAt then return end
     sinceCheck = 0
-    SetMouseover(FindPlate("mouseover"))
+    SetMouseover(CurrentHover())
 end)
 
 local function ApplyIfChanged(plate, oldTarget, oldFocus)
@@ -1552,6 +1575,9 @@ Driver:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 Driver:RegisterEvent("PLAYER_TARGET_CHANGED")
 Driver:RegisterEvent("PLAYER_FOCUS_CHANGED")
 Driver:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
+if C_EventUtils and C_EventUtils.IsEventValid and C_EventUtils.IsEventValid("WORLD_CURSOR_TOOLTIP_UPDATE") then
+    Driver:RegisterEvent("WORLD_CURSOR_TOOLTIP_UPDATE")
+end
 Driver:RegisterEvent("PLAYER_REGEN_ENABLED")
 Driver:RegisterEvent("PLAYER_REGEN_DISABLED")
 Driver:RegisterEvent("CVAR_UPDATE")
@@ -1605,7 +1631,9 @@ Driver:SetScript("OnEvent", function(_, event, arg)
     elseif event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
         UpdateEmphasis()
     elseif event == "UPDATE_MOUSEOVER_UNIT" then
-        SetMouseover(FindPlate("mouseover"))
+        SetMouseover(CurrentHover())
+    elseif event == "WORLD_CURSOR_TOOLTIP_UPDATE" then
+        OnWorldCursor(arg)
     elseif event == "NAME_PLATE_UNIT_ADDED" then
         OnUnitAdded(arg)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
