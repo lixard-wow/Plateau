@@ -400,40 +400,6 @@ local function WatchCasts()
     end)
 end
 
-local function WatchHover()
-    Say(L["Watching the nameplate under your cursor for 15 seconds."])
-    local ticks = 0
-    local ticker
-    ticker = C_Timer.NewTicker(0.25, function()
-        ticks = ticks + 1
-        local base = C_NamePlate.GetNamePlateForUnit("mouseover")
-        local plate
-        ns.Driver:ForEachActive(function(child)
-            if base and child.base == base then
-                plate = child
-            end
-        end)
-        if plate then
-            local function Try(region, method)
-                local ok, value = pcall(region[method], region)
-                if not ok then return "blocked" end
-                if issecretvalue(value) then return "secret" end
-                return type(value) == "number" and ("%.0f"):format(value) or tostring(value)
-            end
-            local x, y = GetCursorPosition()
-            local click = plate.clickArea
-            print(("  %s hover=%s click=%s plate=%s health=%s cursor=%.0f,%.0f box=%s,%s,%s,%s scale=%s"):format(
-                tostring(plate.unit), tostring(plate.isMouseover), Try(click, "IsMouseOver"), Try(plate, "IsMouseOver"),
-                Try(plate.health, "IsMouseOver"), x, y, Try(click, "GetLeft"), Try(click, "GetRight"),
-                Try(click, "GetBottom"), Try(click, "GetTop"), Try(click, "GetEffectiveScale")))
-        end
-        if ticks >= 60 then
-            ticker:Cancel()
-            Say(L["Done watching."])
-        end
-    end)
-end
-
 local function SinkTarget()
     local plate = ns.Driver:GetPlate("target")
     if not plate then
@@ -643,8 +609,6 @@ SlashCmdList.PLATEAU = function(input)
         Layers()
     elseif command == "debug" and path == "watch" then
         WatchCasts()
-    elseif command == "debug" and path == "hover" then
-        WatchHover()
     elseif command == "debug" and path == "sink" then
         SinkTarget()
     elseif command == "debug" and path == "locale" then
