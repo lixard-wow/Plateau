@@ -79,11 +79,13 @@ local clickThroughFriendly = false
 local function ApplyHitTest(plate)
     local base = plate.base
     if not base or not base.CanChangeHitTestPoints then return end
+    plate.hitApplied = false
     if base:CanChangeHitTestPoints() then
         if clickThroughFriendly and plate.isFriendly and base.ClearAllHitTestPoints then
             base:ClearAllHitTestPoints()
         else
             base:SetAllHitTestPoints(plate.clickArea)
+            plate.hitApplied = true
         end
         plate.clickArea.changed = false
     else
@@ -481,6 +483,17 @@ local function FindPlate(unit)
     end
 end
 
+local function FindHover()
+    local plate = FindPlate("mouseover")
+    if plate and plate.hitApplied then
+        local over = plate.clickArea:IsMouseOver()
+        if not issecretvalue(over) and not over then
+            return nil
+        end
+    end
+    return plate
+end
+
 local function NotifyMouseover(plate, hovered)
     plate.isMouseover = hovered
     if not plate.active then return end
@@ -523,7 +536,12 @@ local function SetMouseover(plate)
     if plate then
         hoverLostAt = nil
     end
-    if plate == mouseoverPlate then return end
+    if plate == mouseoverPlate then
+        if not plate and not FindPlate("mouseover") then
+            mouseWatcher:Hide()
+        end
+        return
+    end
     if not plate and mouseoverPlate and mouseoverPlate.active then
         if OverOwnFrames(mouseoverPlate) then
             hoverLostAt = nil
@@ -545,7 +563,7 @@ local function SetMouseover(plate)
     if plate then
         NotifyMouseover(plate, true)
     end
-    mouseWatcher:SetShown(plate ~= nil)
+    mouseWatcher:SetShown(plate ~= nil or FindPlate("mouseover") ~= nil)
 end
 
 local sinceCheck = 0
@@ -553,7 +571,7 @@ mouseWatcher:SetScript("OnUpdate", function(_, elapsed)
     sinceCheck = sinceCheck + elapsed
     if sinceCheck < 0.1 and not hoverLostAt then return end
     sinceCheck = 0
-    SetMouseover(FindPlate("mouseover"))
+    SetMouseover(FindHover())
 end)
 
 local function ApplyIfChanged(plate, oldTarget, oldFocus)
@@ -1605,7 +1623,7 @@ Driver:SetScript("OnEvent", function(_, event, arg)
     elseif event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
         UpdateEmphasis()
     elseif event == "UPDATE_MOUSEOVER_UNIT" then
-        SetMouseover(FindPlate("mouseover"))
+        SetMouseover(FindHover())
     elseif event == "NAME_PLATE_UNIT_ADDED" then
         OnUnitAdded(arg)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
