@@ -39,7 +39,7 @@ local function Configure(fields)
     local db = {
         boss = 1, lieutenant = 1, higher = 1, caster = 1, elite = 1, trivial = 1,
         focusGrow = false, focusScale = 1, castPop = false, castScale = 1,
-        castFront = false, combatEnabled = false, combatScale = 1, idleScale = 1,
+        combatEnabled = false, combatScale = 1, idleScale = 1,
     }
     for k, v in pairs(fields or {}) do db[k] = v end
     Scaling:Configure(db, "enemy")
@@ -143,56 +143,29 @@ check(near(friendlyTarget.scale, 1 / 1.2), "a friendly target cancels the game's
 check(near(enemyTarget.stackRegion.scale, 1), "an enemy target's stacking bounds are not grown twice, since the game already grows the nameplate")
 check(near(friendlyTarget.stackRegion.scale, 1 / 1.2), "a friendly target's stacking bounds cancel the game's growth, matching the plate")
 
-Configure({ castFront = false })
-local offTarget = Live({ isTarget = true, mobType = "boss", casting = true })
-Scaling:Apply(offTarget)
-check(offTarget.band == 0 and offTarget.level == 106, "casters in front off: every plate sits just above its game nameplate, target and casters included")
-check(offTarget.strata == "MEDIUM", "layering never changes a plate's strata")
-
-Configure({ castFront = true })
-local function Band(fields)
+Configure()
+local function Placed(fields)
     local plate = Live(fields)
     Scaling:Apply(plate)
     return plate
 end
-local idle = Band({ mobType = "boss" })
-check(idle.band == 0 and idle.level == 106, "an enemy that isn't casting stays in the game's order, whatever its type")
-local caster = Band({ mobType = "trivial", casting = true })
-check(caster.band == 1 and caster.parent == caster.holder and caster.level == 201, "a casting enemy is lifted onto the front layer, one band up")
-check(Band({ isTarget = true }).band == 2, "your target sits above casting enemies")
-check(Band({ isTarget = true, casting = true }).band == 2, "a casting target stays at the target band")
-check(Band({ isFocus = true }).band == 0, "focus gets no special layer")
-check(Band({ isPlayer = true, casting = true }).band == 1, "a casting enemy player comes forward too")
-check(Band({ isFriendly = true, casting = true }).band == 0, "friendly plates are never raised for casting")
-check(Band({ isFriendly = true, isTarget = true }).band == 0, "a friendly target keeps the game's order")
-check(idle.strata == "MEDIUM" and caster.strata == "BACKGROUND", "a lifted plate sits in the background strata, above nameplates but under the rest of the interface")
+local placedTarget = Placed({ isTarget = true, mobType = "boss", casting = true })
+check(placedTarget.level == 106, "every plate sits just above its game nameplate, target and casters included")
+check(placedTarget.strata == "MEDIUM" and placedTarget.parent == nil, "a plate is never moved to another strata or parent")
+check(Placed({ isMouseover = true }).level == 106, "a hovered plate keeps the game's order")
 
 local near1 = Live({ mobType = "elite", base = Base(110) })
 local far1 = Live({ mobType = "elite", base = Base(101) })
 Scaling:Apply(near1)
 Scaling:Apply(far1)
-check(near1.level > far1.level, "two plates in the same band keep the game's order between them")
-local attached = Plate({ base = Base(107), band = 3 })
+check(near1.level > far1.level, "nearer plates keep the game's order over farther ones")
+local attached = Plate({ base = Base(107) })
 Scaling:Attach(attached)
-check(attached.level == 108 and attached.band == nil, "attaching a plate puts it just above its game nameplate and clears any old band")
-
-check(Band({ casting = true, base = Base(100) }).level > Band({ base = Base(140) }).level, "a casting enemy beats a nearer plate that isn't casting")
-
-local finished = Live({ casting = true })
-Scaling:Apply(finished)
-finished.casting = false
-Scaling:Apply(finished)
-check(finished.band == 0 and finished.level == 106, "when the cast ends the plate drops back to the game's order")
-
-local released = Live({ casting = true })
-Scaling:Apply(released)
-released.active = false
-Scaling:Apply(released)
-check(released.band == 0 and released.level == 106, "a released plate drops back to the game's level")
+check(attached.level == 108, "attaching a plate puts it just above its game nameplate")
 
 local preview = Plate({ preview = true, mobType = "boss", base = Base(105), active = true, casting = true })
 Scaling:Apply(preview)
-check(preview.band == nil and preview.levelSets == nil, "preview plates are left alone")
+check(preview.levelSets == nil, "preview plates are left alone")
 
 
 local watcher
@@ -251,17 +224,6 @@ local foe = Plate({ mobType = "trivial" })
 Scaling:Apply(foe)
 check(near(foe.scale, 1), "friendly nameplate scale leaves enemy plates alone")
 
-Configure({ mouseoverFront = true, castFront = true })
-local front = Live({ base = Base(105), mobType = "trivial", isMouseover = true })
-local boss = Live({ base = Base(105), mobType = "boss" })
-Scaling:Apply(front)
-Scaling:Apply(boss)
-check(front.band > boss.band, "mouseover in front beats other plates")
-local hoveredFriendFront = Live({ base = Base(105), isFriendly = true, isMouseover = true })
-Scaling:Apply(hoveredFriendFront)
-local target = Live({ base = Base(105), isTarget = true })
-Scaling:Apply(target)
-check(hoveredFriendFront.band > target.band, "mouseover in front beats your target, friendly plates included")
 
 local stale = Live({ mobType = "trivial", base = Base(114) })
 Scaling:Apply(stale)
@@ -287,14 +249,3 @@ Scaling:Apply(orphan)
 orphan.appliedScale = nil
 ok = pcall(animator.scripts.OnUpdate, animator, 0.016)
 check(ok, "the size animation skips a plate that lost its target size")
-
-Configure({ importantFront = true })
-check(Band({ casting = true, importantCast = true }).band == 1, "important casts in front: an important cast is lifted")
-check(Band({ casting = true, importantCast = false }).band == 0, "important casts in front: an ordinary cast stays in the game's order")
-check(Band({ isTarget = true }).band == 2, "important casts in front: your target still sits above casters")
-local dropped = Band({ casting = true, importantCast = true })
-dropped.casting = false
-Scaling:Apply(dropped)
-check(dropped.band == 0 and dropped.parent == dropped.base and not dropped.lifted, "when the cast ends the plate drops back onto its game nameplate")
-Configure({ castFront = true, importantFront = true })
-check(Band({ casting = true, importantCast = false }).band == 1, "all casting enemies in front includes ordinary casts")

@@ -350,72 +350,6 @@ setupWatcher:SetScript("OnEvent", function(_, event)
     end
 end)
 
-local function Layers()
-    local levels = {}
-    local bases = C_NamePlate.GetNamePlates()
-    for _, base in ipairs(bases) do
-        local level = base:GetFrameLevel()
-        if not issecretvalue(level) then
-            levels[#levels + 1] = level
-        end
-    end
-    table.sort(levels)
-    Say(L["Nameplate layers:"])
-    print("  plates " .. #bases .. ": " .. table.concat(levels, " "))
-    ns.Driver:ForEachActive(function(child)
-        local base = child.base
-        if not base then return end
-        local health = child.health and child.health:GetFrameLevel()
-        local overlay = child.overlay and child.overlay:GetFrameLevel()
-        print(("  %s cast=%s band=%s base=%s/%s plate=%s/%s health=%s overlay=%s"):format(tostring(child.unit), tostring(child.casting),
-            tostring(child.band), tostring(base:GetFrameLevel()), tostring(base:GetFrameStrata()),
-            tostring(child:GetFrameLevel()), tostring(child:GetFrameStrata()), tostring(health), tostring(overlay)))
-        local baseScale = base:GetEffectiveScale()
-        print(("    lifted=%s secret=%s base=%s plate=%s castbar=%s"):format(tostring(child.lifted), tostring(issecretvalue(baseScale)),
-            issecretvalue(baseScale) and "?" or ("%.3f"):format(baseScale), ("%.3f"):format(child:GetEffectiveScale()),
-            child.castbar and ("%.1f"):format(child.castbar:GetHeight()) or "-"))
-    end)
-end
-
-local function WatchCasts()
-    Say(L["Watching casting nameplates for 20 seconds."])
-    local ticks = 0
-    local ticker
-    ticker = C_Timer.NewTicker(0.5, function()
-        ticks = ticks + 1
-        ns.Driver:ForEachActive(function(child)
-            local base = child.base
-            if child.casting and base then
-                local bar = child.castbar
-                print(("  %s band=%s lifted=%s important=%s scale=%.3f/%.3f castbar=%.1fx%.1f shown=%s health=%.1f"):format(
-                    tostring(child.unit), tostring(child.band), tostring(child.lifted), tostring(child.importantCast),
-                    child:GetEffectiveScale(), base:GetEffectiveScale(), bar:GetWidth(), bar:GetHeight(),
-                    tostring(bar:IsShown()), child.health:GetHeight()))
-            end
-        end)
-        if ticks >= 40 then
-            ticker:Cancel()
-            Say(L["Done watching."])
-        end
-    end)
-end
-
-local function SinkTarget()
-    local plate = ns.Driver:GetPlate("target")
-    if not plate then
-        Say(L["Target an enemy with a Plateau nameplate first."])
-        return
-    end
-    plate:SetFrameLevel(1)
-    Say(L["Your target's nameplate is pushed to the bottom for 10 seconds."])
-    C_Timer.After(10, function()
-        if plate.active then
-            ns.Scaling:Apply(plate)
-        end
-        Say(L["Your target's nameplate is back in place."])
-    end)
-end
-
 local function Help()
     Say(L["Commands:"])
     print("  " .. L["/plt - open the settings"])
@@ -605,12 +539,6 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
         Say(L["Slow-frame counters reset."])
-    elseif command == "debug" and path == "layers" then
-        Layers()
-    elseif command == "debug" and path == "watch" then
-        WatchCasts()
-    elseif command == "debug" and path == "sink" then
-        SinkTarget()
     elseif command == "debug" and path == "locale" then
         OpenLocalePicker()
     elseif command == "debug" then

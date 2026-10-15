@@ -759,13 +759,6 @@ function Castbar:Refresh(plate, unit, ending)
     bar.drains = direction == REMAINING
     local important = IsSpellImportant(spellID)
     bar.isImportant = important
-    local importantCast = issecretvalue(important) or important == true
-    if plate.importantCast ~= importantCast then
-        plate.importantCast = importantCast
-        if plate.casting then
-            ns.Scaling:Apply(plate)
-        end
-    end
     ApplyFill(bar)
 
     if s.showGlow then
@@ -866,7 +859,6 @@ function Castbar:Preview(plate, state)
     end
     bar.glow:SetAlpha((s.showGlow and cast.important) and 1 or 0)
 
-    plate.importantCast = cast.important == true
     plate.casting = true
     ns.Scaling:Apply(plate)
     bar.spark:SetShown(s.showSpark)

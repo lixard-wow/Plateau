@@ -344,9 +344,9 @@ end
 for _, path in ipairs({ "look.range.enabled", "look.range.alpha", "look.target.dimOthers" }) do
     check(hasPath("fading", path), path .. " is on Fading")
 end
-check(labelsOf(byKey.layering)["Stacking bounds"] == true, "Stacking bounds is on Layering and stacking")
-for _, path in ipairs({ "look.scaling.castFront", "look.scaling.mouseoverFront" }) do
-    check(hasPath("layering", path), path .. " is on Layering and stacking")
+check(labelsOf(byKey.layering)["Stacking bounds"] == true, "Stacking bounds is on Stacking")
+for _, path in ipairs({ "look.scaling.castFront", "look.scaling.importantFront", "look.scaling.mouseoverFront" }) do
+    check(not hasPath("layering", path), path .. " is gone")
 end
 for _, path in ipairs({ "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY" }) do
     check(hasPath("clicking", path), path .. " is on Clickable area")
@@ -361,14 +361,13 @@ check(byKey.behavior == nil, "the old catch-all Behavior page is gone")
 check(not hasPath("target", "look.target.dimOthers"), "non-target opacity left the Target page")
 check(not groupCovers(byKey.target, "look.target.dimOthers") and not groupCovers(byKey.target, "look.target.scale"), "resetting Target no longer resets settings that moved to Fading and Size")
 check(groupCovers(byKey.fading, "look.target.dimOthers") and groupCovers(byKey.size, "look.target.scale"), "resetting Fading and Size covers the settings they now hold")
-check(not groupCovers(byKey.size, "look.scaling.castFront") and groupCovers(byKey.layering, "look.scaling.castFront"), "resetting Size does not touch Casting enemies in front")
 check(hasHeader(byKey.friendly, "Blizzard-drawn nameplates") and hasHeader(byKey.friendly, "Blizzard's friendly nameplates"), "all Blizzard-drawn nameplate settings are on Friendly")
 check(hasHeader(byKey.addon, "Other nameplate addons"), "the addon conflict list is on Plateau settings")
 for _, path in ipairs({ "look.friendly.raidMarker.own", "look.friendly.raidMarker.position", "look.scaling.friendlyScale" }) do
     check(hasPath("friendly", path) and groupCovers(byKey.friendly, path), path .. " is on Friendly and reset with it")
 end
 check(not hasPath("raidMarker", "look.friendly.raidMarker.own") and not hasPath("size", "look.scaling.friendlyScale"), "friendly raid icon placement and scale left Raid target icon and Size")
-check(foundOn("casting enemies in front", "layering") and foundOn("priority", "layering") and foundOn("range fading", "fading") and foundOn("enemy type scale", "size"), "the moved sections are searchable on their new pages")
+check(foundOn("stacking bounds", "layering") and foundOn("range fading", "fading") and foundOn("enemy type scale", "size"), "the moved sections are searchable on their new pages")
 
 local function ranked(query)
     local words = {}

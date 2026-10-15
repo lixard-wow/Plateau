@@ -338,8 +338,6 @@ ns.defaults = {
             focusScale = 1.2,
             castPop = false,
             castScale = 1.15,
-            castFront = false,
-            importantFront = false,
             combatEnabled = false,
             combatScale = 1.1,
             idleScale = 0.9,
@@ -347,7 +345,6 @@ ns.defaults = {
             mouseoverScale = 1.1,
             friendlyScale = 1,
             smooth = false,
-            mouseoverFront = false,
         },
         bossPhases = {
             enabled = true,

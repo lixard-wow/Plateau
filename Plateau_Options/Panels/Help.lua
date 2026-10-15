@@ -41,7 +41,7 @@ ns.helpTopics = {
         category = "Getting started",
         title = "Dimmed settings and collapsed sections",
         keywords = "dimmed disabled greyed collapsed section advanced expand hidden",
-        text = "A setting that cannot change anything right now, such as a border thickness while the border is off, is dimmed instead of hidden. Hover it to see what to switch on. Your saved value is kept and the setting works again as soon as you switch that on.\n\nSome pages fold advanced settings into sections that start collapsed, such as Off-screen nameplates on Layering and stacking, Blizzard-drawn nameplates on Friendly, and Diagnostics on Help. Click a heading to open it. Search opens the right section for you.",
+        text = "A setting that cannot change anything right now, such as a border thickness while the border is off, is dimmed instead of hidden. Hover it to see what to switch on. Your saved value is kept and the setting works again as soon as you switch that on.\n\nSome pages fold advanced settings into sections that start collapsed, such as Off-screen nameplates on Stacking, Blizzard-drawn nameplates on Friendly, and Diagnostics on Help. Click a heading to open it. Search opens the right section for you.",
     },
     {
         category = "Getting started",
@@ -93,9 +93,9 @@ ns.helpTopics = {
     },
     {
         category = "Pages",
-        title = "Layering and stacking page",
-        keywords = "layering stacking stack overlap order spacing movement slide front",
-        text = "Layering decides which nameplate is in front where nameplates overlap. Casting enemies in front draws a casting enemy over its neighbors, with your target still on top; otherwise nearer nameplates draw over farther ones. Mouseover in front puts the nameplate under your cursor above all others.\n\nStacking holds the stacking switches, the spacing presets and Show stacking boxes, which draws the area the game keeps apart. Stacking bounds and spacing decide how much of each nameplate counts. Movement holds Instant movement and how fast nameplates slide. Position moves nameplates up or down.",
+        title = "Stacking page",
+        keywords = "stacking stack overlap spacing movement slide",
+        text = "Stacking holds the stacking switches, the spacing presets and Show stacking boxes, which draws the area the game keeps apart. Stacking bounds and spacing decide how much of each nameplate counts. Movement holds Instant movement and how fast nameplates slide. Position moves nameplates up or down.",
     },
     {
         category = "Pages",
@@ -197,7 +197,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Target, Focus and Mouseover pages",
         keywords = "highlight highlights states targets target focus mouseover arrows brackets glow border recolor opacity",
-        text = "Target, Focus, Mouseover and Out of combat each have their own page under Targets in the left menu.\n\nYour target can have a colored border, a recolored health bar with its own texture and overlay pattern, a brighter bar, arrows, corner brackets and a soft glow. Arrows and brackets take any color you choose, and have styles, sizes and spacing from the nameplate. Target scale is on the Size page, and fading the other nameplates while you have a target is on the Fading page.\n\nYour focus has the same choices. When a unit is both your target and focus, Target settings take priority.\n\nMouseover highlights the nameplate under your cursor with a brighter bar, a border and a glow. Its scale, layering and opacity are on the Size, Layering and stacking, and Fading pages.",
+        text = "Target, Focus, Mouseover and Out of combat each have their own page under Targets in the left menu.\n\nYour target can have a colored border, a recolored health bar with its own texture and overlay pattern, a brighter bar, arrows, corner brackets and a soft glow. Arrows and brackets take any color you choose, and have styles, sizes and spacing from the nameplate. Target scale is on the Size page, and fading the other nameplates while you have a target is on the Fading page.\n\nYour focus has the same choices. When a unit is both your target and focus, Target settings take priority.\n\nMouseover highlights the nameplate under your cursor with a brighter bar, a border and a glow. Its scale and opacity are on the Size and Fading pages.",
     },
     {
         category = "Pages",
@@ -239,7 +239,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Blizzard's nameplate settings",
         keywords = "game settings cvar blizzard options names over heads which nameplates show off-screen soft target blizzard-drawn",
-        text = "Blizzard's own nameplate and name settings sit on the Plateau page they belong to, so you only look in one place. Their tooltip ends with Game setting: changing one here changes it in Blizzard's Options too, and a change made in Blizzard's Options shows here. Plateau saves the previous value of any you change, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset its page, or type /plt cvars restore.\n\nWhere they are: names over heads at the bottom of Name; which nameplates show on its own page under Behavior, with friendly players and NPCs on Friendly; size on Size; opacity behind walls and by distance on Fading; stacking, movement and off-screen nameplates on Layering and stacking; soft target icons on Target; and the nameplates the game draws itself (style, cast bar, aggro, auras, simplify) at the bottom of Friendly.\n\nPlateau's own settings (other nameplate addons, window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window. The performance numbers are under Diagnostics on the Help page. These settings are shared by every profile.",
+        text = "Blizzard's own nameplate and name settings sit on the Plateau page they belong to, so you only look in one place. Their tooltip ends with Game setting: changing one here changes it in Blizzard's Options too, and a change made in Blizzard's Options shows here. Plateau saves the previous value of any you change, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset its page, or type /plt cvars restore.\n\nWhere they are: names over heads at the bottom of Name; which nameplates show on its own page under Behavior, with friendly players and NPCs on Friendly; size on Size; opacity behind walls and by distance on Fading; stacking, movement and off-screen nameplates on Stacking; soft target icons on Target; and the nameplates the game draws itself (style, cast bar, aggro, auras, simplify) at the bottom of Friendly.\n\nPlateau's own settings (other nameplate addons, window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window. The performance numbers are under Diagnostics on the Help page. These settings are shared by every profile.",
     },
     {
         category = "How do I",
@@ -269,7 +269,7 @@ ns.helpTopics = {
         category = "How do I",
         title = "Stop nameplates overlapping",
         keywords = "overlap stacking stack spacing slide crowded",
-        text = "Open Layering and stacking. Under Stacking, click a preset to apply it: Tight, Balanced or Spread out. They change only the spacing between nameplates. Turn on Show stacking boxes to see the area the game keeps apart. If nameplates overlap because your name or cast bar takes extra room, change Stacking bounds to include it. Turn on Instant movement under Movement if you also want nameplates to jump straight to their spot.",
+        text = "Open Stacking. Under Stacking, click a preset to apply it: Tight, Balanced or Spread out. They change only the spacing between nameplates. Turn on Show stacking boxes to see the area the game keeps apart. If nameplates overlap because your name or cast bar takes extra room, change Stacking bounds to include it. Turn on Instant movement under Movement if you also want nameplates to jump straight to their spot.",
     },
     {
         category = "How do I",
