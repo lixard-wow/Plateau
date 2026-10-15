@@ -483,11 +483,21 @@ local function FindPlate(unit)
     end
 end
 
+local seenOver
+
 local function FindHover()
     local plate = FindPlate("mouseover")
+    if plate ~= seenOver then
+        seenOver = nil
+    end
     if plate and plate.hitApplied then
         local over = plate.clickArea:IsMouseOver()
-        if not issecretvalue(over) and not over then
+        if issecretvalue(over) then
+            return plate
+        end
+        if over then
+            seenOver = plate
+        elseif seenOver == plate then
             return nil
         end
     end
