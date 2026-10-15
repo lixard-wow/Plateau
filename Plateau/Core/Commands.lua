@@ -414,13 +414,18 @@ local function WatchHover()
             end
         end)
         if plate then
+            local function Try(region, method)
+                local ok, value = pcall(region[method], region)
+                if not ok then return "blocked" end
+                if issecretvalue(value) then return "secret" end
+                return type(value) == "number" and ("%.0f"):format(value) or tostring(value)
+            end
             local x, y = GetCursorPosition()
             local click = plate.clickArea
-            print(("  %s hit=%s base=%s click=%s plate=%s health=%s hover=%s cursor=%.0f,%.0f click=%s,%s,%s,%s scale=%s"):format(
-                tostring(plate.unit), tostring(plate.hitApplied), tostring(plate.base and plate.base:IsMouseOver()),
-                tostring(click:IsMouseOver()), tostring(plate:IsMouseOver()), tostring(plate.health:IsMouseOver()),
-                tostring(plate.isMouseover), x, y, tostring(click:GetLeft()), tostring(click:GetRight()),
-                tostring(click:GetBottom()), tostring(click:GetTop()), tostring(click:GetEffectiveScale())))
+            print(("  %s hover=%s click=%s plate=%s health=%s cursor=%.0f,%.0f box=%s,%s,%s,%s scale=%s"):format(
+                tostring(plate.unit), tostring(plate.isMouseover), Try(click, "IsMouseOver"), Try(plate, "IsMouseOver"),
+                Try(plate.health, "IsMouseOver"), x, y, Try(click, "GetLeft"), Try(click, "GetRight"),
+                Try(click, "GetBottom"), Try(click, "GetTop"), Try(click, "GetEffectiveScale")))
         end
         if ticks >= 60 then
             ticker:Cancel()
