@@ -6,6 +6,15 @@ All notable changes to Plateau Nameplates are recorded here. The format follows 
 
 The first build. Retail 12.1.0 and 12.1.5, and WoW Forever (`16001`).
 
+### 2026-10-16 Horde and Alliance themes
+
+#### Added
+- **Two new settings window themes, Horde and Alliance.** Both keep Artisan Ledger's rounded corners, inner frame and fonts with their own colors: Horde is blood red and iron with a bronze title, Alliance is royal blue and gold. Pick one under Settings window theme.
+
+#### Fixed
+- **A centered spell name with the cast target after it now centers both together.** Before, only the spell name was centered and the target hung off its right side.
+- **Cast bars set to match the plate height no longer turn very tall at random.** They now take their size from your settings instead of measuring the plate.
+
 ### 2026-10-13 gear settings button
 
 #### Changed

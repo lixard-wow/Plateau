@@ -2746,7 +2746,7 @@ ns.sections = {
             { type = "Conflicts" },
             { type = "Header", label = "Settings window" },
             { type = "Dropdown", label = "Settings window theme",
-              options = { { value = "workbench", label = "Workbench" }, { value = "ledger", label = "Artisan Ledger" }, { value = "classic", label = "Slate" } },
+              options = { { value = "workbench", label = "Workbench" }, { value = "ledger", label = "Artisan Ledger" }, { value = "horde", label = "Horde" }, { value = "alliance", label = "Alliance" }, { value = "classic", label = "Slate" } },
               get = function() return Style.ThemeKey() end,
               set = function(value)
                   if value ~= Style.ThemeKey() then
