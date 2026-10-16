@@ -83,6 +83,24 @@ local function TargetShownChanged(plate)
     end
 end
 
+local function SyncCenteredPair(bar)
+    local pair = bar.pair
+    if not pair.on then return end
+    pair.name:SetText(bar.text:GetText())
+    local shown = bar.target:IsShown()
+    if shown then
+        pair.target:SetText(bar.target:GetText())
+    else
+        pair.target:SetText("")
+    end
+    local half = shown and pair.gap / 2 or 0
+    if pair.half ~= half then
+        pair.half = half
+        bar.text:ClearAllPoints()
+        bar.text:SetPoint("RIGHT", pair.span, "CENTER", -half, 0)
+    end
+end
+
 local function TargetTextColor(s, unit)
     if s.targetClassColor and RAID_CLASS_COLORS then
         local classFilename = UnitSpellTargetClass(unit)
@@ -321,6 +339,18 @@ function Castbar:Create(plate)
     bar.target:SetJustifyH("CENTER")
     bar.target:SetWordWrap(false)
 
+    local pair = { span = textLayer:CreateTexture() }
+    pair.span:SetHeight(1)
+    pair.name = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    pair.target = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    for _, ghost in ipairs({ pair.name, pair.target }) do
+        ghost:SetWordWrap(false)
+        ghost:SetAlpha(0)
+    end
+    pair.span:SetPoint("LEFT", pair.target, "LEFT")
+    pair.span:SetPoint("RIGHT", pair.name, "RIGHT")
+    bar.pair = pair
+
     bar.interruptText = textLayer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     bar.interruptText:SetWordWrap(false)
     bar.interruptText:Hide()
@@ -481,7 +511,25 @@ function Castbar:Style(plate, db)
 
     ns.ApplyFont(bar.target, db.font, db.targetSize, db.outline)
     bar.target:SetTextColor(db.targetColor[1], db.targetColor[2], db.targetColor[3], db.targetColor[4])
-    if db.targetPosition == "AFTERNAME" then
+    local pair = bar.pair
+    pair.on = db.targetPosition == "AFTERNAME" and db.textJustify == "CENTER"
+    pair.half = nil
+    if pair.on then
+        local target = bar.target
+        local x = (3 - textRightInset) / 2
+        pair.gap = 4 + (db.targetOffsetX or 0)
+        ns.ApplyFont(pair.name, db.font, db.size, db.outline)
+        ns.ApplyFont(pair.target, db.font, db.targetSize, db.outline)
+        pair.name:ClearAllPoints()
+        pair.name:SetPoint("LEFT", bar, "CENTER", x, 0)
+        pair.target:ClearAllPoints()
+        pair.target:SetPoint("RIGHT", bar, "CENTER", x, 0)
+        target.slPlaceAnchor = nil
+        target:ClearAllPoints()
+        target:SetPoint("LEFT", pair.span, "CENTER", pair.gap / 2, db.targetOffsetY or 0)
+        target:SetJustifyH("LEFT")
+        SyncCenteredPair(bar)
+    elseif db.targetPosition == "AFTERNAME" then
         local target = bar.target
         target.slPlaceAnchor = nil
         target:ClearAllPoints()
@@ -662,6 +710,7 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
     if not s.interruptKeepName then
         bar.text:SetText("")
     end
+    SyncCenteredPair(bar)
     if not pcall(InterruptText, bar.interruptText, interruptedBy, s) then
         bar.interruptText:SetText(INTERRUPTED_TEXT)
     end
@@ -784,6 +833,7 @@ function Castbar:Refresh(plate, unit, ending)
 
     bar.icon:SetTexture(texture)
     bar.text:SetText(s.showSpellName and name or "")
+    SyncCenteredPair(bar)
 
     if not issecretvalue(duration) and duration then
         bar:SetScript("OnUpdate", nil)
@@ -914,6 +964,7 @@ function Castbar:Preview(plate, state)
     else
         bar.target:Hide()
     end
+    SyncCenteredPair(bar)
 
     bar:Show()
     TargetShownChanged(plate)
