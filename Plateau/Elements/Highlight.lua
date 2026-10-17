@@ -195,6 +195,8 @@ local function CreateSet(plate)
     local set = {}
     set.ring = ns.CreateBorder(plate, plate, "BACKGROUND", -5)
     set.glow = ns.CreateBorder(plate, plate, "BACKGROUND", -8)
+    set.span = CreateFrame("Frame", nil, plate)
+    set.span:EnableMouse(false)
     if plate.preview then
         EnsureArrows(set, plate)
         EnsureBrackets(set, plate)
@@ -345,6 +347,7 @@ end
 local function Remember(config, db)
     config.ring = db.ring
     config.glow = db.glow
+    config.glowCastbar = db.glowCastbar ~= false
     config.arrows = db.arrows
     config.brackets = db.brackets
     config.pulse = db.pulse == true
@@ -378,12 +381,41 @@ end
 function Highlight:Style(plate)
     local look = ns.DB.views[plate.state]
     local borderSize = ns.HealthBorderOffset(look)
+    plate.targetSet.wrapKey = nil
+    plate.targetSet.glow:SetAnchor(plate)
     StyleSet(plate.targetSet, plate, ns.DB.views.enemy.target, borderSize)
+    WrapCast(plate.targetSet, plate, settings.target, plate.isTarget)
     if plate.focusSet then
         StyleSet(plate.focusSet, plate, ns.DB.views.enemy.focus, borderSize)
     end
     plate.targetWash:ClearAllPoints()
     plate.targetWash:SetAllPoints(plate.health:GetStatusBarTexture())
+end
+
+local function WrapCast(set, plate, config, on)
+    local wrap = on and config.glow and config.glowCastbar and plate.castbar and plate.castbar:IsShown() and plate.castDrop ~= nil
+    local key = wrap and (plate.castDrop .. ":" .. plate.castSide) or false
+    if set.wrapKey == key then return end
+    set.wrapKey = key
+    if wrap then
+        local side = plate.castSide or 0
+        set.span:ClearAllPoints()
+        set.span:SetPoint("TOPLEFT", plate, "TOPLEFT", -side, 0)
+        set.span:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", side, -plate.castDrop)
+        set.glow:SetAnchor(set.span)
+    else
+        set.glow:SetAnchor(plate)
+    end
+    local laid = set.glow.laidOut
+    if laid then
+        set.glow:Layout(laid[1], laid[2], laid[3])
+    end
+end
+
+function Highlight:RefreshCast(plate)
+    local set = plate.targetSet
+    if not set then return end
+    WrapCast(set, plate, settings.target, plate.isTarget)
 end
 
 local function Clear(plate)
@@ -409,6 +441,7 @@ function Highlight:UpdateEmphasis(plate)
     local isTarget = plate.isTarget
     local isFocus = plate.isFocus and not isTarget
     ShowSet(plate.targetSet, settings.target, isTarget)
+    WrapCast(plate.targetSet, plate, settings.target, isTarget)
     if isFocus then
         ShowSet(FocusSet(plate), settings.focus, true)
     elseif plate.focusSet then

@@ -2429,6 +2429,8 @@ ns.sections = {
           tooltip = "Shows a glow around your target's nameplate." },
         Gate({ type = "Slider", path = "look.target.glowSize", label = "Glow size", min = 2, max = 24,
           tooltip = "How far the glow spreads from the nameplate." }, On("look.target.glow"), "Turn on Show target glow to use this."),
+        Gate({ type = "Toggle", path = "look.target.glowCastbar", label = "Glow around the cast bar",
+          tooltip = "While your target is casting, the glow grows to wrap the cast bar too." }, On("look.target.glow"), "Turn on Show target glow to use this."),
         Gate({ type = "Toggle", path = "look.target.pulse", label = "Pulse glow and border",
           tooltip = "Your target's glow and border slowly pulse brighter and dimmer." }, Any(On("look.target.ring"), On("look.target.glow")), "Turn on Show target border or Show target glow to use this.")
 

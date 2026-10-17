@@ -75,6 +75,10 @@ local function SetColor(texture, color)
 end
 
 local function TargetShownChanged(plate)
+    local highlight = ns.Elements.Highlight
+    if highlight and highlight.RefreshCast then
+        highlight:RefreshCast(plate)
+    end
     local enemyTarget = ns.Elements.EnemyTarget
     if enemyTarget and ns.Runs(enemyTarget, plate) then
         enemyTarget:RefreshShown(plate)
@@ -419,6 +423,12 @@ function Castbar:Style(plate, db)
         bar:SetPoint("TOPRIGHT", plate, "BOTTOMRIGHT", iconRight and -iconOffset or 0, -drop)
     end
     bar:SetHeight(height)
+    local plateWidth = plate.rawWidth or plate:GetWidth()
+    plate.castDrop = drop + height
+    plate.castSide = (db.width and db.width > 0) and math.max(0, (db.width - plateWidth) / 2) or 0
+    if ns.Elements.Highlight and ns.Elements.Highlight.RefreshCast then
+        ns.Elements.Highlight:RefreshCast(plate)
+    end
     ns.SetBarTexture(bar, db.texture)
     ns.SetBarOverlay(bar, db.overlayPattern ~= "" and db.overlayPattern or nil, db.overlayAlpha, db.overlayContrast)
     bar.timerBinding:SetFormatter(settings[plate.state].formatter)

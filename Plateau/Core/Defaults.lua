@@ -406,6 +406,7 @@ ns.defaults = {
             glow = false,
             glowColor = { 1, 1, 1, 0.6 },
             glowSize = 8,
+            glowCastbar = true,
             pulse = false,
             animateArrows = false,
         },
