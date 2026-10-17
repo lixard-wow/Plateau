@@ -261,9 +261,9 @@ function UnitColors:PlayerClass(unit)
     end
     if not (UnitGUID and UnitClassFromGUID) then return nil end
     local ok, guid = pcall(UnitGUID, unit)
-    if not ok then return nil end
+    if not ok or issecretvalue(guid) then return nil end
     local found, _, file = pcall(UnitClassFromGUID, guid)
-    if found and file and not issecretvalue(file) then
+    if found and not issecretvalue(file) and file then
         return file
     end
     return nil

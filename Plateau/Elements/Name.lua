@@ -391,7 +391,8 @@ end
 
 function Name:Color(plate, class)
     local text = plate.name
-    if plate.state == "friendly" and class and plate.isPlayer ~= false then
+    local hasClass = issecretvalue(class) or class ~= nil
+    if plate.state == "friendly" and hasClass and plate.isPlayer ~= false then
         local friendly = ns.DB.views.enemy.friendly
         if friendly.groupColor and InGroup(plate.unit) then
             local c = friendly.groupNameColor
@@ -428,7 +429,7 @@ function Name:Color(plate, class)
     if friendlyClassColors and ApplySecretClass(text, class) then
         return
     end
-    local fallback = class and friendly.playerNameColor or friendly.npcNameColor
+    local fallback = hasClass and friendly.playerNameColor or friendly.npcNameColor
     text:SetTextColor(fallback[1], fallback[2], fallback[3], fallback[4])
 end
 

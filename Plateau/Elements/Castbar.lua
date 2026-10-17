@@ -644,7 +644,7 @@ end
 local function SecretClassColor(guid)
     if not (C_ClassColor and C_ClassColor.GetClassColor) then return nil end
     local ok, class = pcall(ClassFromGUID, guid)
-    if not ok or class == nil then return nil end
+    if not ok or (not issecretvalue(class) and class == nil) then return nil end
     local found, color = pcall(C_ClassColor.GetClassColor, class)
     if found and color then
         return color
@@ -658,7 +658,7 @@ local function WriteSecretInterrupter(text, s, name, guid)
         return
     end
     local ok, wrapped = pcall(color.WrapTextInColorCode, color, name)
-    if ok and wrapped then
+    if ok then
         WriteInterrupter(text, s, wrapped)
         return
     end
@@ -832,7 +832,11 @@ function Castbar:Refresh(plate, unit, ending)
     TargetShownChanged(plate)
 
     bar.icon:SetTexture(texture)
-    bar.text:SetText(s.showSpellName and name or "")
+    if s.showSpellName then
+        bar.text:SetText(name)
+    else
+        bar.text:SetText("")
+    end
     SyncCenteredPair(bar)
 
     if not issecretvalue(duration) and duration then
