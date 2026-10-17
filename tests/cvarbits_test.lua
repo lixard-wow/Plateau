@@ -15,3 +15,11 @@ check(WithBit("AE", 3, false) == "AA", "clearing one type keeps the other")
 check(WithBit("A", 7, true) == "A@A", "a type past the first byte adds a byte")
 check(WithBit("A@A", 7, false) == "A", "and removing it shrinks back")
 check(WithBit("C]", 2, true) == "C_", "the version character is kept")
+local HasBit = ns.CVars.HasBit
+check(HasBit("AD", 3) and not HasBit("AD", 1) and not HasBit("AD", 2), "reads the friendly bit back from the code")
+check(HasBit("AE", 1) and HasBit("AE", 3), "reads both types when both are set")
+check(HasBit("A@A", 7) and not HasBit("A@A", 3), "reads a type past the first byte")
+check(not HasBit("A", 3) and not HasBit("A", 9), "an empty code has no types")
+for index = 1, 12 do
+    check(HasBit(WithBit("C]", index, true), index) and not HasBit(WithBit("C]", index, false), index), "write and read agree for type " .. index)
+end

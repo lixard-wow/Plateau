@@ -598,11 +598,11 @@ local function CVarBitToggle(name, index, label, tooltip)
         reset = function() CVars:Release(name) end,
         resetLabel = "Right-click to reset to what it was before Plateau changed it.",
         get = function()
-            return index ~= nil and C_CVar.GetCVar(name) ~= nil and C_CVar.GetCVarBitfield(name, index) == true
+            return index ~= nil and C_CVar.GetCVar(name) ~= nil and CVars.HasBit(CVars:Get(name), index)
         end,
         set = function(value)
-            local current = C_CVar.GetCVar(name)
-            if index == nil or current == nil or current == "" or InCombatLockdown() then return end
+            local current = C_CVar.GetCVar(name) and CVars:Get(name)
+            if index == nil or current == nil or current == "" then return end
             CVars:Set(name, CVars.WithBit(current, index, value))
         end,
     }

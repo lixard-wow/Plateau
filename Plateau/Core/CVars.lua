@@ -137,6 +137,14 @@ function CVars.WithBit(value, index, on)
     return table.concat(out)
 end
 
+function CVars.HasBit(value, index)
+    local bit = index - 1
+    local position = math.floor(bit / BITS_PER_BYTE) + 2
+    if type(value) ~= "string" or position > #value then return false end
+    local byte = value:byte(position) % PADDING
+    return math.floor(byte / 2 ^ (bit % BITS_PER_BYTE)) % 2 == 1
+end
+
 function CVars:IsManaged(name)
     return Store().managed[name] ~= nil
 end
