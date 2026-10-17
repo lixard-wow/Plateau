@@ -641,6 +641,7 @@ local function CountShown(plate, state)
 end
 
 local function ClaimPart(key, started)
+    if not Driver.detailedTiming then return started end
     local now = debugprofilestop()
     claimTime.parts[key] = (claimTime.parts[key] or 0) + now - started
     return now

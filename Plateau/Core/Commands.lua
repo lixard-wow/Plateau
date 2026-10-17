@@ -138,6 +138,8 @@ function ns.PerformanceLines()
                 end
                 if #top > 0 then
                     lines[#lines + 1] = L["Slowest set-up steps (average per set-up): %s"]:format(table.concat(top, ", "))
+                elseif not ns.Driver.detailedTiming then
+                    lines[#lines + 1] = L["Type /plt debug timing to time each set-up step."]
                 end
             end
         end
@@ -358,6 +360,7 @@ local function Help()
     print("  " .. L["/plt minimap - show or hide the minimap button"])
     print("  " .. L["/plt debug - version, CPU and memory for bug reports"])
     print("  " .. L["/plt debug reset - start counting slow frames from now"])
+    print("  " .. L["/plt debug timing - time each step of setting up a plate, until you reload"])
     print("  " .. L["/plt debug locale - preview a translation, or show translatable text in [[brackets]]"])
     print("  " .. L["/plt reset - reset the active profile"])
     print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
@@ -545,6 +548,9 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "debug" and path == "reset" then
         ns.ResetPerformanceCounts()
         Say(L["Slow-frame counters reset."])
+    elseif command == "debug" and path == "timing" then
+        ns.Driver.detailedTiming = not ns.Driver.detailedTiming
+        Say(ns.Driver.detailedTiming and L["Timing each set-up step until you reload. Type /plt debug again after a pull."] or L["Stopped timing each set-up step."])
     elseif command == "debug" and path == "locale" then
         OpenLocalePicker()
     elseif command == "debug" then
