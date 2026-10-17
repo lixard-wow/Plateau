@@ -4,7 +4,7 @@ Nameplates for World of Warcraft that stay fast, read clearly in a big pull, and
 
 Plateau replaces the enemy nameplates with its own, and gives you a settings window where you can see every change happen on a live sample plate, click a piece to edit it, and drag it where you want it.
 
-**Status:** 1.0.0. Played in the open world and in Mythic dungeons. Raids, PvP and WoW Forever are still being tested.
+**Status:** 0.1.0. Played in the open world and in Mythic dungeons. Raids, PvP and WoW Forever are still being tested.
 
 ## Contents
 - [Requirements](#requirements)
