@@ -1021,6 +1021,9 @@ function Drag.SetDotParent(frame)
         end
         selected = nil
         selectionFrame:Hide()
+        propagatePending = false
+        keys:SetPropagateKeyboardInput(true)
+        keys:EnableKeyboard(false)
     end)
     frame:HookScript("OnHide", function()
         Drag.Select(nil)
