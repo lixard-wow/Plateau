@@ -759,7 +759,7 @@ local function Watch(plate)
     plate.stackRegion:SetScale(1)
 end
 
-local OnUnitAdded
+local OnUnitAdded, OnUnitRemoved
 
 local function RecheckWatched()
     for unit in pairs(watched) do
@@ -804,9 +804,9 @@ local function OnPlateEvent(plate, event, ...)
     if event == "UNIT_FACTION" then
         local isFriendly = not UnitCanAttack("player", unit)
         if isFriendly ~= plate.isFriendly then
-            plate.isFriendly = isFriendly
-            ApplyHitTest(plate)
-            ApplyEmphasis(plate)
+            OnUnitRemoved(unit)
+            OnUnitAdded(unit)
+            return
         end
     end
 
@@ -1168,7 +1168,7 @@ function OnUnitAdded(unit)
     end
 end
 
-local function OnUnitRemoved(unit)
+function OnUnitRemoved(unit)
     watched[unit] = nil
     local plate = platesByUnit[unit]
     if not plate then return end
