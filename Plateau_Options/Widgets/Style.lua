@@ -496,7 +496,8 @@ function ns.SpecPaths(spec)
 end
 
 function Style.OverrideLabel(label, spec)
-    label:SetText(spec.label .. (spec.limited and LIMITED_BADGE or ""))
+    local setText = label.RawSetText or label.SetText
+    setText(label, Plateau.T(spec.label) .. (spec.limited and LIMITED_BADGE or ""))
     label:SetTextColor(Style.colors.text[1], Style.colors.text[2], Style.colors.text[3], Style.colors.text[4])
 end
 
@@ -591,7 +592,7 @@ function Style.IconButton(parent, icon, size, onClick, tooltip, round)
         self.icon:SetVertexColor(C.iconHover[1], C.iconHover[2], C.iconHover[3], 1)
         if self.tooltip then
             GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-            GameTooltip:SetText(self.tooltip, 1, 1, 1)
+            GameTooltip:SetText(Plateau.T(self.tooltip), 1, 1, 1)
             GameTooltip:Show()
         end
     end)
