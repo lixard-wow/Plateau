@@ -56,6 +56,7 @@ local inInstance = false
 
 local BossPhases = {
     key = "bossPhases",
+    sizeDependent = true,
     events = { "UNIT_CLASSIFICATION_CHANGED" },
     globalEvents = { "INSTANCE_ENCOUNTER_ENGAGE_UNIT" },
 }
