@@ -888,7 +888,7 @@ Confirming(resetSection, "Reset this section", function()
     else
         Plateau.DB:Reset(current.group)
     end
-    RefreshPage(pages[current.key])
+    ns.RefreshAll()
 end)
 
 resetAll = Widgets.Button(sectionBar, "Reset profile", 150)

@@ -504,6 +504,11 @@ local function Friendly(key, title, group, controls)
         for _, path in ipairs(group) do
             Plateau.DB:Reset(path)
         end
+        for _, spec in ipairs(section.controls) do
+            if spec.reset and (spec.path == nil or spec.gameSetting) then
+                spec.reset()
+            end
+        end
         if wasOn and ns.Get("look.friendly.enabled") ~= true then
             ns.PromptReload()
         end
@@ -1491,7 +1496,7 @@ local COMBAT_PATHS = { "look.idle" }
 local TARGET_LOOK = {}
 for _, key in ipairs({ "ring", "ringColor", "ringSize", "colorBar", "barColor", "texture", "overlayPattern", "overlayAlpha",
     "overlayContrast", "brighten", "arrows", "arrowStyle", "arrowPlacement", "arrowSize", "arrowGap", "arrowColor",
-    "brackets", "bracketStyle", "bracketSize", "bracketGap", "bracketColor", "glow", "glowColor", "glowSize" }) do
+    "brackets", "bracketStyle", "bracketSize", "bracketGap", "bracketColor", "glow", "glowColor", "glowSize", "pulse", "animateArrows" }) do
     TARGET_LOOK[#TARGET_LOOK + 1] = "look.target." .. key
 end
 
@@ -2313,7 +2318,7 @@ ns.sections = {
             { type = "ToggleColor", path = "look.castbar.interruptFlash", colorPath = "look.castbar.interruptFlashColor", label = "Flash when interrupted",
               tooltip = "The cast bar flashes this color when a cast is interrupted." }))),
 
-    Section("shield", "Buff warnings", { "look.shield.alertImportant", "look.shield.alertColor", "look.shield.alertDefensive", "look.shield.defensiveColor", "look.shield.alertEnrage", "look.shield.enrageColor", "look.shield.alertMagic", "look.shield.magicColor", "look.shield.alertOnlyMine", "look.shield.alertSize", "look.shield.alertTexture", "look.shield.alertTextureAlpha" }, List(
+    Section("shield", "Buff warnings", { "look.shield.alertImportant", "look.shield.alertColor", "look.shield.alertDefensive", "look.shield.defensiveColor", "look.shield.alertEnrage", "look.shield.enrageColor", "look.shield.alertMagic", "look.shield.magicColor", "look.shield.alertOnlyMine", "look.shield.alertSize", "look.shield.alertTexture", "look.shield.alertTextureAlpha", "look.shield.alertOrder" }, List(
         { type = "Note", label = "Marks enemies that have certain buffs with a colored border or a health bar overlay. Buff icons are on Enemy buffs and Important auras.", height = 32 },
 
         { type = "Header", label = "Warnings" },
