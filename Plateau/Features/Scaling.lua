@@ -215,6 +215,7 @@ local watcher = CreateFrame("Frame")
 watcher:RegisterEvent("PLAYER_LOGIN")
 watcher:RegisterEvent("CVAR_UPDATE")
 watcher:SetScript("OnEvent", function(_, event, name)
+    if ns.disabled then return end
     if event == "CVAR_UPDATE" and name ~= "nameplateSize" and name ~= "nameplateAuraScale" and name ~= "nameplateSelectedScale" then return end
     local plate, aura = ReadBlizzardSizes()
     local selected = tonumber(C_CVar.GetCVar("nameplateSelectedScale")) or 1

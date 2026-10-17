@@ -421,5 +421,6 @@ Brand:SetScript("OnUpdate", function(_, elapsed)
 end)
 Brand:RegisterEvent("PLAYER_LOGIN")
 Brand:SetScript("OnEvent", function(self)
+    if ns.disabled then return end
     self:Refresh()
 end)

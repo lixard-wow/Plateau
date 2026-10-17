@@ -333,6 +333,7 @@ end
 
 setupWatcher:RegisterEvent("PLAYER_LOGIN")
 setupWatcher:SetScript("OnEvent", function(_, event)
+    if ns.disabled then return end
     if event == "PLAYER_LOGIN" then
         ApplyNewUserDefaults()
         C_Timer.After(3, function()
@@ -515,6 +516,7 @@ end
 local resetFrame = CreateFrame("Frame")
 resetFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 resetFrame:SetScript("OnEvent", function(self)
+    if ns.disabled then return end
     self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     C_Timer.After(2, ns.ResetPerformanceCounts)
 end)
@@ -522,6 +524,10 @@ end)
 SLASH_PLATEAU1 = "/plateau"
 SLASH_PLATEAU2 = "/plt"
 SlashCmdList.PLATEAU = function(input)
+    if ns.disabled then
+        print("|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled)
+        return
+    end
     local words = {}
     for word in input:gmatch("%S+") do
         words[#words + 1] = word

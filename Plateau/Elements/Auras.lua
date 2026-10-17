@@ -978,6 +978,7 @@ end
 local specWatcher = CreateFrame("Frame")
 specWatcher:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 specWatcher:SetScript("OnEvent", function()
+    if ns.disabled then return end
     if configs.enemy then
         ns.Driver:RequestRestyle(true, "spec changed (auras)")
     end
@@ -988,6 +989,7 @@ dispelWatcher:RegisterEvent("PLAYER_LOGIN")
 dispelWatcher:RegisterEvent("SPELLS_CHANGED")
 dispelWatcher:RegisterUnitEvent("UNIT_PET", "player")
 dispelWatcher:SetScript("OnEvent", function()
+    if ns.disabled then return end
     if DetectDispels() and configs.enemy then
         ns.Driver:RequestRestyle(true, "dispel spells changed")
     end
@@ -999,6 +1001,7 @@ if C_EventUtils.IsEventValid("ADDON_RESTRICTION_STATE_CHANGED") then
     watcher:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
 end
 watcher:SetScript("OnEvent", function()
+    if ns.disabled then return end
     if #dirtyOrder > 0 and configs.enemy then
         FlushDirtyButtons()
     end

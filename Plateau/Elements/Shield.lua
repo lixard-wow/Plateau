@@ -435,6 +435,7 @@ abilities:RegisterEvent("PLAYER_LOGIN")
 abilities:RegisterEvent("SPELLS_CHANGED")
 abilities:RegisterUnitEvent("UNIT_PET", "player")
 abilities:SetScript("OnEvent", function()
+    if ns.disabled then return end
     local enrage = KnowsAny(ENRAGE_REMOVERS, Enum.SpellBookSpellBank.Player)
     local magic = KnowsAny(MAGIC_REMOVERS, Enum.SpellBookSpellBank.Player) or KnowsAny(PET_MAGIC_REMOVERS, Enum.SpellBookSpellBank.Pet)
     if enrage ~= canRemove.enrage or magic ~= canRemove.magic then
@@ -451,6 +452,7 @@ if C_EventUtils.IsEventValid("ADDON_RESTRICTION_STATE_CHANGED") then
     watcher:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
 end
 watcher:SetScript("OnEvent", function()
+    if ns.disabled then return end
     if #dirtyOrder > 0 and configs.enemy then
         FlushDirtySlots()
     end

@@ -356,6 +356,7 @@ local cvarWatcher = CreateFrame("Frame")
 cvarWatcher:RegisterEvent("CVAR_UPDATE")
 cvarWatcher:RegisterEvent("PLAYER_LOGIN")
 cvarWatcher:SetScript("OnEvent", function(_, event, name)
+    if ns.disabled then return end
     if event == "CVAR_UPDATE" and name ~= FRIENDLY_CLASS_CVAR and name ~= FRIENDLY_REALM_CVAR then return end
     local value = C_CVar.GetCVarBool(FRIENDLY_CLASS_CVAR) ~= false
     local realms = C_CVar.GetCVarBool(FRIENDLY_REALM_CVAR) == true

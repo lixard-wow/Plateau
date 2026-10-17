@@ -304,6 +304,7 @@ listener:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 listener:RegisterEvent("PLAYER_TALENT_UPDATE")
 listener:RegisterEvent("PLAYER_ENTERING_WORLD")
 listener:SetScript("OnEvent", function(_, event, unit, powerToken)
+    if ns.disabled then return end
     if event == "UNIT_POWER_UPDATE" or event == "UNIT_MAXPOWER" then
         if resource and resource ~= RUNES then
             local token = RESOURCE_TOKEN[resource]

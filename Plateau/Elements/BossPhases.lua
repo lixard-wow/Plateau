@@ -275,6 +275,7 @@ watcher:RegisterEvent("ENCOUNTER_START")
 watcher:RegisterEvent("ENCOUNTER_END")
 watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
 watcher:SetScript("OnEvent", function(_, event, id, name)
+    if ns.disabled then return end
     pcall(function()
         if event == "ENCOUNTER_START" then
             if issecretvalue(id) or type(id) ~= "number" then

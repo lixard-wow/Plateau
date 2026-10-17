@@ -149,6 +149,7 @@ end
 local zoneWatcher = CreateFrame("Frame")
 zoneWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
 zoneWatcher:SetScript("OnEvent", function()
+    if ns.disabled then return end
     local now = IsInInstance() == true
     if now ~= inInstance then
         inInstance = now

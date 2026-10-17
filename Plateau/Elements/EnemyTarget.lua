@@ -163,6 +163,7 @@ end)
 refresher:RegisterEvent("PLAYER_REGEN_DISABLED")
 refresher:RegisterEvent("PLAYER_REGEN_ENABLED")
 refresher:SetScript("OnEvent", function(self, event)
+    if ns.disabled then return end
     if event == "PLAYER_REGEN_DISABLED" and EnemyTarget.enabled then
         elapsedSince = 0
         self:Show()

@@ -75,6 +75,7 @@ end
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", function(self)
+    if ns.disabled then return end
     self:UnregisterEvent("PLAYER_LOGIN")
     DBIcon:Register(NAME, broker, Settings())
 end)

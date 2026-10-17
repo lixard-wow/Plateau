@@ -507,6 +507,7 @@ UnitColors:RegisterEvent("PLAYER_LEVEL_UP")
 UnitColors:RegisterEvent("GROUP_ROSTER_UPDATE")
 UnitColors:RegisterEvent("PLAYER_ROLES_ASSIGNED")
 UnitColors:SetScript("OnEvent", function(_, event)
+    if ns.disabled then return end
     if event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ROLES_ASSIGNED" then
         UpdateTanks()
         return

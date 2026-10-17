@@ -773,6 +773,7 @@ local watcher = CreateFrame("Frame")
 watcher:RegisterEvent("UNIT_FACTION")
 watcher:RegisterEvent("UNIT_FLAGS")
 watcher:SetScript("OnEvent", function(_, _, unit)
+    if ns.disabled then return end
     if unit and watched[unit] and Claimable(unit) then
         OnUnitAdded(unit)
     end
@@ -1092,6 +1093,7 @@ poolWarmer:SetScript("OnUpdate", function(self)
 end)
 poolWarmer:RegisterEvent("PLAYER_ENTERING_WORLD")
 poolWarmer:SetScript("OnEvent", function(self)
+    if ns.disabled then return end
     C_Timer.After(WARM_DELAY, function()
         self:Show()
     end)
@@ -1584,6 +1586,7 @@ Driver:RegisterEvent("CVAR_UPDATE")
 Driver:RegisterEvent("ENCOUNTER_START")
 Driver:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
 Driver:SetScript("OnEvent", function(_, event, arg)
+    if ns.disabled then return end
     if event == "PLAYER_REGEN_ENABLED" and restyleAfterCombat then
         restyleAfterCombat = false
         for key in pairs(deferredReasons) do

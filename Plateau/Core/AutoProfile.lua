@@ -158,6 +158,7 @@ AutoProfile:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 AutoProfile:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 AutoProfile:RegisterEvent("PLAYER_REGEN_ENABLED")
 AutoProfile:SetScript("OnEvent", function(self, event)
+    if ns.disabled then return end
     if event ~= "PLAYER_REGEN_ENABLED" or pending then
         self:Apply()
     end

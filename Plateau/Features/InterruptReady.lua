@@ -205,6 +205,7 @@ InterruptReady:RegisterEvent("SPELLS_CHANGED")
 InterruptReady:RegisterUnitEvent("UNIT_PET", "player")
 InterruptReady:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 InterruptReady:SetScript("OnEvent", function(self, event)
+    if ns.disabled then return end
     if event == "SPELL_UPDATE_COOLDOWN" then
         UpdateBusy()
     else

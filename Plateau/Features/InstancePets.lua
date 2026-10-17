@@ -76,6 +76,7 @@ InstancePets:RegisterEvent("PLAYER_ENTERING_WORLD")
 InstancePets:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 InstancePets:RegisterEvent("PLAYER_REGEN_ENABLED")
 InstancePets:SetScript("OnEvent", function(self, event)
+    if ns.disabled then return end
     if event == "PLAYER_REGEN_ENABLED" and not self.pending then return end
     self:Update()
 end)

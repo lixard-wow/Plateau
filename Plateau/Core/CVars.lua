@@ -270,6 +270,7 @@ CVars:RegisterEvent("PLAYER_LOGOUT")
 CVars:RegisterEvent("PLAYER_REGEN_ENABLED")
 CVars:RegisterEvent("CVAR_UPDATE")
 CVars:SetScript("OnEvent", function(self, event, name)
+    if ns.disabled then return end
     if event == "CVAR_UPDATE" then
         self:Adopt(name)
         return

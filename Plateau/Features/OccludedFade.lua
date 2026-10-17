@@ -53,6 +53,7 @@ OccludedFade:RegisterEvent("PLAYER_ENTERING_WORLD")
 OccludedFade:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 OccludedFade:RegisterEvent("PLAYER_REGEN_ENABLED")
 OccludedFade:SetScript("OnEvent", function(self, event)
+    if ns.disabled then return end
     if event == "PLAYER_REGEN_ENABLED" and not self.pending then return end
     self:Update()
 end)
