@@ -119,38 +119,6 @@ end
 local settingsX = Style.IconButton(titleBar, Style.theme.settingsIcon, ICON_BUTTON, OpenPreferences, "Plateau settings: theme, window scale and fonts")
 settingsX:SetPoint("RIGHT", minimizeX, "LEFT", -6, 0)
 
-local cpuText = Style.Text(titleBar, 11, C.muted)
-cpuText:SetPoint("RIGHT", settingsX, "LEFT", -14, 0)
-cpuText:SetJustifyH("RIGHT")
-
-local cpuButton = CreateFrame("Frame", nil, titleBar)
-cpuButton:SetAllPoints(cpuText)
-Style.Tooltip(cpuButton, { label = "Plateau CPU", tooltip = "Plateau's own CPU time per frame, from the game's addon profiler. Type /plt debug for more numbers." })
-
-local function UpdateCpu()
-    local ms, percent = Plateau.CpuReadout()
-    if ms then
-        cpuText:SetFormattedText("Plateau CPU  %.3f ms (%.1f%%)", ms, percent)
-    else
-        cpuText:SetText("")
-    end
-end
-
-local cpuTicker
-local cpuWatcher = CreateFrame("Frame", nil, titleBar)
-cpuWatcher:SetScript("OnShow", function()
-    UpdateCpu()
-    if not cpuTicker then
-        cpuTicker = C_Timer.NewTicker(2, UpdateCpu)
-    end
-end)
-cpuWatcher:SetScript("OnHide", function()
-    if cpuTicker then
-        cpuTicker:Cancel()
-        cpuTicker = nil
-    end
-end)
-
 local BAR_WIDTH, BAR_HEIGHT = 340, 30
 local BAR_ROW = -15
 local CLICK_THRESHOLD = 4
@@ -1277,8 +1245,6 @@ local RESULT_ROW = 34
 local box = CreateFrame("EditBox", nil, titleBar)
 box:SetSize(240, 24)
 box:SetPoint("RIGHT", settingsX, "LEFT", -12, 0)
-cpuText:ClearAllPoints()
-cpuText:SetPoint("RIGHT", box, "LEFT", -14, 0)
 box:SetAutoFocus(false)
 box:SetFontObject("GameFontHighlightSmall")
 box:SetTextInsets(24, 8, 0, 0)
@@ -1464,9 +1430,6 @@ function SetMinimized(min)
         flash:Hide()
         footerLine:Hide()
         titleVersion:Hide()
-        cpuText:Hide()
-        cpuButton:Hide()
-        cpuWatcher:Hide()
         titleLine:Hide()
         box:Hide()
         results:Hide()
@@ -1486,9 +1449,6 @@ function SetMinimized(min)
         end
         footerLine:Show()
         titleVersion:Show()
-        cpuText:Show()
-        cpuButton:Show()
-        cpuWatcher:Show()
         titleLine:Show()
         box:Show()
         frame:SetSize(WIDTH, restoreHeight)

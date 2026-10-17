@@ -281,7 +281,7 @@ ns.helpTopics = {
         category = "Commands",
         title = "Slash commands",
         keywords = "slash commands plt debug setup reset cvars",
-        text = "/plt opens the settings window.\n/plt setup opens the look picker from the first-time setup.\n/plt minimap shows or hides the minimap button.\n/plt debug shows the version, restrictions, CPU and memory, and how Plateau reads your target. Paste it when you report a bug.\n/plt reset resets the active profile, the same as Reset profile.\n/plt cvars restore undoes every game nameplate setting Plateau changed.",
+        text = "/plt opens the settings window.\n/plt setup opens the look picker from the first-time setup.\n/plt minimap shows or hides the minimap button.\n/plt debug shows the version, profile, active game restrictions, and how Plateau reads your target. Paste it when you report a bug.\n/plt reset resets the active profile, the same as Reset profile.\n/plt cvars restore undoes every game nameplate setting Plateau changed.",
     },
 }
 

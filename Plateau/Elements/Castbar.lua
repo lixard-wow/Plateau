@@ -62,8 +62,6 @@ local Castbar = {
 }
 ns.Elements = ns.Elements or {}
 ns.Elements.Castbar = Castbar
-ns.castTimerPath = "none yet"
-
 local castingBars = {}
 local ticker = CreateFrame("Frame")
 ticker:Hide()
@@ -852,7 +850,6 @@ function Castbar:Refresh(plate, unit, ending)
         bar.timerBinding:SetDuration(duration)
         bar.timerBinding:SetEnabled(s.showTimer)
         bar.timer:SetShown(s.showTimer)
-        ns.castTimerPath = "native"
     else
         bar:SetMinMaxValues(startMs, endMs)
         bar:SetValue(GetTime() * 1000)
@@ -860,7 +857,6 @@ function Castbar:Refresh(plate, unit, ending)
         bar.duration = nil
         bar.timerBinding:SetEnabled(false)
         bar.timer:Hide()
-        ns.castTimerPath = "fallback"
     end
 
     bar.spark:SetShown(s.showSpark)

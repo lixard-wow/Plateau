@@ -18,7 +18,6 @@ local simplifyPlayers, simplifyNpcs = false, false
 
 local Driver = CreateFrame("Frame")
 ns.Driver = Driver
-Driver.eventCount = 0
 
 local function AddOverlay(plate)
     plate:SetFlattensRenderLayers(true)
@@ -257,14 +256,6 @@ local function SizePlate(plate, look)
     end
 end
 
-local buildTime = { count = 0, total = 0, slowest = 0 }
-local partTime = {}
-
-local function AddPartTime(element, started)
-    local key = element.key or "?"
-    partTime[key] = (partTime[key] or 0) + debugprofilestop() - started
-end
-
 local function DisableElement(element, plate)
     if plate.built[element] then
         element:Disable(plate)
@@ -318,11 +309,7 @@ local function StylePlate(plate)
     for i = 1, #elements do
         local element = elements[i]
         if plate.built[element] and element.enabledIn[plate.state] then
-            local started = plate.timing and debugprofilestop()
             element:Style(plate, look[element.key])
-            if started then
-                AddPartTime(element, started)
-            end
         end
     end
     if pixel then
@@ -609,65 +596,7 @@ local function UpdateEmphasis()
     end
 end
 
-local claimTime = { count = 0, total = 0, slowest = 0, restyles = 0, versionRestyles = 0, framesOver1 = 0, worstFrame = 0, frameAt = nil, frameMs = 0, parts = {} }
-
-local shown = { enemy = 0, friendly = 0 }
-local demand = { peak = { enemy = 0, friendly = 0 }, combatPeak = { enemy = 0, friendly = 0 }, misses = 0, combatMisses = 0, missMs = 0, worstMiss = 0 }
-local session = { misses = 0, combatMisses = 0, missMs = 0, worstMiss = 0 }
-
-local function NotePeaks(combat)
-    combat = combat or InCombatLockdown()
-    for state, n in pairs(shown) do
-        if n > demand.peak[state] then
-            demand.peak[state] = n
-        end
-        if combat and n > demand.combatPeak[state] then
-            demand.combatPeak[state] = n
-        end
-    end
-end
-
-local function CountShown(plate, state)
-    local old = plate.countedAs
-    if old == state then return end
-    if old then
-        shown[old] = shown[old] - 1
-    end
-    plate.countedAs = state
-    if state then
-        shown[state] = shown[state] + 1
-        NotePeaks()
-    end
-end
-
-local function ClaimPart(key, started)
-    if not Driver.detailedTiming then return started end
-    local now = debugprofilestop()
-    claimTime.parts[key] = (claimTime.parts[key] or 0) + now - started
-    return now
-end
-
-local function ClaimDone(started)
-    local ms = debugprofilestop() - started
-    claimTime.count = claimTime.count + 1
-    claimTime.total = claimTime.total + ms
-    if ms > claimTime.slowest then claimTime.slowest = ms end
-    local now = GetTime()
-    if claimTime.frameAt ~= now then
-        claimTime.frameAt = now
-        claimTime.frameMs = 0
-        claimTime.counted = false
-    end
-    claimTime.frameMs = claimTime.frameMs + ms
-    if claimTime.frameMs > claimTime.worstFrame then claimTime.worstFrame = claimTime.frameMs end
-    if claimTime.frameMs > 1 and not claimTime.counted then
-        claimTime.counted = true
-        claimTime.framesOver1 = claimTime.framesOver1 + 1
-    end
-end
-
 local function Claim(plate, unit)
-    local claimStarted = debugprofilestop()
     local base = plate.base
     HideBlizzardPlate(base)
     if base.SetStackingBoundsFrame then
@@ -706,7 +635,6 @@ local function Claim(plate, unit)
     if not registered.UNIT_FACTION then
         plate:RegisterUnitEvent("UNIT_FACTION", unit)
     end
-    local t = ClaimPart("events", claimStarted)
     plate.isPlayer = UnitIsPlayer(unit) == true
     plate.isFriendly = not UnitCanAttack("player", unit)
     ApplyHitTest(plate)
@@ -714,15 +642,8 @@ local function Claim(plate, unit)
     if plate.state ~= baseState then
         plate.state = baseState
     end
-    CountShown(plate, baseState)
-    t = ClaimPart("unit checks", t)
     if plate.styledAs ~= styleOf[baseState] or plate.styleVersion ~= styleVersion then
-        claimTime.restyles = claimTime.restyles + 1
-        if plate.styleVersion ~= styleVersion then
-            claimTime.versionRestyles = claimTime.versionRestyles + 1
-        end
         StylePlate(plate)
-        t = ClaimPart("restyle", t)
     end
     for i = 1, #elements do
         local element = elements[i]
@@ -731,29 +652,18 @@ local function Claim(plate, unit)
         else
             DisableElement(element, plate)
         end
-        local key = element.claimKey
-        if not key then
-            key = "enable " .. (element.key or "?")
-            element.claimKey = key
-        end
-        t = ClaimPart(key, t)
     end
     ns.Scaling:Apply(plate)
     UpdateClickArea(plate)
     plate:Show()
-    t = ClaimPart("scale and show", t)
     UpdateEmphasis()
     ApplyEmphasis(plate)
-    t = ClaimPart("highlight", t)
     ns.Fire("PLATE_ADDED", unit, plate)
-    ClaimPart("callbacks", t)
-    ClaimDone(claimStarted)
 end
 
 local watched = {}
 
 local function Watch(plate)
-    CountShown(plate, nil)
     plate.active = false
     plate:Hide()
     ns.Scaling:Reset(plate)
@@ -794,7 +704,6 @@ function AddHandlers(plate, element, events)
 end
 
 local function OnPlateEvent(plate, event, ...)
-    Driver.eventCount = Driver.eventCount + 1
     local unit = plate.unit
     if not plate.active then
         if Claimable(unit) then
@@ -824,7 +733,6 @@ local function OnPlateEvent(plate, event, ...)
 end
 
 local pools = { enemy = {}, friendly = {} }
-local swaps = 0
 local POOL_TARGET = { enemy = 24, friendly = 4 }
 local POOL_BUFFER = { enemy = 8, friendly = 2 }
 local built = { enemy = 0, friendly = 0 }
@@ -848,7 +756,6 @@ local building
 local stale = {}
 
 local function StartBuild(state)
-    local started = debugprofilestop()
     built[state] = built[state] + 1
     local plate = CreateFrame("Frame", nil, hider)
     plate:Hide()
@@ -856,7 +763,7 @@ local function StartBuild(state)
     plate.built = {}
     AddOverlay(plate)
     plate.state = state
-    return { plate = plate, state = state, index = 1, spent = debugprofilestop() - started }
+    return { plate = plate, state = state, index = 1 }
 end
 
 local function RunBuild(job, deadline)
@@ -864,9 +771,7 @@ local function RunBuild(job, deadline)
     while job.index <= #elements do
         local element = elements[job.index]
         if element.enabled ~= false then
-            local started = debugprofilestop()
             element:Create(plate)
-            AddPartTime(element, started)
             AddHandlers(plate, element, element.events)
             AddHandlers(plate, element, element.globalEvents)
             plate.built[element] = true
@@ -883,23 +788,13 @@ local function RunBuild(job, deadline)
             return false
         end
     end
-    plate.timing = true
     StylePlate(plate)
-    plate.timing = nil
     ns.RoundLayout(plate)
     return true
 end
 
 local function StepBuild(job, deadline)
-    local started = debugprofilestop()
-    local done = RunBuild(job, deadline)
-    job.spent = (job.spent or 0) + debugprofilestop() - started
-    if done then
-        buildTime.count = buildTime.count + 1
-        buildTime.total = buildTime.total + job.spent
-        buildTime.slowest = math.max(buildTime.slowest, job.spent)
-    end
-    return done
+    return RunBuild(job, deadline)
 end
 
 local function BuildPlate(state)
@@ -1015,39 +910,8 @@ end
 local function CreatePlate(base, unit)
     local preferred = (unit and not UnitCanAttack("player", unit)) and "friendly" or "enemy"
     local fallback = preferred == "enemy" and "friendly" or "enemy"
-    local plate = table.remove(pools[preferred]) or table.remove(pools[fallback])
-    local combat = InCombatLockdown()
-    if not plate then
-        local started = debugprofilestop()
-        plate = BuildPlate(preferred)
-        local ms = debugprofilestop() - started
-        demand.misses = demand.misses + 1
-        if combat then
-            demand.combatMisses = demand.combatMisses + 1
-        end
-        demand.missMs = demand.missMs + ms
-        if ms > demand.worstMiss then
-            demand.worstMiss = ms
-        end
-        session.misses = session.misses + 1
-        if combat then
-            session.combatMisses = session.combatMisses + 1
-        end
-        session.missMs = session.missMs + ms
-        if ms > session.worstMiss then
-            session.worstMiss = ms
-        end
-    end
-    local spare = #pools.enemy + #pools.friendly
-    if not demand.minSpare or spare < demand.minSpare then
-        demand.minSpare = spare
-    end
-    if combat and (not demand.minSpareCombat or spare < demand.minSpareCombat) then
-        demand.minSpareCombat = spare
-    end
-    local attachStarted = debugprofilestop()
+    local plate = table.remove(pools[preferred]) or table.remove(pools[fallback]) or BuildPlate(preferred)
     AssignBase(plate, base)
-    ClaimPart("attach", attachStarted)
     return plate
 end
 
@@ -1132,7 +996,6 @@ local function SwapToStyled(plate, base, state)
     local list = pools[plate.state]
     list[#list + 1] = plate
     AssignBase(spare, base)
-    swaps = swaps + 1
     return spare
 end
 
@@ -1177,7 +1040,6 @@ function OnUnitRemoved(unit)
     if not plate then return end
     platesByUnit[unit] = nil
 
-    CountShown(plate, nil)
     plate:UnregisterAllEvents()
     plate.active = false
     plate.isTarget, plate.isFocus, plate.isPlayer, plate.isFriendly = false, false, false, false
@@ -1317,7 +1179,6 @@ restyleQueue:SetScript("OnUpdate", function(self)
 end)
 
 local restyleAfterCombat = false
-local restyleReasons = {}
 local pendingReasons = {}
 local deferredReasons = {}
 
@@ -1332,23 +1193,13 @@ function Driver:RequestRestyle(background, reason)
     restyleQueue:Show()
 end
 
-function Driver:RestyleReasons()
-    return restyleReasons
-end
-
 function Driver:Restyle(reason)
     restyleQueue:Hide()
     if reason then
         pendingReasons[reason] = true
     end
-    local counted = false
     for key in pairs(pendingReasons) do
-        restyleReasons[key] = (restyleReasons[key] or 0) + 1
         pendingReasons[key] = nil
-        counted = true
-    end
-    if not counted then
-        restyleReasons.other = (restyleReasons.other or 0) + 1
     end
     views = ns.DB.views
     dimAlpha = views.enemy.target.dimOthers
@@ -1495,56 +1346,6 @@ function Driver:GetPlate(unit)
     return FindPlate(unit)
 end
 
-function Driver:BuildTime()
-    local count = buildTime.count
-    local parts = {}
-    for key, total in pairs(partTime) do
-        parts[#parts + 1] = { key = key, ms = count > 0 and total / count or 0 }
-    end
-    table.sort(parts, function(a, b) return a.ms > b.ms end)
-    return count, count > 0 and buildTime.total / count or 0, buildTime.slowest, parts
-end
-
-function Driver:ClaimTime()
-    local count = claimTime.count
-    local parts = {}
-    for key, total in pairs(claimTime.parts) do
-        parts[#parts + 1] = { key = key, ms = count > 0 and total / count or 0 }
-    end
-    table.sort(parts, function(a, b) return a.ms > b.ms end)
-    return count, count > 0 and claimTime.total / count or 0, claimTime.slowest, claimTime.restyles, claimTime.framesOver1, claimTime.worstFrame, parts, swaps, claimTime.versionRestyles
-end
-
-function Driver:ResetClaimTime()
-    claimTime.count, claimTime.total, claimTime.slowest, claimTime.restyles = 0, 0, 0, 0
-    claimTime.framesOver1, claimTime.worstFrame, claimTime.frameAt, claimTime.frameMs = 0, 0, nil, 0
-    claimTime.parts = {}
-    claimTime.versionRestyles = 0
-    swaps = 0
-    demand.misses, demand.combatMisses, demand.missMs, demand.worstMiss = 0, 0, 0, 0
-    demand.minSpare, demand.minSpareCombat = nil, nil
-    for state, n in pairs(shown) do
-        demand.peak[state] = n
-        demand.combatPeak[state] = 0
-    end
-    for key in pairs(restyleReasons) do
-        restyleReasons[key] = nil
-    end
-end
-
-function Driver:PoolStats()
-    local attached, off = 0, 0
-    for _ in pairs(platesByBase) do
-        attached = attached + 1
-    end
-    for i = 1, #elements do
-        if not elements[i].enabled then
-            off = off + 1
-        end
-    end
-    return built.enemy + built.friendly, attached, #pools.enemy + #pools.friendly, #elements - off, #elements
-end
-
 function Driver:CountActive()
     local total, claimed = 0, 0
     for _, plate in pairs(platesByUnit) do
@@ -1561,16 +1362,6 @@ end
 
 function Driver:WarmPools()
     poolWarmer:Show()
-end
-
-function Driver:Demand()
-    return demand, shown, session
-end
-
-function Driver:PoolPlan()
-    local enemyTarget, enemyBuffer = PoolSize("enemy")
-    local friendlyTarget, friendlyBuffer = PoolSize("friendly")
-    return enemyTarget, enemyBuffer, friendlyTarget, friendlyBuffer
 end
 
 Driver:RegisterEvent("NAME_PLATE_UNIT_ADDED")
@@ -1598,9 +1389,7 @@ Driver:SetScript("OnEvent", function(_, event, arg)
     end
     if event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
         inCombat = event == "PLAYER_REGEN_DISABLED"
-        if inCombat then
-            NotePeaks(true)
-        else
+        if not inCombat then
             poolWarmer:Show()
         end
         if (dimCombatOnly and targetPlate) or hideFriendlyCombat then

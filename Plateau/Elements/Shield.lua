@@ -168,9 +168,6 @@ local function SlotInitializer(plate, slotKey)
     return function(button)
         if button.plateauInit then return end
         button.plateauInit = true
-        if ns.CountAuraButton then
-            ns.CountAuraButton()
-        end
         button.plate = plate
         button.slotKey = slotKey
         plate.shieldSlots[#plate.shieldSlots + 1] = button

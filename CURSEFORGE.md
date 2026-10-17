@@ -110,7 +110,7 @@ Since patch 12.0, the game hides some information from addons during combat and 
 
 - It never reads or compares hidden values — it hands them straight to the game, which is why cast colors, aura filters and buff warnings keep working in dungeons and raids
 - Settings that depend on hidden information show a warning icon explaining what happens
-- Nothing runs on each nameplate every frame, and `/plt debug` shows real performance numbers from the game's own profiler
+- Nothing runs on each nameplate every frame, so it stays light in big pulls
 
 ---
 
@@ -123,7 +123,7 @@ Since patch 12.0, the game hides some information from addons during combat and 
 | `/plt minimap` | Show or hide the minimap button |
 | `/plt reset` | Reset the active profile |
 | `/plt cvars restore` | Undo every game nameplate setting Plateau changed |
-| `/plt debug` | Print version, memory and performance info (include it in bug reports) |
+| `/plt debug` | Print version, profile and target color info (include it in bug reports) |
 
 ---
 
