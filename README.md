@@ -4,7 +4,7 @@ Nameplates for World of Warcraft that stay fast, read clearly in a big pull, and
 
 Plateau replaces the enemy nameplates with its own, and gives you a settings window where you can see every change happen on a live sample plate, click a piece to edit it, and drag it where you want it.
 
-**Status:** beta. Played in the open world and in Mythic dungeons. Raids, PvP and WoW Forever are still being tested.
+**Status:** 1.0.0. Played in the open world and in Mythic dungeons. Raids, PvP and WoW Forever are still being tested.
 
 ## Contents
 - [Requirements](#requirements)
@@ -28,11 +28,10 @@ Plateau replaces the enemy nameplates with its own, and gives you a settings win
 - **Optional:** the [SharedMedia](https://www.curseforge.com/wow/addons/sharedmedia) addon (or any addon that adds textures, borders and fonts to the shared media library). Plateau lists everything registered there in its texture, border and font pickers, so a pack such as SharedMedia adds a long list of bar textures, Charcoal among them.
 
 ## Install
-1. On this page, click **Code**, then **Download ZIP**.
-2. Open the zip. Inside the `Plateau-main` folder are two folders: `Plateau` and `Plateau_Options`.
-3. Copy both into `World of Warcraft\_retail_\Interface\AddOns` (for WoW Forever, the `Interface\AddOns` folder of that game version), then restart the game.
+- **CurseForge:** install [Plateau Nameplates](https://www.curseforge.com/projects/1749349) with the CurseForge app, or download it from the page.
+- **By hand:** download a release zip, open it, and copy the `Plateau` and `Plateau_Options` folders into `World of Warcraft\_retail_\Interface\AddOns` (for WoW Forever, the `Interface\AddOns` folder of that game version), then restart the game.
 
-`Plateau_Options` loads only when you open the settings, so it costs nothing while you play. A CurseForge release is coming later.
+`Plateau_Options` loads only when you open the settings, so it costs nothing while you play.
 
 ## First run
 The first time you log in, Plateau asks you to pick a look from six ready-made styles. Everything else is set up in the settings window, which opens with a short tour of its parts. You can skip both, and bring them back any time: `/plt setup` for the look picker, or the buttons at the top of the **Help** page for the tour.
@@ -112,15 +111,16 @@ Open it with `/plt`, or the **Plateau Nameplates** button in the game menu (Esca
 - **Preview follows your settings.** Whatever you turn on shows on the sample. A **Preview** button next to Reset this section picks the sample's cast (Cast bar page), enemy type and threat (Health bar colors page), threat (Threat page) or badge (Elite icon page); it only changes the preview.
 - **Undo and redo.** Every change is remembered and named ("Moved Raid target icon", "Look: Clean and flat"). Open the list to step back several at once.
 - **Search.** Finds any setting by name or by words in its description and scrolls it to the top. On the Help page it searches only the help topics.
-- **Pages.** One page per part of the nameplate, plus Looks at the top and Help at the bottom. Blizzard's own nameplate settings sit on the page they belong to.
+- **Pages.** One page per part of the nameplate, plus Profiles and Help at the bottom. Blizzard's own nameplate settings sit on the page they belong to.
 - **Apply to all plates.** Copies every setting and position on the current page from the type you are editing to all plates.
 - **Reset.** Right-click a setting to reset it, use **Reset this section**, or **Reset profile** on the Profiles page to reset the active profile.
-- **Help.** A page of 44 topics covering every page and the common how-tos.
+- **Help.** More than 40 topics covering every page and the common how-tos.
+- **Window themes.** Pick Workbench, Artisan's Ledger, Horde, Alliance or Slate on the Plateau settings page (the gear button). A theme change applies after a reload.
 
 ## Profiles and looks
 A profile holds every look setting, including your per-type changes. Each character remembers which profile it uses.
 
-- **Looks** are six ready-made profiles shown as live cards: Minimal (the default), Familiar layout, Classic unit frames, Compact, Clean and flat, and Bold and crisp. Press Use this look on a card to switch to it. **Restore a built-in profile** puts one back to how it shipped.
+- **Looks** are six ready-made profiles: Minimal (the default), Familiar layout, Classic unit frames, Compact, Clean and flat, and Bold and crisp. `/plt setup` shows them as live cards; press Use this look on a card to switch to it. A look keeps your own colors. **Restore a built-in profile** on the Profiles page puts one back to how it shipped.
 - **Switch automatically.** Choose a profile for the open world, dungeons, raids, and delves and scenarios, or per specialization. Content-specific profiles beat specialization profiles, your default profile is the fallback, and automatic switches wait until combat ends.
 - **Manage** them on the Profiles page; the bottom left of the window shows which one is active: start fresh, copy the current one, copy another into this one, delete.
 
@@ -135,11 +135,12 @@ Since patch 12.0 the game hides some information from addons during combat and i
 - Nothing runs on each nameplate every frame, and updates avoid creating tables, so memory churn stays low. **Diagnostics** on the Help page shows the real numbers from the game's own profiler.
 
 ## Commands
-- `/plt` opens the settings.
+- `/plt` or `/plateau` opens the settings.
 - `/plt setup` opens the look picker from the first-time setup.
 - `/plt minimap` shows or hides the minimap button.
 - `/plt debug` prints the version, restrictions, memory and CPU numbers. Paste it when you report a bug.
 - `/plt debug reset` starts counting slow frames from now.
+- `/plt debug timing` times each step of setting up a plate until you reload, for a closer look in `/plt debug`.
 - `/plt reset` resets the active profile: a built-in look goes back to how it shipped, any other profile to the defaults.
 - `/plt cvars restore` undoes every game nameplate setting Plateau changed.
 
@@ -152,7 +153,7 @@ Plateau is in English. Every string can be translated, and translations are welc
 
 ## Troubleshooting
 - **Something looks wrong after an update:** `/reload`. New files need a full game restart.
-- **A plate is the wrong color:** the colors on the Health bar colors page are checked top to bottom, and your target and focus colors win over all of them. Threat and tagged colors win over enemy type colors. Some settings are overridden for one nameplate type only. A dot in the left menu marks a page that differs from the default.
+- **A plate is the wrong color:** the colors on the Health bar colors page are checked top to bottom, and your target and focus colors win over all of them. Threat and tagged colors win over enemy type colors. Some settings are overridden for one nameplate type only.
 - **An error appears:** copy it from BugSack (or the game's error window) and `/plt debug` output when you report it.
 - **Everything is a mess:** `/plt reset` for the current profile, or `/plt cvars restore` for the game's own settings.
 
@@ -169,5 +170,5 @@ All rights reserved. You may use Plateau to play World of Warcraft, but not copy
 
 ## Credits
 - Translations: none yet. Translators will be named here.
-- Libraries: LibStub, CallbackHandler, LibSharedMedia-3.0, LibDeflate.
+- Libraries: LibStub, CallbackHandler, LibSharedMedia-3.0, LibDataBroker, LibDBIcon, LibDeflate.
 - Icons and atlases used in the preview and quest markers are Blizzard's.
