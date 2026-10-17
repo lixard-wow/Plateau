@@ -378,20 +378,6 @@ function Highlight:Configure(db, state)
     Remember(settings.focus, ns.DB.views.enemy.focus)
 end
 
-function Highlight:Style(plate)
-    local look = ns.DB.views[plate.state]
-    local borderSize = ns.HealthBorderOffset(look)
-    plate.targetSet.wrapKey = nil
-    plate.targetSet.glow:SetAnchor(plate)
-    StyleSet(plate.targetSet, plate, ns.DB.views.enemy.target, borderSize)
-    WrapCast(plate.targetSet, plate, settings.target, plate.isTarget)
-    if plate.focusSet then
-        StyleSet(plate.focusSet, plate, ns.DB.views.enemy.focus, borderSize)
-    end
-    plate.targetWash:ClearAllPoints()
-    plate.targetWash:SetAllPoints(plate.health:GetStatusBarTexture())
-end
-
 local function WrapCast(set, plate, config, on)
     local wrap = on and config.glow and config.glowCastbar and plate.castbar and plate.castbar:IsShown() and plate.castDrop ~= nil
     local key = wrap and (plate.castDrop .. ":" .. plate.castSide) or false
@@ -410,6 +396,20 @@ local function WrapCast(set, plate, config, on)
     if laid then
         set.glow:Layout(laid[1], laid[2], laid[3])
     end
+end
+
+function Highlight:Style(plate)
+    local look = ns.DB.views[plate.state]
+    local borderSize = ns.HealthBorderOffset(look)
+    plate.targetSet.wrapKey = nil
+    plate.targetSet.glow:SetAnchor(plate)
+    StyleSet(plate.targetSet, plate, ns.DB.views.enemy.target, borderSize)
+    WrapCast(plate.targetSet, plate, settings.target, plate.isTarget)
+    if plate.focusSet then
+        StyleSet(plate.focusSet, plate, ns.DB.views.enemy.focus, borderSize)
+    end
+    plate.targetWash:ClearAllPoints()
+    plate.targetWash:SetAllPoints(plate.health:GetStatusBarTexture())
 end
 
 function Highlight:RefreshCast(plate)
