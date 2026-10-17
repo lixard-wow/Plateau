@@ -134,7 +134,12 @@ function ns.RestoreWarning(name)
     return T("%s was deleted or renamed.\n\nThis recreates it with its original settings."):format(name)
 end
 
-local namePrompt
+local namePrompt, confirmPrompt
+
+function ns.Widgets.HidePrompts()
+    if namePrompt then namePrompt:Hide() end
+    if confirmPrompt then confirmPrompt:Hide() end
+end
 
 function ns.Widgets.NamePrompt()
     if namePrompt then return namePrompt end
@@ -213,8 +218,6 @@ function ns.Widgets.NamePrompt()
     namePrompt = box
     return box
 end
-
-local confirmPrompt
 
 function ns.Widgets.ConfirmPrompt()
     if confirmPrompt then return confirmPrompt end

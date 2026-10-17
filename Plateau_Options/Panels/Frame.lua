@@ -1510,4 +1510,7 @@ function SetMinimized(min)
     end
 end
 
-frame:HookScript("OnHide", function() SetMinimized(false) end)
+frame:HookScript("OnHide", function()
+    SetMinimized(false)
+    ns.Widgets.HidePrompts()
+end)

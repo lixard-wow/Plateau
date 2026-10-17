@@ -197,6 +197,7 @@ local doneButton = Widgets.Button(frame, "Done", 90, function() Done(false) end)
 doneButton:SetPoint("RIGHT", openButton, "LEFT", -8, 0)
 
 frame:SetScript("OnHide", function(self)
+    ns.Widgets.HidePrompts()
     if not self.closedByCombat then
         Plateau.DB.saved.global.setupDone = true
     end
