@@ -69,11 +69,15 @@ function Execute:Style(plate, db)
         line:SetWidth(db.lineWidth)
         line:SetPoint("TOP", plate.health, "TOP" .. side, direction * width * percent / 100, 0)
         line:SetPoint("BOTTOM", plate.health, "BOTTOM" .. side, direction * width * percent / 100, 0)
-        line:SetShown(db.lines and percent > 0 and percent < 100)
+        line.wanted = db.lines and percent > 0 and percent < 100
+        line:SetShown(line.wanted)
     end
 end
 
 function Execute:Enable(plate, unit)
+    for _, line in ipairs(plate.thresholdLines) do
+        line:SetShown(line.wanted)
+    end
     self:Update(plate, unit)
 end
 
