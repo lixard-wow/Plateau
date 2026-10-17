@@ -170,7 +170,7 @@ end
 Share.Sanitize = Sanitize
 
 function Share.Export(profile, schemaVersion)
-    local payload = { version = schemaVersion, look = profile.look, states = profile.states, specSpells = rawget(profile, "specSpells"), bossPhases = profile.bossPhases }
+    local payload = { version = schemaVersion, look = profile.look, specSpells = rawget(profile, "specSpells"), bossPhases = profile.bossPhases }
     local deflate = Deflate()
     local compressed = deflate:CompressDeflate(Share.Serialize(payload), { level = 9 })
     return PREFIX .. deflate:EncodeForPrint(compressed)

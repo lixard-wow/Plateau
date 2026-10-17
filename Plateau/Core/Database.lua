@@ -1091,7 +1091,7 @@ end
 function DB:ExportProfile()
     local profile = self.saved.profiles[self.profileName]
     local global = self.saved.global
-    local full = { look = FullLook(ns.defaults.look, rawget(profile, "look")), states = rawget(profile, "states"), specSpells = rawget(profile, "specSpells") }
+    local full = { look = FullLook(ns.defaults.look, rawget(profile, "look")), specSpells = rawget(profile, "specSpells") }
     if next(global.bossPhases or {}) or next(global.bossPhaseOn or {}) then
         local names = {}
         for id, name in pairs(global.bossesSeen or {}) do

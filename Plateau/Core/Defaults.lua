@@ -643,5 +643,4 @@ ns.defaults = {
             cropIcon = true,
         },
     },
-    behavior = {},
 }
