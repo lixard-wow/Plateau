@@ -1,8 +1,8 @@
 # Plateau Nameplates
 
-**Fast, readable enemy nameplates built for Midnight — and a settings window where you see every change happen live.**
+**Fast, readable enemy nameplates for Midnight and WoW Forever — and a settings window where you see every change happen live.**
 
-Plateau replaces Blizzard's enemy nameplates with its own. It stays light in big pulls, keeps working in dungeons and raids under Midnight's addon rules, and lets you click any part of a live sample plate to edit it or drag it where you want it.
+Plateau replaces Blizzard's enemy nameplates with its own, on retail and WoW Forever. It stays light in big pulls, keeps working in dungeons and raids under Midnight's addon rules, and lets you click any part of a live sample plate to edit it or drag it where you want it.
 
 ---
 
@@ -129,7 +129,8 @@ Since patch 12.0, the game hides some information from addons during combat and 
 
 ## Compatibility
 
-- Works with World of Warcraft: Midnight (retail) and WoW Forever
+- Works with World of Warcraft: Midnight (retail) and WoW Forever, from the same download
+- On WoW Forever, Mythic+ enemy forces isn't available, and threat percent (off by default) always has a number to show, because Forever doesn't hide it
 - Plateau replaces enemy nameplates, so it shouldn't run alongside another nameplate addon. If one is loaded, Plateau offers to turn it off.
 - **Optional:** [SharedMedia](https://www.curseforge.com/wow/addons/sharedmedia) or any media pack adds more bar textures, borders and fonts to the pickers
 - In dungeons, raids and arenas the game draws friendly nameplates itself, so friendly names only apply in the open world and delves
