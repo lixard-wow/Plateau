@@ -682,6 +682,8 @@ function DB:Init()
     self.saved = db
     self.charKey = CharacterKey()
     local fresh = next(db.profiles) == nil
+    self.freshInstall = fresh
+    self.newCharacter = not fresh and self.charKey ~= nil and db.profileKeys[self.charKey] == nil
     self:SeedBuiltins()
     self.fallbackName = (fresh and ns.Builtins) and ns.Builtins.defaultName or DEFAULT_PROFILE
     self:UseProfile(self:ChosenProfile() or self.fallbackName, self.charKey == nil)
@@ -701,6 +703,7 @@ function DB:ResolveCharacter()
     local key = CharacterKey()
     if not key then return end
     self.charKey = key
+    self.newCharacter = not self.freshInstall and self.saved.profileKeys[key] == nil
     local chosen = self:ChosenProfile()
     if chosen and chosen ~= self.profileName then
         self:SwitchProfile(chosen)

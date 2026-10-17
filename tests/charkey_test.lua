@@ -35,3 +35,16 @@ DB:Init()
 playerName = "Newchar"
 DB:ResolveCharacter()
 check(PlateauDB.profileKeys["Newchar - Classic Beta PvE 2"] == DB.profileName, "a new character gets the profile it loaded with, saved under its real name")
+
+check(DB.newCharacter == true, "a character named after login with no saved profile is new")
+DB:Shutdown()
+playerName = "Freshalt"
+DB:Init()
+check(DB.newCharacter == true, "a character with no saved profile on an account that has profiles is new")
+DB:Shutdown()
+DB:Init()
+check(DB.newCharacter == false, "...and only on its first login")
+PlateauDB = nil
+playerName = "Firstever"
+DB:Init()
+check(DB.newCharacter == false, "the very first character on a fresh install gets the normal first-run setup instead")

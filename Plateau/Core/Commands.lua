@@ -178,7 +178,7 @@ setupWatcher:SetScript("OnEvent", function(_, event)
         ApplyNewUserDefaults()
         C_Timer.After(3, function()
             local function Next()
-                if not ns.DB.saved.global.setupDone then
+                if not ns.DB.saved.global.setupDone or ns.DB.newCharacter then
                     OpenSetup()
                 end
             end

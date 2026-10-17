@@ -14,15 +14,106 @@ local SPACING = 6
 local COLUMN_GAP = 12
 local HALF_WIDTH = (CONTENT_WIDTH - COLUMN_GAP) / 2
 
+local T = Style.T
+local IMPORT_BOX_HEIGHT = 80
+
+local function OwnProfiles()
+    local options = {}
+    for _, name in ipairs(Plateau.DB:ListProfiles()) do
+        if not Plateau.Builtins.ByName(name) then
+            options[#options + 1] = { value = name, label = name }
+        end
+    end
+    return options
+end
+
 local PAGE = {
     title = "Pick a look",
     intro = "Each look is a ready-made profile. Choosing one makes it your active and default profile. Fine-tune it any time with /plt.",
+    characterTitle = "Pick a profile for this character",
+    characterIntro = "This character doesn't have a profile yet. Use one you already set up, paste a profile string, or pick a ready-made look. Change it any time with /plt.",
     controls = function()
-        return {
-            { type = "LookCards", presets = ns.AllLooks(), width = CONTENT_WIDTH, wide = true, mode = "profile" },
-        }
+        local list = {}
+        if #OwnProfiles() > 0 then
+            list[#list + 1] = { type = "Header", label = "Use a profile you already have", first = true }
+            list[#list + 1] = { type = "Dropdown", label = "Profile",
+                tooltip = "Makes this your active profile and the default for this character.",
+                options = OwnProfiles,
+                get = function() return Plateau.DB:DefaultProfile() end,
+                set = function(value) Plateau.DB:SetDefaultProfile(value) end }
+        end
+        list[#list + 1] = { type = "Header", label = "Import a profile string", first = #list == 0 }
+        list[#list + 1] = { type = "SetupImport", wide = true }
+        list[#list + 1] = { type = "Header", label = "Or start from a ready-made look" }
+        list[#list + 1] = { type = "LookCards", presets = ns.AllLooks(), width = CONTENT_WIDTH, wide = true, mode = "profile" }
+        return list
     end,
 }
+
+function Widgets.SetupImport(parent)
+    local row = CreateFrame("Frame", nil, parent)
+    row:SetHeight(IMPORT_BOX_HEIGHT + 56)
+
+    local box = CreateFrame("ScrollFrame", nil, row)
+    box:SetPoint("TOPLEFT")
+    box:SetPoint("TOPRIGHT")
+    box:SetHeight(IMPORT_BOX_HEIGHT)
+    Style.Field(box, C.field, C.border)
+    local edit = CreateFrame("EditBox", nil, box)
+    edit:SetMultiLine(true)
+    edit:SetMaxLetters(0)
+    edit:SetMaxBytes(65000)
+    edit:SetAutoFocus(false)
+    Style.SetFont(edit, Style.font, 10, "")
+    edit:SetTextColor(C.text[1], C.text[2], C.text[3])
+    edit:SetWidth(CONTENT_WIDTH - 12)
+    edit:SetTextInsets(6, 6, 6, 6)
+    edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    box:SetScrollChild(edit)
+    box:EnableMouseWheel(true)
+    box:SetScript("OnMouseWheel", function(self, delta)
+        local offset, range = self:GetVerticalScroll(), self:GetVerticalScrollRange()
+        if issecretvalue(offset) or issecretvalue(range) then return end
+        self:SetVerticalScroll(math.max(0, math.min(range, offset - delta * 30)))
+    end)
+    box:SetScript("OnMouseDown", function() edit:SetFocus() end)
+
+    local message = Style.Text(row, 11, C.muted)
+    message:SetWordWrap(true)
+    message:SetJustifyH("LEFT")
+
+    local import = Widgets.Button(row, "Import and use", 140, function()
+        local ok, name, state, reload = Plateau.DB:ImportProfile(nil, edit:GetText(), true)
+        if ok then
+            message:SetTextColor(C.muted[1], C.muted[2], C.muted[3])
+            if state == "deferred" then
+                message:SetText(T("Imported as %s. It becomes active when combat ends."):format(name))
+            else
+                message:SetText(T("Imported as %s and now active."):format(name))
+            end
+            edit:SetText("")
+            edit:ClearFocus()
+            if ns.RefreshAll then
+                ns.RefreshAll()
+            end
+            if reload and ns.PromptReload then
+                ns.PromptReload()
+            end
+        else
+            message:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
+            message:SetText(name or T("Import failed."))
+        end
+    end)
+    import:SetPoint("TOPLEFT", box, "BOTTOMLEFT", 0, -8)
+    message:SetPoint("LEFT", import, "RIGHT", 12, 0)
+    message:SetPoint("RIGHT", row, "RIGHT", 0, 0)
+    Style.Tooltip(import, { label = "Import and use", tooltip = "Adds the pasted profile, makes it active and the default for this character, and applies the Blizzard nameplate settings saved with it." })
+
+    row:SetScript("OnHide", function()
+        message:SetText("")
+    end)
+    return row
+end
 
 local frame = CreateFrame("Frame", "PlateauSetup", UIParent)
 frame:SetSize(WIDTH, HEIGHT)
@@ -184,6 +275,7 @@ end)
 
 local function Done(openOptions)
     Plateau.DB.saved.global.setupDone = true
+    Plateau.DB.newCharacter = false
     frame:Hide()
     if openOptions and PlateauOptions then
         PlateauOptions:Show()
@@ -200,6 +292,7 @@ frame:SetScript("OnHide", function(self)
     ns.Widgets.HidePrompts()
     if not self.closedByCombat then
         Plateau.DB.saved.global.setupDone = true
+        Plateau.DB.newCharacter = false
     end
     self.closedByCombat = false
     ns.HideDropdownList()
@@ -218,9 +311,10 @@ function frame:Open()
     if PlateauOptions and PlateauOptions:IsShown() then
         PlateauOptions:Hide()
     end
+    local character = Plateau.DB.newCharacter and Plateau.DB.saved.global.setupDone
     self:Show()
-    heading:SetText(PAGE.title)
-    intro:SetText(PAGE.intro)
+    heading:SetText(character and PAGE.characterTitle or PAGE.title)
+    intro:SetText(character and PAGE.characterIntro or PAGE.intro)
     page = page or BuildPage()
     page:Show()
     Refresh()
