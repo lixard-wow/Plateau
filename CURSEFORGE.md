@@ -110,7 +110,7 @@ Since patch 12.0, the game hides some information from addons during combat and 
 
 - It never reads or compares hidden values — it hands them straight to the game, which is why cast colors, aura filters and buff warnings keep working in dungeons and raids
 - Settings that depend on hidden information show a warning icon explaining what happens
-- Nothing runs on each nameplate every frame, and **Diagnostics** on the Help page shows real performance numbers from the game's own profiler
+- Nothing runs on each nameplate every frame, and `/plt debug` shows real performance numbers from the game's own profiler
 
 ---
 

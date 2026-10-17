@@ -27,9 +27,8 @@ Plateau = {
     DB = DB, flavor = "mainline", brand = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 } },
     Brand = { OnChange = function() end, Text = function(_, t) return t end }, presets = { palettes = {}, looks = {}, styles = {} },
     CVars = { Get = function() return "0" end, Set = function() end, Release = function() end, IsManaged = function() return false end },
-    CurrentSpec = function() return 1, "Arcane" end, PerformanceLines = function() return {} end,
+    CurrentSpec = function() return 1, "Arcane" end,
     Builtins = { Label = function(n) return n end }, FindConflicts = function() return {} end,
-    ResetPerformanceCounts = function() end,
     barTextures = {}, overlayPatterns = {}, media = setmetatable({}, { __index = function() return function() return {} end end }),
     arrowStyles = setmetatable({}, { __index = function() return { file = 'x' } end }),
 }
@@ -177,8 +176,7 @@ end
 local addonLabels = labelsOf(byKey.addon)
 check(addonLabels["Settings window theme"] and addonLabels["Settings window scale"] and addonLabels["Text font"] and addonLabels["Heading font"] and addonLabels["Show settings tooltips"] and addonLabels["Show Plateau in game menu"], "the gear page holds theme, scale, fonts and the other preferences")
 check(Logic.OFF_MENU.addon == true, "the gear page stays off the sidebar")
-local diagIndex, diagSpec = Logic.FindKeyed(byKey.help, "diagnostics")
-check(diagIndex ~= nil and diagSpec.collapsible == true and diagSpec.searchable == true, "Help has a collapsible, searchable Diagnostics section")
+check(Logic.FindKeyed(byKey.help, "diagnostics") == nil, "Help no longer has a Diagnostics section; /plt debug has the numbers")
 
 local sample = { { type = "Header", collapsible = true }, { type = "Toggle" }, { type = "Header" }, { type = "Toggle" } }
 check(Logic.AssignGroups(sample)[2] == 1, "controls under a collapsible header belong to it")
@@ -289,7 +287,6 @@ check(foundOn("health threshold markers", "health"), "Health threshold markers a
 check(foundOn("stacking presets", "layering") and foundOn("tight balanced", "layering"), "stacking presets are searchable on Layering and stacking")
 check(foundOn("movement speed", "layering") and foundOn("behind walls", "fading"), "movement and line-of-sight fading are searchable on their new pages")
 check(foundOn("window scale", "addon") and foundOn("heading font", "addon") and foundOn("settings window theme", "addon"), "Plateau settings are searchable")
-check(foundOn("diagnostics", "help") and foundOn("slow frames", "help"), "Diagnostics on Help is searchable from the settings search")
 check(foundOn("rename profile", "profiles") and foundOn("copy settings from", "profiles") and foundOn("delete profile", "profiles"), "profile actions are searchable")
 check(foundOn("export active profile", "profiles") and foundOn("activate after import", "profiles"), "export and import are searchable")
 check(foundOn("default profile", "profiles"), "Default profile is searchable")

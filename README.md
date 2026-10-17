@@ -132,7 +132,7 @@ Since patch 12.0 the game hides some information from addons during combat and i
 
 - It never reads, compares or does math on a hidden value. It hands the value straight to the game's own functions, which can use it safely. That is why cast colors, aura filters and buff warnings keep working in dungeons and raids.
 - Some things the game simply does not allow. Friendly nameplates are locked in dungeons, raids and arenas, so Blizzard draws them there. The game hides who interrupts a channeled cast, so that name may be missing. Threat can be hidden in some fights, and a plate then keeps its normal color. A setting that depends on hidden information shows a warning icon, and its tooltip explains what happens.
-- Nothing runs on each nameplate every frame, and updates avoid creating tables, so memory churn stays low. **Diagnostics** on the Help page shows the real numbers from the game's own profiler.
+- Nothing runs on each nameplate every frame, and updates avoid creating tables, so memory churn stays low. `/plt debug` shows the real numbers from the game's own profiler.
 
 ## Commands
 - `/plt` or `/plateau` opens the settings.

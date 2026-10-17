@@ -41,7 +41,7 @@ ns.helpTopics = {
         category = "Getting started",
         title = "Dimmed settings and collapsed sections",
         keywords = "dimmed disabled greyed collapsed section advanced expand hidden",
-        text = "A setting that cannot change anything right now, such as a border thickness while the border is off, is dimmed instead of hidden. Hover it to see what to switch on. Your saved value is kept and the setting works again as soon as you switch that on.\n\nSome pages fold advanced settings into sections that start collapsed, such as Off-screen nameplates on Stacking, Blizzard-drawn nameplates on Friendly, and Diagnostics on Help. Click a heading to open it. Search opens the right section for you.",
+        text = "A setting that cannot change anything right now, such as a border thickness while the border is off, is dimmed instead of hidden. Hover it to see what to switch on. Your saved value is kept and the setting works again as soon as you switch that on.\n\nSome pages fold advanced settings into sections that start collapsed, such as Off-screen nameplates on Stacking, and Blizzard-drawn nameplates on Friendly. Click a heading to open it. Search opens the right section for you.",
     },
     {
         category = "Getting started",
@@ -239,7 +239,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Blizzard's nameplate settings",
         keywords = "game settings cvar blizzard options names over heads which nameplates show off-screen soft target blizzard-drawn",
-        text = "Blizzard's own nameplate and name settings sit on the Plateau page they belong to, so you only look in one place. Their tooltip ends with Game setting: changing one here changes it in Blizzard's Options too, and a change made in Blizzard's Options shows here. Plateau saves the previous value of any you change, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset its page, or type /plt cvars restore.\n\nWhere they are: names over heads at the bottom of Name; which nameplates show on its own page under Behavior, with friendly players and NPCs on Friendly; size on Size; opacity behind walls and by distance on Fading; stacking, movement and off-screen nameplates on Stacking; soft target icons on Target; and the nameplates the game draws itself (style, cast bar, aggro, auras, simplify) at the bottom of Friendly.\n\nPlateau's own settings (other nameplate addons, window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window. The performance numbers are under Diagnostics on the Help page. These settings are shared by every profile.",
+        text = "Blizzard's own nameplate and name settings sit on the Plateau page they belong to, so you only look in one place. Their tooltip ends with Game setting: changing one here changes it in Blizzard's Options too, and a change made in Blizzard's Options shows here. Plateau saves the previous value of any you change, and puts those saved values back (not Blizzard's defaults) when you right-click a setting, reset its page, or type /plt cvars restore.\n\nWhere they are: names over heads at the bottom of Name; which nameplates show on its own page under Behavior, with friendly players and NPCs on Friendly; size on Size; opacity behind walls and by distance on Fading; stacking, movement and off-screen nameplates on Stacking; soft target icons on Target; and the nameplates the game draws itself (style, cast bar, aggro, auras, simplify) at the bottom of Friendly.\n\nPlateau's own settings (other nameplate addons, window theme, scale and fonts, tooltips, the game menu and minimap buttons) are on Plateau settings, opened with the gear button at the top of this window. For performance numbers, type /plt debug. These settings are shared by every profile.",
     },
     {
         category = "How do I",
@@ -293,25 +293,6 @@ local controls = {
     { type = "Actions", buttons = {
         { label = "Replay the tour", width = 150, click = function() if ns.StartTour then ns.StartTour() end end },
         { label = "Run first-time setup", width = 170, click = function() if PlateauSetup then PlateauSetup:Open() end end },
-    } },
-    { type = "Header", label = "Diagnostics", collapsible = true, collapsed = true, searchable = true, key = "diagnostics",
-      keywords = "performance cpu memory usage slow frames statistics refresh reset counters profiler",
-      helpTopic = {
-          title = "Diagnostics",
-          category = "Diagnostics",
-          keywords = "performance cpu memory usage slow frames statistics refresh reset counters profiler",
-          text = "Diagnostics shows how much CPU time and memory Plateau uses, read from the game's own profiler. The numbers update only when you open this section or click Refresh statistics, so they cost nothing while you are not looking. CPU figures are Plateau's own execution time, not total game frame time. The game's slow-frame counts can't be reset, so Plateau also shows how many happened since you last clicked Reset slow-frame counters; the this-session counts and the CPU figures are not cleared.",
-      } },
-    { type = "Note", height = 90, label = function()
-        return table.concat(Plateau.PerformanceLines(), "\n")
-    end },
-    { type = "Note", label = "CPU is Plateau's own time, not total frame time. Reset slow-frame counters clears only Slow frames since reset.", height = 30 },
-    { type = "Actions", buttons = {
-        { label = "Refresh statistics", width = 170, click = function() ns.RefreshAll() end },
-        { label = "Reset slow-frame counters", width = 200, click = function()
-            Plateau.ResetPerformanceCounts()
-            ns.RefreshAll()
-        end },
     } },
 }
 

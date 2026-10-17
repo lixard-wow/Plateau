@@ -123,14 +123,9 @@ local cpuText = Style.Text(titleBar, 11, C.muted)
 cpuText:SetPoint("RIGHT", settingsX, "LEFT", -14, 0)
 cpuText:SetJustifyH("RIGHT")
 
-local cpuButton = CreateFrame("Button", nil, titleBar)
+local cpuButton = CreateFrame("Frame", nil, titleBar)
 cpuButton:SetAllPoints(cpuText)
-cpuButton:SetScript("OnClick", function()
-    if ns.OpenLink then
-        ns.OpenLink({ section = "help", key = "diagnostics" })
-    end
-end)
-Style.Tooltip(cpuButton, { label = "Plateau CPU", tooltip = "Click to open Diagnostics." })
+Style.Tooltip(cpuButton, { label = "Plateau CPU", tooltip = "Plateau's own CPU time per frame, from the game's addon profiler. Type /plt debug for more numbers." })
 
 local function UpdateCpu()
     local ms, percent = Plateau.CpuReadout()

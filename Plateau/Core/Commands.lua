@@ -601,12 +601,6 @@ Plateau = {
     MemoryReadout = function()
         return ns.MemoryReadout()
     end,
-    PerformanceLines = function()
-        return ns.PerformanceLines()
-    end,
-    ResetPerformanceCounts = function()
-        ns.ResetPerformanceCounts()
-    end,
     Brand = ns.Brand,
     Builtins = ns.Builtins,
     AutoProfile = ns.AutoProfile,
