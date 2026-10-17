@@ -35,7 +35,7 @@ local STEPS = {
         target = "menu",
         place = "right",
         title = "The pages",
-        text = "Each page holds one part of the nameplate. A dot beside a page means it differs from the default. Blizzard's own nameplate settings sit on the page they belong to.",
+        text = "Each page holds one part of the nameplate. Blizzard's own nameplate settings sit on the page they belong to.",
     },
     {
         target = "search",
@@ -53,7 +53,7 @@ local STEPS = {
         target = "profile",
         place = "above",
         title = "Profiles",
-        text = "Your active profile, the one every page edits. Switch profiles on the Looks or Profiles page. Changes save automatically.",
+        text = "Your active profile, the one every page edits. Switch profiles on the Profiles page. Changes save automatically.",
     },
 }
 

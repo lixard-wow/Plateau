@@ -526,7 +526,7 @@ profileButton:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
     local accent = Style.StateColor()
     GameTooltip:SetText(T("Active profile: %s"):format(status.active), accent[1], accent[2], accent[3])
-    GameTooltip:AddLine(T("Every page edits this profile. Switch profiles on the Looks or Profiles page."), 1, 1, 1, true)
+    GameTooltip:AddLine(T("Every page edits this profile. Switch profiles on the Profiles page."), 1, 1, 1, true)
     GameTooltip:AddLine(T("Default profile: %s"):format(status.default), 1, 1, 1, true)
     if status.overridden then
         GameTooltip:AddLine(T("Active because of: %s. Automatic switching can replace your choice when you change zone or specialization."):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
