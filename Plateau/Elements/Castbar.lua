@@ -562,6 +562,13 @@ function Castbar:Style(plate, db)
         ns.PlaceIcon(interruptText, bar, db.interruptPosition, 2, x, y)
     end
 
+    if castingBars[bar] and plate.unit then
+        local s = settings[plate.state]
+        if s.showGlow then
+            bar.glow:SetAlphaFromBoolean(bar.isImportant, 1, 0)
+        end
+        bar.target:SetTextColor(TargetTextColor(s, plate.unit))
+    end
     ApplyFill(bar)
 end
 
