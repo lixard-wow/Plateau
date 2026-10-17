@@ -1375,7 +1375,8 @@ local function Search(query)
     end
     local scored = {}
     for _, entry in ipairs(source) do
-        local score = Logic.SearchScore(entry, words, query)
+        local spec = entry.where ~= "Page" and entry.section.controls[entry.index]
+        local score = (not spec or Logic.RowShown(spec)) and Logic.SearchScore(entry, words, query)
         if score then
             scored[#scored + 1] = { entry = entry, score = score }
         end
