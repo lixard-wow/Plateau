@@ -58,7 +58,7 @@ function ns.Widgets.MakeSwatch(parent, path, setter)
         end
     end
 
-    local opening, seed, original, changed
+    local opening, seed, before, changed
 
     local function Near(a, b)
         return math.abs(a - b) < 0.002
@@ -80,7 +80,7 @@ function ns.Widgets.MakeSwatch(parent, path, setter)
 
     swatch:SetScript("OnClick", function()
         local value = ns.Get(path)
-        original = value
+        before = Plateau.DB:Snapshot()
         changed = false
         local start = value
         seed = nil
@@ -102,7 +102,10 @@ function ns.Widgets.MakeSwatch(parent, path, setter)
                 pending = nil
                 if changed then
                     changed = false
-                    ns.Set(path, original)
+                    Plateau.DB:Restore(before)
+                    if ns.RefreshAll then
+                        ns.RefreshAll()
+                    end
                     swatch:Refresh()
                     if swatch.onChange then
                         swatch.onChange()

@@ -81,6 +81,20 @@ local ns = {
 }
 function ns.Get(path) local v = db[path] return { v[1], v[2], v[3], v[4] } end
 function ns.Set(path, value) writes = writes + 1 db[path] = { value[1], value[2], value[3], value[4] } end
+local function CopyDb()
+    local copy = {}
+    for k, v in pairs(db) do copy[k] = type(v) == "table" and { v[1], v[2], v[3], v[4] } or v end
+    return copy
+end
+Plateau = { DB = {
+    Snapshot = function() return CopyDb() end,
+    Restore = function(_, snapshot)
+        for k in pairs(db) do db[k] = nil end
+        for k, v in pairs(snapshot) do db[k] = v end
+        writes = writes + 1
+        return true
+    end,
+} }
 assert(loadfile("Plateau_Options/Widgets/ColorSwatch.lua"))("Plateau_Options", ns)
 
 local function Swatch(start, setter)
@@ -184,3 +198,15 @@ check(not IsTarget(resetTargets, swatchFrame), "right-click-to-reset is not wire
 check(ColorPickerFrame.strata == "FULLSCREEN_DIALOG" and ColorPickerFrame.raised, "the picker opens above the settings window, so a click on OK can't land on the window and count as cancel")
 ColorPickerFrame.onHide(ColorPickerFrame)
 check(ColorPickerFrame.strata == "DIALOG", "the picker goes back to its normal layer when it closes")
+
+db.style = "none"
+swatch = Swatch({ 0.2, 0.4, 0.9, 1 }, function(value)
+    db.color = { value[1], value[2], value[3], value[4] }
+    db.style = "pixel"
+end)
+swatch.scripts.OnClick()
+Pick(1, 0, 0)
+RunTimers()
+check(db.style == "pixel", "a setter can change other settings while picking")
+Cancel()
+check(db.style == "none" and Is(Stored(), 0.2, 0.4, 0.9), "Cancel also undoes what the setter changed, not just the color")
