@@ -268,7 +268,7 @@ ns.defaults = {
             matchBar = false,
         },
         friendly = {
-            enabled = false,
+            enabled = true,
             players = true,
             npcs = true,
             minions = false,

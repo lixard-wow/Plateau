@@ -50,12 +50,12 @@ check(DB:Set("look.castbar.height", 12, "friendly"), "an extra state argument to
 check(DB:Get("look.castbar.height") == 12, "...and just sets the one real value")
 DB:Reset("look.castbar.height")
 
-DB:Set("look.friendly.enabled", true)
-check(DB.views.enemy.friendly.enabled == true, "look.friendly.* settings are plain, independent settings")
+DB:Set("look.friendly.enabled", false)
+check(DB.views.enemy.friendly.enabled == false, "look.friendly.* settings are plain, independent settings")
 DB:Shutdown()
-check(PlateauDB.profiles.Default.look.friendly.enabled == true, "friendly-only setting saved")
+check(PlateauDB.profiles.Default.look.friendly.enabled == false, "friendly-only setting saved")
 DB:Init()
-check(DB.views.friendly.friendly.enabled == true, "friendly-only setting reloads")
+check(DB.views.friendly.friendly.enabled == false, "friendly-only setting reloads")
 
 DB:SetSpecSpells("mine", "only", "192090, 164812", 104)
 DB:SetSpecSpells("mine", "hide", "1079", 103)

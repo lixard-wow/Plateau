@@ -50,6 +50,24 @@ check(not DB:ImportProfile("Shared", text), "existing name rejected")
 check(not DB:ImportProfile("Bad", "hello"), "non-Plateau string rejected")
 check(not DB:ImportProfile("Bad", "!SL1!zzzz"), "damaged string rejected")
 
+local applied = {}
+ns.CVars = {
+    ManagedCopy = function() return { nameplateMaxDistance = "45", nameplateOverlapV = "1.2", Gamma = "2" } end,
+    Set = function(_, name, value) applied[name] = value end,
+}
+C_CVar = { GetCVar = function(name) return name:find("^nameplate") and "0" or nil end }
+DB.saved.global.hideInstancePets = true
+local gameText = DB:ExportProfile()
+local gamePayload = ns.Share.Decode(gameText)
+check(gamePayload.game and gamePayload.game.cvars.nameplateMaxDistance == "45" and gamePayload.game.cvars.Gamma == nil, "export carries Plateau's Blizzard nameplate settings only")
+DB.saved.global.hideInstancePets = nil
+check(DB:ImportProfile("Game off", gameText, false) and next(applied) == nil, "importing without activating leaves Blizzard settings alone")
+check(DB:ImportProfile("Game on", gameText, true) and applied.nameplateMaxDistance == "45" and applied.nameplateOverlapV == "1.2", "activating an import applies its Blizzard nameplate settings")
+check(DB.saved.global.hideInstancePets == true, "activating an import applies its instance pet setting")
+local hostileGame = DB.CleanGame({ cvars = { nameplateMaxDistance = 5, ["bad name"] = "1", SoftTargetIconEnemy = "1", nameplateTopInset = string.rep("9", 500) }, occludedFade = { world = false, nope = false } })
+check(hostileGame.cvars.SoftTargetIconEnemy == "1" and hostileGame.cvars.nameplateMaxDistance == nil and hostileGame.cvars["bad name"] == nil and hostileGame.cvars.nameplateTopInset == nil and hostileGame.occludedFade.world == false and hostileGame.occludedFade.nope == nil, "imported Blizzard settings are cleaned")
+ns.CVars, C_CVar = nil, nil
+
 local hostile = LibDeflate:EncodeForPrint(LibDeflate:CompressDeflate(Share.Serialize({
     version = 4, look = { castbar = { height = "tall", nope = 1, readyColor = { "a" } }, junk = { x = 1 } } })))
 check(DB:ImportProfile("Hostile", "!SL1!" .. hostile, true), "import with wrong types still succeeds")

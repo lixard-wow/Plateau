@@ -1088,6 +1088,95 @@ local function Copy(source)
     return copy
 end
 
+local GAME_CVAR_PREFIXES = { "^nameplate", "^SoftTarget", "^UnitName" }
+local GAME_CVARS = { ShowQuestUnitCircles = true }
+local OCCLUDED_KINDS = { world = true, dungeon = true, raid = true, delve = true, pvp = true }
+
+local function GameCVar(name)
+    if type(name) ~= "string" or #name > 64 or name:find("[^%w]") then return false end
+    if GAME_CVARS[name] then return true end
+    for _, pattern in ipairs(GAME_CVAR_PREFIXES) do
+        if name:find(pattern) then return true end
+    end
+    return false
+end
+
+local function CleanGame(data)
+    if type(data) ~= "table" then return nil end
+    local clean = { cvars = {} }
+    local count = 0
+    if type(data.cvars) == "table" then
+        for name, value in pairs(data.cvars) do
+            if GameCVar(name) and type(value) == "string" and #value <= 200 and count < 200 then
+                clean.cvars[name] = value
+                count = count + 1
+            end
+        end
+    end
+    if type(data.occludedFade) == "table" then
+        for kind, on in pairs(data.occludedFade) do
+            if OCCLUDED_KINDS[kind] and on == false then
+                clean.occludedFade = clean.occludedFade or {}
+                clean.occludedFade[kind] = false
+            end
+        end
+    end
+    if type(data.hideInstancePets) == "boolean" then
+        clean.hideInstancePets = data.hideInstancePets
+    end
+    if type(data.keepRealmMarker) == "boolean" then
+        clean.keepRealmMarker = data.keepRealmMarker
+    end
+    return clean
+end
+DB.CleanGame = CleanGame
+
+function DB:ExportGame()
+    local global = self.saved.global
+    local game = { cvars = {} }
+    if ns.CVars then
+        for name, value in pairs(ns.CVars:ManagedCopy()) do
+            if GameCVar(name) then
+                game.cvars[name] = tostring(value)
+            end
+        end
+    end
+    if type(global.occludedFade) == "table" then
+        game.occludedFade = Copy(global.occludedFade)
+    end
+    game.hideInstancePets = global.hideInstancePets == true
+    game.keepRealmMarker = global.keepRealmMarker == true
+    return game
+end
+
+function DB:ApplyGame(game)
+    game = CleanGame(game)
+    if not game then return false end
+    local global = self.saved.global
+    if ns.CVars and C_CVar then
+        for name, value in pairs(game.cvars) do
+            if C_CVar.GetCVar(name) ~= nil then
+                ns.CVars:Set(name, value)
+            end
+        end
+    end
+    local reload = (global.keepRealmMarker == true) ~= (game.keepRealmMarker == true)
+    global.keepRealmMarker = game.keepRealmMarker or nil
+    if ns.InstancePets then
+        ns.InstancePets:SetOn(game.hideInstancePets == true)
+    else
+        global.hideInstancePets = game.hideInstancePets or nil
+    end
+    if ns.OccludedFade then
+        for kind in pairs(OCCLUDED_KINDS) do
+            ns.OccludedFade:SetOn(kind, not (game.occludedFade and game.occludedFade[kind] == false))
+        end
+    else
+        global.occludedFade = game.occludedFade
+    end
+    return true, reload
+end
+
 function DB:ExportProfile()
     local profile = self.saved.profiles[self.profileName]
     local global = self.saved.global
@@ -1101,6 +1190,7 @@ function DB:ExportProfile()
         end
         full.bossPhases = { lines = Copy(global.bossPhases), on = Copy(global.bossPhaseOn), names = names }
     end
+    full.game = self:ExportGame()
     return ns.Share.Export(full, SCHEMA_VERSION)
 end
 
@@ -1165,7 +1255,12 @@ function DB:ImportProfile(name, text, activate)
         return true, name
     end
     local ok, state = self:ActivateProfile(name)
-    return ok, name, state
+    local reload = false
+    if ok and payload.game ~= nil then
+        local _, needsReload = self:ApplyGame(payload.game)
+        reload = needsReload == true
+    end
+    return ok, name, state, reload
 end
 
 function DB:DeleteProfile(name)

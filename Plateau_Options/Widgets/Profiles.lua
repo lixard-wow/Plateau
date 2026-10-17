@@ -766,13 +766,13 @@ function ns.Widgets.ShareProfile(parent)
 
     local activateToggle = ns.Widgets.Toggle(frame, {
         label = "Activate after import",
-        tooltip = "Switches to the imported profile and makes it your default. During combat it switches when combat ends.",
+        tooltip = "Switches to the imported profile and makes it your default, and applies the Blizzard nameplate settings saved with it. During combat it switches when combat ends.",
         get = function() return activate end,
         set = function(value) activate = value == true end,
     })
 
     local import = ns.Widgets.Button(frame, "Import profile", SHARE_BUTTON, function()
-        local ok, name, state = Plateau.DB:ImportProfile(nameBox:GetText(), importEdit:GetText(), activate)
+        local ok, name, state, reload = Plateau.DB:ImportProfile(nameBox:GetText(), importEdit:GetText(), activate)
         if ok then
             local color = C.muted
             importMessage:SetTextColor(color[1], color[2], color[3])
@@ -788,6 +788,9 @@ function ns.Widgets.ShareProfile(parent)
             nameBox:SetText("")
             importEdit:SetText("")
             Refreshed()
+            if reload and ns.PromptReload then
+                ns.PromptReload()
+            end
         else
             local reason = name or T("Import failed.")
             if NameTaken(reason) then

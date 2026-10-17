@@ -19,7 +19,7 @@ First release.
 - Separate settings for enemy players, friendly units, your target and your focus, each following the enemy settings until you change them.
 - Undo and redo, search, built-in help and a short tour.
 - Six ready-made looks to start from, and five window themes: Workbench, Artisan's Ledger, Horde, Alliance and Slate.
-- Profiles that switch automatically by content or specialization, and profile sharing by text string.
+- Profiles that switch automatically by content or specialization, and profile sharing by text string that also carries the Blizzard nameplate settings you change in Plateau.
 - Blizzard's nameplate settings gathered in one place, with a one-step restore.
 
 ### Commands
