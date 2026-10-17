@@ -129,7 +129,7 @@ Since patch 12.0, the game hides some information from addons during combat and 
 
 ## Compatibility
 
-- Works with World of Warcraft: Midnight (retail)
+- Works with World of Warcraft: Midnight (retail) and WoW Forever
 - Plateau replaces enemy nameplates, so it shouldn't run alongside another nameplate addon. If one is loaded, Plateau offers to turn it off.
 - **Optional:** [SharedMedia](https://www.curseforge.com/wow/addons/sharedmedia) or any media pack adds more bar textures, borders and fonts to the pickers
 - In dungeons, raids and arenas the game draws friendly nameplates itself, so friendly names only apply in the open world and delves
