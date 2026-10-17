@@ -93,6 +93,8 @@ local DESCRIBE = {
     Reset = function(path) return path and T("Reset %s"):format(T(Label(path) or "a setting")) or T("Reset profile") end,
     ResetEverywhere = function(paths) return T("Reset %s"):format(T((type(paths) == "table" and Label(paths[1])) or "a setting")) end,
     SetSpecSpells = function() return T("Spell list") end,
+    CopyProfile = function() return T("Copied settings") end,
+    RestoreBuiltin = function() return T("Restored built-in look") end,
     CVarSet = function(name) return T(Label("cvar." .. tostring(name))) or tostring(name) end,
     CVarRelease = function(name) return T("Reset %s"):format(T(Label("cvar." .. tostring(name))) or tostring(name)) end,
 }
@@ -136,6 +138,22 @@ function Undo.Remember(kind, ...)
     end
     wipe(redo)
     Notify()
+end
+
+local function Prune()
+    local name = Plateau.DB.profileName
+    local changed = false
+    for _, list in ipairs({ stack, redo }) do
+        for i = #list, 1, -1 do
+            if list[i].profile.profile ~= name then
+                table.remove(list, i)
+                changed = true
+            end
+        end
+    end
+    if changed then
+        Notify()
+    end
 end
 
 local function Finish()
@@ -206,8 +224,30 @@ local function Wrap(target, method, kind)
     end
 end
 
-for _, method in ipairs({ "Set", "SetMany", "Reset", "ResetEverywhere", "SetSpecSpells" }) do
+for _, method in ipairs({ "Set", "SetMany", "Reset", "ResetEverywhere", "SetSpecSpells", "CopyProfile" }) do
     Wrap(Plateau.DB, method, method)
+end
+
+local restoreBuiltin = Plateau.DB.RestoreBuiltin
+Plateau.DB.RestoreBuiltin = function(self, name, ...)
+    if name == self.profileName then
+        Undo.Remember("RestoreBuiltin")
+    end
+    return restoreBuiltin(self, name, ...)
+end
+
+local function Pruned(...)
+    Prune()
+    return ...
+end
+
+for _, method in ipairs({ "SwitchProfile", "RenameProfile", "DeleteProfile", "ImportProfile" }) do
+    local original = Plateau.DB[method]
+    if original then
+        Plateau.DB[method] = function(self, ...)
+            return Pruned(original(self, ...))
+        end
+    end
 end
 Wrap(Plateau.CVars, "Set", "CVarSet")
 Wrap(Plateau.CVars, "Release", "CVarRelease")
