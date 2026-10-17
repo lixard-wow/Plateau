@@ -28,7 +28,7 @@ Plateau replaces the enemy nameplates with its own, and gives you a settings win
 - **Optional:** the [SharedMedia](https://www.curseforge.com/wow/addons/sharedmedia) addon (or any addon that adds textures, borders and fonts to the shared media library). Plateau lists everything registered there in its texture, border and font pickers, so a pack such as SharedMedia adds a long list of bar textures, Charcoal among them.
 
 ## Install
-- **CurseForge:** install [Plateau Nameplates](https://www.curseforge.com/projects/1749349) with the CurseForge app, or download it from the page.
+- **CurseForge:** install [Plateau Nameplates](https://www.curseforge.com/wow/addons/plateau) with the CurseForge app, or download it from the page.
 - **By hand:** download a release zip, open it, and copy the `Plateau` and `Plateau_Options` folders into `World of Warcraft\_retail_\Interface\AddOns` (for WoW Forever, the `Interface\AddOns` folder of that game version), then restart the game.
 
 `Plateau_Options` loads only when you open the settings, so it costs nothing while you play.
