@@ -836,7 +836,6 @@ function Castbar:Refresh(plate, unit, ending)
     else
         bar.target:Hide()
     end
-    TargetShownChanged(plate)
 
     bar.icon:SetTexture(texture)
     if s.showSpellName then
@@ -877,6 +876,7 @@ function Castbar:Refresh(plate, unit, ending)
     end
     UpdateKickMarker(bar)
     bar:Show()
+    TargetShownChanged(plate)
 end
 
 function Castbar:Preview(plate, state)
