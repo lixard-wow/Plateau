@@ -102,3 +102,9 @@ check(okBad, "an import with bad values still imports")
 local bad = DB.saved.profiles[badName].look
 check(bad.castbar.textJustify == nil and bad.name.justify == "RIGHT", "an unknown text alignment is dropped and a valid one kept")
 check(bad.target.scale == 0.1 and bad.scaling.boss == 0.1 and bad.scaling.castScale == 5, "scale values are kept between 0.1 and 5, so the game never gets a zero or negative scale")
+Share.ranges = { ["look.plate.width"] = { 40, 300 }, ["look.castbar.height"] = { 2, 40 } }
+local okRange, rangeName = DB:ImportProfile("Out of range", pack({ version = 17, look = { plate = { width = -500 }, castbar = { height = 100000 }, name = { size = 12 } } }), false)
+local ranged = okRange and DB.saved.profiles[rangeName].look
+check(ranged and ranged.plate.width == 40 and ranged.castbar.height == 40, "imported numbers are kept inside the matching slider range")
+check(ranged and ranged.name.size == 12, "numbers without a known slider range are left alone")
+Share.ranges = nil

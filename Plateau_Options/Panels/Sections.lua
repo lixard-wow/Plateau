@@ -2877,6 +2877,19 @@ for _, section in ipairs(ns.sections) do
     section.picks = SECTION_PICKS[section.key]
 end
 
+local sliderRanges = {}
+for _, section in ipairs(ns.sections) do
+    for _, spec in ipairs(type(section.controls) == "table" and section.controls or {}) do
+        if spec.type == "Slider" and spec.path and spec.min and spec.max and not sliderRanges[spec.path] then
+            sliderRanges[spec.path] = { spec.min, spec.max }
+        end
+    end
+end
+ns.sliderRanges = sliderRanges
+if Plateau.SetImportRanges then
+    Plateau.SetImportRanges(sliderRanges)
+end
+
 ns.CVarToggle = CVarToggle
 ns.CVarBitToggle = CVarBitToggle
 ns.stackTypes = STACK

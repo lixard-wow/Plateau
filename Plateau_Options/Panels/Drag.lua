@@ -20,20 +20,8 @@ local selectionFrame
 local keys
 local lastDragged = false
 
-local ranges
-
 local function Range(path)
-    if not ranges then
-        ranges = {}
-        for _, section in ipairs(ns.sections or {}) do
-            for _, spec in ipairs(type(section.controls) == "table" and section.controls or {}) do
-                if spec.type == "Slider" and spec.path and spec.min and spec.max and not ranges[spec.path] then
-                    ranges[spec.path] = { spec.min, spec.max }
-                end
-            end
-        end
-    end
-    return ranges[path]
+    return ns.sliderRanges and ns.sliderRanges[path]
 end
 
 local function Apply(values)

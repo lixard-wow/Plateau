@@ -125,13 +125,14 @@ local function IsScale(key, parent)
     return type(key) == "string" and (key:find("[Ss]cale$") ~= nil or (parent == "scaling" and TYPE_SCALES[key] == true))
 end
 
-local function Sanitize(data, defaults, parent)
+local function Sanitize(data, defaults, parent, prefix)
+    prefix = prefix or "look"
     local clean = {}
     for key, value in pairs(data) do
         local default = defaults[key]
         if type(default) == "table" and default[1] == nil then
             if type(value) == "table" then
-                clean[key] = Sanitize(value, default, key)
+                clean[key] = Sanitize(value, default, key, prefix .. "." .. tostring(key))
             end
         elseif type(default) == "table" then
             if type(value) == "table" then
@@ -148,6 +149,10 @@ local function Sanitize(data, defaults, parent)
                 if value == value and value >= -MAX_NUMBER and value <= MAX_NUMBER then
                     if IsScale(key, parent) then
                         value = math.max(MIN_SCALE, math.min(MAX_SCALE, value))
+                    end
+                    local range = Share.ranges and Share.ranges[prefix .. "." .. tostring(key)]
+                    if range then
+                        value = math.max(range[1], math.min(range[2], value))
                     end
                     clean[key] = value
                 end

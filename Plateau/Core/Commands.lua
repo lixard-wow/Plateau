@@ -660,6 +660,9 @@ Plateau = {
     SetClickAreas = function(preview, world)
         ns.Driver:SetClickAreas(preview, world)
     end,
+    SetImportRanges = function(ranges)
+        ns.Share.ranges = ranges
+    end,
     SetStackBoxes = function(on)
         ns.Driver:SetStackBoxes(on)
     end,
