@@ -3,7 +3,7 @@ local _, ns = ...
 local L = ns.L
 
 local PREFIX = "!SL1!"
-local MAX_TEXT = 20000
+local MAX_TEXT = 60000
 local MAX_SERIALIZED = 1000000
 local MAX_NODES = 20000
 local MAX_STRING = 200
