@@ -5,6 +5,7 @@
 ## Version: 0.1.0-beta
 ## Dependencies: Plateau
 ## LoadOnDemand: 1
+## X-Curse-Project-ID: 1749349
 ## IconTexture: Interface\AddOns\Plateau\Art\icon
 
 Widgets\Style.lua
