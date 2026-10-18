@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1
+
+### New
+- The target glow can wrap the cast bar while your target casts. Turn it off with Glow around the cast bar under Target.
+- A new character's first login opens setup, where you can pick a profile you already have, paste a profile string, or start from a ready-made look. Setup now offers these for every character.
+
+### Changed
+- Plateau styles friendly nameplates by default, so friendly NPCs show names instead of Blizzard's health bars in the open world.
+- Profile strings now carry the Blizzard nameplate settings you change in Plateau, such as stacking, spacing and max distance. They're applied when you activate the imported profile.
+
 ## 0.1.0
 
 First release.
@@ -19,7 +29,7 @@ First release.
 - Separate settings for enemy players, friendly units, your target and your focus, each following the enemy settings until you change them.
 - Undo and redo, search, built-in help and a short tour.
 - Six ready-made looks to start from, and five window themes: Workbench, Artisan's Ledger, Horde, Alliance and Slate.
-- Profiles that switch automatically by content or specialization, and profile sharing by text string that also carries the Blizzard nameplate settings you change in Plateau.
+- Profiles that switch automatically by content or specialization, and profile sharing by text string.
 - Blizzard's nameplate settings gathered in one place, with a one-step restore.
 
 ### Commands
