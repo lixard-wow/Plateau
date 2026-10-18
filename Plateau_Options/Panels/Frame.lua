@@ -69,6 +69,9 @@ titleBar:EnableMouse(true)
 titleBar:RegisterForDrag("LeftButton")
 titleBar:SetScript("OnDragStart", function() frame:StartMoving() end)
 titleBar:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+frame:RegisterForDrag("LeftButton")
+frame:SetScript("OnDragStart", function() frame:StartMoving() end)
+frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
 
 if Style.theme.headerFill then
     local titleCap = Style.Rounded(titleBar, C.header, "BACKGROUND", -1)
