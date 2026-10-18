@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+### Changed
+- You can drag the settings and setup windows from any empty spot, not just the title bar.
+- The target glow pulse now brightens and dims the whole glow, not just its corners.
+
 ## 0.1.1
 
 ### New
