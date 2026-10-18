@@ -47,14 +47,14 @@ pulser:SetScript("OnUpdate", function(self, elapsed)
     local any = false
     for border, low in pairs(pulsing) do
         any = true
-        border:SetAlpha(low + (1 - low) * wave)
+        border:SetPulse(low + (1 - low) * wave)
     end
     if not any then
         self:Hide()
     end
 end)
 
-local RING_LOW, GLOW_LOW = 0.2, 0.6
+local RING_LOW, GLOW_LOW = 0.2, 0.4
 
 local function Pulse(border, on, low)
     if on then
@@ -64,7 +64,7 @@ local function Pulse(border, on, low)
         end
     elseif pulsing[border] then
         pulsing[border] = nil
-        border:SetAlpha(1)
+        border:SetPulse(1)
     end
 end
 

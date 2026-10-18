@@ -294,7 +294,7 @@ function Border:SetSpriteCell(path, index, rows, columns)
     end
 end
 
-function Border:SetFade(r, g, b, a)
+local function ApplyFade(self, r, g, b, a)
     local inner, outer = self.fadeInner, self.fadeOuter
     if inner then
         inner:SetRGBA(r, g, b, a)
@@ -328,6 +328,11 @@ function Border:SetFade(r, g, b, a)
     for i = 1, 4 do
         self.corners[i]:SetVertexColor(r, g, b, a)
     end
+end
+
+function Border:SetFade(r, g, b, a)
+    self.fadeColor = { r, g, b, a }
+    ApplyFade(self, r, g, b, a)
     if not self.fade then
         self.fade = true
         if self.laidOut then
@@ -379,6 +384,15 @@ function Border:SetAlpha(alpha)
     end
     if self.edgeFrame then
         self.edgeFrame:SetAlpha(alpha)
+    end
+end
+
+function Border:SetPulse(alpha)
+    local color = self.fade and self.fadeColor
+    if color then
+        ApplyFade(self, color[1], color[2], color[3], color[4] * alpha)
+    else
+        self:SetAlpha(alpha)
     end
 end
 
