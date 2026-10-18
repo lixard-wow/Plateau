@@ -43,21 +43,23 @@ local pulser = CreateFrame("Frame")
 pulser:Hide()
 pulser:SetScript("OnUpdate", function(self, elapsed)
     pulseTime = pulseTime + elapsed
-    local alpha = 0.6 + 0.4 * math.sin(pulseTime * 4)
+    local wave = (1 + math.sin(pulseTime * 4)) / 2
     local any = false
-    for border in pairs(pulsing) do
+    for border, low in pairs(pulsing) do
         any = true
-        border:SetAlpha(alpha)
+        border:SetAlpha(low + (1 - low) * wave)
     end
     if not any then
         self:Hide()
     end
 end)
 
-local function Pulse(border, on)
+local RING_LOW, GLOW_LOW = 0.2, 0.6
+
+local function Pulse(border, on, low)
     if on then
         if not pulsing[border] then
-            pulsing[border] = true
+            pulsing[border] = low or RING_LOW
             pulser:Show()
         end
     elseif pulsing[border] then
@@ -305,7 +307,7 @@ local function ShowSet(set, config, shown)
     set.ring:SetShown(shown and config.ring)
     set.glow:SetShown(shown and config.glow)
     Pulse(set.ring, shown and config.ring and config.pulse)
-    Pulse(set.glow, shown and config.glow and config.pulse)
+    Pulse(set.glow, shown and config.glow and config.pulse, GLOW_LOW)
     if set.arrowLeft then
         set.arrowLeft:SetShown(shown and config.arrows)
         set.arrowRight:SetShown(shown and config.arrows and not set.single)
