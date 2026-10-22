@@ -17,7 +17,7 @@ local PREVIEW_BAR = 36
 local FOOTER = 44
 local SPACING = 6
 local SCROLLBAR = 14
-local CONTENT_WIDTH = WIDTH - RAIL - PAD * 2 - SCROLLBAR
+local CONTENT_WIDTH = WIDTH - RAIL - 1 - PAD * 2 - SCROLLBAR
 local CARD_GAP = 14
 local CARD_PAD = 16
 local HALF_CARD = math.floor((CONTENT_WIDTH - CARD_GAP) / 2)
@@ -891,7 +891,7 @@ local function LayoutPage(page)
                     left, top, width = 0, Bottom(), CONTENT_WIDTH
                 else
                     local which = columns[2] < columns[1] and 2 or 1
-                    left, top, width = (which - 1) * (HALF_CARD + CARD_GAP), columns[which], HALF_CARD
+                    left, top, width = (which - 1) * (HALF_CARD + CARD_GAP), columns[which], which == 1 and HALF_CARD or CONTENT_WIDTH - HALF_CARD - CARD_GAP
                     card.column = which
                 end
                 local inner = top + CARD_PAD - 4
