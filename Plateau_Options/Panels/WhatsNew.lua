@@ -59,9 +59,12 @@ frame:EnableMouse(true)
 frame:Hide()
 Style.Panel(frame, C.window, C.border)
 tinsert(UISpecialFrames, "PlateauWhatsNew")
+frame:SetScale(Style.PixelScale())
+frame:HookScript("OnShow", function(self) Style.FitWindow(self) end)
 
 local function StopMoving()
     frame:StopMovingOrSizing()
+    Style.SnapWindow(frame)
 end
 frame:RegisterForDrag("LeftButton")
 frame:SetScript("OnDragStart", function() frame:StartMoving() end)

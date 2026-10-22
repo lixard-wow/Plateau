@@ -42,7 +42,7 @@ frame:SetMovable(true)
 frame:SetClampedToScreen(true)
 frame:EnableMouse(true)
 frame:Hide()
-frame:SetScale(Style.Scale())
+frame:SetScale(Style.PixelScale())
 local frameEdge = Style.Rounded(frame, C.border, "BACKGROUND", -2)
 frameEdge:SetAllPoints()
 local frameFill = Style.Rounded(frame, C.window, "BACKGROUND", -1)
@@ -152,10 +152,8 @@ function KeepOnScreen()
     local screenWidth, screenHeight = UIParent:GetWidth() * ratio, UIParent:GetHeight() * ratio
     local fixedLeft = math.max(OFFSCREEN_KEEP - width, math.min(left, screenWidth - OFFSCREEN_KEEP))
     local fixedTop = math.max(TITLE, math.min(top, screenHeight))
-    if fixedLeft ~= left or fixedTop ~= top then
-        frame:ClearAllPoints()
-        frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", fixedLeft, fixedTop)
-    end
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", math.floor(fixedLeft + 0.5), math.floor(fixedTop + 0.5))
 end
 local restoreHeight = HEIGHT
 local SetMinimized
@@ -340,6 +338,9 @@ local screenWatcher = CreateFrame("Frame")
 screenWatcher:RegisterEvent("DISPLAY_SIZE_CHANGED")
 screenWatcher:RegisterEvent("UI_SCALE_CHANGED")
 screenWatcher:SetScript("OnEvent", function()
+    if ns.ApplyScale then
+        ns.ApplyScale()
+    end
     Style.RefreshPixels()
     if minimized then
         local left, top = frame:GetLeft(), frame:GetTop()
@@ -1429,14 +1430,14 @@ end
 LayoutRail()
 local function FitHeight()
     if minimized then return end
-    frame:SetHeight(math.min(HEIGHT, (UIParent:GetHeight() - 40) / frame:GetScale()))
+    frame:SetHeight(math.floor(math.min(HEIGHT, (UIParent:GetHeight() * UIParent:GetEffectiveScale() - 40 * frame:GetEffectiveScale()) / frame:GetEffectiveScale())))
     LooseClamp()
 end
 FitHeight()
 
 function ns.ApplyScale()
-    local old, new = frame:GetScale(), Style.Scale()
-    if old == new then return end
+    local old, new = frame:GetScale(), Style.PixelScale()
+    if math.abs(old - new) < 1e-6 then return end
     local left, right, top = frame:GetLeft(), frame:GetRight(), frame:GetTop()
     frame:SetScale(new)
     Style.RefreshPixels()
@@ -1445,8 +1446,15 @@ function ns.ApplyScale()
         local ratio = old / new
         frame:ClearAllPoints()
         frame:SetPoint("TOP", UIParent, "BOTTOMLEFT", (left + right) / 2 * ratio, top * ratio)
+        KeepOnScreen()
     end
 end
+
+hooksecurefunc(UIParent, "SetScale", function()
+    if frame:IsShown() then
+        ns.ApplyScale()
+    end
+end)
 
 function ns.UpdateProfileLabel()
     local status = Plateau.AutoProfile:Status()
@@ -1530,6 +1538,10 @@ function ns.SelectSection(key)
 end
 
 frame:SetScript("OnShow", function()
+    ns.ApplyScale()
+    if not minimized then
+        KeepOnScreen()
+    end
     Style.RefreshPixels()
     ns.UpdateProfileLabel()
     Select(current or sectionsByKey[Plateau.DB.saved.global.lastSection] or sectionsByKey.health or ns.sections[1])

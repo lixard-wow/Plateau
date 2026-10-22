@@ -2775,7 +2775,7 @@ ns.sections = {
                   Plateau.DB.saved.global.optionsScale = nil
                   ns.ApplyScale()
               end,
-              tooltip = "The size of this settings window, on top of your UI scale. Nameplates are not affected." },
+              tooltip = "The size of this settings window. It snaps to the nearest size where every line falls on whole screen pixels, so it changes in steps and stays sharp whatever UI scale you or other addons use. Nameplates are not affected." },
             { type = "Header", label = "Fonts" },
             { type = "Dropdown", label = "Text font", keywords = "font typeface options window",
               options = function() return ns.OptionsFonts() end,

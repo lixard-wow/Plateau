@@ -107,3 +107,24 @@ local hooks2 = {}
 reset.RightClickReset({ HookScript = function(_, name, fn) hooks2[name] = fn end }, { label = "CVar", reset = function() custom = custom + 1 end }, function() end)
 hooks2.OnMouseUp(nil, "RightButton")
 check(custom == 1 and menus == 0, "settings with their own reset also reset straight away")
+
+local function PixelLoad(uiScale, optionsScale)
+    local style = Load("mainline")
+    Plateau.DB.saved.global.optionsScale = optionsScale
+    UIParent = { GetEffectiveScale = function() return uiScale end }
+    PixelUtil = { GetPixelToUIUnitFactor = function() return 768 / 1440 end }
+    return style
+end
+local function PixelsPerUnit(style, uiScale)
+    return style.PixelScale() * uiScale / (768 / 1440)
+end
+local sharp = PixelLoad(0.64, 0.85)
+local perUnit = PixelsPerUnit(sharp, 0.64)
+check(math.abs(perUnit - math.floor(perUnit + 0.5)) < 1e-9 and math.floor(perUnit + 0.5) == 1, "the settings window is scaled so one unit is exactly one screen pixel")
+local bigger = PixelLoad(1, 1)
+perUnit = PixelsPerUnit(bigger, 1)
+check(math.abs(perUnit - 2) < 1e-9, "a larger UI scale from another addon still lands on whole pixels (two per unit)")
+local tiny = PixelLoad(0.3, 0.6)
+perUnit = PixelsPerUnit(tiny, 0.3)
+check(math.abs(perUnit - 1) < 1e-9, "the window never shrinks below one pixel per unit")
+UIParent, PixelUtil = nil, nil

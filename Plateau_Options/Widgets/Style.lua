@@ -265,6 +265,35 @@ function Style.Scale()
     return math.max(Style.SCALE_MIN, math.min(Style.SCALE_MAX, scale))
 end
 
+function Style.PixelScale()
+    local wanted = Style.Scale()
+    local base = UIParent:GetEffectiveScale()
+    local factor = PixelUtil and PixelUtil.GetPixelToUIUnitFactor and PixelUtil.GetPixelToUIUnitFactor()
+    if type(base) ~= "number" or base <= 0 or type(factor) ~= "number" or factor <= 0 then
+        return wanted
+    end
+    local pixels = math.max(1, math.floor(base * wanted / factor + 0.5))
+    return pixels * factor / base
+end
+
+function Style.SnapWindow(frame)
+    local left, top = frame:GetLeft(), frame:GetTop()
+    if not left or not top then return end
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", math.floor(left + 0.5), math.floor(top + 0.5))
+end
+
+function Style.FitWindow(frame)
+    local scale = Style.PixelScale()
+    if frame:GetScale() ~= scale then
+        frame:SetScale(scale)
+    end
+    Style.SnapWindow(frame)
+    if Style.RefreshPixels then
+        Style.RefreshPixels()
+    end
+end
+
 local gameFont = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
 local useGameFont = Plateau.ActiveLocale ~= nil and NON_LATIN[Plateau.ActiveLocale()] == true
 
