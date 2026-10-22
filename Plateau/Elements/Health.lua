@@ -92,7 +92,10 @@ function Health:Configure(db, state)
     spark[state] = db.spark == true
     local colors = ns.DB.views[state] and ns.DB.views[state].colors
     if colors and colors.healthGradient and C_CurveUtil and C_CurveUtil.CreateColorCurve then
-        fades[state] = { low = colors.healthLow, amount = colors.healthFade or 0.75, curves = {} }
+        local low, amount, fade = colors.healthLow, colors.healthFade or 0.75, fades[state]
+        if not (fade and fade.amount == amount and fade.low[1] == low[1] and fade.low[2] == low[2] and fade.low[3] == low[3]) then
+            fades[state] = { low = { low[1], low[2], low[3] }, amount = amount, curves = {} }
+        end
     else
         fades[state] = nil
     end

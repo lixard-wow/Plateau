@@ -85,3 +85,24 @@ check(plate.healthText.shown == false, "only on my target hides it on other enem
 plate.isTarget = true
 HealthText:UpdateEmphasis(plate)
 check(plate.healthText.shown == true, "only on my target shows it on the target")
+
+local built = 0
+C_CurveUtil.CreateColorCurve = function() built = built + 1 return FakeCurve() end
+local curveDb = Db({ colorByHealth = true, executeColor = true })
+HealthText:Configure(curveDb, "enemy")
+built = 0
+for _ = 1, 50 do HealthText:Configure(curveDb, "enemy") end
+check(built == 0, "configuring health text again with the same colors reuses its color curve")
+curveDb.colorMid[1] = 0.5
+HealthText:Configure(curveDb, "enemy")
+check(built == 1, "changing a gradient color builds a new curve")
+ns.DB.views.enemy.execute.threshold = 35
+HealthText:Configure(curveDb, "enemy")
+check(built == 2, "changing the execute threshold builds a new curve")
+ns.DB.views.enemy.execute.threshold = 20
+curveDb.colorByHealth, curveDb.executeColor = false, false
+HealthText:Configure(curveDb, "enemy")
+curveDb.colorByHealth = true
+built = 0
+HealthText:Configure(curveDb, "enemy")
+check(built == 1, "turning health coloring back on builds its curve again")

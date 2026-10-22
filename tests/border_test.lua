@@ -128,3 +128,76 @@ local previewPlate = { rawWidth = 125, rawHeight = 11, preview = true, GetEffect
 function previewPlate:SetSize(w, h) self.w = w end
 ns.SnapPlateSize(previewPlate)
 check(previewPlate.w == 125, "the settings preview keeps the exact size")
+
+ns.pixelPerfect, ns.pixelBorders = nil, nil
+local steady = ns.CreateBorder(owner, owner, "BACKGROUND", 0)
+local clears = 0
+local edge = steady.edges[1]
+local clear = edge.ClearAllPoints
+function edge:ClearAllPoints() clears = clears + 1 clear(self) end
+steady:Layout(2, 1)
+local laid = steady.laidOut
+clears = 0
+steady:Layout(2, 1)
+check(clears == 0, "laying out a border again with the same settings does no anchor work")
+check(steady.laidOut == laid, "...and reuses its saved layout instead of making a new one")
+steady:Layout(3, 1)
+check(clears == 1 and steady.edges[1].height == 3, "a new size lays the border out again")
+steady:SetAnchor({})
+clears = 0
+steady:Layout(3, 1)
+check(clears == 1, "a new anchor lays the border out again")
+steady:Show()
+steady:Hide()
+steady:Layout(3, 1)
+check(not steady.edges[1].shown, "a skipped layout still respects a hidden border")
+
+local fades = 0
+local soft = ns.CreateBorder(owner, owner, "BACKGROUND", 0)
+soft:Layout(4, 1)
+local topEdge = soft.edges[1]
+local gradient = topEdge.SetGradient
+function topEdge:SetGradient(...) fades = fades + 1 gradient(self, ...) end
+soft:SetFade(1, 0, 0, 1)
+local saved = soft.fadeColor
+fades = 0
+soft:SetFade(1, 0, 0, 1)
+check(fades == 0, "setting the same glow color again does nothing")
+check(soft.fadeColor == saved, "...and keeps its saved color instead of making a new one")
+soft:SetFade(0, 1, 0, 1)
+check(fades == 1, "a new glow color is applied")
+soft:SetPulse(0.4)
+fades = 0
+soft:SetFade(0, 1, 0, 1)
+check(fades == 1, "the same color is applied again after a pulse dimmed it")
+
+local roundCalls = 0
+local function Region()
+    return { SetRoundLayoutToNearestPixel = function(self, on) roundCalls = roundCalls + 1 self.rounded = on end }
+end
+local function Node(regions, children)
+    local node = Region()
+    node.regions, node.children = regions, children
+    function node:GetRegions() return unpack(self.regions) end
+    function node:GetChildren() return unpack(self.children) end
+    function node:IsForbidden() return false end
+    return node
+end
+local leaf = Node({ Region(), Region() }, {})
+local skipped = Node({ Region() }, {})
+skipped.AddAuraGroup = function() end
+local root = Node({ Region() }, { leaf, skipped })
+ns.pixelPerfect = true
+ns.RoundLayout(root)
+check(roundCalls == 5 and leaf.regions[2].rounded == true, "pixel rounding reaches every frame and region of a plate")
+check(skipped.rounded == nil and skipped.regions[1].rounded == nil, "...but never an aura container's internals")
+roundCalls = 0
+ns.RoundLayout(root)
+check(roundCalls == 0, "rounding a plate again with the same setting changes nothing")
+leaf.regions[3] = Region()
+ns.RoundLayout(root)
+check(roundCalls == 1 and leaf.regions[3].rounded == true, "art added later is rounded on the next pass")
+roundCalls = 0
+ns.pixelPerfect = false
+ns.RoundLayout(root)
+check(roundCalls == 6 and root.rounded == false, "turning pixel-perfect off updates everything")

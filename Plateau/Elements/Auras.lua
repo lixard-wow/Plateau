@@ -536,6 +536,9 @@ local function AddPart(container, group, index)
     })
     container.added[index] = true
     container.filters[index] = filter
+    if container.partSpacing then
+        container.partSpacing[index], container.partCount[index], container.partEnabled[index] = nil, nil, nil
+    end
 end
 
 local function StyleSet(set, state, db)
@@ -544,11 +547,29 @@ local function StyleSet(set, state, db)
         local container = containers[group.key]
         local groupDb = db[group.key]
         local point, _, horizontal, vertical, axis = Placement(groupDb)
-        container:SetFlowLayoutAxis(axis)
-        container:SetFlowLayoutAnchorPoint(point)
-        container:SetFlowLayoutGrowthDirection(horizontal, vertical)
+        if container.flowAxis ~= axis then
+            container.flowAxis = axis
+            container:SetFlowLayoutAxis(axis)
+        end
+        if container.flowPoint ~= point then
+            container.flowPoint = point
+            container:SetFlowLayoutAnchorPoint(point)
+        end
+        if container.flowHorizontal ~= horizontal or container.flowVertical ~= vertical then
+            container.flowHorizontal, container.flowVertical = horizontal, vertical
+            container:SetFlowLayoutGrowthDirection(horizontal, vertical)
+        end
         local perRow = math.max(1, groupDb.perRow)
-        container:SetFlowLayoutMaximumLineSize(perRow * groupDb.size * ns.Scaling:AuraFactor() + (perRow - 1) * groupDb.spacing)
+        local lineSize = perRow * groupDb.size * ns.Scaling:AuraFactor() + (perRow - 1) * groupDb.spacing
+        if container.flowLineSize ~= lineSize then
+            container.flowLineSize = lineSize
+            container:SetFlowLayoutMaximumLineSize(lineSize)
+        end
+        local spacings, counts, enabled = container.partSpacing, container.partCount, container.partEnabled
+        if not spacings then
+            spacings, counts, enabled = {}, {}, {}
+            container.partSpacing, container.partCount, container.partEnabled = spacings, counts, enabled
+        end
         local sortMethod = SORT_METHODS[groupDb.sort] or Sort.Default
         if container.sortMethod ~= sortMethod then
             container.sortMethod = sortMethod
@@ -568,10 +589,19 @@ local function StyleSet(set, state, db)
                 added = true
             end
             if container.added[index] then
-                container:SetAuraGroupLayout(key, { elementSpacing = groupDb.spacing, lineSpacing = groupDb.spacing })
-                container:SetAuraGroupMaxFrameCount(key, count)
-                if container.SetAuraGroupEnabled then
-                    container:SetAuraGroupEnabled(key, count > 0)
+                local spacing = groupDb.spacing
+                if spacings[index] ~= spacing then
+                    spacings[index] = spacing
+                    container:SetAuraGroupLayout(key, { elementSpacing = spacing, lineSpacing = spacing })
+                end
+                if counts[index] ~= count then
+                    counts[index] = count
+                    container:SetAuraGroupMaxFrameCount(key, count)
+                end
+                local on = count > 0
+                if container.SetAuraGroupEnabled and enabled[index] ~= on then
+                    enabled[index] = on
+                    container:SetAuraGroupEnabled(key, on)
                 end
             end
         end

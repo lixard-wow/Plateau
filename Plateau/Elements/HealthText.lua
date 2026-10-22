@@ -105,6 +105,18 @@ local function ColorCurve(db, executeOn, threshold)
     return curve
 end
 
+local function ColorKey(color)
+    return ("%.4f,%.4f,%.4f,%.4f"):format(color[1], color[2], color[3], color[4] or 1)
+end
+
+local function CurveKey(db, executeOn, threshold)
+    local key = executeOn and ("x" .. threshold .. ":" .. ColorKey(db.executeTextColor)) or "-"
+    if db.colorByHealth then
+        return key .. "|g:" .. ColorKey(db.colorLow) .. ":" .. ColorKey(db.colorMid) .. ":" .. ColorKey(db.colorHigh)
+    end
+    return key .. "|c:" .. ColorKey(db.color)
+end
+
 function HealthText:Create(plate)
     local text = plate.overlay:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     text:SetWordWrap(false)
@@ -132,9 +144,13 @@ function HealthText:Configure(db, state)
     s.executeOn = db.executeColor == true
     s.executeColor = db.executeTextColor
     if (db.colorByHealth or s.executeOn) and C_CurveUtil and C_CurveUtil.CreateColorCurve then
-        s.curve = ColorCurve(db, s.executeOn, s.threshold)
+        local key = CurveKey(db, s.executeOn, s.threshold)
+        if s.curveKey ~= key or not s.curve then
+            s.curveKey = key
+            s.curve = ColorCurve(db, s.executeOn, s.threshold)
+        end
     else
-        s.curve = nil
+        s.curve, s.curveKey = nil, nil
     end
 end
 

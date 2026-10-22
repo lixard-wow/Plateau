@@ -78,9 +78,16 @@ function Border:SetStyle(style, levelAbove)
     self.levelAbove = levelAbove
 end
 
+local customEdges = {}
+
 local function EdgeInfo(style)
     if not style or style == "pixel" or style == "shadow" then return nil end
-    return EDGE_STYLES[style] or { file = style, base = 8, step = 2 }
+    local info = EDGE_STYLES[style] or customEdges[style]
+    if not info then
+        info = { file = style, base = 8, step = 2 }
+        customEdges[style] = info
+    end
+    return info
 end
 
 function Border:LayoutEdge(info, size, inside)
@@ -126,9 +133,15 @@ function Border:Layout(size, offset, inside)
         args[1], args[2], args[3] = size, offset, inside
     end
     self.empty = size <= 0 or self.style == "none"
-    self.laidOut = { size, offset, inside }
+    local laid = self.laidOut
+    if not laid then
+        laid = {}
+        self.laidOut = laid
+    end
+    laid[1], laid[2], laid[3] = size, offset, inside
     self.cornersOn = false
     if self.style == "none" then
+        self.laidStyle = nil
         for i = 1, 4 do
             self.edges[i]:Hide()
         end
@@ -139,6 +152,7 @@ function Border:Layout(size, offset, inside)
         return
     end
     if info then
+        self.laidStyle = nil
         for i = 1, 4 do
             self.edges[i]:Hide()
         end
@@ -148,22 +162,33 @@ function Border:Layout(size, offset, inside)
         self:SetShown(self.shown ~= false)
         return
     end
+    offset = offset or 0
+    local pixel = false
+    if ns.pixelBorders and PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
+        local scale = anchor:GetEffectiveScale()
+        if scale >= MIN_PIXEL_SCALE then
+            pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
+        end
+    end
+    local fade = not inside and Faded(self)
+    self.cornersOn = fade
+    local hasCorners = self.corners ~= nil
+    if self.laidStyle == self.style and self.laidAnchor == anchor and self.laidSize == size and self.laidOffset == offset
+        and self.laidInside == inside and self.laidPixel == pixel and self.laidFade == fade and self.laidCorners == hasCorners then
+        self:SetShown(self.shown ~= false)
+        return
+    end
+    self.laidStyle, self.laidAnchor, self.laidSize, self.laidOffset = self.style, anchor, size, offset
+    self.laidInside, self.laidPixel, self.laidFade, self.laidCorners = inside, pixel, fade, hasCorners
     if self.style == "shadow" then
         size = size * SHADOW_STEP
     end
     local top, bottom, left, right = self.edges[1], self.edges[2], self.edges[3], self.edges[4]
-    offset = offset or 0
-    if ns.pixelBorders and PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
-        local scale = anchor:GetEffectiveScale()
-        if scale >= MIN_PIXEL_SCALE then
-            local pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
-            size = math.floor(size + 0.5) * pixel
-            offset = math.floor(offset + 0.5) * pixel
-        end
+    if pixel then
+        size = math.floor(size + 0.5) * pixel
+        offset = math.floor(offset + 0.5) * pixel
     end
     local outer = offset + size
-    local fade = not inside and Faded(self)
-    self.cornersOn = fade
     local span = fade and offset or outer
     if fade then
         PlaceCorners(self, size, offset)
@@ -228,16 +253,34 @@ function ns.SnapPlateSize(plate)
     end
 end
 
-local function RoundTree(frame, enabled)
-    frame:SetRoundLayoutToNearestPixel(enabled)
-    for _, region in ipairs({ frame:GetRegions() }) do
-        region:SetRoundLayoutToNearestPixel(enabled)
+local RoundTree
+
+local function Round(object, enabled)
+    if object.plateauRound ~= enabled then
+        object.plateauRound = enabled
+        object:SetRoundLayoutToNearestPixel(enabled)
     end
-    for _, child in ipairs({ frame:GetChildren() }) do
+end
+
+local function RoundRegions(enabled, ...)
+    for i = 1, select("#", ...) do
+        Round((select(i, ...)), enabled)
+    end
+end
+
+local function RoundChildren(enabled, ...)
+    for i = 1, select("#", ...) do
+        local child = select(i, ...)
         if not child:IsForbidden() and not child.AddAuraGroup and not child.AddAuraSlot then
             RoundTree(child, enabled)
         end
     end
+end
+
+function RoundTree(frame, enabled)
+    Round(frame, enabled)
+    RoundRegions(enabled, frame:GetRegions())
+    RoundChildren(enabled, frame:GetChildren())
 end
 
 function ns.RoundLayout(frame)
@@ -331,7 +374,14 @@ local function ApplyFade(self, r, g, b, a)
 end
 
 function Border:SetFade(r, g, b, a)
-    self.fadeColor = { r, g, b, a }
+    local color = self.fadeColor
+    if color and self.fade and not self.pulsed and color[1] == r and color[2] == g and color[3] == b and color[4] == a then
+        return
+    end
+    color = color or {}
+    color[1], color[2], color[3], color[4] = r, g, b, a
+    self.fadeColor = color
+    self.pulsed = false
     ApplyFade(self, r, g, b, a)
     if not self.fade then
         self.fade = true
@@ -389,6 +439,7 @@ end
 
 function Border:SetPulse(alpha)
     local color = self.fade and self.fadeColor
+    self.pulsed = alpha ~= 1
     if color then
         ApplyFade(self, color[1], color[2], color[3], color[4] * alpha)
     else

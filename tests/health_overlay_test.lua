@@ -134,3 +134,30 @@ check(fullRecolours == 0 and painted == nil, "without health fading a health tic
 Health:OnEvent(fastPlate, "UNIT_TARGET", "nameplate1")
 check(fullRecolours == 1, "other events still run the full recolour")
 Health.UpdateColor = previousUpdateColor
+
+local function Upvalue(fn, key)
+    for i = 1, 200 do
+        local name, value = debug.getupvalue(fn, i)
+        if name == key then return value end
+        if not name then break end
+    end
+end
+local fades = Upvalue(Health.Configure, "fades")
+C_CurveUtil.CreateColorCurve = C_CurveUtil.CreateColorCurve or C_CurveUtil.CreateCurve
+COLORS.healthGradient, COLORS.healthLow, COLORS.healthFade = true, { 0.5, 0, 0, 1 }, 0.75
+local gradientDb = { texture = "BASE", overlayPattern = "", overlayAlpha = 0.3, overlayContrast = 0.4 }
+Health:Configure(gradientDb, "enemy")
+local first = fades.enemy
+first.curves.sample = true
+Health:Configure(gradientDb, "enemy")
+check(fades.enemy == first and fades.enemy.curves.sample, "an unrelated restyle keeps the health gradient's built curves")
+COLORS.healthLow[2] = 0.2
+Health:Configure(gradientDb, "enemy")
+check(fades.enemy ~= first and fades.enemy.curves.sample == nil, "changing the low-health color starts fresh curves")
+local second = fades.enemy
+COLORS.healthFade = 0.5
+Health:Configure(gradientDb, "enemy")
+check(fades.enemy ~= second, "changing the fade amount starts fresh curves")
+COLORS.healthGradient = false
+Health:Configure(gradientDb, "enemy")
+check(fades.enemy == nil, "turning the gradient off drops its curves")
