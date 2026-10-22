@@ -66,10 +66,16 @@ tinsert(UISpecialFrames, "PlateauOptions")
 
 local OFFSCREEN_KEEP = 120
 
+local KeepOnScreen
+
 local function LooseClamp()
-    local width, height = frame:GetWidth(), frame:GetHeight()
-    local side = math.max(width - OFFSCREEN_KEEP, 0)
-    frame:SetClampRectInsets(side, -side, 0, math.max(height - TITLE, 0))
+    frame:SetClampRectInsets(0, 0, 0, 0)
+    frame:SetClampedToScreen(false)
+end
+
+local function StopDrag()
+    frame:StopMovingOrSizing()
+    KeepOnScreen()
 end
 
 local titleBar = CreateFrame("Frame", nil, frame)
@@ -79,10 +85,10 @@ titleBar:SetHeight(TITLE)
 titleBar:EnableMouse(true)
 titleBar:RegisterForDrag("LeftButton")
 titleBar:SetScript("OnDragStart", function() frame:StartMoving() end)
-titleBar:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+titleBar:SetScript("OnDragStop", StopDrag)
 frame:RegisterForDrag("LeftButton")
 frame:SetScript("OnDragStart", function() frame:StartMoving() end)
-frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+frame:SetScript("OnDragStop", StopDrag)
 
 local titleCap = Style.Rounded(titleBar, C.rail, "BACKGROUND", -1)
 titleCap:SetHeight(Style.RADIUS * 2)
@@ -151,6 +157,20 @@ local minimizeX = Style.IconButton(titleBar, "icon_minus", ICON_BUTTON, nil, "Mi
 minimizeX:SetPoint("RIGHT", closeX, "LEFT", -6, 0)
 
 local minimized = false
+
+function KeepOnScreen()
+    if minimized then return end
+    local left, top, width = frame:GetLeft(), frame:GetTop(), frame:GetWidth()
+    if not left or not top or not width then return end
+    local ratio = UIParent:GetEffectiveScale() / frame:GetEffectiveScale()
+    local screenWidth, screenHeight = UIParent:GetWidth() * ratio, UIParent:GetHeight() * ratio
+    local fixedLeft = math.max(OFFSCREEN_KEEP - width, math.min(left, screenWidth - OFFSCREEN_KEEP))
+    local fixedTop = math.max(TITLE, math.min(top, screenHeight))
+    if fixedLeft ~= left or fixedTop ~= top then
+        frame:ClearAllPoints()
+        frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", fixedLeft, fixedTop)
+    end
+end
 local restoreHeight = HEIGHT
 local SetMinimized
 
@@ -1769,6 +1789,7 @@ function SetMinimized(min)
         scrollThumb:Hide()
         frame:SetSize(BAR_WIDTH, BAR_HEIGHT)
         frame:SetClampRectInsets(0, 0, 0, 0)
+        frame:SetClampedToScreen(true)
         PlaceBar((fullRight or BAR_WIDTH) - BAR_WIDTH, fullTop or UIParent:GetHeight() / frame:GetScale())
         miniBar:Show()
         ns.UpdateMiniBar()
