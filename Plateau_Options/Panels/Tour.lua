@@ -17,7 +17,7 @@ local STEPS = {
         target = "preview",
         place = "below",
         title = "The live preview",
-        text = "These sample nameplates show your changes as you make them. Click a part of the middle one to edit it, drag it to move it, and hold Shift to place it freely.",
+        text = "This sample nameplate shows your changes as you make them. Click a part to edit it, drag it to move it, and hold Shift to place it freely.",
     },
     {
         target = "snap",

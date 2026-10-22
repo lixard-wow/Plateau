@@ -501,41 +501,6 @@ holder:SetPoint("CENTER", 0, 0)
 
 local plate = Plateau.CreatePreview(holder, sample)
 plate:SetPoint("CENTER")
-
-local COMPANION_GAP = 56
-local companions = {
-    Plateau.CreatePreview(holder, {
-        health = 0.38,
-        maxHealth = 31200,
-        name = "Ravenous Ghoul",
-        levelOffset = 0,
-        classification = "normal",
-        mobType = "trivial",
-        auras = {},
-        alerts = {},
-        absorb = 0,
-        cast = {
-            progress = 0.3,
-            name = "Mend Flesh",
-            icon = "Interface\\Icons\\Spell_Shadow_LifeDrain02",
-            timer = "1.7",
-            onCooldown = true,
-        },
-    }),
-    Plateau.CreatePreview(holder, {
-        health = 0.64,
-        maxHealth = 118000,
-        name = "Bonebreaker Brute",
-        levelOffset = 1,
-        classification = "elite",
-        mobType = "elite",
-        auras = {},
-        alerts = {},
-        absorb = 0,
-    }),
-}
-companions[1]:SetPoint("RIGHT", plate, "LEFT", -COMPANION_GAP, 0)
-companions[2]:SetPoint("LEFT", plate, "RIGHT", COMPANION_GAP, 0)
 ns.Drag.SetDotParent(panel)
 ns.Drag.SetTargets(SnapTargets)
 AddHotspots(plate)
@@ -717,9 +682,6 @@ function ns.SetPreviewSection(key)
     end
     ApplySample()
     Plateau.SetPreviewState(plate, key == "friendly" and friendlySample or sample)
-    for _, companion in ipairs(companions) do
-        companion:SetShown(key ~= "friendly")
-    end
     UpdateHotspots()
     if key == "castbar" and not castPlayer:IsShown() then
         PlayCast()
