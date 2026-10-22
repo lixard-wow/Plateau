@@ -861,7 +861,7 @@ local function LayoutPage(page)
         return math.max(columns[1], columns[2])
     end
     for _, card in ipairs(page.cards) do
-        local any = card.header == nil or card.header.widget:IsShown()
+        local any = card.header ~= nil and card.header.widget:IsShown()
         if not any then
             for _, row in ipairs(card.rows) do
                 if row.widget:IsShown() then
@@ -958,8 +958,14 @@ local function PlanCards(controls)
             if (WIDE[spec.type] and not FLEXIBLE[spec.type]) or spec.wide == true then
                 card.wide = true
             end
+            if not card.headerIndex and spec.type ~= "Note" then
+                card.boxed = true
+            end
         end
         cardOf[index] = card
+    end
+    if cards[1].boxed then
+        cards[1].wide = true
     end
     return cards, cardOf
 end
@@ -1006,6 +1012,8 @@ local function BuildPage(section)
         end
         if entry.headerIndex then
             card.header = page.rows[entry.headerIndex]
+        end
+        if entry.headerIndex or entry.boxed then
             card.frame = CardFrame(page)
         end
         if card.header or #card.rows > 0 then
