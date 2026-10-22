@@ -18,6 +18,8 @@ function Frame:GetTop() return 100 end
 function Frame:GetEffectiveScale() return 1 end
 function Frame:SetScale(scale) self.scale = scale end
 function Frame:SetColorTexture() end
+function Frame:SetVertexColor() end
+function Frame:SetAlpha() end
 function Frame:SetAtlas() end
 function Frame:SetTexture() end
 function Frame:SetRotation() end
@@ -54,7 +56,7 @@ local db = {}
 local ns = {
     Widgets = {},
     Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintVertex = function(t, c, a, s) s = s or 1 t:SetVertexColor((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintText = function(t, c, a) t:SetTextColor(c[1] or 0, c[2] or 0, c[3] or 0, a or c[4] or 1) end, PixelInset = function() end, PixelWidth = function() end, PixelHeight = function() end, RefreshPixels = function() end, 
-        colors = { border = {}, field = {}, accent = {}, hover = {}, window = {}, text = {}, muted = {} },
+        colors = { border = {}, field = {}, accent = {}, hover = {}, window = {}, text = {}, muted = {}, primaryText = {} },
         CONTROL_X = 0,
         CONTROL_WIDTH = 100,
         RowLabel = function() return setmetatable({}, Frame) end,
@@ -66,7 +68,7 @@ local ns = {
         Fill = function() return setmetatable({}, Frame) end,
         Border = function() end,
         Field = function() return setmetatable({}, Frame) end,
-        Panel = function() end,
+        Panel = function() return setmetatable({}, Frame), setmetatable({}, Frame) end,
         ButtonBox = function() end,
         ThemedBorder = function() end,
         HoverBorder = function() end,

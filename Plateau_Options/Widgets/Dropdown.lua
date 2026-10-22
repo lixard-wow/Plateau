@@ -9,6 +9,7 @@ local MAX_VISIBLE = 12
 local MAX_ITEMS = 20
 local ICON_SIZE = 16
 local CHECK_SIZE = 10
+local CHECK_RADIUS = 4
 
 local function SetIcon(texture, icon)
     if not icon then
@@ -86,7 +87,10 @@ local function Render()
             if option.checked ~= nil then
                 local on = Checked(option)
                 local tint = Style.StateColor()
-                Style.Paint(item.check, tint, on and 1 or 0)
+                Style.PaintVertex(item.boxFill, on and tint or C.window)
+                Style.PaintVertex(item.boxEdge, on and tint or C.border)
+                Style.PaintVertex(item.check, C.primaryText)
+                item.check:SetAlpha(on and 1 or 0)
                 item.text:ClearAllPoints()
                 item.text:SetPoint("LEFT", item.box, "RIGHT", 8, 0)
                 item.text:SetPoint("RIGHT", -8, 0)
@@ -161,9 +165,10 @@ local function EnsureList()
         item.box = CreateFrame("Frame", nil, item)
         item.box:SetSize(CHECK_SIZE + 4, CHECK_SIZE + 4)
         item.box:SetPoint("LEFT", 8, 0)
-        Style.Field(item.box, C.window, C.border)
+        item.boxFill, item.boxEdge = Style.Panel(item.box, C.window, C.border, CHECK_RADIUS)
         item.check = item.box:CreateTexture(nil, "ARTWORK")
-        item.check:SetSize(CHECK_SIZE - 2, CHECK_SIZE - 2)
+        item.check:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\Icons\\icon_check")
+        item.check:SetSize(CHECK_SIZE + 2, CHECK_SIZE + 2)
         item.check:SetPoint("CENTER")
         item:SetScript("OnEnter", function(self)
             if not self.option or not self.option.title then
