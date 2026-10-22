@@ -1682,9 +1682,16 @@ local placeholder = Style.Text(box, 12, C.muted)
 placeholder:SetPoint("LEFT", 30, 0)
 placeholder:SetText("Search settings")
 
-local themeLabelGap = 12
-themePicker:SetPoint("LEFT", box, "RIGHT", themeLabelGap + 4, 0)
 profileButton:SetPoint("RIGHT", undoSlot, "LEFT", -12, 0)
+local themeGap = CreateFrame("Frame", nil, titleBar)
+themeGap:SetPoint("LEFT", box, "RIGHT")
+themeGap:SetPoint("RIGHT", profileButton, "LEFT")
+themeGap:SetHeight(1)
+themeGap:SetScript("OnSizeChanged", function(self, width)
+    themePicker:ClearAllPoints()
+    themePicker:SetPoint("LEFT", self, "LEFT", math.floor((width - themePicker:GetWidth()) / 2 + 0.5), 0)
+end)
+themePicker:SetPoint("LEFT", themeGap, "LEFT", 0, 0)
 
 ns.tour = { window = frame, menu = rail, search = box, profile = profileButton, minimize = minimizeX }
 
