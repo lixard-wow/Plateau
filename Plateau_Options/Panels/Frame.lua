@@ -350,14 +350,11 @@ screenWatcher:SetScript("OnEvent", function()
 end)
 
 local profileButton = CreateFrame("Button", nil, titleBar)
-profileButton:SetSize(210, 40)
+profileButton:SetSize(200, 30)
 Style.ButtonBox(profileButton, C.field, Style.BUTTON_RADIUS, C.border, C.hover)
 local profile = Style.Text(profileButton, 12, C.text)
-profile:SetPoint("TOPLEFT", 12, -6)
+profile:SetPoint("LEFT", 12, 0)
 profile:SetPoint("RIGHT", -26, 0)
-local profileSub = Style.Text(profileButton, 10, C.muted)
-profileSub:SetPoint("TOPLEFT", profile, "BOTTOMLEFT", 0, -3)
-profileSub:SetPoint("RIGHT", -26, 0)
 Style.DropArrow(profileButton)
 profileButton:SetScript("OnEnter", function(self)
     local status = Plateau.AutoProfile:Status()
@@ -1452,14 +1449,6 @@ function ns.UpdateProfileLabel()
         profile:SetFormattedText("Profile: %s (override)", status.active)
     else
         profile:SetFormattedText("Profile: %s", status.active)
-    end
-    local account = Plateau.DB.AccountProfile and Plateau.DB:AccountProfile()
-    if status.pending then
-        profileSub:SetFormattedText("Switches to %s after combat", status.pending)
-    elseif account and account == status.active then
-        profileSub:SetText("New characters use it too")
-    else
-        profileSub:SetText("Click to switch profile")
     end
     footerText:SetFormattedText("Changes save to %s as you make them. Open this window any time with /plt.", status.active)
     ns.UpdateMiniBar()
