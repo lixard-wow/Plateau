@@ -114,22 +114,6 @@ local function Tick() driver.scripts.OnUpdate(driver) end
 local panel = NewFrame(UIParent):Rect(-1000, 1000, 1000, -1000)
 Drag.SetDotParent(panel)
 
-local function Dots()
-    local list = {}
-    for _, frame in ipairs(frames) do
-        if frame.isTexture and frame.shown and frame.anchor then
-            list[#list + 1] = frame
-        end
-    end
-    return list
-end
-
-local function DotAt(x, y)
-    for _, dot in ipairs(Dots()) do
-        local cx, cy = (dot.l + dot.r) / 2, (dot.t + dot.b) / 2
-        if math.abs(cx - x) < 0.01 and math.abs(cy - y) < 0.01 then return dot end
-    end
-end
 
 local function Drop(spec, spot, fromX, fromY, toX, toY)
     saved = nil
@@ -139,11 +123,7 @@ local function Drop(spec, spot, fromX, fromY, toX, toY)
     Tick()
     cursorX, cursorY = toX + (toX > fromX and 5 or -5), toY
     Tick()
-    local shown = Dots()
-    local snapshot = {}
-    for i, dot in ipairs(shown) do
-        snapshot[i] = { x = (dot.l + dot.r) / 2, y = (dot.t + dot.b) / 2, anchor = dot.anchor }
-    end
+    local snapshot = Drag.SnapSpots()
     mouseDown = false
     Tick()
     return snapshot

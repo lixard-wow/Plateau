@@ -61,7 +61,7 @@ end
 
 local function Sample()
     return {
-        health = 0.72,
+        health = 1,
         maxHealth = 72700,
         name = "Wastelander Phaseblade",
         levelOffset = 1,
@@ -73,10 +73,10 @@ local function Sample()
         auras = {},
         absorb = 0.15,
         cast = {
-            progress = 0.6,
+            progress = 1,
             name = "Shadow Bolt",
             icon = "Interface\\Icons\\Spell_Shadow_ShadowBolt",
-            timer = "1.4",
+            timer = "0.0",
             important = true,
             target = playerName,
         },

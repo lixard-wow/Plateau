@@ -516,9 +516,28 @@ Style.OnPixels(previewBox, function(px)
     previewStage:SetPoint("BOTTOMRIGHT", -px, px)
 end)
 previewStage:SetClipsChildren(true)
-local stageFill = previewStage:CreateTexture(nil, "BACKGROUND")
-stageFill:SetAllPoints()
-Style.Paint(stageFill, C.window, 1, 0.55)
+do
+    local stageFill = previewStage:CreateTexture(nil, "BACKGROUND")
+    stageFill:SetAllPoints()
+    Style.Paint(stageFill, C.window, 1, 0.55)
+    local stageGlow = previewStage:CreateTexture(nil, "BACKGROUND", nil, 1)
+    stageGlow:SetPoint("BOTTOMLEFT")
+    stageGlow:SetPoint("BOTTOMRIGHT")
+    stageGlow:SetHeight(PREVIEW * 0.7)
+    stageGlow:SetColorTexture(1, 1, 1, 1)
+    local function PaintGlow()
+        local accent = C.accent
+        stageGlow:SetGradient("VERTICAL", CreateColor(accent[1], accent[2], accent[3], 0.09), CreateColor(accent[1], accent[2], accent[3], 0))
+    end
+    PaintGlow()
+    Style.OnTheme(PaintGlow)
+    local stageDots = previewStage:CreateTexture(nil, "BACKGROUND", nil, 2)
+    stageDots:SetAllPoints()
+    stageDots:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\dots", "REPEAT", "REPEAT")
+    stageDots:SetHorizTile(true)
+    stageDots:SetVertTile(true)
+    Style.PaintVertex(stageDots, C.border, 0.9)
+end
 
 ns.previewBar, ns.previewStage = previewBar, previewStage
 
