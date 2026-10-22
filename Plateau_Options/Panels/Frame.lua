@@ -54,7 +54,7 @@ if Style.theme.innerFrame then
     ring:EnableMouse(false)
     for _, edge in ipairs({ { "TOPLEFT", "TOPRIGHT", nil, 1 }, { "BOTTOMLEFT", "BOTTOMRIGHT", nil, 1 }, { "TOPLEFT", "BOTTOMLEFT", 1, nil }, { "TOPRIGHT", "BOTTOMRIGHT", 1, nil } }) do
         local line = ring:CreateTexture(nil, "OVERLAY")
-        line:SetColorTexture(C.line[1], C.line[2], C.line[3], 1)
+        Style.Paint(line, C.line, 1)
         line:SetPoint(edge[1])
         line:SetPoint(edge[2])
         if edge[3] then line:SetWidth(edge[3]) end
@@ -87,7 +87,7 @@ frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
 local titleCap = Style.Rounded(titleBar, C.rail, "BACKGROUND", -1)
 titleCap:SetHeight(Style.RADIUS * 2)
 local titleFill = titleBar:CreateTexture(nil, "BACKGROUND")
-titleFill:SetColorTexture(C.rail[1], C.rail[2], C.rail[3], 1)
+Style.Paint(titleFill, C.rail, 1)
 Style.OnPixels(titleBar, function(px)
     titleCap:ClearAllPoints()
     titleCap:SetPoint("TOPLEFT", px, -px)
@@ -129,7 +129,7 @@ do
     local pieces = {}
     for i, color in ipairs(colors) do
         local piece = stripe:CreateTexture(nil, "ARTWORK")
-        piece:SetColorTexture(color[1], color[2], color[3], 1)
+        Style.Paint(piece, color, 1)
         pieces[i] = piece
     end
     stripe:SetScript("OnSizeChanged", function(self, width)
@@ -374,41 +374,59 @@ profileButton:SetScript("OnClick", function(self)
     ShowProfileList(self, true)
 end)
 
-local THEME_ORDER = { "workbench", "ledger", "horde", "alliance", "classic" }
 local themePicker = CreateFrame("Frame", nil, titleBar)
-themePicker:SetSize(#THEME_ORDER * 24 + 12, 30)
+themePicker:SetSize(#Style.THEME_ORDER * 24 + 12, 30)
 Style.Panel(themePicker, C.rail, C.border)
-for i, key in ipairs(THEME_ORDER) do
+local themeDots = {}
+
+local function PaintThemeDots()
+    local chosenKey = Style.ThemeKey()
+    for _, dot in ipairs(themeDots) do
+        local chosen = dot.key == chosenKey
+        Style.PaintVertex(dot.ring, chosen and C.text or dot.theme.colors.border)
+        dot.core:SetSize(chosen and 10 or 8, chosen and 10 or 8)
+    end
+end
+
+function ns.ApplyTheme(key)
+    if key == Style.ThemeKey() or not Style.THEMES[key] then return end
+    Style.SetTheme(key)
+    PaintThemeDots()
+    if ns.RefreshAll then
+        ns.RefreshAll()
+    end
+end
+
+for i, key in ipairs(Style.THEME_ORDER) do
     local theme = Style.THEMES[key]
     if theme then
         local dot = CreateFrame("Button", nil, themePicker)
         dot:SetSize(20, 20)
         dot:SetPoint("LEFT", 6 + (i - 1) * 24, 0)
-        local chosen = key == Style.ThemeKey()
-        local ring = Style.Rounded(dot, chosen and C.text or theme.colors.border, "ARTWORK", 0, "circle")
-        ring:SetAllPoints()
+        dot.key, dot.theme = key, theme
+        dot.ring = Style.Rounded(dot, theme.colors.border, "ARTWORK", 0, "circle")
+        dot.ring:SetAllPoints()
         local fill = Style.Rounded(dot, theme.colors.window, "ARTWORK", 1, "circle")
         fill:SetPoint("TOPLEFT", 2, -2)
         fill:SetPoint("BOTTOMRIGHT", -2, 2)
-        local core = Style.Rounded(dot, theme.colors.accent, "ARTWORK", 2, "circle")
-        core:SetSize(chosen and 10 or 8, chosen and 10 or 8)
-        core:SetPoint("CENTER")
+        dot.core = Style.Rounded(dot, theme.colors.accent, "ARTWORK", 2, "circle")
+        dot.core:SetPoint("CENTER")
         dot:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
             GameTooltip:SetText(T(theme.name), 1, 1, 1)
             GameTooltip:AddLine(T(theme.desc or ""), 0.8, 0.8, 0.8, true)
-            GameTooltip:AddLine(T(key == Style.ThemeKey() and "The current settings window theme." or "Click to use this theme for the settings window. Requires a reload."), C.muted[1], C.muted[2], C.muted[3], true)
+            GameTooltip:AddLine(T(key == Style.ThemeKey() and "The current settings window theme." or "Click to switch the settings window to this theme."), C.muted[1], C.muted[2], C.muted[3], true)
             GameTooltip:Show()
         end)
         dot:SetScript("OnLeave", function() GameTooltip:Hide() end)
-        dot:SetScript("OnClick", function()
-            if key ~= Style.ThemeKey() then
-                Style.SetTheme(key)
-                ns.PromptReload()
-            end
+        dot:SetScript("OnClick", function(self)
+            ns.ApplyTheme(key)
+            self:GetScript("OnEnter")(self)
         end)
+        themeDots[#themeDots + 1] = dot
     end
 end
+PaintThemeDots()
 
 local rail = CreateFrame("Frame", nil, frame)
 Style.OnPixels(frame, function(px)
@@ -424,7 +442,7 @@ local railEdge = rail:CreateTexture(nil, "ARTWORK")
 railEdge:SetPoint("TOPRIGHT")
 railEdge:SetPoint("BOTTOMRIGHT")
 Style.PixelWidth(railEdge)
-railEdge:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+Style.Paint(railEdge, C.border, 1)
 
 local pageHead = CreateFrame("Frame", nil, frame)
 pageHead:SetPoint("TOPLEFT", RAIL + 1 + PAD, -TOP)
@@ -459,7 +477,7 @@ local previewBarLine = previewBar:CreateTexture(nil, "ARTWORK")
 previewBarLine:SetPoint("BOTTOMLEFT")
 previewBarLine:SetPoint("BOTTOMRIGHT")
 Style.PixelHeight(previewBarLine)
-previewBarLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+Style.Paint(previewBarLine, C.border, 1)
 local previewLabel = Style.Text(previewBar, 11, C.muted)
 previewLabel:SetPoint("LEFT", 14, 0)
 previewLabel:SetText("LIVE PREVIEW")
@@ -480,7 +498,7 @@ end)
 previewStage:SetClipsChildren(true)
 local stageFill = previewStage:CreateTexture(nil, "BACKGROUND")
 stageFill:SetAllPoints()
-stageFill:SetColorTexture(C.window[1] * 0.55, C.window[2] * 0.55, C.window[3] * 0.55, 1)
+Style.Paint(stageFill, C.window, 1, 0.55)
 
 ns.previewBar, ns.previewStage = previewBar, previewStage
 
@@ -498,12 +516,12 @@ banner:SetPoint("TOPRIGHT", -(PAD + SCROLLBAR), -BANNER_TOP)
 banner:SetHeight(BANNER)
 banner.fill = banner:CreateTexture(nil, "BACKGROUND")
 banner.fill:SetAllPoints()
-banner.fill:SetColorTexture(C.muted[1], C.muted[2], C.muted[3], 0.14)
+Style.Paint(banner.fill, C.muted, 0.14)
 banner.bar = banner:CreateTexture(nil, "ARTWORK")
 banner.bar:SetPoint("TOPLEFT")
 banner.bar:SetPoint("BOTTOMLEFT")
 banner.bar:SetWidth(3)
-banner.bar:SetColorTexture(C.muted[1], C.muted[2], C.muted[3], 1)
+Style.Paint(banner.bar, C.muted, 1)
 banner.text = Style.Text(banner, 11, C.text)
 banner.text:SetPoint("LEFT", 12, 0)
 banner.text:SetPoint("RIGHT", -8, 0)
@@ -541,7 +559,7 @@ local function Scrollbar(scroller, parent, gap)
     trackLine:SetPoint("TOP")
     trackLine:SetPoint("BOTTOM")
     trackLine:SetWidth(3)
-    trackLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 0.6)
+    Style.Paint(trackLine, C.border, 0.6)
 
     local thumb = CreateFrame("Frame", nil, track)
     thumb:SetWidth(9)
@@ -637,7 +655,7 @@ local footerLine = footer:CreateTexture(nil, "ARTWORK")
 footerLine:SetPoint("TOPLEFT")
 footerLine:SetPoint("TOPRIGHT")
 Style.PixelHeight(footerLine)
-footerLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+Style.Paint(footerLine, C.border, 1)
 
 local footerText = Style.Text(footer, 12, C.muted)
 footerText:SetPoint("LEFT", PAD, 0)
@@ -694,7 +712,7 @@ local function Divider(page, index)
         end
         line = page.lines:CreateTexture(nil, "ARTWORK")
         Style.PixelWidth(line)
-        line:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+        Style.Paint(line, C.border, 1)
         page.dividers[index] = line
     end
     return line
@@ -1145,7 +1163,7 @@ local function RailButton(section, tint)
     marker:SetPoint("TOPLEFT", 8, -3)
     marker:SetPoint("BOTTOMLEFT", 8, 3)
     marker:SetWidth(3)
-    marker:SetColorTexture(tint[1], tint[2], tint[3], 1)
+    Style.Paint(marker, tint, 1)
     marker:Hide()
     button.marker = marker
 
@@ -1159,7 +1177,7 @@ local function RailButton(section, tint)
         marker:SetShown(selected)
         hover:SetShown(selected)
         local color = selected and C.text or C.muted
-        label:SetTextColor(color[1], color[2], color[3])
+        Style.PaintText(label, color)
     end
 
     button:SetScript("OnEnter", function() hover:Show() end)
@@ -1280,7 +1298,7 @@ local function RailHeader(group, tint)
     local mark = header:CreateTexture(nil, "ARTWORK")
     mark:SetSize(8, 8)
     mark:SetPoint("BOTTOMLEFT", PAD - 2, 9)
-    mark:SetColorTexture(tint[1], tint[2], tint[3], 1)
+    Style.Paint(mark, tint, 1)
     local label = Style.Text(header, 11, C.muted)
     label:SetPoint("LEFT", mark, "RIGHT", 8, 0)
     label:SetText(T(group.label):upper())
@@ -1568,7 +1586,7 @@ local glass = box:CreateTexture(nil, "ARTWORK")
 glass:SetAtlas("common-search-magnifyingglass")
 glass:SetSize(14, 14)
 glass:SetPoint("LEFT", 10, 0)
-glass:SetVertexColor(C.muted[1], C.muted[2], C.muted[3])
+Style.PaintVertex(glass, C.muted)
 
 local placeholder = Style.Text(box, 12, C.muted)
 placeholder:SetPoint("LEFT", 30, 0)

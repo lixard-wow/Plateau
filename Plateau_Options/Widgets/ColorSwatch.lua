@@ -27,7 +27,7 @@ function ns.Widgets.MakeSwatch(parent, path, setter)
 
     function swatch:Refresh()
         local value = ns.Get(path)
-        color:SetColorTexture(value[1], value[2], value[3], value[4])
+        Style.Paint(color, value)
     end
 
     local pending, scheduled

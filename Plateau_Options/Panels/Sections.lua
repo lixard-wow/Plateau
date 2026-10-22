@@ -2756,12 +2756,9 @@ ns.sections = {
               options = { { value = "workbench", label = "Workbench" }, { value = "ledger", label = "Artisan Ledger" }, { value = "horde", label = "Horde" }, { value = "alliance", label = "Alliance" }, { value = "classic", label = "Slate" } },
               get = function() return Style.ThemeKey() end,
               set = function(value)
-                  if value ~= Style.ThemeKey() then
-                      Style.SetTheme(value)
-                      ns.PromptReload()
-                  end
+                  ns.ApplyTheme(value)
               end,
-              tooltip = "The look of Plateau's settings window and pop-ups. Nameplates are not affected. Requires a reload." },
+              tooltip = "The colors of Plateau's settings window and pop-ups. Nameplates are not affected." },
             { type = "Dropdown", label = "Brand color", keywords = "color colour brand icon minimap class rainbow cycle random logo",
               options = { { value = "class", label = "Class color" }, { value = "cycle", label = "Color cycle" }, { value = "random", label = "Random each login" } },
               get = function() return Plateau.Brand:Mode() end,

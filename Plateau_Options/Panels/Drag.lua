@@ -135,7 +135,7 @@ local function ShowDots(candidates, nearest, ratio)
         local isNearest = nearest and candidate.id == nearest.id
         local color = isNearest and Style.StateColor() or C.muted
         dot:SetDrawLayer("OVERLAY", isNearest and 7 or 0)
-        dot:SetColorTexture(color[1], color[2], color[3], isNearest and 1 or 0.7)
+        Style.Paint(dot, color, isNearest and 1 or 0.7)
         dot:SetSize(isNearest and DOT + 3 or DOT, isNearest and DOT + 3 or DOT)
         dot:Show()
     end

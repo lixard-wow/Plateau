@@ -34,11 +34,7 @@ local labelHits = {}
 local db = {}
 local ns = {
     Widgets = {},
-    Style = {
-        PixelInset = function() end,
-        PixelWidth = function() end,
-        PixelHeight = function() end,
-        RefreshPixels = function() end,
+    Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintVertex = function(t, c, a, s) s = s or 1 t:SetVertexColor((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintText = function(t, c, a) t:SetTextColor(c[1] or 0, c[2] or 0, c[3] or 0, a or c[4] or 1) end, PixelInset = function() end, PixelWidth = function() end, PixelHeight = function() end, RefreshPixels = function() end, 
         colors = { border = {}, field = {}, muted = { 0.5, 0.5, 0.5, 1 } },
         CONTROL_X = 0,
         RowLabel = function() return setmetatable({}, Frame) end,

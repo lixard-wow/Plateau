@@ -242,11 +242,11 @@ local function SetHovered(spot)
         outline:Show()
         hint:SetFormattedText(DragOf(spot) and "%s  -  click to edit, drag to move, arrow keys to nudge" or "%s  -  click to edit", Style.T(Resolve(spot.label)))
         local tint = Style.StateColor()
-        hint:SetTextColor(tint[1], tint[2], tint[3])
+        Style.PaintText(hint, tint)
     else
         outline:Hide()
         hint:SetText(Hint())
-        hint:SetTextColor(C.muted[1], C.muted[2], C.muted[3])
+        Style.PaintText(hint, C.muted)
     end
 end
 

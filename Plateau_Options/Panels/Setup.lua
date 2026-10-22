@@ -65,7 +65,7 @@ function Widgets.SetupImport(parent)
     edit:SetMaxBytes(65000)
     edit:SetAutoFocus(false)
     Style.SetFont(edit, Style.font, 10, "")
-    edit:SetTextColor(C.text[1], C.text[2], C.text[3])
+    Style.PaintText(edit, C.text)
     edit:SetWidth(CONTENT_WIDTH - 12)
     edit:SetTextInsets(6, 6, 6, 6)
     edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
@@ -85,7 +85,7 @@ function Widgets.SetupImport(parent)
     local import = Widgets.Button(row, "Import and use", 140, function()
         local ok, name, state, reload = Plateau.DB:ImportProfile(nil, edit:GetText(), true)
         if ok then
-            message:SetTextColor(C.muted[1], C.muted[2], C.muted[3])
+            Style.PaintText(message, C.muted)
             if state == "deferred" then
                 message:SetText(T("Imported as %s. It becomes active when combat ends."):format(name))
             else
@@ -100,7 +100,7 @@ function Widgets.SetupImport(parent)
                 ns.PromptReload()
             end
         else
-            message:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
+            Style.PaintText(message, C.warn)
             message:SetText(name or T("Import failed."))
         end
     end)
@@ -154,7 +154,9 @@ logo:SetTexture("Interface\\AddOns\\Plateau\\Art\\icon")
 local heading = Style.Text(titleBar, 16, C.text)
 heading:SetPoint("LEFT", logo, "RIGHT", 10, 0)
 
-local line = Style.GradientLine(titleBar, { C.line, C.line }, 1)
+local line = titleBar:CreateTexture(nil, "ARTWORK")
+Style.Paint(line, C.line)
+Style.PixelHeight(line)
 line:SetPoint("BOTTOMLEFT", 1, 0)
 line:SetPoint("BOTTOMRIGHT", -1, 0)
 
@@ -172,7 +174,7 @@ local footerLine = frame:CreateTexture(nil, "ARTWORK")
 footerLine:SetPoint("BOTTOMLEFT", 1, FOOTER)
 footerLine:SetPoint("BOTTOMRIGHT", -1, FOOTER)
 Style.PixelHeight(footerLine)
-footerLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+Style.Paint(footerLine, C.border, 1)
 
 local page
 
@@ -190,10 +192,10 @@ local function Scroller(page, height)
     track:SetPoint("TOPLEFT", scroll, "TOPRIGHT", 8, 0)
     track:SetPoint("BOTTOMLEFT", scroll, "BOTTOMRIGHT", 8, 0)
     track:SetWidth(3)
-    track:SetColorTexture(C.border[1], C.border[2], C.border[3], 0.6)
+    Style.Paint(track, C.border, 0.6)
     local thumb = scroll:CreateTexture(nil, "OVERLAY")
     thumb:SetWidth(3)
-    thumb:SetColorTexture(C.accent[1], C.accent[2], C.accent[3], 0.9)
+    Style.Paint(thumb, C.accent, 0.9)
 
     local function Update()
         local view = scroll:GetHeight()

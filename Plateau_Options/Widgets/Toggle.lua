@@ -50,9 +50,9 @@ local function MakeToggle(parent, spec)
         local tint = Style.StateColor()
         Style.SetBorderColor(track, hovered and tint or C.border)
         if on then
-            knob:SetColorTexture(tint[1], tint[2], tint[3], 1)
+            Style.Paint(knob, tint, 1)
         else
-            knob:SetColorTexture(Style.colors.muted[1], Style.colors.muted[2], Style.colors.muted[3], 1)
+            Style.Paint(knob, Style.colors.muted, 1)
         end
         local target = on and ON_X or OFF_X
         if instant or not changed then

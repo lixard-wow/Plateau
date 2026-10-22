@@ -86,7 +86,7 @@ local function Render()
             if option.checked ~= nil then
                 local on = Checked(option)
                 local tint = Style.StateColor()
-                item.check:SetColorTexture(tint[1], tint[2], tint[3], on and 1 or 0)
+                Style.Paint(item.check, tint, on and 1 or 0)
                 item.text:ClearAllPoints()
                 item.text:SetPoint("LEFT", item.box, "RIGHT", 8, 0)
                 item.text:SetPoint("RIGHT", -8, 0)
@@ -103,7 +103,7 @@ local function Render()
             else
                 color = option.value == listCurrent and Style.StateColor() or C.text
             end
-            item.text:SetTextColor(color[1], color[2], color[3])
+            Style.PaintText(item.text, color)
             item:Show()
         else
             item:Hide()
@@ -199,13 +199,13 @@ local function EnsureList()
     scrollTrack:EnableMouse(true)
     local groove = scrollTrack:CreateTexture(nil, "BACKGROUND")
     groove:SetAllPoints()
-    groove:SetColorTexture(C.border[1], C.border[2], C.border[3], 0.6)
+    Style.Paint(groove, C.border, 0.6)
     scrollThumb = CreateFrame("Frame", nil, scrollTrack)
     scrollThumb:SetWidth(SCROLL_WIDTH)
     local thumbFill = scrollThumb:CreateTexture(nil, "OVERLAY")
     thumbFill:SetAllPoints()
     local tint = Style.StateColor()
-    thumbFill:SetColorTexture(tint[1], tint[2], tint[3], 0.9)
+    Style.Paint(thumbFill, tint, 0.9)
     scrollTrack:Hide()
 
     local function DragTo()

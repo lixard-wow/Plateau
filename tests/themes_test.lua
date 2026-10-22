@@ -9,38 +9,50 @@ local function Load(flavor, saved, class)
     return ns.Style
 end
 
+local function Same(a, b)
+    return math.abs(a[1] - b[1]) < 1e-9 and math.abs(a[2] - b[2]) < 1e-9 and math.abs(a[3] - b[3]) < 1e-9
+end
+
 local retail = Load("mainline")
 check(retail.ThemeKey() == "workbench", "retail starts on Workbench")
-check(retail.RADIUS == 10, "Workbench has 10 pixel corners")
-check(retail.StateColor() == retail.colors.accent, "Workbench uses its green accent, like PKT's Workbench")
+check(Same(retail.colors.accent, retail.THEMES.workbench.colors.accent), "Workbench uses its green accent")
 
 local forever = Load("forever")
 check(forever.ThemeKey() == "ledger", "WoW Forever starts on Artisan Ledger")
-check(forever.RADIUS == 4, "Artisan Ledger has 4 pixel corners")
-check(forever.StateColor() == forever.colors.accent, "Artisan Ledger uses its brass accent")
-check(forever.font:find("SourceSans3", 1, true) and forever.headingFont:find("Cinzel", 1, true), "Artisan Ledger uses Source Sans for text and Cinzel for headings")
+check(Same(forever.colors.accent, forever.THEMES.ledger.colors.accent), "Artisan Ledger uses its brass accent")
 
-local classic = Load("mainline", "classic")
-check(classic.ThemeKey() == "classic", "a saved theme choice is used")
-check(classic.RADIUS == 0, "Slate has square corners")
-check(math.abs(classic.colors.accent[1] - 0.25) < 1e-9 and math.abs(classic.colors.accent[3] - 0.92) < 1e-9, "Slate highlights in the class color of the character you're on")
-check(classic.StateColor() == classic.colors.accent and classic.groupColors.look == classic.colors.accent, "Slate's toggles, sliders and section colors follow the class color")
-check(math.abs(classic.THEMES.classic.colors.accent[1] - 0.78) < 1e-9, "the theme itself keeps the gold accent for when no class is known")
-check(math.abs(retail.colors.accent[1] - 0.25) > 0.01, "other themes keep their own accent")
+local saved = Load("mainline", "classic")
+check(saved.ThemeKey() == "classic", "a saved theme choice is used")
 
 local bogus = Load("mainline", "neon")
 check(bogus.ThemeKey() == "workbench", "an unknown saved theme falls back to the client default")
 
+local shapes = {}
+for _, key in ipairs(retail.THEME_ORDER) do
+    local style = Load("mainline", key)
+    shapes[#shapes + 1] = table.concat({ style.RADIUS, style.BUTTON_RADIUS, style.font, style.headingFont, style.titleFont, style.TITLE_SIZE, style.sectionFont, style.buttonFont, style.HEADER_HEIGHT, style.ICON_BUTTON }, "|")
+end
+local oneShape = true
+for i = 2, #shapes do
+    oneShape = oneShape and shapes[i] == shapes[1]
+end
+check(oneShape, "every theme uses the same fonts, corners and sizes; only colors change")
+check(retail.font:find("Barlow", 1, true) and retail.headingFont:find("Barlow", 1, true), "every theme uses Barlow")
+
+local tokens = {}
+for token in pairs(retail.THEMES.workbench.colors) do
+    tokens[#tokens + 1] = token
+end
 for _, key in ipairs(retail.THEME_ORDER) do
     local theme = retail.THEMES[key]
-    local complete = theme.name and theme.body and theme.heading and theme.colors and theme.groups
-    for _, token in ipairs({ "window", "rail", "field", "hover", "border", "accent", "text", "muted", "warn" }) do
-        complete = complete and theme.colors[token] ~= nil
+    local missing = {}
+    for _, token in ipairs(tokens) do
+        if type(theme.colors[token]) ~= "table" then missing[#missing + 1] = token end
     end
     for _, group in ipairs({ "look", "casts", "highlights", "setup" }) do
-        complete = complete and theme.groups[group] ~= nil
+        if type(theme.groups[group]) ~= "table" then missing[#missing + 1] = group end
     end
-    check(complete, theme.name .. " defines every color, section color, font and gradient")
+    check(theme.name and theme.desc and #missing == 0, theme.name .. " defines every color and section color" .. (#missing > 0 and (": missing " .. table.concat(missing, ", ")) or ""))
 end
 
 local picked = Load("mainline")
@@ -49,17 +61,35 @@ check(Plateau.DB.saved.global.optionsTheme == "ledger", "picking a theme saves i
 picked.SetTheme("neon")
 check(Plateau.DB.saved.global.optionsTheme == "ledger", "an unknown theme is not saved")
 
-local PKT_COLORS = { "title", "heading", "line", "surface", "surfaceBorder", "buttonText", "primary", "primaryBorder", "primaryHover", "primaryText", "iconButton", "iconButtonBorder" }
-for key, theme in pairs(retail.THEMES) do
-    local missing = {}
-    for _, color in ipairs(PKT_COLORS) do
-        if type(theme.colors[color]) ~= "table" then missing[#missing + 1] = color end
-    end
-    check(#missing == 0, key .. " has every PKT color" .. (#missing > 0 and (": missing " .. table.concat(missing, ", ")) or ""))
-    check(type(theme.titleFont) == "table" and type(theme.sectionFont) == "table" and type(theme.buttonFont) == "table" and theme.headerHeight and theme.iconButton, key .. " has PKT fonts and header sizes")
-    check(not theme.headerFill or type(theme.colors.header) == "table", key .. " has a header color when its header is filled")
+local live = Load("mainline")
+local function Texture()
+    local texture = {}
+    function texture:SetColorTexture(r, g, b, a) self.color = { r, g, b, a } end
+    function texture:SetVertexColor(r, g, b, a) self.vertex = { r, g, b, a } end
+    function texture:SetTextColor(r, g, b, a) self.text = { r, g, b, a } end
+    return texture
 end
-check(retail.THEMES.ledger.colors.title[1] > 0.9 and retail.THEMES.ledger.brackets == true, "Artisan Ledger uses PKT's gold title and corner brackets")
+local accentTable = live.colors.accent
+local fill, edge, label, fixed, dimmed = Texture(), Texture(), Texture(), Texture(), Texture()
+live.Paint(fill, live.colors.surface)
+live.PaintVertex(edge, live.groupColors.casts)
+live.PaintText(label, live.colors.muted)
+live.Paint(fixed, { 0.3, 0.3, 0.3, 1 })
+live.Paint(dimmed, live.colors.window, 1, 0.5)
+local heard
+live.OnTheme(function(key) heard = key end)
+live.SetTheme("horde")
+local horde = live.THEMES.horde
+check(Same(fill.color, horde.colors.surface), "a painted fill switches to the new theme's color without a reload")
+check(Same(edge.vertex, horde.groups.casts), "section colors switch too")
+check(Same(label.text, horde.colors.muted), "text colors switch too")
+check(Same(fixed.color, { 0.3, 0.3, 0.3 }), "colors that are not theme colors stay as they are")
+check(math.abs(dimmed.color[1] - horde.colors.window[1] * 0.5) < 1e-9 and dimmed.color[4] == 1, "a darkened theme color keeps its darkening and opacity")
+check(live.colors.accent == accentTable and Same(accentTable, horde.colors.accent), "the shared color tables are updated in place, so hover effects pick up the new colors")
+check(heard == "horde", "theme listeners hear about the switch")
+live.PaintText(label, { 1, 0, 0, 1 })
+live.SetTheme("alliance")
+check(Same(label.text, { 1, 0, 0 }), "repainting with a fixed color stops the theme from overriding it")
 
 local reset = Load("mainline")
 local resetPaths, refreshed, menus = nil, 0, 0
