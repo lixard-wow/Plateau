@@ -54,6 +54,10 @@ local db = {}
 local ns = {
     Widgets = {},
     Style = {
+        PixelInset = function() end,
+        PixelWidth = function() end,
+        PixelHeight = function() end,
+        RefreshPixels = function() end,
         colors = { border = {}, field = {}, accent = {}, hover = {}, window = {}, text = {}, muted = {} },
         CONTROL_X = 0,
         CONTROL_WIDTH = 100,

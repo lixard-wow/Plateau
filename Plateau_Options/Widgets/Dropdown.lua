@@ -244,6 +244,7 @@ end
 local function ShowList(owner, options, current, onPick, opts)
     EnsureList()
     list:SetScale(owner:GetEffectiveScale() / catcher:GetEffectiveScale())
+    Style.RefreshPixels()
     opts = opts or {}
     listOptions, listCurrent, listPick = options, current, onPick
     listVisible = math.min(opts.maxVisible or MAX_VISIBLE, MAX_ITEMS)

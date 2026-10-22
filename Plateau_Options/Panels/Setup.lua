@@ -171,7 +171,7 @@ body:SetPoint("BOTTOMRIGHT", -PAD, FOOTER)
 local footerLine = frame:CreateTexture(nil, "ARTWORK")
 footerLine:SetPoint("BOTTOMLEFT", 1, FOOTER)
 footerLine:SetPoint("BOTTOMRIGHT", -1, FOOTER)
-footerLine:SetHeight(1)
+Style.PixelHeight(footerLine)
 footerLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
 
 local page

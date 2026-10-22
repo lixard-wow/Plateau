@@ -35,6 +35,10 @@ local db = {}
 local ns = {
     Widgets = {},
     Style = {
+        PixelInset = function() end,
+        PixelWidth = function() end,
+        PixelHeight = function() end,
+        RefreshPixels = function() end,
         colors = { border = {}, field = {}, muted = { 0.5, 0.5, 0.5, 1 } },
         CONTROL_X = 0,
         RowLabel = function() return setmetatable({}, Frame) end,

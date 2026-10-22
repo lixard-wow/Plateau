@@ -64,6 +64,10 @@ local resetTargets, tooltips, labelHits = {}, {}, {}
 local ns = {
     Widgets = {},
     Style = {
+        PixelInset = function() end,
+        PixelWidth = function() end,
+        PixelHeight = function() end,
+        RefreshPixels = function() end,
         colors = { border = {} },
         Fill = function() end,
         Border = function() end,

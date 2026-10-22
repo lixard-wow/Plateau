@@ -551,12 +551,65 @@ function Style.Rounded(frame, color, layer, sublevel, radius)
     return texture
 end
 
+local pixelSized = {}
+local pixelWatchers = {}
+
+function Style.PixelUnit(region)
+    local scale = region:GetEffectiveScale()
+    if not (PixelUtil and PixelUtil.GetPixelToUIUnitFactor) or type(scale) ~= "number" or (issecretvalue and issecretvalue(scale)) or scale <= 0 then
+        return 1
+    end
+    return PixelUtil.GetPixelToUIUnitFactor() / scale
+end
+
+local function ApplyPixel(region, how)
+    local unit = Style.PixelUnit(region)
+    if how == "width" then
+        region:SetWidth(unit)
+    elseif how == "height" then
+        region:SetHeight(unit)
+    else
+        region:ClearAllPoints()
+        region:SetPoint("TOPLEFT", how, "TOPLEFT", unit, -unit)
+        region:SetPoint("BOTTOMRIGHT", how, "BOTTOMRIGHT", -unit, unit)
+    end
+end
+
+function Style.PixelWidth(region)
+    pixelSized[region] = "width"
+    ApplyPixel(region, "width")
+end
+
+function Style.PixelHeight(region)
+    pixelSized[region] = "height"
+    ApplyPixel(region, "height")
+end
+
+function Style.PixelInset(region, parent)
+    pixelSized[region] = parent
+    ApplyPixel(region, parent)
+end
+
+function Style.OnPixels(region, callback)
+    pixelWatchers[#pixelWatchers + 1] = { region, callback }
+    callback(Style.PixelUnit(region))
+end
+
+function Style.RefreshPixels()
+    for region, how in pairs(pixelSized) do
+        ApplyPixel(region, how)
+    end
+    for i = 1, #pixelWatchers do
+        local entry = pixelWatchers[i]
+        entry[2](Style.PixelUnit(entry[1]))
+    end
+end
+
 function Style.Panel(frame, fill, border, radius)
     local edge = Style.Rounded(frame, border, "BACKGROUND", -2, radius)
     edge:SetAllPoints()
     local inner = Style.Rounded(frame, fill, "BACKGROUND", -1, radius)
-    inner:SetPoint("TOPLEFT", 1, -1)
-    inner:SetPoint("BOTTOMRIGHT", -1, 1)
+    Style.PixelInset(inner, frame)
     frame.roundEdge = edge
     frame.roundFill = inner
     return inner, edge
@@ -658,16 +711,16 @@ function Style.Border(frame, color)
     end
     edges[1]:SetPoint("TOPLEFT")
     edges[1]:SetPoint("TOPRIGHT")
-    edges[1]:SetHeight(1)
+    Style.PixelHeight(edges[1])
     edges[2]:SetPoint("BOTTOMLEFT")
     edges[2]:SetPoint("BOTTOMRIGHT")
-    edges[2]:SetHeight(1)
+    Style.PixelHeight(edges[2])
     edges[3]:SetPoint("TOPLEFT")
     edges[3]:SetPoint("BOTTOMLEFT")
-    edges[3]:SetWidth(1)
+    Style.PixelWidth(edges[3])
     edges[4]:SetPoint("TOPRIGHT")
     edges[4]:SetPoint("BOTTOMRIGHT")
-    edges[4]:SetWidth(1)
+    Style.PixelWidth(edges[4])
     frame.borderEdges = edges
     Style.SetBorderColor(frame, color)
 end
