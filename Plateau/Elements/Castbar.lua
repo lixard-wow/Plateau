@@ -243,8 +243,10 @@ local function FallbackOnUpdate(bar)
     bar:SetValue(GetTime() * 1000)
 end
 
+local HOLD_SLACK = 0.05
+
 local function HoldExpired(bar)
-    if bar.holding and bar.holdToken == bar.pendingHoldToken then
+    if bar.holding and bar.holdUntil and GetTime() >= bar.holdUntil - HOLD_SLACK then
         Castbar:Disable(bar.plate)
     end
 end
@@ -297,7 +299,6 @@ function Castbar:Create(plate)
     flashAnim:SetScript("OnFinished", function() flash:Hide() end)
     flash.anim, flash.fade = flashAnim, fade
     bar.interruptFlash = flash
-    bar.holdToken = 0
     bar.holdCallback = function() HoldExpired(bar) end
 
     local textLayer = CreateFrame("Frame", nil, bar)
@@ -595,7 +596,7 @@ function Castbar:Disable(plate)
     if not bar:IsShown() and not bar.holding and bar.duration == nil then
         return
     end
-    bar.holdToken = bar.holdToken + 1
+    bar.holdUntil = nil
     if bar:IsShown() and not bar.holding then
         bar.stoppedAt = GetTime()
     end
@@ -739,8 +740,7 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
             ns.Driver:RefreshAlpha(plate)
         end
     end
-    bar.holdToken = bar.holdToken + 1
-    bar.pendingHoldToken = bar.holdToken
+    bar.holdUntil = GetTime() + s.interruptHold
     C_Timer.After(s.interruptHold, bar.holdCallback)
 end
 
@@ -783,7 +783,7 @@ function Castbar:Refresh(plate, unit, ending)
     local bar = plate.castbar
     if bar.holding then
         bar.holding = false
-        bar.holdToken = bar.holdToken + 1
+        bar.holdUntil = nil
         bar.interruptFlash.anim:Stop()
         bar.interruptFlash:Hide()
         bar.interrupted:Hide()
