@@ -1092,7 +1092,7 @@ end
 local ConfigureState
 
 local function DrawPreview(plate)
-    ns.pixelBorders = true
+    ns.pixelBorders = ns.pixelPerfect == true
     local state = plate.state
     if sampleStale[state] and sampleLooks[state] then
         sampleStale[state] = nil
@@ -1106,6 +1106,7 @@ local function DrawPreview(plate)
     end
     StylePlate(plate)
     RenderPreview(plate)
+    ns.RoundLayout(plate)
     if forced then
         views[state] = real
         ConfigureState(state, real)

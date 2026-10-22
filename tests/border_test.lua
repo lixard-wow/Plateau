@@ -127,7 +127,11 @@ check(calls == 0, "an unchanged size is not set again")
 local previewPlate = { rawWidth = 125, rawHeight = 11, preview = true, GetEffectiveScale = function() return 1 end }
 function previewPlate:SetSize(w, h) self.w = w end
 ns.SnapPlateSize(previewPlate)
-check(previewPlate.w == 125, "the settings preview keeps the exact size")
+check(math.abs(previewPlate.w / 0.5333 - math.floor(previewPlate.w / 0.5333 + 0.5)) < 1e-6, "the settings preview is sized to whole screen pixels like a real nameplate")
+ns.pixelPerfect = false
+ns.SnapPlateSize(previewPlate)
+check(previewPlate.w == 125, "with pixel-perfect off the settings preview keeps the exact size")
+ns.pixelPerfect = true
 
 ns.pixelPerfect, ns.pixelBorders = nil, nil
 local steady = ns.CreateBorder(owner, owner, "BACKGROUND", 0)
