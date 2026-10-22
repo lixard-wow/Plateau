@@ -103,3 +103,22 @@ Castbar:ShowInterrupted(plate)
 bar.holding = false
 Fire(1)
 check(hides == 0, "a timer firing after the hold was cleared does nothing")
+
+local SizeKickLine = Upvalue(Castbar.Style, "SizeKickLine")
+local function LineBar(scale, width)
+    local bar = { kickWidth = width, kickLine = {} }
+    function bar:GetEffectiveScale() return scale end
+    function bar.kickLine:SetWidth(w) self.width = w end
+    return bar
+end
+PixelUtil = { GetPixelToUIUnitFactor = function() return 0.64 end }
+local thin = LineBar(0.32, 1)
+SizeKickLine(thin)
+check(math.abs(thin.kickLine.width - 2) < 1e-6, "a marker thinner than a screen pixel grows to one pixel")
+local small = LineBar(0.5, 1)
+SizeKickLine(small)
+check(math.abs(small.kickLine.width - 1.28) < 1e-6, "a shrunken plate still gets a one pixel marker")
+local thick = LineBar(1, 2)
+SizeKickLine(thick)
+check(math.abs(thick.kickLine.width - 1.92) < 1e-6, "a thicker marker snaps to whole pixels")
+PixelUtil = nil

@@ -25,6 +25,7 @@ local InterruptReady = ns.InterruptReady
 
 local TIMER_WIDTH = 30
 local READY_TICK = 0.1
+local MIN_PIXEL_SCALE = 0.2
 
 local settings = {}
 
@@ -196,6 +197,21 @@ local function PointMarker(bar, channel)
     end
 end
 
+local function SizeKickLine(bar)
+    local width = bar.kickWidth or 1
+    if PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
+        local scale = bar:GetEffectiveScale()
+        if not issecretvalue(scale) and scale >= MIN_PIXEL_SCALE then
+            local pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
+            width = math.max(1, math.floor(width / pixel + 0.5)) * pixel
+        end
+    end
+    if bar.kickLineWidth ~= width then
+        bar.kickLineWidth = width
+        bar.kickLine:SetWidth(width)
+    end
+end
+
 local function UpdateKickMarker(bar)
     local clip = bar.kickClip
     local duration = bar.duration
@@ -220,6 +236,7 @@ local function UpdateKickMarker(bar)
     local alpha = EvaluateColorValueFromBoolean(bar.notInterruptible, 0, 1)
     alpha = EvaluateColorValueFromBoolean(kick:IsZero(), 0, alpha)
     bar.kickLine:SetAlpha(alpha)
+    SizeKickLine(bar)
     clip:Show()
 end
 
@@ -435,7 +452,8 @@ function Castbar:Style(plate, db)
     bar.timerBinding:SetFormatter(settings[plate.state].formatter)
     bar.kickMarker:SetWidth(barWidth)
     bar.kickClip:SetFrameLevel(bar:GetFrameLevel() + 2)
-    bar.kickLine:SetWidth(db.kickMarkerWidth)
+    bar.kickWidth, bar.kickLineWidth = db.kickMarkerWidth, nil
+    SizeKickLine(bar)
     bar.kickLine:SetColorTexture(db.kickMarkerColor[1], db.kickMarkerColor[2], db.kickMarkerColor[3], db.kickMarkerColor[4])
     bar.markerChannel = nil
     bar.shield:ClearAllPoints()
@@ -925,6 +943,7 @@ function Castbar:Preview(plate, state)
     if s.showKickMarker and not cast.notInterruptible then
         bar.kickClip:Show()
         bar.kickLine:SetAlpha(1)
+        SizeKickLine(bar)
         PointMarker(bar, false)
         bar.kickPositioner:SetMinMaxValues(0, 1)
         bar.kickPositioner:SetValue(cast.progress)
