@@ -683,10 +683,45 @@ function DB:Init()
     self.charKey = CharacterKey()
     local fresh = next(db.profiles) == nil
     self.freshInstall = fresh
-    self.newCharacter = not fresh and self.charKey ~= nil and db.profileKeys[self.charKey] == nil
     self:SeedBuiltins()
+    self:GuessAccountProfile()
     self.fallbackName = (fresh and ns.Builtins) and ns.Builtins.defaultName or DEFAULT_PROFILE
-    self:UseProfile(self:ChosenProfile() or self.fallbackName, self.charKey == nil)
+    self.newCharacter = not fresh and self.charKey ~= nil and db.profileKeys[self.charKey] == nil and not self:AccountProfile()
+    self:UseProfile(self:ChosenProfile() or self:NewCharacterProfile(), self.charKey == nil)
+end
+
+function DB:AccountProfile()
+    local name = self.saved.global.accountProfile
+    if name and self.saved.profiles[name] then
+        return name
+    end
+end
+
+function DB:SetAccountProfile(name)
+    if not self.saved.profiles[name] then
+        return false, L["Profile %s not found."]:format(tostring(name))
+    end
+    self.saved.global.accountProfile = name
+    return true
+end
+
+function DB:GuessAccountProfile()
+    local db = self.saved
+    if self:AccountProfile() then return end
+    local counts, best = {}, nil
+    for _, name in pairs(db.profileKeys) do
+        if db.profiles[name] then
+            counts[name] = (counts[name] or 0) + 1
+            if not best or counts[name] > counts[best] or (counts[name] == counts[best] and name < best) then
+                best = name
+            end
+        end
+    end
+    db.global.accountProfile = best
+end
+
+function DB:NewCharacterProfile()
+    return self:AccountProfile() or self.fallbackName
 end
 
 function DB:ChosenProfile()
@@ -703,8 +738,9 @@ function DB:ResolveCharacter()
     local key = CharacterKey()
     if not key then return end
     self.charKey = key
-    self.newCharacter = not self.freshInstall and self.saved.profileKeys[key] == nil
-    local chosen = self:ChosenProfile()
+    local new = self.saved.profileKeys[key] == nil
+    self.newCharacter = not self.freshInstall and new and not self:AccountProfile()
+    local chosen = self:ChosenProfile() or (new and self:NewCharacterProfile())
     if chosen and chosen ~= self.profileName then
         self:SwitchProfile(chosen)
     else
@@ -956,6 +992,9 @@ function DB:RenameProfile(old, new)
     end
     profiles[new] = profiles[old]
     profiles[old] = nil
+    if self.saved.global.accountProfile == old then
+        self.saved.global.accountProfile = new
+    end
     for character, profile in pairs(self.saved.profileKeys) do
         if profile == old then
             self.saved.profileKeys[character] = new
@@ -1274,6 +1313,9 @@ function DB:DeleteProfile(name)
         return false, L["Profile %s not found."]:format(tostring(name))
     end
     self.saved.profiles[name] = nil
+    if self.saved.global.accountProfile == name then
+        self.saved.global.accountProfile = nil
+    end
     local replacement = self:FallbackProfile(name)
     for character, profile in pairs(self.saved.profileKeys) do
         if profile == name then

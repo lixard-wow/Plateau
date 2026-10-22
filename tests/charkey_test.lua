@@ -40,7 +40,8 @@ check(DB.newCharacter == true, "a character named after login with no saved prof
 DB:Shutdown()
 playerName = "Freshalt"
 DB:Init()
-check(DB.newCharacter == true, "a character with no saved profile on an account that has profiles is new")
+check(DB.newCharacter == false, "a new character on an account with a profile for new characters skips setup")
+check(DB.profileName == PlateauDB.global.accountProfile, "...and starts with that profile")
 DB:Shutdown()
 DB:Init()
 check(DB.newCharacter == false, "...and only on its first login")
@@ -48,3 +49,35 @@ PlateauDB = nil
 playerName = "Firstever"
 DB:Init()
 check(DB.newCharacter == false, "the very first character on a fresh install gets the normal first-run setup instead")
+
+PlateauDB = {
+    profileKeys = { ["Main - Realm"] = "Mine", ["Alt - Realm"] = "Mine", ["Other - Realm"] = "Slim" },
+    profiles = { Default = {}, Mine = { look = { friendly = { nameMode = "lastWord" } } }, Slim = {} },
+}
+playerName = "Brandnew"
+DB:Init()
+check(PlateauDB.global.accountProfile == "Mine", "an account without a profile for new characters picks the one most characters use")
+check(DB.profileName == "Mine", "a new character starts with it instead of Default")
+check(DB.views.enemy.friendly.nameMode == "lastWord", "...with that profile's settings")
+check(DB.newCharacter == false, "...and doesn't need setup")
+DB:Shutdown()
+
+check(DB:SetAccountProfile("Slim") == true, "the profile for new characters can be changed")
+check(DB:SetAccountProfile("Missing") == false, "...but only to a profile that exists")
+DB:RenameProfile("Slim", "Thin")
+check(PlateauDB.global.accountProfile == "Thin", "renaming it keeps it as the profile for new characters")
+DB:DeleteProfile("Thin")
+check(PlateauDB.global.accountProfile == nil, "deleting it clears the choice")
+check(DB:NewCharacterProfile() == DB.fallbackName, "...and new characters fall back to the usual profile")
+
+PlateauDB = { profileKeys = { ["Main - Realm"] = "Mine" }, profiles = { Mine = {} }, global = { accountProfile = "Gone" } }
+playerName = "Another"
+DB:Init()
+check(DB:AccountProfile() == "Mine", "a profile for new characters that no longer exists is replaced by the one most characters use")
+check(DB.profileName == "Mine", "...and the new character starts with it")
+
+PlateauDB = { profileKeys = { ["Main - Realm"] = "Gone" }, profiles = { Default = {} } }
+playerName = "Lonely"
+DB:Init()
+check(DB:AccountProfile() == nil, "with no usable profile to pick, none is chosen")
+check(DB.newCharacter == true, "...so the new character gets setup")

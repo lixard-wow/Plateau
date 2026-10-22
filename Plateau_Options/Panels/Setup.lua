@@ -29,7 +29,7 @@ end
 
 local PAGE = {
     title = "Pick a look",
-    intro = "Each look is a ready-made profile. Choosing one makes it your active and default profile. Fine-tune it any time with /plt.",
+    intro = "Each look is a ready-made profile. Choosing one makes it your active and default profile, and new characters start with it too. Fine-tune it any time with /plt.",
     characterTitle = "Pick a profile for this character",
     characterIntro = "This character doesn't have a profile yet. Use one you already set up, paste a profile string, or pick a ready-made look. Change it any time with /plt.",
     controls = function()
@@ -277,9 +277,20 @@ ns.OnRefresh(function()
     end
 end)
 
+local openedWith
+
+local function Finish()
+    local DB = Plateau.DB
+    DB.saved.global.setupDone = true
+    DB.newCharacter = false
+    local chosen = DB:DefaultProfile()
+    if chosen ~= openedWith or not DB:AccountProfile() then
+        DB:SetAccountProfile(chosen)
+    end
+end
+
 local function Done(openOptions)
-    Plateau.DB.saved.global.setupDone = true
-    Plateau.DB.newCharacter = false
+    Finish()
     frame:Hide()
     if openOptions and PlateauOptions then
         PlateauOptions:Show()
@@ -295,8 +306,7 @@ doneButton:SetPoint("RIGHT", openButton, "LEFT", -8, 0)
 frame:SetScript("OnHide", function(self)
     ns.Widgets.HidePrompts()
     if not self.closedByCombat then
-        Plateau.DB.saved.global.setupDone = true
-        Plateau.DB.newCharacter = false
+        Finish()
     end
     self.closedByCombat = false
     ns.HideDropdownList()
@@ -316,6 +326,7 @@ function frame:Open()
         PlateauOptions:Hide()
     end
     local character = Plateau.DB.newCharacter and Plateau.DB.saved.global.setupDone
+    openedWith = Plateau.DB:DefaultProfile()
     self:Show()
     heading:SetText(character and PAGE.characterTitle or PAGE.title)
     intro:SetText(character and PAGE.characterIntro or PAGE.intro)

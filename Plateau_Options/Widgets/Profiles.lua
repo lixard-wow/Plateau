@@ -270,7 +270,7 @@ end
 
 function ns.Widgets.ProfileStatus(parent)
     local frame = CreateFrame("Frame", nil, parent)
-    frame:SetHeight(ROW_STEP + 60)
+    frame:SetHeight(ROW_STEP * 2 + 60)
 
     local notice = Style.Text(frame, 11, C.muted)
     notice:SetWordWrap(true)
@@ -304,8 +304,24 @@ function ns.Widgets.ProfileStatus(parent)
     })
     picker:SetPoint("TOPLEFT", 0, 0)
 
+    local account = ns.Widgets.Dropdown(frame, {
+        label = "New characters use",
+        tooltip = "The profile a character gets the first time you log in on it with Plateau. Choosing a look in setup sets this too.",
+        options = function() return ProfileOptions() end,
+        get = function() return Plateau.DB:AccountProfile() or Plateau.DB.fallbackName end,
+        set = function(value)
+            local ok, reason = Plateau.DB:SetAccountProfile(value)
+            if not ok then
+                Say(reason, true)
+                return
+            end
+            Say(T("New characters now start with %s."):format(value))
+        end,
+    })
+    account:SetPoint("TOPLEFT", 0, -ROW_STEP)
+
     local active = Style.Text(frame, 13, C.text)
-    active:SetPoint("TOPLEFT", 0, -ROW_STEP)
+    active:SetPoint("TOPLEFT", 0, -ROW_STEP * 2)
     local detail = Style.Text(frame, 11, C.muted)
     detail:SetPoint("TOPLEFT", active, "BOTTOMLEFT", 0, -4)
     detail:SetWordWrap(true)
@@ -313,9 +329,11 @@ function ns.Widgets.ProfileStatus(parent)
 
     function frame:Refresh()
         picker:SetWidth(ROW_WIDTH())
+        account:SetWidth(ROW_WIDTH())
         detail:SetWidth(ROW_WIDTH())
         notice:SetWidth(ROW_WIDTH())
         picker:Refresh()
+        account:Refresh()
         local status = Plateau.AutoProfile:Status()
         active:SetText(T("Active profile: %s"):format(status.active))
         local lines = {}
@@ -333,7 +351,7 @@ function ns.Widgets.ProfileStatus(parent)
             lines[#lines + 1] = T("Every page edits the active profile.")
         end
         detail:SetText(table.concat(lines, "\n"))
-        local height = ROW_STEP + 22 + (detail:GetStringHeight() or 16) + 6 + ((notice:GetText() or "") ~= "" and ((notice:GetStringHeight() or 14) + 6) or 0)
+        local height = ROW_STEP * 2 + 22 + (detail:GetStringHeight() or 16) + 6 + ((notice:GetText() or "") ~= "" and ((notice:GetStringHeight() or 14) + 6) or 0)
         frame:SetHeight(height)
     end
 
