@@ -687,10 +687,17 @@ Style.Paint(footerLine, C.border, 1)
 
 local footerText = Style.Text(footer, 12, C.muted)
 footerText:SetPoint("LEFT", PAD, 0)
-footerText:SetPoint("RIGHT", -140, 0)
+footerText:SetPoint("RIGHT", -250, 0)
 
 local closeButton = Widgets.Button(footer, "Close", 100, function() frame:Hide() end)
 closeButton:SetPoint("RIGHT", -PAD, 0)
+
+local whatsNewButton = Widgets.Button(footer, "What's new", 110, function()
+    if PlateauWhatsNew then
+        PlateauWhatsNew:Open(nil)
+    end
+end)
+whatsNewButton:SetPoint("RIGHT", closeButton, "LEFT", -8, 0)
 
 local Select, UpdateChrome, RevealRail, OpenRailFor
 
