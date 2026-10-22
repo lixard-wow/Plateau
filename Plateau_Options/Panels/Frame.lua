@@ -9,7 +9,7 @@ local WIDTH, HEIGHT = 1280, 900
 local RAIL = 204
 local PAD = 18
 local TITLE = math.max(Style.HEADER_HEIGHT, 58)
-local STRIPE = 3
+local STRIPE = 1
 local TOP = TITLE + STRIPE
 local PAGE_HEAD = 84
 local PREVIEW = 232
@@ -129,25 +129,11 @@ Style.OnPixels(frame, function(px)
     stripe:SetPoint("TOPRIGHT", -px, -TITLE)
 end)
 stripe:SetHeight(STRIPE)
-do
-    local groups = Style.groupColors or {}
-    local colors = { groups.look or C.accent, groups.casts or C.accent, groups.highlights or C.accent, groups.setup or C.accent }
-    local pieces = {}
-    for i, color in ipairs(colors) do
-        local piece = stripe:CreateTexture(nil, "ARTWORK")
-        Style.Paint(piece, color, 1)
-        pieces[i] = piece
-    end
-    stripe:SetScript("OnSizeChanged", function(self, width)
-        local each = width / #pieces
-        for i, piece in ipairs(pieces) do
-            piece:ClearAllPoints()
-            piece:SetPoint("TOPLEFT", self, "TOPLEFT", (i - 1) * each, 0)
-            piece:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", (i - 1) * each, 0)
-            piece:SetWidth(each)
-        end
-    end)
-end
+local stripeLine = stripe:CreateTexture(nil, "ARTWORK")
+stripeLine:SetPoint("TOPLEFT")
+stripeLine:SetPoint("TOPRIGHT")
+Style.PixelHeight(stripeLine)
+Style.Paint(stripeLine, C.line)
 
 local ICON_BUTTON = Style.ICON_BUTTON
 local closeX = Style.IconButton(titleBar, "icon_close", ICON_BUTTON, function() frame:Hide() end, "Close", Style.theme.roundClose)
