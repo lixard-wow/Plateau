@@ -17,7 +17,7 @@ local STEPS = {
         target = "preview",
         place = "below",
         title = "The live preview",
-        text = "This sample nameplate shows your changes as you make them. Click a part to edit it, drag it to move it, and hold Shift to place it freely.",
+        text = "These sample nameplates show your changes as you make them. Click a part of the middle one to edit it, drag it to move it, and hold Shift to place it freely.",
     },
     {
         target = "snap",
@@ -51,9 +51,9 @@ local STEPS = {
     },
     {
         target = "profile",
-        place = "above",
+        place = "below",
         title = "Profiles",
-        text = "Your active profile, the one every page edits. Switch profiles on the Profiles page. Changes save automatically.",
+        text = "Your active profile, the one every page edits. Click it to switch profiles. Changes save automatically.",
     },
 }
 

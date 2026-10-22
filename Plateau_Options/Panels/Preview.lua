@@ -34,19 +34,7 @@ local function Hint()
     return table.concat(parts, " ")
 end
 
-local frame = PlateauOptions
-
-local panel = CreateFrame("Frame", nil, frame)
-panel:SetPoint("TOPLEFT", layout.rail + 1, -layout.title)
-panel:SetPoint("TOPRIGHT", -1, -layout.title)
-panel:SetHeight(layout.preview)
-Style.Fill(panel, C.rail)
-
-local line = panel:CreateTexture(nil, "ARTWORK")
-line:SetPoint("BOTTOMLEFT")
-line:SetPoint("BOTTOMRIGHT")
-line:SetHeight(1)
-line:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+local panel = ns.previewStage
 
 local hint = Style.Text(panel, 11, C.muted)
 hint:SetPoint("BOTTOMLEFT", layout.pad, 10)
@@ -513,18 +501,54 @@ holder:SetPoint("CENTER", 0, 0)
 
 local plate = Plateau.CreatePreview(holder, sample)
 plate:SetPoint("CENTER")
+
+local COMPANION_GAP = 56
+local companions = {
+    Plateau.CreatePreview(holder, {
+        health = 0.38,
+        maxHealth = 31200,
+        name = "Ravenous Ghoul",
+        levelOffset = 0,
+        classification = "normal",
+        mobType = "trivial",
+        auras = {},
+        alerts = {},
+        absorb = 0,
+        cast = {
+            progress = 0.3,
+            name = "Mend Flesh",
+            icon = "Interface\\Icons\\Spell_Shadow_LifeDrain02",
+            timer = "1.7",
+            onCooldown = true,
+        },
+    }),
+    Plateau.CreatePreview(holder, {
+        health = 0.64,
+        maxHealth = 118000,
+        name = "Bonebreaker Brute",
+        levelOffset = 1,
+        classification = "elite",
+        mobType = "elite",
+        auras = {},
+        alerts = {},
+        absorb = 0,
+    }),
+}
+companions[1]:SetPoint("RIGHT", plate, "LEFT", -COMPANION_GAP, 0)
+companions[2]:SetPoint("LEFT", plate, "RIGHT", COMPANION_GAP, 0)
 ns.Drag.SetDotParent(panel)
 ns.Drag.SetTargets(SnapTargets)
 AddHotspots(plate)
 
-local redoButton = ns.Widgets.Button(panel, "Redo", 94, function() ns.Undo.Redo() end)
-redoButton:SetFrameLevel(outline:GetFrameLevel() + 1)
+local slot = layout.undoSlot
+local redoButton = ns.Widgets.Button(slot, "Redo", 70, function() ns.Undo.Redo() end)
+redoButton:SetHeight(30)
+redoButton:SetPoint("RIGHT", slot, "RIGHT", 0, 0)
 
-local undoButton = ns.Widgets.Button(panel, "Undo", 94)
+local undoButton = ns.Widgets.Button(slot, "Undo", 100)
+undoButton:SetHeight(30)
 Style.DropArrow(undoButton)
-undoButton:SetPoint("TOPRIGHT", -layout.pad, -8)
-redoButton:SetPoint("TOPRIGHT", undoButton, "BOTTOMRIGHT", 0, -4)
-undoButton:SetFrameLevel(outline:GetFrameLevel() + 1)
+undoButton:SetPoint("RIGHT", redoButton, "LEFT", -6, 0)
 undoButton:SetScript("OnClick", function(self)
     local options = {}
     for i, label in ipairs(ns.Undo.History()) do
@@ -666,9 +690,8 @@ function ns.ShowKickMarkerCast()
     ns.SetPreviewPick("cast", "kickCooldown")
 end
 
-local snapButton = ns.Widgets.Button(panel, "", 94)
-snapButton:SetPoint("TOPRIGHT", redoButton, "BOTTOMRIGHT", 0, -4)
-snapButton:SetFrameLevel(outline:GetFrameLevel() + 1)
+local snapButton = ns.Widgets.Button(ns.previewBar, "", 94)
+snapButton:SetPoint("RIGHT", ns.previewBar, "RIGHT", -12, 0)
 local function PaintSnap()
     snapButton.label:SetText(ns.Drag.SnapEnabled() and "Snap: On" or "Snap: Off")
 end
@@ -694,6 +717,9 @@ function ns.SetPreviewSection(key)
     end
     ApplySample()
     Plateau.SetPreviewState(plate, key == "friendly" and friendlySample or sample)
+    for _, companion in ipairs(companions) do
+        companion:SetShown(key ~= "friendly")
+    end
     UpdateHotspots()
     if key == "castbar" and not castPlayer:IsShown() then
         PlayCast()

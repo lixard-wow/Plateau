@@ -75,29 +75,23 @@ end
 
 function ns.Widgets.Header(parent, spec)
     local row = CreateFrame("Frame", nil, parent)
-    row:SetHeight(spec.first and 24 or 36)
+    row:SetHeight(26)
 
     local tick = row:CreateTexture(nil, "ARTWORK")
-    tick:SetSize(3, 12)
-    tick:SetPoint("BOTTOMLEFT", 0, 7)
+    tick:SetSize(4, 14)
+    tick:SetPoint("LEFT", 0, 0)
     local tint = Style.StateColor()
     tick:SetColorTexture(tint[1], tint[2], tint[3], 1)
 
-    local text = Style.Text(row, 13, C.heading)
-    Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE + 1, "")
-    text:SetPoint("BOTTOMLEFT", tick, "BOTTOMRIGHT", 8, -1)
+    local text = Style.Text(row, 14, C.heading)
+    Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE + 2, "")
+    text:SetPoint("LEFT", tick, "RIGHT", 9, 0)
     text:SetText(spec.label)
-
-    local line = row:CreateTexture(nil, "ARTWORK")
-    line:SetPoint("BOTTOMLEFT")
-    line:SetPoint("BOTTOMRIGHT")
-    line:SetHeight(1)
-    line:SetColorTexture(C.line[1], C.line[2], C.line[3], 1)
 
     if spec.collapsible then
         row:EnableMouse(true)
         local state = Style.Text(row, 11, C.muted)
-        state:SetPoint("BOTTOMRIGHT", 0, 6)
+        state:SetPoint("RIGHT", 0, 0)
         function row:SetCollapsed(collapsed)
             state:SetText(collapsed and "Show" or "Hide")
         end
