@@ -111,7 +111,7 @@ logo:SetTexture("Interface\\AddOns\\Plateau\\Art\\icon")
 local TITLE_TEXT = Style.theme.uppercaseTitle and "PLATEAU" or "Plateau"
 local titleName = Style.Text(titleBar, 18, C.title)
 Style.SetFont(titleName, Style.titleFont, Style.TITLE_SIZE + 6, "")
-titleName:SetPoint("TOPLEFT", logo, "TOPRIGHT", 10, 3)
+titleName:SetPoint("TOPLEFT", logo, "TOPRIGHT", 10, 2)
 titleName:SetText(TITLE_TEXT)
 
 local titleSub = Style.Text(titleBar, 11, C.muted)
