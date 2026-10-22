@@ -1285,6 +1285,7 @@ end
 
 local railGroups = {}
 local railLoose = {}
+local openGroup
 
 local function PlaceRailRow(row, y)
     row:ClearAllPoints()
@@ -1298,11 +1299,18 @@ local function LayoutRail()
     for _, group in ipairs(railGroups) do
         PlaceRailRow(group.header, y)
         y = y + RAIL_HEADER
+        local open = openGroup == group
+        group.header.arrow:SetRotation(open and 0 or math.pi / 2)
         for _, button in ipairs(group.buttons) do
-            PlaceRailRow(button, y)
-            y = y + RAIL_ROW
+            button:SetShown(open)
+            if open then
+                PlaceRailRow(button, y)
+                y = y + RAIL_ROW
+            end
         end
-        y = y + 6
+        if open then
+            y = y + 6
+        end
     end
     for _, button in ipairs(railLoose) do
         PlaceRailRow(button, y)
@@ -1313,15 +1321,48 @@ local function LayoutRail()
 end
 
 local function RailHeader(group, tint)
-    local header = CreateFrame("Frame", nil, railContent)
+    local header = CreateFrame("Button", nil, railContent)
     header:SetHeight(RAIL_HEADER)
+    local hover = Style.Rounded(header, C.hover, "BACKGROUND", 0, Style.BUTTON_RADIUS)
+    hover:SetPoint("TOPLEFT", 8, -2)
+    hover:SetPoint("BOTTOMRIGHT", -8, 2)
+    hover:Hide()
     local mark = header:CreateTexture(nil, "ARTWORK")
     mark:SetSize(8, 8)
-    mark:SetPoint("BOTTOMLEFT", PAD - 2, 9)
+    mark:SetPoint("LEFT", PAD - 2, 0)
     Style.Paint(mark, tint, 1)
     local label = Style.Text(header, 11, C.muted)
     label:SetPoint("LEFT", mark, "RIGHT", 8, 0)
     label:SetText(T(group.label):upper())
+    local arrow = header:CreateTexture(nil, "OVERLAY")
+    arrow:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\Icons\\icon_chevron_down")
+    arrow:SetSize(10, 10)
+    arrow:SetPoint("RIGHT", -14, 0)
+    Style.PaintVertex(arrow, tint)
+    header.arrow = arrow
+    header:SetScript("OnEnter", function()
+        hover:Show()
+        Style.PaintText(label, C.text)
+    end)
+    header:SetScript("OnLeave", function()
+        hover:Hide()
+        Style.PaintText(label, C.muted)
+    end)
+    header:SetScript("OnClick", function()
+        if openGroup == group then
+            openGroup = nil
+            LayoutRail()
+            return
+        end
+        if current and groupOf[current.key] == group then
+            openGroup = group
+            LayoutRail()
+            return
+        end
+        local remembered = Plateau.DB.saved.global.railLast
+        local key = type(remembered) == "table" and remembered[group.label]
+        Select(groupOf[key] == group and sectionsByKey[key] or group.buttons[1].section)
+    end)
     return header
 end
 
@@ -1353,12 +1394,14 @@ end
 function OpenRailFor(key)
     local group = groupOf[key]
     if group then
+        openGroup = group
         local global = Plateau.DB.saved.global
         if type(global.railLast) ~= "table" then
             global.railLast = {}
         end
         global.railLast[group.label] = key
     end
+    LayoutRail()
 end
 LayoutRail()
 local function FitHeight()
