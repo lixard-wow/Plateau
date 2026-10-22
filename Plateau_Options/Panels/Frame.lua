@@ -111,11 +111,11 @@ logo:SetTexture("Interface\\AddOns\\Plateau\\Art\\icon")
 local TITLE_TEXT = Style.theme.uppercaseTitle and "PLATEAU" or "Plateau"
 local titleName = Style.Text(titleBar, 18, C.title)
 Style.SetFont(titleName, Style.titleFont, Style.TITLE_SIZE + 6, "")
-titleName:SetPoint("TOPLEFT", logo, "TOPRIGHT", 10, 1)
+titleName:SetPoint("TOPLEFT", logo, "TOPRIGHT", 10, 3)
 titleName:SetText(TITLE_TEXT)
 
 local titleSub = Style.Text(titleBar, 11, C.muted)
-titleSub:SetPoint("BOTTOMLEFT", logo, "BOTTOMRIGHT", 10, 1)
+titleSub:SetPoint("BOTTOMLEFT", logo, "BOTTOMRIGHT", 10, -1)
 titleSub:SetText("Nameplates")
 
 local titleVersion = Style.Text(titleBar, 11, C.muted)
