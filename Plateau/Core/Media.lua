@@ -292,6 +292,9 @@ local function Family(file, size, flags)
         familyCount = familyCount + 1
         local ok, created = pcall(CreateFontFamily, "PlateauFontFamily" .. familyCount, members)
         family = ok and created or false
+        if not ok then
+            ns.fontFamilyProblem = created
+        end
         families[key] = family
     end
     return family or nil

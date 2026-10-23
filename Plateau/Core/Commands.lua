@@ -61,6 +61,10 @@ local function Debug()
         print("  " .. L["Target: state %s, enemy type %s, boss %s, classification %s, level %s"]:format(
             plate.state, tostring(plate.mobType), Show(UnitIsBossMob("target")), Show(UnitClassification("target")),
             Show(UnitEffectiveLevel("target"))))
+        local family = plate.name:GetFontObject()
+        print("  " .. L["Name font: %s, font family %s, font families allowed %s, problem %s"]:format(
+            tostring((plate.name:GetFont())), tostring(family and family:GetName()), tostring(CreateFontFamily ~= nil),
+            tostring(ns.fontFamilyProblem or L["none"])))
     else
         print("  " .. L["Target: none"])
     end
