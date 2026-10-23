@@ -612,8 +612,16 @@ local function Repair(db)
     end
 end
 
+local function SchemaOf(saved)
+    local version = saved.version
+    if type(version) ~= "number" or version ~= version or version < 0 or version % 1 ~= 0 then
+        return nil
+    end
+    return version
+end
+
 local function Migrate(db)
-    local version = db.version or SCHEMA_VERSION
+    local version = SchemaOf(db) or SCHEMA_VERSION
     local failures = {}
     while version < SCHEMA_VERSION do
         version = version + 1
@@ -658,6 +666,20 @@ function DB:Init()
         PlateauDB = {}
     end
     local db = PlateauDB
+    self.newerSchema, self.restoredNewer = nil, nil
+    local backup = type(db.newerBackup) == "table" and db.newerBackup or nil
+    local backupSchema = backup and SchemaOf(backup)
+    if backupSchema and backupSchema <= SCHEMA_VERSION then
+        PlateauDB = backup
+        db = backup
+        self.restoredNewer = backupSchema
+    end
+    local schema = SchemaOf(db)
+    if schema and schema > SCHEMA_VERSION then
+        PlateauDB = { newerBackup = db }
+        db = PlateauDB
+        self.newerSchema = schema
+    end
     Repair(db)
     self.migrationFailures = Migrate(db)
     local Sanitize = ns.Share and ns.Share.Sanitize
