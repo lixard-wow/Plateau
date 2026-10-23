@@ -4,9 +4,11 @@ local Style = ns.Style
 local C = Style.colors
 
 local FADED = 0.3
-local TRACK_WIDTH, TRACK_HEIGHT = 32, 16
+local TRACK_WIDTH, TRACK_HEIGHT = 34, 18
+local PILL = 9
 local KNOB = 12
-local OFF_X, ON_X = 2, TRACK_WIDTH - KNOB - 2
+local OFF_X, ON_X = 3, TRACK_WIDTH - KNOB - 3
+local KNOB_ON = { 1, 1, 1, 1 }
 local DURATION = 0.2
 
 local function MakeToggle(parent, spec)
@@ -17,9 +19,8 @@ local function MakeToggle(parent, spec)
     local track = CreateFrame("Frame", nil, row)
     track:SetSize(TRACK_WIDTH, TRACK_HEIGHT)
     track:SetPoint("LEFT", Style.CONTROL_X, 0)
-    Style.Fill(track, C.field)
-    Style.Border(track, C.border)
-    local knob = track:CreateTexture(nil, "ARTWORK")
+    local fill, edge = Style.Panel(track, C.field, C.border, PILL)
+    local knob = Style.Rounded(track, C.muted, "ARTWORK", 0, "circle")
     knob:SetSize(KNOB, KNOB)
 
     local currentX = OFF_X
@@ -48,11 +49,14 @@ local function MakeToggle(parent, spec)
         local changed = self.on ~= on
         self.on = on
         local tint = Style.StateColor()
-        Style.SetBorderColor(track, hovered and tint or C.border)
         if on then
-            knob:SetColorTexture(tint[1], tint[2], tint[3], 1)
+            Style.PaintVertex(fill, hovered and C.primaryHover or tint)
+            Style.PaintVertex(edge, hovered and C.primaryHover or tint)
+            Style.PaintVertex(knob, KNOB_ON)
         else
-            knob:SetColorTexture(Style.colors.muted[1], Style.colors.muted[2], Style.colors.muted[3], 1)
+            Style.PaintVertex(fill, hovered and C.hover or C.field)
+            Style.PaintVertex(edge, hovered and tint or C.border)
+            Style.PaintVertex(knob, hovered and C.text or C.muted)
         end
         local target = on and ON_X or OFF_X
         if instant or not changed then

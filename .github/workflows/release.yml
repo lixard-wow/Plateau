@@ -13,6 +13,26 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Lua 5.1
+        run: sudo apt-get update && sudo apt-get install -y lua5.1
+
+      - name: Fetch LibDeflate
+        run: git clone --depth 1 --branch 1.0.2-release https://github.com/SafeteeWoW/LibDeflate Plateau/Libs/LibDeflate
+
+      - name: Check every file compiles
+        run: |
+          status=0
+          for file in $(find Plateau Plateau_Options -name '*.lua' -not -path '*/Libs/*'); do
+            luac5.1 -p "$file" || status=1
+          done
+          exit $status
+
+      - name: Run tests
+        run: LUA=lua5.1 bash tests/run.sh
+
+      - name: Remove test-only libraries before packaging
+        run: rm -rf Plateau/Libs/LibDeflate
+
       - uses: BigWigsMods/packager@v2
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}

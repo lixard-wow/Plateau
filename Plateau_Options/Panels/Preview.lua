@@ -34,19 +34,7 @@ local function Hint()
     return table.concat(parts, " ")
 end
 
-local frame = PlateauOptions
-
-local panel = CreateFrame("Frame", nil, frame)
-panel:SetPoint("TOPLEFT", layout.rail + 1, -layout.title)
-panel:SetPoint("TOPRIGHT", -1, -layout.title)
-panel:SetHeight(layout.preview)
-Style.Fill(panel, C.rail)
-
-local line = panel:CreateTexture(nil, "ARTWORK")
-line:SetPoint("BOTTOMLEFT")
-line:SetPoint("BOTTOMRIGHT")
-line:SetHeight(1)
-line:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+local panel = ns.previewStage
 
 local hint = Style.Text(panel, 11, C.muted)
 hint:SetPoint("BOTTOMLEFT", layout.pad, 10)
@@ -73,7 +61,7 @@ end
 
 local function Sample()
     return {
-        health = 0.72,
+        health = 1,
         maxHealth = 72700,
         name = "Wastelander Phaseblade",
         levelOffset = 1,
@@ -85,10 +73,10 @@ local function Sample()
         auras = {},
         absorb = 0.15,
         cast = {
-            progress = 0.6,
+            progress = 1,
             name = "Shadow Bolt",
             icon = "Interface\\Icons\\Spell_Shadow_ShadowBolt",
-            timer = "1.4",
+            timer = "0.0",
             important = true,
             target = playerName,
         },
@@ -254,11 +242,11 @@ local function SetHovered(spot)
         outline:Show()
         hint:SetFormattedText(DragOf(spot) and "%s  -  click to edit, drag to move, arrow keys to nudge" or "%s  -  click to edit", Style.T(Resolve(spot.label)))
         local tint = Style.StateColor()
-        hint:SetTextColor(tint[1], tint[2], tint[3])
+        Style.PaintText(hint, tint)
     else
         outline:Hide()
         hint:SetText(Hint())
-        hint:SetTextColor(C.muted[1], C.muted[2], C.muted[3])
+        Style.PaintText(hint, C.muted)
     end
 end
 
@@ -517,14 +505,15 @@ ns.Drag.SetDotParent(panel)
 ns.Drag.SetTargets(SnapTargets)
 AddHotspots(plate)
 
-local redoButton = ns.Widgets.Button(panel, "Redo", 94, function() ns.Undo.Redo() end)
-redoButton:SetFrameLevel(outline:GetFrameLevel() + 1)
+local slot = layout.undoSlot
+local redoButton = ns.Widgets.Button(slot, "Redo", 70, function() ns.Undo.Redo() end)
+redoButton:SetHeight(30)
+redoButton:SetPoint("RIGHT", slot, "RIGHT", 0, 0)
 
-local undoButton = ns.Widgets.Button(panel, "Undo", 94)
+local undoButton = ns.Widgets.Button(slot, "Undo", 100)
+undoButton:SetHeight(30)
 Style.DropArrow(undoButton)
-undoButton:SetPoint("TOPRIGHT", -layout.pad, -8)
-redoButton:SetPoint("TOPRIGHT", undoButton, "BOTTOMRIGHT", 0, -4)
-undoButton:SetFrameLevel(outline:GetFrameLevel() + 1)
+undoButton:SetPoint("RIGHT", redoButton, "LEFT", -6, 0)
 undoButton:SetScript("OnClick", function(self)
     local options = {}
     for i, label in ipairs(ns.Undo.History()) do
@@ -666,9 +655,8 @@ function ns.ShowKickMarkerCast()
     ns.SetPreviewPick("cast", "kickCooldown")
 end
 
-local snapButton = ns.Widgets.Button(panel, "", 94)
-snapButton:SetPoint("TOPRIGHT", redoButton, "BOTTOMRIGHT", 0, -4)
-snapButton:SetFrameLevel(outline:GetFrameLevel() + 1)
+local snapButton = ns.Widgets.Button(ns.previewBar, "", 94)
+snapButton:SetPoint("RIGHT", ns.previewBar, "RIGHT", -12, 0)
 local function PaintSnap()
     snapButton.label:SetText(ns.Drag.SnapEnabled() and "Snap: On" or "Snap: Off")
 end

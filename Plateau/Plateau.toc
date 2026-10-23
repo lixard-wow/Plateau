@@ -2,7 +2,7 @@
 ## Title: |cff36c2c9Plateau Nameplates|r
 ## Notes: Fast, readable enemy nameplates.
 ## Author: lixard-wow
-## Version: 0.1.2
+## Version: 0.1.3
 ## OptionalDeps: SharedMedia
 ## SavedVariables: PlateauDB
 ## IconTexture: Interface\AddOns\Plateau\Art\icon
@@ -39,6 +39,7 @@ Core\CVars.lua
 Core\AutoProfile.lua
 Core\Commands.lua
 Core\Minimap.lua
+Driver\StockEvents.lua
 Driver\PlateDriver.lua
 Features\InterruptReady.lua
 Features\UnitColors.lua

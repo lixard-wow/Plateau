@@ -6,6 +6,7 @@ function Frame:EnableMouse() end
 function Frame:SetPoint() end
 function Frame:SetSize() end
 function Frame:SetColorTexture(r, g, b, a) self.color = { r, g, b, a } end
+function Frame:SetVertexColor(r, g, b, a) self.vertex = { r, g, b, a } end
 function Frame:SetAlpha(a) self.alpha = a end
 function Frame:ClearAllPoints() end
 function Frame:Show() self.shown = true end
@@ -30,12 +31,13 @@ function CreateFrame(kind, _, parent)
 end
 
 local resetTargets, tooltips, borderColors = {}, {}, {}
+local trackEdges = {}
 local labelHits = {}
 local db = {}
 local ns = {
     Widgets = {},
-    Style = {
-        colors = { border = {}, field = {}, muted = { 0.5, 0.5, 0.5, 1 } },
+    Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintVertex = function(t, c, a, s) s = s or 1 t:SetVertexColor((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintText = function(t, c, a) t:SetTextColor(c[1] or 0, c[2] or 0, c[3] or 0, a or c[4] or 1) end, PixelInset = function() end, PixelWidth = function() end, PixelHeight = function() end, RefreshPixels = function() end, 
+        colors = { border = { 0.2, 0.2, 0.2, 1 }, field = { 0.1, 0.1, 0.1, 1 }, muted = { 0.5, 0.5, 0.5, 1 }, text = { 0.9, 0.9, 0.9, 1 }, hover = { 0.3, 0.3, 0.3, 1 }, primaryHover = { 0.6, 0.6, 0.6, 1 } },
         CONTROL_X = 0,
         RowLabel = function() return setmetatable({}, Frame) end,
         LabelHit = function(label)
@@ -44,6 +46,12 @@ local ns = {
             return hit
         end,
         Fill = function() end,
+        Panel = function(frame)
+            local fill, edge = setmetatable({}, Frame), setmetatable({}, Frame)
+            trackEdges[frame] = edge
+            return fill, edge
+        end,
+        Rounded = function() return setmetatable({}, Frame) end,
         Border = function() end,
         HoverBorder = function() end,
         StateColor = function() return { 1, 1, 1 } end,
@@ -106,11 +114,11 @@ check(db[spec.path] == false, "left-clicking the label text still toggles the va
 row:Fire("OnClick")
 check(db[spec.path] == true, "clicking elsewhere on the row (native Button click) still toggles the value too")
 
-borderColors = {}
+local edge = trackEdges[track]
 track:Fire("OnEnter")
-check(#borderColors > 0 and borderColors[#borderColors].frame == track, "hovering the track still drives the shared hover-tint update")
+check(edge ~= nil and edge.vertex and edge.vertex[1] == 0.6, "hovering an on switch brightens its rounded track")
 track:Fire("OnLeave")
-check(#borderColors > 0 and borderColors[#borderColors].frame == track, "leaving the track restores the hover-tint update too")
+check(edge ~= nil and edge.vertex and edge.vertex[1] == 1, "leaving an on switch puts the accent back on its track")
 
 resetTargets, tooltips = {}, {}
 local colorSpec = { path = "look.test.colorOn", colorPath = "look.test.color", label = "Colored toggle", tooltip = "Toggles a colored thing." }

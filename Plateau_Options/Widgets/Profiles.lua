@@ -31,7 +31,7 @@ local function SetButtonEnabled(button, enabled)
     button:SetAlpha(enabled and 1 or 0.5)
     if button.label then
         local color = enabled and C.text or C.muted
-        button.label:SetTextColor(color[1], color[2], color[3])
+        Style.PaintText(button.label, color)
     end
 end
 
@@ -50,12 +50,12 @@ local function Danger(button)
     button:HookScript("OnEnter", function(self)
         if self:IsEnabled() then
             Style.SetBorderColor(self, DANGER_BORDER)
-            self.label:SetTextColor(DANGER_TEXT[1], DANGER_TEXT[2], DANGER_TEXT[3])
+            Style.PaintText(self.label, DANGER_TEXT)
         end
     end)
     button:HookScript("OnLeave", function(self)
         if self:IsEnabled() then
-            self.label:SetTextColor(C.text[1], C.text[2], C.text[3])
+            Style.PaintText(self.label, C.text)
         end
     end)
 end
@@ -166,7 +166,7 @@ function ns.Widgets.NamePrompt()
     edit:SetPoint("TOPLEFT", 20, -106)
     edit:SetAutoFocus(false)
     Style.SetFont(edit, Style.font, 12, "")
-    edit:SetTextColor(C.text[1], C.text[2], C.text[3])
+    Style.PaintText(edit, C.text)
     edit:SetTextInsets(6, 6, 0, 0)
     edit:SetMaxLetters(NAME_LIMIT)
     Style.Field(edit, C.field, C.border)
@@ -254,7 +254,7 @@ function ns.Widgets.ConfirmPrompt()
         title:SetText(heading)
         text:SetText(body)
         confirm.label:SetText(actionLabel)
-        confirm.label:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
+        Style.PaintText(confirm.label, C.warn)
         onConfirm = callback
         local height = text:GetStringHeight()
         if not height or height <= 0 then
@@ -277,7 +277,7 @@ function ns.Widgets.ProfileStatus(parent)
 
     local function Say(text, isError)
         local color = isError and C.warn or C.muted
-        notice:SetTextColor(color[1], color[2], color[3])
+        Style.PaintText(notice, color)
         notice:SetText(text or "")
     end
 
@@ -387,7 +387,7 @@ function ns.Widgets.ProfileActions(parent)
 
     local function Say(text, isError)
         local color = isError and C.warn or C.muted
-        message:SetTextColor(color[1], color[2], color[3])
+        Style.PaintText(message, color)
         message:SetText(text or "")
     end
 
@@ -688,7 +688,7 @@ local function ShareBox(frame)
     edit:SetMaxBytes(65000)
     edit:SetAutoFocus(false)
     Style.SetFont(edit, Style.font, 10, "")
-    edit:SetTextColor(C.text[1], C.text[2], C.text[3])
+    Style.PaintText(edit, C.text)
     edit:SetWidth(ROW_WIDTH() - 12)
     edit:SetTextInsets(6, 6, 6, 6)
     edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
@@ -775,7 +775,7 @@ function ns.Widgets.ShareProfile(parent)
     nameBox:SetSize(220, 22)
     nameBox:SetAutoFocus(false)
     Style.SetFont(nameBox, Style.font, 11, "")
-    nameBox:SetTextColor(C.text[1], C.text[2], C.text[3])
+    Style.PaintText(nameBox, C.text)
     nameBox:SetTextInsets(6, 6, 0, 0)
     nameBox:SetMaxLetters(NAME_LIMIT)
     Style.Field(nameBox, C.field, C.border)
@@ -793,7 +793,7 @@ function ns.Widgets.ShareProfile(parent)
         local ok, name, state, reload = Plateau.DB:ImportProfile(nameBox:GetText(), importEdit:GetText(), activate)
         if ok then
             local color = C.muted
-            importMessage:SetTextColor(color[1], color[2], color[3])
+            Style.PaintText(importMessage, color)
             if not activate then
                 importMessage:SetText(T("Imported as %s. It is saved but not active."):format(name))
             elseif state == "deferred" then
@@ -814,7 +814,7 @@ function ns.Widgets.ShareProfile(parent)
             if NameTaken(reason) then
                 reason = T("%s Type a different name, or leave it empty."):format(reason)
             end
-            importMessage:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
+            Style.PaintText(importMessage, C.warn)
             importMessage:SetText(reason)
         end
         frame:Layout()

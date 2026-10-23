@@ -35,7 +35,7 @@ function ns.Widgets.Confirm(button, text, action)
         armed = false
         token = token + 1
         button.label:SetText(text)
-        button.label:SetTextColor(C.text[1], C.text[2], C.text[3])
+        Style.PaintText(button.label, C.text)
     end
     local function Expire()
         token = token + 1
@@ -54,7 +54,7 @@ function ns.Widgets.Confirm(button, text, action)
         end
         armed = true
         self.label:SetText("Click again to confirm")
-        self.label:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
+        Style.PaintText(self.label, C.warn)
         Expire()
     end)
     button:HookScript("OnLeave", function()
@@ -75,29 +75,23 @@ end
 
 function ns.Widgets.Header(parent, spec)
     local row = CreateFrame("Frame", nil, parent)
-    row:SetHeight(spec.first and 24 or 36)
+    row:SetHeight(26)
 
     local tick = row:CreateTexture(nil, "ARTWORK")
-    tick:SetSize(3, 12)
-    tick:SetPoint("BOTTOMLEFT", 0, 7)
+    tick:SetSize(4, 14)
+    tick:SetPoint("LEFT", 0, 0)
     local tint = Style.StateColor()
-    tick:SetColorTexture(tint[1], tint[2], tint[3], 1)
+    Style.Paint(tick, tint, 1)
 
-    local text = Style.Text(row, 13, C.heading)
-    Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE + 1, "")
-    text:SetPoint("BOTTOMLEFT", tick, "BOTTOMRIGHT", 8, -1)
+    local text = Style.Text(row, 14, C.heading)
+    Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE + 2, "")
+    text:SetPoint("LEFT", tick, "RIGHT", 9, 0)
     text:SetText(spec.label)
-
-    local line = row:CreateTexture(nil, "ARTWORK")
-    line:SetPoint("BOTTOMLEFT")
-    line:SetPoint("BOTTOMRIGHT")
-    line:SetHeight(1)
-    line:SetColorTexture(C.line[1], C.line[2], C.line[3], 1)
 
     if spec.collapsible then
         row:EnableMouse(true)
         local state = Style.Text(row, 11, C.muted)
-        state:SetPoint("BOTTOMRIGHT", 0, 6)
+        state:SetPoint("RIGHT", 0, 0)
         function row:SetCollapsed(collapsed)
             state:SetText(collapsed and "Show" or "Hide")
         end
@@ -109,10 +103,10 @@ function ns.Widgets.Header(parent, spec)
         end)
         row:SetScript("OnEnter", function()
             local tint = Style.StateColor()
-            state:SetTextColor(tint[1], tint[2], tint[3])
+            Style.PaintText(state, tint)
         end)
         row:SetScript("OnLeave", function()
-            state:SetTextColor(C.muted[1], C.muted[2], C.muted[3])
+            Style.PaintText(state, C.muted)
         end)
         Style.Tooltip(row, { label = spec.label, tooltip = "Click to show or hide these settings." })
     end
@@ -131,10 +125,10 @@ function ns.Widgets.Link(parent, spec)
             ns.OpenLink(spec.target)
         end
     end)
-    row:SetScript("OnEnter", function() text:SetTextColor(C.text[1], C.text[2], C.text[3]) end)
+    row:SetScript("OnEnter", function() Style.PaintText(text, C.text) end)
     row:SetScript("OnLeave", function()
         local tint = Style.StateColor()
-        text:SetTextColor(tint[1], tint[2], tint[3])
+        Style.PaintText(text, tint)
     end)
     Style.Tooltip(row, { label = spec.label, tooltip = spec.tooltip })
     function row:SetWidth() end
@@ -280,7 +274,7 @@ function ns.Widgets.PriorityList(parent, spec)
         line.grab = line:CreateTexture(nil, "BACKGROUND")
         line.grab:SetAllPoints()
         local tint = Style.StateColor()
-        line.grab:SetColorTexture(tint[1], tint[2], tint[3], 0.25)
+        Style.Paint(line.grab, tint, 0.25)
         line.grab:SetAlpha(0)
         line.hover = line:CreateTexture(nil, "BACKGROUND")
         line.hover:SetAllPoints()
@@ -290,7 +284,7 @@ function ns.Widgets.PriorityList(parent, spec)
             local grip = line:CreateTexture(nil, "ARTWORK")
             grip:SetSize(10, 2)
             grip:SetPoint("LEFT", 3, (2 - bar) * 4)
-            grip:SetColorTexture(C.muted[1], C.muted[2], C.muted[3], 0.9)
+            Style.Paint(grip, C.muted, 0.9)
         end
         line:EnableMouse(true)
         line:RegisterForDrag("LeftButton")
@@ -377,7 +371,7 @@ function ns.Widgets.Presets(parent, spec)
     end
     local function LabelColor(button)
         local color = button.active and Style.StateColor() or C.text
-        button.label:SetTextColor(color[1], color[2], color[3])
+        Style.PaintText(button.label, color)
     end
     function row:Refresh()
         for _, button in ipairs(buttons) do
@@ -388,7 +382,7 @@ function ns.Widgets.Presets(parent, spec)
                 button.active = preset.values ~= nil and ValuesActive(preset.values)
             end
             local tint = Style.StateColor()
-            button.activeBar:SetColorTexture(tint[1], tint[2], tint[3], 1)
+            Style.Paint(button.activeBar, tint, 1)
             button.activeBar:SetShown(button.active)
             LabelColor(button)
         end
@@ -404,7 +398,7 @@ function ns.Widgets.Presets(parent, spec)
         bar:SetPoint("BOTTOMLEFT", 1, 1)
         bar:SetPoint("BOTTOMRIGHT", -1, 1)
         bar:SetHeight(2)
-        bar:SetColorTexture(C.accent[1], C.accent[2], C.accent[3], 1)
+        Style.Paint(bar, C.accent, 1)
         bar:Hide()
         button.activeBar = bar
         buttons[#buttons + 1] = button
@@ -431,7 +425,7 @@ function ns.Widgets.Presets(parent, spec)
             if not armed and not spec.instant then
                 armed = true
                 self.label:SetText("Click to apply")
-                self.label:SetTextColor(C.warn[1], C.warn[2], C.warn[3])
+                Style.PaintText(self.label, C.warn)
                 Expire()
                 return
             end
@@ -595,7 +589,7 @@ function ns.Widgets.LookCards(parent, spec)
         card.edge:SetPoint("TOPLEFT", 1, -1)
         card.edge:SetPoint("TOPRIGHT", -1, -1)
         card.edge:SetHeight(CARD_EDGE)
-        card.edge:SetColorTexture(accent[1], accent[2], accent[3], 1)
+        Style.Paint(card.edge, accent, 1)
 
         local title = Style.Text(card, 15, accent, "CENTER")
         title:SetPoint("TOP", card.edge, "BOTTOM", 0, -14)
@@ -659,13 +653,13 @@ function ns.Widgets.LookCards(parent, spec)
             local button = card.button
             if card.active then
                 button.label:SetText("In use")
-                button.label:SetTextColor(C.muted[1], C.muted[2], C.muted[3])
-                button.tint:SetColorTexture(C.window[1], C.window[2], C.window[3], 1)
+                Style.PaintText(button.label, C.muted)
+                Style.Paint(button.tint, C.window, 1)
                 Style.SetBorderColor(button, C.border)
             else
                 button.label:SetText(profile and "Use this look" or "Apply this look")
-                button.label:SetTextColor(C.text[1], C.text[2], C.text[3])
-                button.tint:SetColorTexture(accent[1] * 0.22, accent[2] * 0.22, accent[3] * 0.22, 1)
+                Style.PaintText(button.label, C.text)
+                Style.Paint(button.tint, accent, 1, 0.22)
                 Style.SetBorderColor(button, accent)
             end
             button:SetEnabled(not card.active)
@@ -692,7 +686,7 @@ function ns.Widgets.SpellList(parent, spec)
     box:SetPoint("RIGHT")
     box:SetAutoFocus(false)
     Style.SetFont(box, Style.font, 11, "")
-    box:SetTextColor(C.text[1], C.text[2], C.text[3])
+    Style.PaintText(box, C.text)
     box:SetTextInsets(6, 6, 0, 0)
     Style.Field(box, C.field, C.border)
 

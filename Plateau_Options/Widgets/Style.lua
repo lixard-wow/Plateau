@@ -23,237 +23,104 @@ local SOURCE_BOLD = FONTS .. "SourceSans3-Bold.ttf"
 
 Style.THEME_ORDER = { "workbench", "ledger", "horde", "alliance", "classic" }
 
+local function Mix(color, toward, amount)
+    return {
+        color[1] + (toward - color[1]) * amount,
+        color[2] + (toward - color[2]) * amount,
+        color[3] + (toward - color[3]) * amount,
+        1,
+    }
+end
+
+local function Palette(spec)
+    local accent = Hex(spec.accent)
+    local hover = Hex(spec.hover)
+    local border = Hex(spec.border)
+    local text = Hex(spec.text)
+    local muted = Hex(spec.muted)
+    return {
+        window = Hex(spec.window),
+        rail = Hex(spec.rail),
+        header = Hex(spec.rail),
+        surface = Hex(spec.surface),
+        surfaceBorder = border,
+        field = Hex(spec.field),
+        hover = hover,
+        border = border,
+        line = border,
+        accent = accent,
+        text = text,
+        title = text,
+        heading = text,
+        muted = muted,
+        warn = Hex("#e0913a"),
+        button = hover,
+        buttonBorder = hover,
+        buttonHover = Mix(hover, 1, 0.07),
+        buttonText = text,
+        primary = accent,
+        primaryBorder = accent,
+        primaryHover = Mix(accent, 1, 0.15),
+        primaryText = Hex(spec.onAccent),
+        iconButton = hover,
+        iconButtonBorder = hover,
+        icon = Mix(muted, 1, 0.3),
+        iconHover = { 1, 1, 1, 1 },
+    }
+end
+
 Style.THEMES = {
     workbench = {
         name = "Workbench",
-        desc = "Flat charcoal with a green accent and a color for each section.",
-        body = BARLOW,
-        heading = BARLOW_COND,
-        radius = 10,
-        colors = {
-            window = Hex("#171a1f"),
-            rail = Hex("#171a1f"),
-            field = Hex("#1d2127"),
-            hover = Hex("#262b32"),
-            border = Hex("#2c323a"),
-            accent = Hex("#4fbf8f"),
-            text = Hex("#e8ebee"),
-            muted = Hex("#9aa3ad"),
-            title = Hex("#e8ebee"),
-            heading = Hex("#e8ebee"),
-            line = Hex("#2c323a"),
-            surface = Hex("#1d2127"),
-            surfaceBorder = Hex("#2c323a"),
-            header = Hex("#1d2127"),
-            buttonText = Hex("#e8ebee"),
-            primary = Hex("#2f8f68"),
-            primaryBorder = Hex("#2f8f68"),
-            primaryHover = Hex("#36a377"),
-            primaryText = Hex("#ffffff"),
-            iconButton = Hex("#262b32"),
-            iconButtonBorder = Hex("#262b32"),
-            warn = Hex("#e0913a"),
-            button = Hex("#262b32"),
-            buttonBorder = Hex("#262b32"),
-            buttonHover = Hex("#30363f"),
-            icon = Hex("#c3cad2"),
-            iconHover = Hex("#ffffff"),
-        },
-        buttonRadius = 4,
-        titleFont = { BARLOW_COND, 17 },
-        sectionFont = { BARLOW_SEMI, 12 },
-        buttonFont = { BARLOW_SEMI, 13 },
-        headerHeight = 46,
-        iconButton = 28,
-        headerFill = true,
-        uppercaseTitle = true,
-        stripe = true,
-        settingsIcon = "icon_gear",
+        desc = "Charcoal with a green accent.",
+        colors = Palette({ window = "#111418", rail = "#171a1f", surface = "#1a1e23", field = "#1d2127", hover = "#262b32", border = "#2c323a",
+            text = "#e8ebee", muted = "#9aa3ad", accent = "#4fbf8f", onAccent = "#08140f" }),
         groups = { look = Hex("#4fbf8f"), casts = Hex("#a98cf0"), highlights = Hex("#e0a03a"), setup = Hex("#6fa8e8") },
     },
     ledger = {
         name = "Artisan Ledger",
-        desc = "Walnut and brass with a serif title face, like a craftsman's ledger.",
-        body = SOURCE,
-        heading = CINZEL,
-        radius = 4,
-        colors = {
-            window = Hex("#1c1611"),
-            rail = Hex("#1c1611"),
-            field = Hex("#120e0b"),
-            hover = Hex("#2e241b"),
-            border = Hex("#5a4630"),
-            accent = Hex("#c9a35a"),
-            text = Hex("#efe6d6"),
-            muted = Hex("#bfb19e"),
-            title = Hex("#e9d9b4"),
-            heading = Hex("#f3e6c8"),
-            line = Hex("#3a2e22"),
-            surface = Hex("#241c15"),
-            surfaceBorder = Hex("#3a2e22"),
-            buttonText = Hex("#e9d9b4"),
-            primary = Hex("#c9a35a"),
-            primaryBorder = Hex("#e2c07a"),
-            primaryHover = Hex("#d6b06a"),
-            primaryText = Hex("#1c1611"),
-            iconButton = Hex("#241c15"),
-            iconButtonBorder = Hex("#3a2e22"),
-            warn = Hex("#d0614a"),
-            button = Hex("#241c15"),
-            buttonBorder = Hex("#5a4630"),
-            buttonHover = Hex("#2e241b"),
-            icon = Hex("#a8998a"),
-            iconHover = Hex("#e9d9b4"),
-        },
-        buttonRadius = 4,
-        titleFont = { CINZEL, 14 },
-        innerFrame = true,
-        sectionFont = { CINZEL, 12 },
-        buttonFont = { SOURCE_BOLD, 12 },
-        headerHeight = 42,
-        iconButton = 26,
-        brackets = true,
-        roundFields = true,
-        settingsIcon = "icon_gear",
+        desc = "Walnut brown with a brass accent.",
+        colors = Palette({ window = "#16110c", rail = "#1d1610", surface = "#221a13", field = "#2a2018", hover = "#33281d", border = "#4a3a28",
+            text = "#f1e6d2", muted = "#bba98b", accent = "#c9a24a", onAccent = "#1a1206" }),
         groups = { look = Hex("#c9a35a"), casts = Hex("#b9825a"), highlights = Hex("#9fc58a"), setup = Hex("#8fa3b0") },
     },
     horde = {
         name = "Horde",
-        desc = "Blood red and iron with a bronze title, built on Artisan Ledger.",
-        body = SOURCE,
-        heading = CINZEL,
-        radius = 4,
-        colors = {
-            window = Hex("#1a0f0c"),
-            rail = Hex("#1a0f0c"),
-            field = Hex("#100806"),
-            hover = Hex("#2c1813"),
-            border = Hex("#6a2e24"),
-            accent = Hex("#d5462f"),
-            text = Hex("#f1e4dc"),
-            muted = Hex("#c2a69a"),
-            title = Hex("#e8c9a0"),
-            heading = Hex("#f5ddd0"),
-            line = Hex("#3d1f19"),
-            surface = Hex("#24140f"),
-            surfaceBorder = Hex("#3d1f19"),
-            buttonText = Hex("#f0d6c4"),
-            primary = Hex("#a82c20"),
-            primaryBorder = Hex("#d5462f"),
-            primaryHover = Hex("#bd3526"),
-            primaryText = Hex("#fff1e8"),
-            iconButton = Hex("#24140f"),
-            iconButtonBorder = Hex("#3d1f19"),
-            warn = Hex("#e3a03a"),
-            button = Hex("#24140f"),
-            buttonBorder = Hex("#6a2e24"),
-            buttonHover = Hex("#2c1813"),
-            icon = Hex("#ab8f84"),
-            iconHover = Hex("#e8c9a0"),
-        },
-        buttonRadius = 4,
-        titleFont = { CINZEL, 14 },
-        innerFrame = true,
-        sectionFont = { CINZEL, 12 },
-        buttonFont = { SOURCE_BOLD, 12 },
-        headerHeight = 42,
-        iconButton = 26,
-        brackets = true,
-        roundFields = true,
-        settingsIcon = "icon_gear",
-        groups = { look = Hex("#d5462f"), casts = Hex("#e0843a"), highlights = Hex("#c9a35a"), setup = Hex("#9c8f88") },
+        desc = "Dark red with an ember accent.",
+        colors = Palette({ window = "#140c0b", rail = "#1b100f", surface = "#211312", field = "#291816", hover = "#341e1b", border = "#4d2a25",
+            text = "#f3e5e1", muted = "#bea19b", accent = "#e8664c", onAccent = "#1a0703" }),
+        groups = { look = Hex("#e8664c"), casts = Hex("#e0a03a"), highlights = Hex("#c9a35a"), setup = Hex("#a8968f") },
     },
     alliance = {
         name = "Alliance",
-        desc = "Royal blue and gold, built on Artisan Ledger.",
-        body = SOURCE,
-        heading = CINZEL,
-        radius = 4,
-        colors = {
-            window = Hex("#0f1522"),
-            rail = Hex("#0f1522"),
-            field = Hex("#090e18"),
-            hover = Hex("#1a2539"),
-            border = Hex("#36507e"),
-            accent = Hex("#d8b45a"),
-            text = Hex("#e8edf6"),
-            muted = Hex("#a6b3c9"),
-            title = Hex("#e6cf8f"),
-            heading = Hex("#eef2f9"),
-            line = Hex("#1f2c45"),
-            surface = Hex("#141d2e"),
-            surfaceBorder = Hex("#1f2c45"),
-            buttonText = Hex("#dbe4f3"),
-            primary = Hex("#2a5aa8"),
-            primaryBorder = Hex("#d8b45a"),
-            primaryHover = Hex("#3368bd"),
-            primaryText = Hex("#f6f8fc"),
-            iconButton = Hex("#141d2e"),
-            iconButtonBorder = Hex("#1f2c45"),
-            warn = Hex("#d0614a"),
-            button = Hex("#141d2e"),
-            buttonBorder = Hex("#36507e"),
-            buttonHover = Hex("#1a2539"),
-            icon = Hex("#8f9db5"),
-            iconHover = Hex("#e6cf8f"),
-        },
-        buttonRadius = 4,
-        titleFont = { CINZEL, 14 },
-        innerFrame = true,
-        sectionFont = { CINZEL, 12 },
-        buttonFont = { SOURCE_BOLD, 12 },
-        headerHeight = 42,
-        iconButton = 26,
-        brackets = true,
-        roundFields = true,
-        settingsIcon = "icon_gear",
-        groups = { look = Hex("#5b9be8"), casts = Hex("#d8b45a"), highlights = Hex("#8fc4d8"), setup = Hex("#a6b3c9") },
+        desc = "Deep blue with a gold accent.",
+        colors = Palette({ window = "#0b1120", rail = "#0f172a", surface = "#121c33", field = "#17233d", hover = "#1e2c4b", border = "#2b3d63",
+            text = "#e7edf8", muted = "#a3b3cf", accent = "#e2bb4d", onAccent = "#1a1404" }),
+        groups = { look = Hex("#e2bb4d"), casts = Hex("#5b9be8"), highlights = Hex("#8fc4d8"), setup = Hex("#a6b3c9") },
     },
     classic = {
         name = "Slate",
-        desc = "The house style of Lixard's addons: near-black, square edges and gold.",
-        body = SOURCE,
-        heading = SOURCE_BOLD,
-        radius = 0,
-        colors = {
-            window = { 0.06, 0.06, 0.06, 1 },
-            rail = { 0.06, 0.06, 0.06, 1 },
-            field = Hex("#101010"),
-            hover = Hex("#1f1f1f"),
-            border = { 0.22, 0.22, 0.22, 1 },
-            accent = { 0.78, 0.66, 0.22, 1 },
-            text = { 0.92, 0.91, 0.86, 1 },
-            muted = { 0.70, 0.70, 0.70, 1 },
-            title = { 0.92, 0.91, 0.86, 1 },
-            heading = { 0.92, 0.91, 0.86, 1 },
-            line = { 0.29, 0.29, 0.29, 1 },
-            surface = Hex("#161616"),
-            surfaceBorder = { 0.22, 0.22, 0.22, 1 },
-            buttonText = { 0.92, 0.91, 0.86, 1 },
-            primary = Hex("#161616"),
-            primaryBorder = { 0.78, 0.66, 0.22, 1 },
-            primaryHover = Hex("#202020"),
-            primaryText = { 0.92, 0.91, 0.86, 1 },
-            iconButton = Hex("#161616"),
-            iconButtonBorder = { 0.22, 0.22, 0.22, 1 },
-            warn = Hex("#d0614a"),
-            button = Hex("#161616"),
-            buttonBorder = { 0.22, 0.22, 0.22, 1 },
-            buttonHover = Hex("#202020"),
-            icon = { 0.70, 0.70, 0.70, 1 },
-            iconHover = { 0.92, 0.91, 0.86, 1 },
-        },
-        buttonRadius = 0,
-        titleFont = { SOURCE_BOLD, 15 },
-        sectionFont = { SOURCE_BOLD, 12 },
-        buttonFont = { SOURCE, 12 },
-        headerHeight = 42,
-        iconButton = 24,
-        classAccent = true,
-        settingsIcon = "icon_gear",
-        roundClose = true,
-        groups = { look = { 0.78, 0.66, 0.22, 1 }, casts = { 0.88, 0.76, 0.40, 1 }, highlights = { 0.68, 0.56, 0.18, 1 }, setup = { 0.62, 0.62, 0.62, 1 } },
+        desc = "Cool grey with a steel blue accent.",
+        colors = Palette({ window = "#101214", rail = "#16191c", surface = "#1a1d21", field = "#202428", hover = "#292e33", border = "#32383e",
+            text = "#e6e8ea", muted = "#a0a7ae", accent = "#8fb3d9", onAccent = "#0a1420" }),
+        groups = { look = Hex("#8fb3d9"), casts = Hex("#b59be0"), highlights = Hex("#d9b46a"), setup = Hex("#8fc4b0") },
     },
+}
+
+Style.SHAPE = {
+    body = BARLOW,
+    heading = BARLOW_COND,
+    radius = 10,
+    buttonRadius = 4,
+    titleFont = { BARLOW_COND, 17 },
+    sectionFont = { BARLOW_SEMI, 12 },
+    buttonFont = { BARLOW_SEMI, 13 },
+    headerHeight = 46,
+    iconButton = 28,
+    headerFill = true,
+    uppercaseTitle = true,
+    stripe = true,
+    settingsIcon = "icon_gear",
 }
 
 local NON_LATIN = { ruRU = true, koKR = true, zhCN = true, zhTW = true }
@@ -270,35 +137,99 @@ function Style.ThemeKey()
     return ChosenTheme()
 end
 
+Style.theme = Style.SHAPE
+Style.colors = {}
+Style.groupColors = {}
+
+local themeTables = {}
+local painted = {}
+local themeListeners = {}
+
+local function CopyInto(target, source)
+    target[1], target[2], target[3], target[4] = source[1], source[2], source[3], source[4] or 1
+end
+
+local function LoadPalette(key)
+    local theme = Style.THEMES[key] or Style.THEMES.workbench
+    for name, color in pairs(theme.colors) do
+        local slot = Style.colors[name]
+        if not slot then
+            slot = {}
+            Style.colors[name] = slot
+            themeTables[slot] = true
+        end
+        CopyInto(slot, color)
+    end
+    for name, color in pairs(theme.groups) do
+        local slot = Style.groupColors[name]
+        if not slot then
+            slot = {}
+            Style.groupColors[name] = slot
+            themeTables[slot] = true
+        end
+        CopyInto(slot, color)
+    end
+end
+
+LoadPalette(ChosenTheme())
+
+local function ApplyPaint(region, entry)
+    local color, scale = entry.color, entry.scale or 1
+    local r, g, b, a = color[1] * scale, color[2] * scale, color[3] * scale, entry.alpha or color[4] or 1
+    if entry.kind == "texture" then
+        region:SetColorTexture(r, g, b, a)
+    elseif entry.kind == "vertex" then
+        region:SetVertexColor(r, g, b, a)
+    else
+        region:SetTextColor(r, g, b, a)
+    end
+end
+
+local function Paint(region, kind, color, alpha, scale)
+    if themeTables[color] then
+        local entry = painted[region]
+        if not entry then
+            entry = {}
+            painted[region] = entry
+        end
+        entry.kind, entry.color, entry.alpha, entry.scale = kind, color, alpha, scale
+        ApplyPaint(region, entry)
+        return
+    end
+    painted[region] = nil
+    ApplyPaint(region, { kind = kind, color = color, alpha = alpha, scale = scale })
+end
+
+function Style.Paint(texture, color, alpha, scale)
+    Paint(texture, "texture", color, alpha, scale)
+end
+
+function Style.PaintVertex(texture, color, alpha, scale)
+    Paint(texture, "vertex", color, alpha, scale)
+end
+
+function Style.PaintText(fontString, color, alpha)
+    Paint(fontString, "text", color, alpha)
+end
+
+function Style.OnTheme(callback)
+    themeListeners[#themeListeners + 1] = callback
+end
+
 function Style.SetTheme(key)
-    if Style.THEMES[key] and Plateau.DB and Plateau.DB.saved then
+    if not Style.THEMES[key] then return end
+    if Plateau.DB and Plateau.DB.saved then
         Plateau.DB.saved.global.optionsTheme = key
     end
-end
-
-Style.theme = Style.THEMES[ChosenTheme()]
-Style.colors = {}
-for key, value in pairs(Style.theme.colors) do
-    Style.colors[key] = value
-end
-Style.groupColors = Style.theme.groups
-
-local function PlayerClassColor()
-    local class = UnitClassBase and UnitClassBase("player")
-    local color = class and ((C_ClassColor and C_ClassColor.GetClassColor(class)) or (RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]))
-    if color then
-        return { color.r, color.g, color.b, 1 }
+    LoadPalette(key)
+    for region, entry in pairs(painted) do
+        ApplyPaint(region, entry)
+    end
+    for i = 1, #themeListeners do
+        themeListeners[i](key)
     end
 end
 
-if Style.theme.classAccent then
-    local class = PlayerClassColor()
-    if class then
-        Style.colors.accent = class
-        Style.colors.primaryBorder = class
-        Style.groupColors = { look = class, casts = class, highlights = class, setup = class }
-    end
-end
 Style.RADIUS = Style.theme.radius
 Style.BUTTON_RADIUS = Style.theme.buttonRadius
 
@@ -308,9 +239,9 @@ function Style.DropArrow(button)
     arrow:SetSize(12, 12)
     arrow:SetPoint("RIGHT", -7, 0)
     local idle, hover = Style.colors.icon or Style.colors.muted, Style.colors.iconHover or Style.colors.text
-    arrow:SetVertexColor(idle[1], idle[2], idle[3])
-    button:HookScript("OnEnter", function() arrow:SetVertexColor(hover[1], hover[2], hover[3]) end)
-    button:HookScript("OnLeave", function() arrow:SetVertexColor(idle[1], idle[2], idle[3]) end)
+    Style.PaintVertex(arrow, idle)
+    button:HookScript("OnEnter", function() Style.PaintVertex(arrow, hover) end)
+    button:HookScript("OnLeave", function() Style.PaintVertex(arrow, idle) end)
     button.arrow = arrow
     return arrow
 end
@@ -332,6 +263,35 @@ end
 function Style.Scale()
     local scale = tonumber(SavedGlobal().optionsScale) or 1
     return math.max(Style.SCALE_MIN, math.min(Style.SCALE_MAX, scale))
+end
+
+function Style.PixelScale()
+    local wanted = Style.Scale()
+    local base = UIParent:GetEffectiveScale()
+    local factor = PixelUtil and PixelUtil.GetPixelToUIUnitFactor and PixelUtil.GetPixelToUIUnitFactor()
+    if type(base) ~= "number" or base <= 0 or type(factor) ~= "number" or factor <= 0 then
+        return wanted
+    end
+    local pixels = math.max(1, math.floor(base * wanted / factor + 0.5))
+    return pixels * factor / base
+end
+
+function Style.SnapWindow(frame)
+    local left, top = frame:GetLeft(), frame:GetTop()
+    if not left or not top then return end
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", math.floor(left + 0.5), math.floor(top + 0.5))
+end
+
+function Style.FitWindow(frame)
+    local scale = Style.PixelScale()
+    if frame:GetScale() ~= scale then
+        frame:SetScale(scale)
+    end
+    Style.SnapWindow(frame)
+    if Style.RefreshPixels then
+        Style.RefreshPixels()
+    end
 end
 
 local gameFont = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
@@ -431,14 +391,14 @@ end
 
 function Style.Themed(texture, alpha)
     local color = Style.StateColor()
-    texture:SetColorTexture(color[1], color[2], color[3], alpha or 1)
+    Style.Paint(texture, color, alpha or 1)
 end
 
 function Style.ThemedBorder(frame)
     local roundEdge = rawget(frame, "roundEdge")
     if roundEdge then
         local color = Style.StateColor()
-        roundEdge:SetVertexColor(color[1], color[2], color[3], 1)
+        Style.PaintVertex(roundEdge, color, 1)
         return
     end
     for _, edge in ipairs(frame.borderEdges) do
@@ -498,7 +458,7 @@ end
 function Style.OverrideLabel(label, spec)
     local setText = label.RawSetText or label.SetText
     setText(label, Plateau.T(spec.label) .. (spec.limited and LIMITED_BADGE or ""))
-    label:SetTextColor(Style.colors.text[1], Style.colors.text[2], Style.colors.text[3], Style.colors.text[4])
+    Style.PaintText(label, Style.colors.text)
 end
 
 local function AfterChange(refresh)
@@ -527,7 +487,7 @@ end
 function Style.Fill(frame, color, layer)
     local texture = frame:CreateTexture(nil, layer or "BACKGROUND")
     texture:SetAllPoints()
-    texture:SetColorTexture(color[1], color[2], color[3], color[4])
+    Style.Paint(texture, color)
     return texture
 end
 
@@ -547,16 +507,69 @@ function Style.Rounded(frame, color, layer, sublevel, radius)
     else
         texture:SetColorTexture(1, 1, 1, 1)
     end
-    texture:SetVertexColor(color[1], color[2], color[3], color[4] or 1)
+    Style.PaintVertex(texture, color)
     return texture
+end
+
+local pixelSized = {}
+local pixelWatchers = {}
+
+function Style.PixelUnit(region)
+    local scale = region:GetEffectiveScale()
+    if not (PixelUtil and PixelUtil.GetPixelToUIUnitFactor) or type(scale) ~= "number" or (issecretvalue and issecretvalue(scale)) or scale <= 0 then
+        return 1
+    end
+    return PixelUtil.GetPixelToUIUnitFactor() / scale
+end
+
+local function ApplyPixel(region, how)
+    local unit = Style.PixelUnit(region)
+    if how == "width" then
+        region:SetWidth(unit)
+    elseif how == "height" then
+        region:SetHeight(unit)
+    else
+        region:ClearAllPoints()
+        region:SetPoint("TOPLEFT", how, "TOPLEFT", unit, -unit)
+        region:SetPoint("BOTTOMRIGHT", how, "BOTTOMRIGHT", -unit, unit)
+    end
+end
+
+function Style.PixelWidth(region)
+    pixelSized[region] = "width"
+    ApplyPixel(region, "width")
+end
+
+function Style.PixelHeight(region)
+    pixelSized[region] = "height"
+    ApplyPixel(region, "height")
+end
+
+function Style.PixelInset(region, parent)
+    pixelSized[region] = parent
+    ApplyPixel(region, parent)
+end
+
+function Style.OnPixels(region, callback)
+    pixelWatchers[#pixelWatchers + 1] = { region, callback }
+    callback(Style.PixelUnit(region))
+end
+
+function Style.RefreshPixels()
+    for region, how in pairs(pixelSized) do
+        ApplyPixel(region, how)
+    end
+    for i = 1, #pixelWatchers do
+        local entry = pixelWatchers[i]
+        entry[2](Style.PixelUnit(entry[1]))
+    end
 end
 
 function Style.Panel(frame, fill, border, radius)
     local edge = Style.Rounded(frame, border, "BACKGROUND", -2, radius)
     edge:SetAllPoints()
     local inner = Style.Rounded(frame, fill, "BACKGROUND", -1, radius)
-    inner:SetPoint("TOPLEFT", 1, -1)
-    inner:SetPoint("BOTTOMRIGHT", -1, 1)
+    Style.PixelInset(inner, frame)
     frame.roundEdge = edge
     frame.roundFill = inner
     return inner, edge
@@ -570,10 +583,10 @@ function Style.ButtonBox(button, fill, radius, border, hover)
     local inner = Style.Panel(button, fill, border, radius or Style.BUTTON_RADIUS)
     button.restBorder = border
     button:HookScript("OnEnter", function()
-        inner:SetVertexColor(hover[1], hover[2], hover[3], 1)
+        Style.PaintVertex(inner, hover, 1)
     end)
     button:HookScript("OnLeave", function()
-        inner:SetVertexColor(fill[1], fill[2], fill[3], fill[4] or 1)
+        Style.PaintVertex(inner, fill)
     end)
     return inner
 end
@@ -587,9 +600,9 @@ function Style.IconButton(parent, icon, size, onClick, tooltip, round)
     button.icon:SetTexture(ICONS .. icon)
     button.icon:SetSize(math.floor(size * 0.5 + 0.5), math.floor(size * 0.5 + 0.5))
     button.icon:SetPoint("CENTER")
-    button.icon:SetVertexColor(C.icon[1], C.icon[2], C.icon[3], 1)
+    Style.PaintVertex(button.icon, C.icon, 1)
     button:HookScript("OnEnter", function(self)
-        self.icon:SetVertexColor(C.iconHover[1], C.iconHover[2], C.iconHover[3], 1)
+        Style.PaintVertex(self.icon, C.iconHover, 1)
         if self.tooltip then
             GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
             GameTooltip:SetText(Plateau.T(self.tooltip), 1, 1, 1)
@@ -597,7 +610,7 @@ function Style.IconButton(parent, icon, size, onClick, tooltip, round)
         end
     end)
     button:HookScript("OnLeave", function(self)
-        self.icon:SetVertexColor(C.icon[1], C.icon[2], C.icon[3], 1)
+        Style.PaintVertex(self.icon, C.icon, 1)
         GameTooltip:Hide()
     end)
     button.tooltip = tooltip
@@ -615,7 +628,7 @@ function Style.SquareCorners(frame, color, corners, layer, sublevel)
     if Style.RADIUS <= 0 then return end
     for _, point in ipairs(corners) do
         local texture = frame:CreateTexture(nil, layer or "BACKGROUND", nil, sublevel or 0)
-        texture:SetColorTexture(color[1], color[2], color[3], color[4] or 1)
+        Style.Paint(texture, color)
         texture:SetSize(Style.RADIUS, Style.RADIUS)
         texture:SetPoint(point)
     end
@@ -628,11 +641,11 @@ function Style.Brackets(frame, color, size, thickness)
         local x = point:find("LEFT") and -1 or 1
         local y = point:find("TOP") and 1 or -1
         local across = frame:CreateTexture(nil, "OVERLAY")
-        across:SetColorTexture(color[1], color[2], color[3], color[4] or 1)
+        Style.Paint(across, color)
         across:SetSize(size, thickness)
         across:SetPoint(point, frame, point, x, y)
         local down = frame:CreateTexture(nil, "OVERLAY")
-        down:SetColorTexture(color[1], color[2], color[3], color[4] or 1)
+        Style.Paint(down, color)
         down:SetSize(thickness, size)
         down:SetPoint(point, frame, point, x, y)
     end
@@ -644,7 +657,7 @@ function Style.Card(frame, size)
         Style.Brackets(frame, C.accent, size or 10, 2)
     elseif Style.theme.stripe then
         local stripe = frame:CreateTexture(nil, "ARTWORK")
-        stripe:SetColorTexture(C.accent[1], C.accent[2], C.accent[3], 1)
+        Style.Paint(stripe, C.accent, 1)
         stripe:SetHeight(3)
         stripe:SetPoint("TOPLEFT", 10, -1)
         stripe:SetPoint("TOPRIGHT", -10, -1)
@@ -658,16 +671,16 @@ function Style.Border(frame, color)
     end
     edges[1]:SetPoint("TOPLEFT")
     edges[1]:SetPoint("TOPRIGHT")
-    edges[1]:SetHeight(1)
+    Style.PixelHeight(edges[1])
     edges[2]:SetPoint("BOTTOMLEFT")
     edges[2]:SetPoint("BOTTOMRIGHT")
-    edges[2]:SetHeight(1)
+    Style.PixelHeight(edges[2])
     edges[3]:SetPoint("TOPLEFT")
     edges[3]:SetPoint("BOTTOMLEFT")
-    edges[3]:SetWidth(1)
+    Style.PixelWidth(edges[3])
     edges[4]:SetPoint("TOPRIGHT")
     edges[4]:SetPoint("BOTTOMRIGHT")
-    edges[4]:SetWidth(1)
+    Style.PixelWidth(edges[4])
     frame.borderEdges = edges
     Style.SetBorderColor(frame, color)
 end
@@ -708,11 +721,11 @@ end
 function Style.SetBorderColor(frame, color)
     local roundEdge = rawget(frame, "roundEdge")
     if roundEdge then
-        roundEdge:SetVertexColor(color[1], color[2], color[3], color[4] or 1)
+        Style.PaintVertex(roundEdge, color)
         return
     end
     for i = 1, 4 do
-        frame.borderEdges[i]:SetColorTexture(color[1], color[2], color[3], color[4])
+        Style.Paint(frame.borderEdges[i], color)
     end
 end
 
@@ -764,7 +777,7 @@ end
 function Style.Text(parent, size, color, justify)
     local text = Style.Translates(parent:CreateFontString(nil, "OVERLAY"))
     Style.SetFont(text, size >= Style.HEADING_SIZE and Style.headingFont or Style.font, size, "")
-    text:SetTextColor(color[1], color[2], color[3], color[4])
+    Style.PaintText(text, color)
     text:SetJustifyH(justify or "LEFT")
     text:SetWordWrap(false)
     return text

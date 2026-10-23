@@ -22,13 +22,12 @@ function ns.Widgets.MakeSwatch(parent, path, setter)
     swatch:SetSize(SWATCH_SIZE, SWATCH_SIZE)
     Style.Fill(swatch, { 0.3, 0.3, 0.3, 1 })
     local color = swatch:CreateTexture(nil, "ARTWORK")
-    color:SetPoint("TOPLEFT", 1, -1)
-    color:SetPoint("BOTTOMRIGHT", -1, 1)
+    Style.PixelInset(color, swatch)
     Style.Border(swatch, C.border)
 
     function swatch:Refresh()
         local value = ns.Get(path)
-        color:SetColorTexture(value[1], value[2], value[3], value[4])
+        Style.Paint(color, value)
     end
 
     local pending, scheduled

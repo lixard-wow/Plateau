@@ -239,7 +239,7 @@ end
 function ns.SnapPlateSize(plate)
     local width, height = plate.rawWidth, plate.rawHeight
     if not width then return end
-    if ns.pixelPerfect and not plate.preview and PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
+    if ns.pixelPerfect and PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
         local scale = plate:GetEffectiveScale()
         if not issecretvalue(scale) and scale >= MIN_PIXEL_SCALE then
             local pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
@@ -284,7 +284,7 @@ function RoundTree(frame, enabled)
 end
 
 function ns.RoundLayout(frame)
-    if not frame.SetRoundLayoutToNearestPixel or frame.preview then return end
+    if not frame.SetRoundLayoutToNearestPixel then return end
     RoundTree(frame, ns.pixelPerfect == true)
 end
 

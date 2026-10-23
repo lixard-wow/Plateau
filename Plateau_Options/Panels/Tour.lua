@@ -51,9 +51,9 @@ local STEPS = {
     },
     {
         target = "profile",
-        place = "above",
+        place = "below",
         title = "Profiles",
-        text = "Your active profile, the one every page edits. Switch profiles on the Profiles page. Changes save automatically.",
+        text = "Your active profile, the one every page edits. Click it to switch profiles. Changes save automatically.",
     },
 }
 

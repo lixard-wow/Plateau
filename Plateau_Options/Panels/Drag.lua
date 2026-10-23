@@ -6,13 +6,12 @@ local C = Style.colors
 local SNAP = 8
 local THRESHOLD = 4
 local LIMIT = 80
-local DOT = 5
 
 local Drag = {}
 ns.Drag = Drag
 
-local dots = {}
 local dotParent
+local snapCandidates = {}
 local active
 local pressed
 local selected
@@ -113,41 +112,6 @@ local function Nearest(candidates)
         end
     end
     return bestCandidate, bestX, bestY
-end
-
-local function Dot(index)
-    local dot = dots[index]
-    if not dot then
-        dot = dotParent:CreateTexture(nil, "OVERLAY")
-        dots[index] = dot
-    end
-    return dot
-end
-
-local function ShowDots(candidates, nearest, ratio)
-    local index = 0
-    for _, candidate in ipairs(candidates) do
-        index = index + 1
-        local dot = Dot(index)
-        dot:ClearAllPoints()
-        dot:SetPoint("CENTER", candidate.anchor, candidate.relPoint,
-            (candidate.dotOx or candidate.ox or 0) * ratio + (candidate.dotX or 0), (candidate.oy or 0) * ratio + (candidate.dotY or 0))
-        local isNearest = nearest and candidate.id == nearest.id
-        local color = isNearest and Style.StateColor() or C.muted
-        dot:SetDrawLayer("OVERLAY", isNearest and 7 or 0)
-        dot:SetColorTexture(color[1], color[2], color[3], isNearest and 1 or 0.7)
-        dot:SetSize(isNearest and DOT + 3 or DOT, isNearest and DOT + 3 or DOT)
-        dot:Show()
-    end
-    for i = index + 1, #dots do
-        dots[i]:Hide()
-    end
-end
-
-local function HideDots()
-    for i = 1, #dots do
-        dots[i]:Hide()
-    end
 end
 
 local function Cursor(frame)
@@ -377,7 +341,22 @@ local function OnUpdate()
         mover:ClearAllPoints()
         mover:SetPoint(candidate.point, candidate.anchor, candidate.relPoint, candidate.ox or 0, candidate.oy or 0)
     end
-    ShowDots(candidates, candidate, spec.spot:GetEffectiveScale() / dotParent:GetEffectiveScale())
+    snapCandidates = candidates
+end
+
+function Drag.SnapSpots()
+    local list = {}
+    for _, candidate in ipairs(snapCandidates) do
+        local ax, ay = PointXY(candidate.anchor, candidate.relPoint)
+        if ax then
+            list[#list + 1] = {
+                x = ax + (candidate.dotOx or candidate.ox or 0) + (candidate.dotX or 0),
+                y = ay + (candidate.oy or 0) + (candidate.dotY or 0),
+                anchor = candidate.anchor,
+            }
+        end
+    end
+    return list
 end
 
 local driver = CreateFrame("Frame")
@@ -431,7 +410,7 @@ function Stop(spec)
     active = nil
     pressed = nil
     driver:Hide()
-    HideDots()
+    snapCandidates = {}
 
     if spec.Place and not Snapping() then
         local mover = spec.Mover()
@@ -468,7 +447,7 @@ function Drag.Cancel()
     local spec = active
     active = nil
     driver:Hide()
-    HideDots()
+    snapCandidates = {}
     Apply({})
     Settle(spec)
 end
@@ -699,7 +678,7 @@ function Drag.AuraSpec(plate, key)
     return spec
 end
 
-local NAME_NUDGE = DOT - 1
+local NAME_NUDGE = 4
 local NAME_SPOTS = {
     { id = "TOP", relPoint = "TOP", measure = "BOTTOM", sign = 1, pad = 1, inset = 0, dotY = NAME_NUDGE },
     { id = "BOTTOM", relPoint = "BOTTOM", measure = "TOP", sign = -1, pad = -1, inset = 0, dotY = -NAME_NUDGE },

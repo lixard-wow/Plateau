@@ -2756,12 +2756,9 @@ ns.sections = {
               options = { { value = "workbench", label = "Workbench" }, { value = "ledger", label = "Artisan Ledger" }, { value = "horde", label = "Horde" }, { value = "alliance", label = "Alliance" }, { value = "classic", label = "Slate" } },
               get = function() return Style.ThemeKey() end,
               set = function(value)
-                  if value ~= Style.ThemeKey() then
-                      Style.SetTheme(value)
-                      ns.PromptReload()
-                  end
+                  ns.ApplyTheme(value)
               end,
-              tooltip = "The look of Plateau's settings window and pop-ups. Nameplates are not affected. Requires a reload." },
+              tooltip = "The colors of Plateau's settings window and pop-ups. Nameplates are not affected." },
             { type = "Dropdown", label = "Brand color", keywords = "color colour brand icon minimap class rainbow cycle random logo",
               options = { { value = "class", label = "Class color" }, { value = "cycle", label = "Color cycle" }, { value = "random", label = "Random each login" } },
               get = function() return Plateau.Brand:Mode() end,
@@ -2778,7 +2775,7 @@ ns.sections = {
                   Plateau.DB.saved.global.optionsScale = nil
                   ns.ApplyScale()
               end,
-              tooltip = "The size of this settings window, on top of your UI scale. Nameplates are not affected." },
+              tooltip = "The size of this settings window. It snaps to the nearest size where every line falls on whole screen pixels, so it changes in steps and stays sharp whatever UI scale you or other addons use. Nameplates are not affected." },
             { type = "Header", label = "Fonts" },
             { type = "Dropdown", label = "Text font", keywords = "font typeface options window",
               options = function() return ns.OptionsFonts() end,
@@ -2807,6 +2804,10 @@ ns.sections = {
               end,
               tooltip = "The font for titles and headings in this settings window. Requires a reload." },
             { type = "Header", label = "Help and access" },
+            { type = "Toggle", label = "Show what's new after updates", keywords = "changelog changes update patch notes version",
+              get = function() return not Plateau.DB.saved.global.whatsNewOff end,
+              set = function(value) Plateau.DB.saved.global.whatsNewOff = not value or nil end,
+              tooltip = "After Plateau updates, the first login shows what changed. Open it any time with /plt whatsnew or What's new at the bottom of this window." },
             { type = "Toggle", label = "Show settings tooltips",
               get = function() return Plateau.DB.saved.global.tooltipsEnabled ~= false end,
               set = function(value) Plateau.DB.saved.global.tooltipsEnabled = value == true end,

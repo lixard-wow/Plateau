@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.3
+
+### New
+- A redesigned settings window: a header with search, theme buttons, your profile and Undo/Redo; side menu categories that open as you need them; a short description on every page; settings grouped in cards; and a framed live preview.
+- Settings window themes only change colors now and switch instantly, without a reload. All five themes share the same fonts and shapes.
+- On/off switches are rounded and slide when clicked, and checkboxes in lists are rounded with a check mark.
+- What's new: the first time you log in after an update, Plateau shows what changed. Pick Don't show again to turn it off, or open it any time with /plt whatsnew.
+- New characters start with the profile you picked in setup, and the Profiles page shows which profile new characters use.
+
+### Changed
+- The settings window and its pop-ups sit on whole screen pixels, so borders stay sharp at any UI scale, including scales set by other addons. The window scale setting now changes in steps.
+- The settings preview follows Pixel-perfect borders, shows full health and cast bars so edges are easy to see, and no longer shows snap dots while you drag.
+- Restyling is lighter: borders, auras, health colors and pixel rounding skip work that hasn't changed.
+
+### Fixed
+- The interrupt ready marker could disappear when its thickness was set to 1.
+- A newer interrupt message could be hidden early by an older interrupt's timer.
+- The settings window jumped away from the cursor when you started dragging it.
+- Nameplates Plateau hands back to Blizzard keep updating their auras, cast bar and other details.
+- Settings saved by a newer version of Plateau are kept safe instead of being reset when an older version loads them.
+
 ## 0.1.2
 
 ### Changed

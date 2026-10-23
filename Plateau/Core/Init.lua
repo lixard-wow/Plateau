@@ -47,6 +47,10 @@ local function ReportStartup()
         print("|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled)
     elseif ns.recovered then
         print("|cffffd200Plateau:|r " .. ns.L["Saved settings were damaged and have been reset to default. The old data is kept under 'recovered'. Error: %s"]:format(ns.recovered))
+    elseif ns.DB.newerSchema then
+        print("|cffffd200Plateau:|r " .. ns.L["Your saved settings come from a newer version of Plateau. They are kept safe and come back when you update Plateau again. Until then Plateau uses default settings."])
+    elseif ns.DB.restoredNewer then
+        print("|cffffd200Plateau:|r " .. ns.L["Restored the settings you had before using an older version of Plateau."])
     elseif failures and #failures > 0 then
         print("|cffffd200Plateau:|r " .. ns.L["Some saved settings couldn't be updated: %s"]:format(table.concat(failures, "; ")))
     end

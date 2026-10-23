@@ -9,6 +9,7 @@ local MAX_VISIBLE = 12
 local MAX_ITEMS = 20
 local ICON_SIZE = 16
 local CHECK_SIZE = 10
+local CHECK_RADIUS = 4
 
 local function SetIcon(texture, icon)
     if not icon then
@@ -86,7 +87,10 @@ local function Render()
             if option.checked ~= nil then
                 local on = Checked(option)
                 local tint = Style.StateColor()
-                item.check:SetColorTexture(tint[1], tint[2], tint[3], on and 1 or 0)
+                Style.PaintVertex(item.boxFill, on and tint or C.window)
+                Style.PaintVertex(item.boxEdge, on and tint or C.border)
+                Style.PaintVertex(item.check, C.primaryText)
+                item.check:SetAlpha(on and 1 or 0)
                 item.text:ClearAllPoints()
                 item.text:SetPoint("LEFT", item.box, "RIGHT", 8, 0)
                 item.text:SetPoint("RIGHT", -8, 0)
@@ -103,7 +107,7 @@ local function Render()
             else
                 color = option.value == listCurrent and Style.StateColor() or C.text
             end
-            item.text:SetTextColor(color[1], color[2], color[3])
+            Style.PaintText(item.text, color)
             item:Show()
         else
             item:Hide()
@@ -161,9 +165,10 @@ local function EnsureList()
         item.box = CreateFrame("Frame", nil, item)
         item.box:SetSize(CHECK_SIZE + 4, CHECK_SIZE + 4)
         item.box:SetPoint("LEFT", 8, 0)
-        Style.Field(item.box, C.window, C.border)
+        item.boxFill, item.boxEdge = Style.Panel(item.box, C.window, C.border, CHECK_RADIUS)
         item.check = item.box:CreateTexture(nil, "ARTWORK")
-        item.check:SetSize(CHECK_SIZE - 2, CHECK_SIZE - 2)
+        item.check:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\Icons\\icon_check")
+        item.check:SetSize(CHECK_SIZE + 2, CHECK_SIZE + 2)
         item.check:SetPoint("CENTER")
         item:SetScript("OnEnter", function(self)
             if not self.option or not self.option.title then
@@ -199,13 +204,13 @@ local function EnsureList()
     scrollTrack:EnableMouse(true)
     local groove = scrollTrack:CreateTexture(nil, "BACKGROUND")
     groove:SetAllPoints()
-    groove:SetColorTexture(C.border[1], C.border[2], C.border[3], 0.6)
+    Style.Paint(groove, C.border, 0.6)
     scrollThumb = CreateFrame("Frame", nil, scrollTrack)
     scrollThumb:SetWidth(SCROLL_WIDTH)
     local thumbFill = scrollThumb:CreateTexture(nil, "OVERLAY")
     thumbFill:SetAllPoints()
     local tint = Style.StateColor()
-    thumbFill:SetColorTexture(tint[1], tint[2], tint[3], 0.9)
+    Style.Paint(thumbFill, tint, 0.9)
     scrollTrack:Hide()
 
     local function DragTo()
@@ -244,6 +249,7 @@ end
 local function ShowList(owner, options, current, onPick, opts)
     EnsureList()
     list:SetScale(owner:GetEffectiveScale() / catcher:GetEffectiveScale())
+    Style.RefreshPixels()
     opts = opts or {}
     listOptions, listCurrent, listPick = options, current, onPick
     listVisible = math.min(opts.maxVisible or MAX_VISIBLE, MAX_ITEMS)

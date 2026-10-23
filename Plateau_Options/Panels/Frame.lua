@@ -5,19 +5,31 @@ local C = Style.colors
 local Widgets = ns.Widgets
 local T = Style.T
 
-local WIDTH, HEIGHT = 1260, 880
-local RAIL = 168
-local RAIL_TOP = 8
-local PAD = 16
-local TITLE = Style.HEADER_HEIGHT
-local PREVIEW = 196
+local WIDTH, HEIGHT = 1280, 900
+local RAIL = 204
+local PAD = 18
+local TITLE = math.max(Style.HEADER_HEIGHT, 58)
+local STRIPE = 1
+local TOP = TITLE + STRIPE
+local PAGE_HEAD = 84
+local PREVIEW = 232
+local PREVIEW_BAR = 36
 local FOOTER = 44
-local SPACING = 4
-local CONTENT_WIDTH = WIDTH - RAIL - PAD * 2 - 12
-local COLUMN_GAP = 24
-local COLUMN = math.floor((CONTENT_WIDTH - COLUMN_GAP) / 2)
+local SPACING = 6
+local SCROLLBAR = 14
+local CONTENT_WIDTH = WIDTH - RAIL - 1 - PAD * 2 - SCROLLBAR
+local CARD_GAP = 14
+local CARD_PAD = 16
+local HALF_CARD = math.floor((CONTENT_WIDTH - CARD_GAP) / 2)
+local COLUMN = HALF_CARD - CARD_PAD * 2
+local WIDE_INNER = CONTENT_WIDTH - CARD_PAD * 2
+local PAIR_GAP = WIDE_INNER - COLUMN * 2
+local PREVIEW_TOP = TOP + PAGE_HEAD
 
-ns.layout = { width = WIDTH, title = TITLE, preview = PREVIEW, pad = PAD, rail = RAIL, content = CONTENT_WIDTH, column = COLUMN }
+ns.layout = {
+    width = WIDTH, title = TOP, preview = PREVIEW - PREVIEW_BAR, pad = PAD, rail = RAIL, content = WIDE_INNER, column = COLUMN,
+    previewTop = PREVIEW_TOP + PREVIEW_BAR, previewLeft = RAIL + PAD, previewRight = PAD + SCROLLBAR,
+}
 
 local Logic = ns.PageLogic
 
@@ -30,7 +42,7 @@ frame:SetMovable(true)
 frame:SetClampedToScreen(true)
 frame:EnableMouse(true)
 frame:Hide()
-frame:SetScale(Style.Scale())
+frame:SetScale(Style.PixelScale())
 local frameEdge = Style.Rounded(frame, C.border, "BACKGROUND", -2)
 frameEdge:SetAllPoints()
 local frameFill = Style.Rounded(frame, C.window, "BACKGROUND", -1)
@@ -42,23 +54,28 @@ if Style.theme.innerFrame then
     ring:EnableMouse(false)
     for _, edge in ipairs({ { "TOPLEFT", "TOPRIGHT", nil, 1 }, { "BOTTOMLEFT", "BOTTOMRIGHT", nil, 1 }, { "TOPLEFT", "BOTTOMLEFT", 1, nil }, { "TOPRIGHT", "BOTTOMRIGHT", 1, nil } }) do
         local line = ring:CreateTexture(nil, "OVERLAY")
-        line:SetColorTexture(C.line[1], C.line[2], C.line[3], 1)
+        Style.Paint(line, C.line, 1)
         line:SetPoint(edge[1])
         line:SetPoint(edge[2])
         if edge[3] then line:SetWidth(edge[3]) end
         if edge[4] then line:SetHeight(edge[4]) end
     end
 end
-frameFill:SetPoint("TOPLEFT", 1, -1)
-frameFill:SetPoint("BOTTOMRIGHT", -1, 1)
+Style.PixelInset(frameFill, frame)
 tinsert(UISpecialFrames, "PlateauOptions")
 
 local OFFSCREEN_KEEP = 120
 
+local KeepOnScreen
+
 local function LooseClamp()
-    local width, height = frame:GetWidth(), frame:GetHeight()
-    local side = math.max(width - OFFSCREEN_KEEP, 0)
-    frame:SetClampRectInsets(side, -side, 0, math.max(height - TITLE, 0))
+    frame:SetClampRectInsets(0, 0, 0, 0)
+    frame:SetClampedToScreen(false)
+end
+
+local function StopDrag()
+    frame:StopMovingOrSizing()
+    KeepOnScreen()
 end
 
 local titleBar = CreateFrame("Frame", nil, frame)
@@ -68,45 +85,76 @@ titleBar:SetHeight(TITLE)
 titleBar:EnableMouse(true)
 titleBar:RegisterForDrag("LeftButton")
 titleBar:SetScript("OnDragStart", function() frame:StartMoving() end)
-titleBar:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+titleBar:SetScript("OnDragStop", StopDrag)
 frame:RegisterForDrag("LeftButton")
 frame:SetScript("OnDragStart", function() frame:StartMoving() end)
-frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+frame:SetScript("OnDragStop", StopDrag)
 
-if Style.theme.headerFill then
-    local titleCap = Style.Rounded(titleBar, C.header, "BACKGROUND", -1)
-    titleCap:SetPoint("TOPLEFT", 1, -1)
-    titleCap:SetPoint("TOPRIGHT", -1, -1)
-    titleCap:SetHeight(Style.RADIUS * 2)
-    local titleFill = titleBar:CreateTexture(nil, "BACKGROUND")
-    titleFill:SetPoint("TOPLEFT", 1, -(1 + Style.RADIUS))
-    titleFill:SetPoint("BOTTOMRIGHT", -1, 0)
-    titleFill:SetColorTexture(C.header[1], C.header[2], C.header[3], 1)
-end
+local titleCap = Style.Rounded(titleBar, C.rail, "BACKGROUND", -1)
+titleCap:SetHeight(Style.RADIUS * 2)
+local titleFill = titleBar:CreateTexture(nil, "BACKGROUND")
+Style.Paint(titleFill, C.rail, 1)
+Style.OnPixels(titleBar, function(px)
+    titleCap:ClearAllPoints()
+    titleCap:SetPoint("TOPLEFT", px, -px)
+    titleCap:SetPoint("TOPRIGHT", -px, -px)
+    titleFill:ClearAllPoints()
+    titleFill:SetPoint("TOPLEFT", px, -(px + Style.RADIUS))
+    titleFill:SetPoint("BOTTOMRIGHT", -px, 0)
+end)
 
 local logo = titleBar:CreateTexture(nil, "ARTWORK")
-logo:SetSize(32, 32)
+logo:SetSize(42, 42)
 logo:SetPoint("LEFT", PAD, 0)
 logo:SetTexture("Interface\\AddOns\\Plateau\\Art\\icon")
 
 local TITLE_TEXT = Style.theme.uppercaseTitle and "PLATEAU" or "Plateau"
 local titleName = Style.Text(titleBar, 18, C.title)
-Style.SetFont(titleName, Style.titleFont, Style.TITLE_SIZE + 4, "")
-titleName:SetPoint("LEFT", logo, "RIGHT", 10, 0)
+Style.SetFont(titleName, Style.titleFont, Style.TITLE_SIZE + 6, "")
+titleName:SetPoint("TOPLEFT", logo, "TOPRIGHT", 10, -2)
 titleName:SetText(TITLE_TEXT)
 
+local titleSub = Style.Text(titleBar, 11, C.muted)
+titleSub:SetPoint("BOTTOMLEFT", logo, "BOTTOMRIGHT", 10, 3)
+titleSub:SetText("Nameplates")
+
 local titleVersion = Style.Text(titleBar, 11, C.muted)
-titleVersion:SetPoint("LEFT", titleName, "RIGHT", 8, -1)
+titleVersion:SetPoint("LEFT", titleName, "RIGHT", 8, 0)
 titleVersion:SetText(("v%s"):format(Plateau.version))
+
+local stripe = CreateFrame("Frame", nil, frame)
+Style.OnPixels(frame, function(px)
+    stripe:ClearAllPoints()
+    stripe:SetPoint("TOPLEFT", px, -TITLE)
+    stripe:SetPoint("TOPRIGHT", -px, -TITLE)
+end)
+stripe:SetHeight(STRIPE)
+local stripeLine = stripe:CreateTexture(nil, "ARTWORK")
+stripeLine:SetPoint("TOPLEFT")
+stripeLine:SetPoint("TOPRIGHT")
+Style.PixelHeight(stripeLine)
+Style.Paint(stripeLine, C.line)
 
 local ICON_BUTTON = Style.ICON_BUTTON
 local closeX = Style.IconButton(titleBar, "icon_close", ICON_BUTTON, function() frame:Hide() end, "Close", Style.theme.roundClose)
-closeX:SetPoint("RIGHT", titleBar, "RIGHT", -8, 0)
+closeX:SetPoint("RIGHT", titleBar, "RIGHT", -12, 0)
 
 local minimizeX = Style.IconButton(titleBar, "icon_minus", ICON_BUTTON, nil, "Minimize")
 minimizeX:SetPoint("RIGHT", closeX, "LEFT", -6, 0)
 
 local minimized = false
+
+function KeepOnScreen()
+    if minimized then return end
+    local left, top, width = frame:GetLeft(), frame:GetTop(), frame:GetWidth()
+    if not left or not top or not width then return end
+    local ratio = UIParent:GetEffectiveScale() / frame:GetEffectiveScale()
+    local screenWidth, screenHeight = UIParent:GetWidth() * ratio, UIParent:GetHeight() * ratio
+    local fixedLeft = math.max(OFFSCREEN_KEEP - width, math.min(left, screenWidth - OFFSCREEN_KEEP))
+    local fixedTop = math.max(TITLE, math.min(top, screenHeight))
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", math.floor(fixedLeft + 0.5), math.floor(fixedTop + 0.5))
+end
 local restoreHeight = HEIGHT
 local SetMinimized
 
@@ -121,6 +169,11 @@ end
 
 local settingsX = Style.IconButton(titleBar, Style.theme.settingsIcon, ICON_BUTTON, OpenPreferences, "Plateau settings: theme, window scale and fonts")
 settingsX:SetPoint("RIGHT", minimizeX, "LEFT", -6, 0)
+
+local undoSlot = CreateFrame("Frame", nil, titleBar)
+undoSlot:SetSize(176, 30)
+undoSlot:SetPoint("RIGHT", settingsX, "LEFT", -14, 0)
+ns.layout.undoSlot = undoSlot
 
 local BAR_WIDTH, BAR_HEIGHT = 340, 30
 local BAR_ROW = -15
@@ -229,6 +282,20 @@ local function ShowProfileTip(owner)
     GameTooltip:Show()
 end
 
+local function ShowProfileList(owner, alignRight)
+    local options = {}
+    for _, name in ipairs(Plateau.DB:ListProfiles()) do
+        options[#options + 1] = { value = name, label = Plateau.Builtins.Label(name) }
+    end
+    ns.ShowList(owner, options, Plateau.DB.profileName, function(value)
+        if value ~= Plateau.DB.profileName or value ~= Plateau.DB:DefaultProfile() then
+            Plateau.DB:ActivateProfile(value)
+            ns.UpdateProfileLabel()
+            ns.RefreshAll()
+        end
+    end, { width = 220, alignRight = alignRight })
+end
+
 miniInfo:SetScript("OnEnter", function(self) ShowProfileTip(self) end)
 miniInfo:SetScript("OnLeave", function() GameTooltip:Hide() end)
 miniHit:HookScript("OnEnter", function(self) ShowProfileTip(self) end)
@@ -253,17 +320,7 @@ miniInfo:SetScript("OnClick", function(self)
     local x, y = GetCursorPosition()
     if miniDragging or not Logic.IsClick(infoPressX, infoPressY, x, y, CLICK_THRESHOLD) then return end
     GameTooltip:Hide()
-    local options = {}
-    for _, name in ipairs(Plateau.DB:ListProfiles()) do
-        options[#options + 1] = { value = name, label = Plateau.Builtins.Label(name) }
-    end
-    ns.ShowList(self, options, Plateau.DB.profileName, function(value)
-        if value ~= Plateau.DB.profileName or value ~= Plateau.DB:DefaultProfile() then
-            Plateau.DB:ActivateProfile(value)
-            ns.UpdateProfileLabel()
-            ns.RefreshAll()
-        end
-    end, { width = 220 })
+    ShowProfileList(self)
 end)
 
 function ns.UpdateMiniBar()
@@ -281,6 +338,10 @@ local screenWatcher = CreateFrame("Frame")
 screenWatcher:RegisterEvent("DISPLAY_SIZE_CHANGED")
 screenWatcher:RegisterEvent("UI_SCALE_CHANGED")
 screenWatcher:SetScript("OnEvent", function()
+    if ns.ApplyScale then
+        ns.ApplyScale()
+    end
+    Style.RefreshPixels()
     if minimized then
         local left, top = frame:GetLeft(), frame:GetTop()
         if left and top then
@@ -289,13 +350,94 @@ screenWatcher:SetScript("OnEvent", function()
     end
 end)
 
-local titleLine = Style.GradientLine(titleBar, { C.line, C.line }, 1)
-titleLine:SetPoint("BOTTOMLEFT", 1, 0)
-titleLine:SetPoint("BOTTOMRIGHT", -1, 0)
+local profileButton = CreateFrame("Button", nil, titleBar)
+profileButton:SetSize(200, 30)
+Style.ButtonBox(profileButton, C.field, Style.BUTTON_RADIUS, C.border, C.hover)
+local profile = Style.Text(profileButton, 12, C.text)
+profile:SetPoint("LEFT", 12, 0)
+profile:SetPoint("RIGHT", -26, 0)
+Style.DropArrow(profileButton)
+profileButton:SetScript("OnEnter", function(self)
+    local status = Plateau.AutoProfile:Status()
+    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+    local accent = Style.StateColor()
+    GameTooltip:SetText(T("Active profile: %s"):format(status.active), accent[1], accent[2], accent[3])
+    GameTooltip:AddLine(T("Every page edits this profile. Click to switch, or manage profiles on the Profiles page."), 1, 1, 1, true)
+    GameTooltip:AddLine(T("Default profile: %s"):format(status.default), 1, 1, 1, true)
+    if status.overridden then
+        GameTooltip:AddLine(T("Active because of: %s. Automatic switching can replace your choice when you change zone or specialization."):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
+    end
+    if status.pending then
+        GameTooltip:AddLine(T("Switches to %s after combat."):format(status.pending), C.warn[1], C.warn[2], C.warn[3], true)
+    end
+    GameTooltip:Show()
+end)
+profileButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+profileButton:SetScript("OnClick", function(self)
+    GameTooltip:Hide()
+    ShowProfileList(self, true)
+end)
+
+local themePicker = CreateFrame("Frame", nil, titleBar)
+themePicker:SetSize(#Style.THEME_ORDER * 24 + 12, 30)
+Style.Panel(themePicker, C.rail, C.border)
+local themeDots = {}
+
+local function PaintThemeDots()
+    local chosenKey = Style.ThemeKey()
+    for _, dot in ipairs(themeDots) do
+        local chosen = dot.key == chosenKey
+        Style.PaintVertex(dot.ring, chosen and C.text or dot.theme.colors.border)
+        dot.core:SetSize(chosen and 10 or 8, chosen and 10 or 8)
+    end
+end
+
+function ns.ApplyTheme(key)
+    if key == Style.ThemeKey() or not Style.THEMES[key] then return end
+    Style.SetTheme(key)
+    PaintThemeDots()
+    if ns.RefreshAll then
+        ns.RefreshAll()
+    end
+end
+
+for i, key in ipairs(Style.THEME_ORDER) do
+    local theme = Style.THEMES[key]
+    if theme then
+        local dot = CreateFrame("Button", nil, themePicker)
+        dot:SetSize(20, 20)
+        dot:SetPoint("LEFT", 6 + (i - 1) * 24, 0)
+        dot.key, dot.theme = key, theme
+        dot.ring = Style.Rounded(dot, theme.colors.border, "ARTWORK", 0, "circle")
+        dot.ring:SetAllPoints()
+        local fill = Style.Rounded(dot, theme.colors.window, "ARTWORK", 1, "circle")
+        fill:SetPoint("TOPLEFT", 2, -2)
+        fill:SetPoint("BOTTOMRIGHT", -2, 2)
+        dot.core = Style.Rounded(dot, theme.colors.accent, "ARTWORK", 2, "circle")
+        dot.core:SetPoint("CENTER")
+        dot:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+            GameTooltip:SetText(T(theme.name), 1, 1, 1)
+            GameTooltip:AddLine(T(theme.desc or ""), 0.8, 0.8, 0.8, true)
+            GameTooltip:AddLine(T(key == Style.ThemeKey() and "The current settings window theme." or "Click to switch the settings window to this theme."), C.muted[1], C.muted[2], C.muted[3], true)
+            GameTooltip:Show()
+        end)
+        dot:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        dot:SetScript("OnClick", function(self)
+            ns.ApplyTheme(key)
+            self:GetScript("OnEnter")(self)
+        end)
+        themeDots[#themeDots + 1] = dot
+    end
+end
+PaintThemeDots()
 
 local rail = CreateFrame("Frame", nil, frame)
-rail:SetPoint("TOPLEFT", 1, -TITLE)
-rail:SetPoint("BOTTOMLEFT", 1, 1)
+Style.OnPixels(frame, function(px)
+    rail:ClearAllPoints()
+    rail:SetPoint("TOPLEFT", px, -TOP)
+    rail:SetPoint("BOTTOMLEFT", px, px)
+end)
 rail:SetWidth(RAIL)
 Style.Rounded(rail, C.rail):SetAllPoints()
 Style.SquareCorners(rail, C.rail, { "TOPLEFT", "TOPRIGHT", "BOTTOMRIGHT" })
@@ -303,52 +445,117 @@ Style.SquareCorners(rail, C.rail, { "TOPLEFT", "TOPRIGHT", "BOTTOMRIGHT" })
 local railEdge = rail:CreateTexture(nil, "ARTWORK")
 railEdge:SetPoint("TOPRIGHT")
 railEdge:SetPoint("BOTTOMRIGHT")
-railEdge:SetWidth(1)
-railEdge:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+Style.PixelWidth(railEdge)
+Style.Paint(railEdge, C.border, 1)
 
+local pageHead = CreateFrame("Frame", nil, frame)
+pageHead:SetPoint("TOPLEFT", RAIL + 1 + PAD, -TOP)
+pageHead:SetPoint("TOPRIGHT", -(PAD + SCROLLBAR), -TOP)
+pageHead:SetHeight(PAGE_HEAD)
 
-local SECTION_BAR = 36
+local crumb = Style.Text(pageHead, 11, C.muted)
+crumb:SetPoint("TOPLEFT", 0, -14)
 
-local sectionBar = CreateFrame("Frame", nil, frame)
-sectionBar:SetPoint("TOPLEFT", RAIL + 1, -(TITLE + PREVIEW))
-sectionBar:SetPoint("TOPRIGHT", -1, -(TITLE + PREVIEW))
-sectionBar:SetHeight(SECTION_BAR)
-Style.Fill(sectionBar, C.rail)
+local sectionTitle = Style.Text(pageHead, 18, C.title)
+Style.SetFont(sectionTitle, Style.titleFont, Style.TITLE_SIZE + 10, "")
+sectionTitle:SetPoint("TOPLEFT", crumb, "BOTTOMLEFT", 0, -6)
 
-local sectionBarLine = sectionBar:CreateTexture(nil, "ARTWORK")
-sectionBarLine:SetPoint("BOTTOMLEFT")
-sectionBarLine:SetPoint("BOTTOMRIGHT")
-sectionBarLine:SetHeight(1)
-sectionBarLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+local sectionDesc = Style.Text(pageHead, 12, C.muted)
+sectionDesc:SetPoint("TOPLEFT", sectionTitle, "BOTTOMLEFT", 0, -6)
+sectionDesc:SetPoint("RIGHT", pageHead, "RIGHT", -330, 0)
 
-local sectionTitle = Style.Text(sectionBar, 15, C.text)
-sectionTitle:SetPoint("LEFT", PAD, 0)
+local previewBox = CreateFrame("Frame", nil, frame)
+previewBox:SetPoint("TOPLEFT", RAIL + 1 + PAD, -PREVIEW_TOP)
+previewBox:SetPoint("TOPRIGHT", -(PAD + SCROLLBAR), -PREVIEW_TOP)
+previewBox:SetHeight(PREVIEW)
+Style.Panel(previewBox, C.surface, C.surfaceBorder)
 
-local SCROLL_TOP = TITLE + PREVIEW + SECTION_BAR + 4
+local previewBar = CreateFrame("Frame", nil, previewBox)
+Style.OnPixels(previewBox, function(px)
+    previewBar:ClearAllPoints()
+    previewBar:SetPoint("TOPLEFT", px, -px)
+    previewBar:SetPoint("TOPRIGHT", -px, -px)
+end)
+previewBar:SetHeight(PREVIEW_BAR - 1)
+local previewBarLine = previewBar:CreateTexture(nil, "ARTWORK")
+previewBarLine:SetPoint("BOTTOMLEFT")
+previewBarLine:SetPoint("BOTTOMRIGHT")
+Style.PixelHeight(previewBarLine)
+Style.Paint(previewBarLine, C.border, 1)
+local previewLabel = Style.Text(previewBar, 11, C.muted)
+previewLabel:SetPoint("LEFT", 14, 0)
+previewLabel:SetText("LIVE PREVIEW")
+local previewDot = previewBar:CreateTexture(nil, "ARTWORK")
+previewDot:SetSize(7, 7)
+previewDot:SetPoint("LEFT", previewLabel, "RIGHT", 10, 0)
+previewDot:SetColorTexture(0.31, 0.82, 0.55, 1)
+local previewNote = Style.Text(previewBar, 11, C.muted)
+previewNote:SetPoint("LEFT", previewDot, "RIGHT", 6, 0)
+previewNote:SetText("Changes show here and in game as you make them")
+
+local previewStage = CreateFrame("Frame", nil, previewBox)
+Style.OnPixels(previewBox, function(px)
+    previewStage:ClearAllPoints()
+    previewStage:SetPoint("TOPLEFT", px, -PREVIEW_BAR)
+    previewStage:SetPoint("BOTTOMRIGHT", -px, px)
+end)
+previewStage:SetClipsChildren(true)
+do
+    local inner = math.max(Style.RADIUS - 1, 0)
+    local stageFill = Style.Rounded(previewStage, C.window, "BACKGROUND", 0, inner)
+    stageFill:SetAllPoints()
+    Style.PaintVertex(stageFill, C.window, 1, 0.55)
+    local stageTop = previewStage:CreateTexture(nil, "BACKGROUND", nil, 0)
+    stageTop:SetPoint("TOPLEFT")
+    stageTop:SetPoint("TOPRIGHT")
+    stageTop:SetHeight(inner)
+    Style.Paint(stageTop, C.window, 1, 0.55)
+    local stageGlow = Style.Rounded(previewStage, { 1, 1, 1, 1 }, "BACKGROUND", 1, inner)
+    stageGlow:SetPoint("BOTTOMLEFT")
+    stageGlow:SetPoint("BOTTOMRIGHT")
+    stageGlow:SetHeight(PREVIEW * 0.7)
+    local function PaintGlow()
+        local accent = C.accent
+        stageGlow:SetGradient("VERTICAL", CreateColor(accent[1], accent[2], accent[3], 0.09), CreateColor(accent[1], accent[2], accent[3], 0))
+    end
+    PaintGlow()
+    Style.OnTheme(PaintGlow)
+    local stageDots = previewStage:CreateTexture(nil, "BACKGROUND", nil, 2)
+    stageDots:SetPoint("TOPLEFT")
+    stageDots:SetPoint("BOTTOMRIGHT", 0, inner)
+    stageDots:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\dots", "REPEAT", "REPEAT")
+    stageDots:SetHorizTile(true)
+    stageDots:SetVertTile(true)
+    Style.PaintVertex(stageDots, C.border, 0.9)
+end
+
+ns.previewBar, ns.previewStage = previewBar, previewStage
+
+local SCROLL_TOP = PREVIEW_TOP + PREVIEW + 12
 local BANNER = 26
-local BANNER_TOP = TITLE + PREVIEW + SECTION_BAR + 10
+local BANNER_TOP = SCROLL_TOP
 
 local scroll = CreateFrame("ScrollFrame", nil, frame)
-scroll:SetPoint("TOPLEFT", RAIL + PAD, -SCROLL_TOP)
+scroll:SetPoint("TOPLEFT", RAIL + 1 + PAD, -SCROLL_TOP)
 
 local banner = CreateFrame("Frame", nil, frame)
 banner:Hide()
-banner:SetPoint("TOPLEFT", RAIL + PAD, -BANNER_TOP)
-banner:SetPoint("TOPRIGHT", -(PAD + 8), -BANNER_TOP)
+banner:SetPoint("TOPLEFT", RAIL + 1 + PAD, -BANNER_TOP)
+banner:SetPoint("TOPRIGHT", -(PAD + SCROLLBAR), -BANNER_TOP)
 banner:SetHeight(BANNER)
 banner.fill = banner:CreateTexture(nil, "BACKGROUND")
 banner.fill:SetAllPoints()
-banner.fill:SetColorTexture(C.muted[1], C.muted[2], C.muted[3], 0.14)
+Style.Paint(banner.fill, C.muted, 0.14)
 banner.bar = banner:CreateTexture(nil, "ARTWORK")
 banner.bar:SetPoint("TOPLEFT")
 banner.bar:SetPoint("BOTTOMLEFT")
 banner.bar:SetWidth(3)
-banner.bar:SetColorTexture(C.muted[1], C.muted[2], C.muted[3], 1)
+Style.Paint(banner.bar, C.muted, 1)
 banner.text = Style.Text(banner, 11, C.text)
 banner.text:SetPoint("LEFT", 12, 0)
 banner.text:SetPoint("RIGHT", -8, 0)
 banner.text:SetText("On this page, search finds help topics only.")
-scroll:SetPoint("BOTTOMRIGHT", -(PAD + 8), FOOTER)
+scroll:SetPoint("BOTTOMRIGHT", -(PAD + SCROLLBAR), FOOTER + 6)
 scroll:EnableMouseWheel(true)
 
 local function Range(scroller)
@@ -381,7 +588,7 @@ local function Scrollbar(scroller, parent, gap)
     trackLine:SetPoint("TOP")
     trackLine:SetPoint("BOTTOM")
     trackLine:SetWidth(3)
-    trackLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 0.6)
+    Style.Paint(trackLine, C.border, 0.6)
 
     local thumb = CreateFrame("Frame", nil, track)
     thumb:SetWidth(9)
@@ -460,7 +667,7 @@ local function Scrollbar(scroller, parent, gap)
     return Update, track, thumb
 end
 
-local UpdateThumb, scrollTrack, scrollThumb = Scrollbar(scroll, frame, 6)
+local UpdateThumb, scrollTrack, scrollThumb = Scrollbar(scroll, frame, 4)
 
 scroll:SetScript("OnMouseWheel", function(self, delta)
     local target = Offset(self) - delta * 48
@@ -469,40 +676,31 @@ scroll:SetScript("OnMouseWheel", function(self, delta)
 end)
 scroll:SetScript("OnScrollRangeChanged", UpdateThumb)
 
-local footerLine = frame:CreateTexture(nil, "ARTWORK")
-footerLine:SetPoint("BOTTOMLEFT", RAIL + 1, FOOTER)
-footerLine:SetPoint("BOTTOMRIGHT", -1, FOOTER)
-footerLine:SetHeight(1)
-footerLine:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+local footer = CreateFrame("Frame", nil, frame)
+footer:SetPoint("BOTTOMLEFT", RAIL + 1, 1)
+footer:SetPoint("BOTTOMRIGHT", -1, 1)
+footer:SetHeight(FOOTER)
+local footerLine = footer:CreateTexture(nil, "ARTWORK")
+footerLine:SetPoint("TOPLEFT")
+footerLine:SetPoint("TOPRIGHT")
+Style.PixelHeight(footerLine)
+Style.Paint(footerLine, C.border, 1)
 
-local closeButton = Widgets.Button(frame, "Close", 100, function() frame:Hide() end)
-closeButton:SetPoint("BOTTOMRIGHT", -PAD, 11)
+local footerText = Style.Text(footer, 12, C.muted)
+footerText:SetPoint("LEFT", PAD, 0)
+footerText:SetPoint("RIGHT", -250, 0)
+
+local closeButton = Widgets.Button(footer, "Close", 100, function() frame:Hide() end)
+closeButton:SetPoint("RIGHT", -PAD, 0)
+
+local whatsNewButton = Widgets.Button(footer, "What's new", 110, function()
+    if PlateauWhatsNew then
+        PlateauWhatsNew:Open(nil)
+    end
+end)
+whatsNewButton:SetPoint("RIGHT", closeButton, "LEFT", -8, 0)
 
 local Select, UpdateChrome, RevealRail, OpenRailFor
-local profileButton = CreateFrame("Frame", nil, frame)
-profileButton:SetSize(250, 22)
-profileButton:SetPoint("BOTTOMLEFT", RAIL + PAD, 11)
-profileButton:EnableMouse(true)
-local profile = Style.Text(profileButton, 12, C.muted)
-profile:SetPoint("LEFT")
-profile:SetPoint("RIGHT")
-profile:SetJustifyH("LEFT")
-profileButton:SetScript("OnEnter", function(self)
-    local status = Plateau.AutoProfile:Status()
-    GameTooltip:SetOwner(self, "ANCHOR_TOP")
-    local accent = Style.StateColor()
-    GameTooltip:SetText(T("Active profile: %s"):format(status.active), accent[1], accent[2], accent[3])
-    GameTooltip:AddLine(T("Every page edits this profile. Switch profiles on the Profiles page."), 1, 1, 1, true)
-    GameTooltip:AddLine(T("Default profile: %s"):format(status.default), 1, 1, 1, true)
-    if status.overridden then
-        GameTooltip:AddLine(T("Active because of: %s. Automatic switching can replace your choice when you change zone or specialization."):format(T(tostring(status.rule or "an automatic switch"))), C.warn[1], C.warn[2], C.warn[3], true)
-    end
-    if status.pending then
-        GameTooltip:AddLine(T("Switches to %s after combat."):format(status.pending), C.warn[1], C.warn[2], C.warn[3], true)
-    end
-    GameTooltip:Show()
-end)
-profileButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 local Confirming = ns.Widgets.Confirm
 
@@ -511,7 +709,7 @@ local resetSection, resetAll
 local railButtons = {}
 local current
 
-local PAGE_TOP = 8
+local PAGE_TOP = 2
 
 local WIDE = {
     Header = true,
@@ -529,6 +727,8 @@ local WIDE = {
     Link = true,
 }
 
+local FLEXIBLE = { Header = true, Note = true, Link = true }
+
 local function PlaceRow(row, x, top, lineHeight, stretch)
     if stretch then
         row.widget:SetHeight(lineHeight)
@@ -541,9 +741,14 @@ end
 local function Divider(page, index)
     local line = page.dividers[index]
     if not line then
-        line = page:CreateTexture(nil, "BACKGROUND")
-        line:SetWidth(1)
-        line:SetColorTexture(C.border[1], C.border[2], C.border[3], 1)
+        if not page.lines then
+            page.lines = CreateFrame("Frame", nil, page)
+            page.lines:SetAllPoints()
+            page.lines:SetFrameLevel(page:GetFrameLevel() + 1)
+        end
+        line = page.lines:CreateTexture(nil, "ARTWORK")
+        Style.PixelWidth(line)
+        Style.Paint(line, C.border, 1)
         page.dividers[index] = line
     end
     return line
@@ -598,38 +803,39 @@ local function ApplyEnabled(row)
     row.widget:SetAlpha(DISABLED_ALPHA)
 end
 
-local function LayoutPage(page)
-    local y = PAGE_TOP
+local function RowHeight(row)
+    if FLEXIBLE[row.spec.type] or row.wide then
+        return row.widget:GetHeight()
+    end
+    return row.naturalHeight
+end
+
+local function StackRows(page, rows, x, y, wide)
     local waiting
-    local dividers = 0
     local function EndLine(right)
         local height = waiting.naturalHeight
         if right then
             height = math.max(height, right.naturalHeight)
-            PlaceRow(right, COLUMN + COLUMN_GAP, y, height, true)
-            dividers = dividers + 1
-            local line = Divider(page, dividers)
+            PlaceRow(right, x + COLUMN + PAIR_GAP, y, height, true)
+            page.dividerCount = page.dividerCount + 1
+            local line = Divider(page, page.dividerCount)
             line:ClearAllPoints()
-            line:SetPoint("TOPLEFT", COLUMN + COLUMN_GAP / 2, -y)
+            line:SetPoint("TOPLEFT", x + COLUMN + PAIR_GAP / 2, -y)
             line:SetHeight(height)
             line:Show()
         end
-        PlaceRow(waiting, 0, y, height, true)
+        PlaceRow(waiting, x, y, height, true)
         waiting = nil
         y = y + height + SPACING
     end
-    for _, row in ipairs(page.rows) do
-        local hidden = row.group ~= nil and page.collapsed[row.group] == true
-        local visible = Logic.RowShown(row.spec, hidden)
-        row.widget:SetShown(visible)
-        if visible then
-            ApplyEnabled(row)
-            if row.wide then
+    for _, row in ipairs(rows) do
+        if row.widget:IsShown() then
+            if not wide or row.wide then
                 if waiting then
                     EndLine()
                 end
-                local height = row.widget:GetHeight()
-                PlaceRow(row, 0, y, height)
+                local height = RowHeight(row)
+                PlaceRow(row, x, y, height, not row.wide and not FLEXIBLE[row.spec.type])
                 y = y + height + SPACING
             elseif waiting then
                 EndLine(row)
@@ -641,10 +847,75 @@ local function LayoutPage(page)
     if waiting then
         EndLine()
     end
-    for i = dividers + 1, #page.dividers do
+    return y
+end
+
+local function LayoutPage(page)
+    page.dividerCount = 0
+    for _, row in ipairs(page.rows) do
+        local hidden = row.group ~= nil and page.collapsed[row.group] == true
+        local visible = Logic.RowShown(row.spec, hidden)
+        row.widget:SetShown(visible)
+        if visible then
+            ApplyEnabled(row)
+        end
+    end
+    local y = PAGE_TOP
+    local columns = { y, y }
+    local function Bottom()
+        return math.max(columns[1], columns[2])
+    end
+    for _, card in ipairs(page.cards) do
+        local any = card.header ~= nil and card.header.widget:IsShown()
+        if not any then
+            for _, row in ipairs(card.rows) do
+                if row.widget:IsShown() then
+                    any = true
+                    break
+                end
+            end
+        end
+        if card.frame then
+            card.frame:SetShown(any)
+        end
+        if any then
+            if not card.frame then
+                local top = Bottom()
+                local bottom = StackRows(page, card.rows, CARD_PAD, top, true)
+                if bottom > top then
+                    columns[1], columns[2] = bottom + CARD_GAP - SPACING, bottom + CARD_GAP - SPACING
+                end
+            else
+                local left, top, width
+                if card.wide then
+                    left, top, width = 0, Bottom(), CONTENT_WIDTH
+                else
+                    local which = columns[2] < columns[1] and 2 or 1
+                    left, top, width = (which - 1) * (HALF_CARD + CARD_GAP), columns[which], which == 1 and HALF_CARD or CONTENT_WIDTH - HALF_CARD - CARD_GAP
+                    card.column = which
+                end
+                local inner = top + CARD_PAD - 4
+                if card.header and card.header.widget:IsShown() then
+                    local height = card.header.widget:GetHeight()
+                    PlaceRow(card.header, left + CARD_PAD, inner, height)
+                    inner = inner + height + SPACING
+                end
+                local bottom = StackRows(page, card.rows, left + CARD_PAD, inner, card.wide) - SPACING + CARD_PAD
+                card.frame:ClearAllPoints()
+                card.frame:SetPoint("TOPLEFT", left, -top)
+                card.frame:SetSize(width, bottom - top)
+                if card.wide then
+                    columns[1], columns[2] = bottom + CARD_GAP, bottom + CARD_GAP
+                else
+                    columns[card.column] = bottom + CARD_GAP
+                end
+            end
+        end
+    end
+    for i = page.dividerCount + 1, #page.dividers do
         page.dividers[i]:Hide()
     end
-    page:SetHeight(y + PAD)
+    page:SetHeight(Bottom() + PAD)
 end
 
 local function RefreshPage(page)
@@ -672,6 +943,37 @@ local function ExpandGroup(page, index)
     end
 end
 
+local function CardFrame(page)
+    local card = CreateFrame("Frame", nil, page)
+    card:SetFrameLevel(page:GetFrameLevel())
+    Style.Panel(card, C.surface, C.surfaceBorder)
+    return card
+end
+
+local function PlanCards(controls)
+    local cards, cardOf = {}, {}
+    local card = { rows = {}, indexes = {} }
+    cards[1] = card
+    for index, spec in ipairs(controls) do
+        if spec.type == "Header" then
+            card = { rows = {}, indexes = {}, headerIndex = index }
+            cards[#cards + 1] = card
+        else
+            card.indexes[#card.indexes + 1] = index
+            if (WIDE[spec.type] and not FLEXIBLE[spec.type]) or spec.wide == true then
+                card.wide = true
+            end
+            if not card.headerIndex and spec.type ~= "Note" then
+                card.boxed = true
+            end
+        end
+        cardOf[index] = card
+    end
+    if cards[1].boxed then
+        cards[1].wide = true
+    end
+    return cards, cardOf
+end
 
 local function BuildPage(section)
     local page = CreateFrame("Frame", nil, scroll)
@@ -681,6 +983,7 @@ local function BuildPage(section)
     page.sectionKey = section.key
     page.collapsed = {}
     local groups = Logic.AssignGroups(section.controls)
+    local plan, cardOf = PlanCards(section.controls)
 
     for index, spec in ipairs(section.controls) do
         if spec.collapsible then
@@ -691,9 +994,36 @@ local function BuildPage(section)
         if spec.collapsible then
             widget:SetCollapsed(page.collapsed[index])
         end
+        local card = cardOf[index]
         local wide = WIDE[spec.type] or spec.wide == true
-        widget:SetWidth(wide and CONTENT_WIDTH or COLUMN)
+        local inCard = card.headerIndex ~= nil
+        local width
+        if spec.type == "Header" then
+            width = (card.wide and WIDE_INNER or COLUMN)
+        elseif wide then
+            width = (inCard and not card.wide) and COLUMN or WIDE_INNER
+        else
+            width = COLUMN
+        end
+        widget:SetWidth(width)
         page.rows[index] = { widget = widget, spec = spec, y = 0, wide = wide, naturalHeight = widget:GetHeight(), group = groups[index] }
+    end
+
+    page.cards = {}
+    for _, entry in ipairs(plan) do
+        local card = { wide = entry.wide == true, rows = {} }
+        for _, index in ipairs(entry.indexes) do
+            card.rows[#card.rows + 1] = page.rows[index]
+        end
+        if entry.headerIndex then
+            card.header = page.rows[entry.headerIndex]
+        end
+        if entry.headerIndex or entry.boxed then
+            card.frame = CardFrame(page)
+        end
+        if card.header or #card.rows > 0 then
+            page.cards[#page.cards + 1] = card
+        end
     end
 
     LayoutPage(page)
@@ -707,6 +1037,59 @@ function ns.UpdateClickAreas()
         ns.SetPreviewSection(current.key)
     end
 end
+
+local DESCRIPTIONS = {
+    profiles = { desc = "Choose which profile this character uses, make new ones and share them." },
+    health = { desc = "Size, texture, border and absorbs of the health bar." },
+    healthColors = { desc = "How the health bar is colored: by reaction, class, unit type and threat." },
+    healthText = { desc = "The health numbers on the bar and how they are written." },
+    name = { desc = "The unit's name and the name of whoever it is targeting." },
+    level = { desc = "The level number and when it shows." },
+    castbar = { desc = "How enemy casts look, and whether your interrupt is back before the cast finishes." },
+    threatText = { desc = "Threat colors and the threat percent for tanks and damage dealers." },
+    enemyPower = { desc = "A small power bar for enemies that use mana, energy or rage." },
+    classPower = { desc = "Your combo points, holy power, runes and other class resources." },
+    forces = { desc = "How much each enemy adds to Mythic+ enemy forces." },
+    showing = { desc = "Which nameplates show, and when." },
+    size = { desc = "Plate sizes and how much bigger your target, casters and casting enemies get." },
+    fading = { desc = "Fading for plates out of range, behind walls or not your target." },
+    layering = { desc = "How overlapping nameplates spread out and stack." },
+    clicking = { desc = "How big the clickable area of each plate is." },
+    target = { desc = "How your current target stands out." },
+    focus = { desc = "How your focus target stands out." },
+    mouseover = { desc = "How the plate under your cursor stands out." },
+    combat = { desc = "A separate, quieter look for nameplates out of combat." },
+    auraAll = { desc = "Text, timers and tooltips shared by every aura group." },
+    auraMine = { desc = "Your own debuffs on enemies." },
+    auraCC = { desc = "Crowd control on enemies, such as stuns and fears." },
+    auraPurge = { desc = "Buffs on enemies, such as ones you can purge or steal." },
+    auraImportant = { desc = "Important auras that need your attention." },
+    shield = { desc = "Warnings for important, defensive, enrage and magic buffs." },
+    raidMarker = { desc = "Raid target icons like skull and cross." },
+    quest = { desc = "Quest icons and quest progress on enemies." },
+    classification = { desc = "The elite, rare and boss badge." },
+    faction = { desc = "The Horde or Alliance icon on players." },
+    friendly = { desc = "Nameplates for your group and other friendly units." },
+    help = { desc = "Answers, commands and how to report a problem." },
+    addon = { desc = "Preferences for this settings window. Not part of a profile." },
+}
+
+local GROUP_COLORS = {
+    Profile = "setup",
+    Nameplates = "look",
+    Behavior = "highlights",
+    Targets = "highlights",
+    Auras = "casts",
+    Icons = "setup",
+    Friendly = "look",
+}
+
+local function GroupColor(label)
+    local groups = Style.groupColors or {}
+    return groups[GROUP_COLORS[label] or ""] or C.muted
+end
+
+local groupOf = {}
 
 function Select(section)
     ns.HideDropdownList()
@@ -738,7 +1121,11 @@ function Select(section)
         railButtons[section.key]:SetSelected(true)
         RevealRail(railButtons[section.key])
     end
+    local group = groupOf[section.key]
+    crumb:SetText(group and group.label or "Plateau")
     sectionTitle:SetText(section.title)
+    local about = DESCRIPTIONS[section.key]
+    sectionDesc:SetText(about and about.desc or "")
     UpdateThumb()
     ns.UpdateClickAreas()
     UpdateChrome()
@@ -767,8 +1154,9 @@ local RAIL_GROUPS = {
     { label = "Friendly", keys = { "friendly" } },
     { label = "Help", keys = { "help" } },
 }
-local RAIL_ROW = 21
-local RAIL_HEADER = 28
+local RAIL_ROW = 24
+local RAIL_HEADER = 30
+local RAIL_TOP = 6
 
 local railScroll = CreateFrame("ScrollFrame", nil, rail)
 railScroll:SetPoint("TOPLEFT", 0, -(RAIL_TOP + 1))
@@ -806,23 +1194,26 @@ for _, section in ipairs(ns.sections) do
     sectionsByKey[section.key] = section
 end
 
-local function RailButton(section)
-    local tint = Style.StateColor()
+local function RailButton(section, tint)
+    tint = tint or Style.StateColor()
     local button = CreateFrame("Button", nil, railContent)
     button:SetHeight(RAIL_ROW)
 
-    local hover = Style.Fill(button, C.hover)
+    local hover = Style.Rounded(button, C.hover, "BACKGROUND", 0, Style.BUTTON_RADIUS)
+    hover:SetPoint("TOPLEFT", 8, 0)
+    hover:SetPoint("BOTTOMRIGHT", -8, 0)
     hover:Hide()
     local marker = button:CreateTexture(nil, "ARTWORK")
-    marker:SetPoint("TOPLEFT")
-    marker:SetPoint("BOTTOMLEFT")
+    marker:SetPoint("TOPLEFT", 8, -3)
+    marker:SetPoint("BOTTOMLEFT", 8, 3)
     marker:SetWidth(3)
-    marker:SetColorTexture(tint[1], tint[2], tint[3], 1)
+    Style.Paint(marker, tint, 1)
     marker:Hide()
     button.marker = marker
 
     local label = Style.Text(button, 13, C.muted)
     label:SetPoint("LEFT", PAD + 4, 0)
+    label:SetPoint("RIGHT", -10, 0)
     label:SetText(section.title)
 
     function button:SetSelected(selected)
@@ -830,7 +1221,7 @@ local function RailButton(section)
         marker:SetShown(selected)
         hover:SetShown(selected)
         local color = selected and C.text or C.muted
-        label:SetTextColor(color[1], color[2], color[3])
+        Style.PaintText(label, color)
     end
 
     button:SetScript("OnEnter", function() hover:Show() end)
@@ -842,8 +1233,8 @@ end
 
 ns.railGroups = RAIL_GROUPS
 
-resetSection = Widgets.Button(sectionBar, "Reset this section", 150)
-resetSection:SetPoint("RIGHT", -PAD, 0)
+resetSection = Widgets.Button(pageHead, "Reset this section", 150)
+resetSection:SetPoint("BOTTOMRIGHT", 0, 14)
 Confirming(resetSection, "Reset this section", function()
     if current.reset then
         current.reset()
@@ -857,8 +1248,8 @@ Confirming(resetSection, "Reset this section", function()
     ns.RefreshAll()
 end)
 
-resetAll = Widgets.Button(sectionBar, "Reset profile", 150)
-resetAll:SetPoint("RIGHT", -PAD, 0)
+resetAll = Widgets.Button(pageHead, "Reset profile", 150)
+resetAll:SetPoint("BOTTOMRIGHT", 0, 14)
 resetAll:Hide()
 Confirming(resetAll, "Reset profile", function()
     Plateau.DB:Reset(nil)
@@ -867,9 +1258,11 @@ Confirming(resetAll, "Reset profile", function()
     end
 end)
 
+local SNAP_ROOM = 94 + 22
+
 local pickButtons = {}
 for i = 1, 2 do
-    local button = Widgets.Button(sectionBar, "", 150)
+    local button = Widgets.Button(previewBar, "", 150)
     Style.DropArrow(button)
     button.tip = { label = "", tooltip = "" }
     Style.Tooltip(button, button.tip)
@@ -889,10 +1282,7 @@ end
 
 function ns.UpdatePickButtons(section)
     local picks = section and section.picks or {}
-    local anchor, point = resetSection, "LEFT"
-    if not (resetSection and resetSection:IsShown()) then
-        anchor, point = sectionBar, "RIGHT"
-    end
+    local anchor, point = previewBar, "RIGHT"
     for i, button in ipairs(pickButtons) do
         local pick = picks[i]
         if pick then
@@ -901,7 +1291,7 @@ function ns.UpdatePickButtons(section)
             button.tip.label = pick.label
             button.tip.tooltip = pick.tooltip
             button:ClearAllPoints()
-            button:SetPoint("RIGHT", anchor, point, point == "RIGHT" and -PAD or -8, 0)
+            button:SetPoint("RIGHT", anchor, point, point == "RIGHT" and -SNAP_ROOM or -8, 0)
             button:SetScript("OnClick", function(self)
                 ns.ShowList(self, pick.options, pick.get(), function(value)
                     pick.set(value)
@@ -914,11 +1304,11 @@ function ns.UpdatePickButtons(section)
             button:Hide()
         end
     end
+    previewNote:SetShown(not picks[1])
 end
 
 local railGroups = {}
 local railLoose = {}
-local groupOf = {}
 local openGroup
 
 local function PlaceRailRow(row, y)
@@ -942,6 +1332,9 @@ local function LayoutRail()
                 y = y + RAIL_ROW
             end
         end
+        if open then
+            y = y + 6
+        end
     end
     for _, button in ipairs(railLoose) do
         PlaceRailRow(button, y)
@@ -951,23 +1344,34 @@ local function LayoutRail()
     UpdateRailThumb()
 end
 
-local function RailHeader(group)
+local function RailHeader(group, tint)
     local header = CreateFrame("Button", nil, railContent)
     header:SetHeight(RAIL_HEADER)
-    local hover = Style.Fill(header, C.hover)
+    local hover = Style.Rounded(header, C.hover, "BACKGROUND", 0, Style.BUTTON_RADIUS)
+    hover:SetPoint("TOPLEFT", 8, -2)
+    hover:SetPoint("BOTTOMRIGHT", -8, 2)
     hover:Hide()
-    local tint = Style.StateColor()
-    local label = Style.Text(header, 11, tint)
-    label:SetPoint("LEFT", PAD - 4, 0)
+    local mark = header:CreateTexture(nil, "ARTWORK")
+    mark:SetSize(8, 8)
+    mark:SetPoint("LEFT", PAD - 2, 0)
+    Style.Paint(mark, tint, 1)
+    local label = Style.Text(header, 11, C.muted)
+    label:SetPoint("LEFT", mark, "RIGHT", 8, 0)
     label:SetText(T(group.label):upper())
     local arrow = header:CreateTexture(nil, "OVERLAY")
     arrow:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\Icons\\icon_chevron_down")
     arrow:SetSize(10, 10)
-    arrow:SetPoint("RIGHT", -12, 0)
-    arrow:SetVertexColor(tint[1], tint[2], tint[3])
+    arrow:SetPoint("RIGHT", -14, 0)
+    Style.PaintVertex(arrow, tint)
     header.arrow = arrow
-    header:SetScript("OnEnter", function() hover:Show() end)
-    header:SetScript("OnLeave", function() hover:Hide() end)
+    header:SetScript("OnEnter", function()
+        hover:Show()
+        Style.PaintText(label, C.text)
+    end)
+    header:SetScript("OnLeave", function()
+        hover:Hide()
+        Style.PaintText(label, C.muted)
+    end)
     header:SetScript("OnClick", function()
         if openGroup == group then
             openGroup = nil
@@ -989,10 +1393,11 @@ end
 local placed = {}
 for _, entry in ipairs(RAIL_GROUPS) do
     local group = { label = entry.label, buttons = {} }
+    local tint = GroupColor(entry.label)
     for _, key in ipairs(entry.keys) do
         local section = sectionsByKey[key]
         if section then
-            local button = RailButton(section)
+            local button = RailButton(section, tint)
             button.section = section
             group.buttons[#group.buttons + 1] = button
             groupOf[key] = group
@@ -1000,7 +1405,7 @@ for _, entry in ipairs(RAIL_GROUPS) do
         end
     end
     if #group.buttons > 0 then
-        group.header = RailHeader(group)
+        group.header = RailHeader(group, tint)
         railGroups[#railGroups + 1] = group
     end
 end
@@ -1025,33 +1430,42 @@ end
 LayoutRail()
 local function FitHeight()
     if minimized then return end
-    frame:SetHeight(math.min(HEIGHT, (UIParent:GetHeight() - 40) / frame:GetScale()))
+    frame:SetHeight(math.floor(math.min(HEIGHT, (UIParent:GetHeight() * UIParent:GetEffectiveScale() - 40 * frame:GetEffectiveScale()) / frame:GetEffectiveScale())))
     LooseClamp()
 end
 FitHeight()
 
 function ns.ApplyScale()
-    local old, new = frame:GetScale(), Style.Scale()
-    if old == new then return end
+    local old, new = frame:GetScale(), Style.PixelScale()
+    if math.abs(old - new) < 1e-6 then return end
     local left, right, top = frame:GetLeft(), frame:GetRight(), frame:GetTop()
     frame:SetScale(new)
+    Style.RefreshPixels()
     FitHeight()
     if left and right and top and not minimized then
         local ratio = old / new
         frame:ClearAllPoints()
         frame:SetPoint("TOP", UIParent, "BOTTOMLEFT", (left + right) / 2 * ratio, top * ratio)
+        KeepOnScreen()
     end
 end
+
+hooksecurefunc(UIParent, "SetScale", function()
+    if frame:IsShown() then
+        ns.ApplyScale()
+    end
+end)
 
 function ns.UpdateProfileLabel()
     local status = Plateau.AutoProfile:Status()
     if status.pending then
-        profile:SetFormattedText("Active: %s (pending)", status.active)
+        profile:SetFormattedText("Profile: %s (pending)", status.active)
     elseif status.overridden then
-        profile:SetFormattedText("Active: %s (override)", status.active)
+        profile:SetFormattedText("Profile: %s (override)", status.active)
     else
-        profile:SetFormattedText("Active: %s", status.active)
+        profile:SetFormattedText("Profile: %s", status.active)
     end
+    footerText:SetFormattedText("Changes save to %s as you make them. Open this window any time with /plt.", status.active)
     ns.UpdateMiniBar()
 end
 
@@ -1066,7 +1480,7 @@ end)
 function UpdateChrome()
     local helpPage = not minimized and current ~= nil and current.key == "help"
     banner:SetShown(helpPage)
-    scroll:SetPoint("TOPLEFT", RAIL + PAD, -(helpPage and (BANNER_TOP + BANNER + 6) or SCROLL_TOP))
+    scroll:SetPoint("TOPLEFT", RAIL + 1 + PAD, -(helpPage and (BANNER_TOP + BANNER + 6) or SCROLL_TOP))
     UpdateThumb()
     if ns.RefreshChips then
         ns.RefreshChips()
@@ -1124,6 +1538,11 @@ function ns.SelectSection(key)
 end
 
 frame:SetScript("OnShow", function()
+    ns.ApplyScale()
+    if not minimized then
+        KeepOnScreen()
+    end
+    Style.RefreshPixels()
     ns.UpdateProfileLabel()
     Select(current or sectionsByKey[Plateau.DB.saved.global.lastSection] or sectionsByKey.health or ns.sections[1])
     Plateau.RefreshDirtyPreviews()
@@ -1246,29 +1665,40 @@ local RESULTS_PAD = 5
 local RESULT_ROW = 34
 
 local box = CreateFrame("EditBox", nil, titleBar)
-box:SetSize(240, 24)
-box:SetPoint("RIGHT", settingsX, "LEFT", -12, 0)
+box:SetSize(320, 32)
+box:SetPoint("LEFT", titleBar, "LEFT", RAIL + 1 + PAD, 0)
 box:SetAutoFocus(false)
-box:SetFontObject("GameFontHighlightSmall")
-box:SetTextInsets(24, 8, 0, 0)
+box:SetFontObject("GameFontHighlight")
+box:SetTextInsets(30, 10, 0, 0)
 Style.Field(box, C.field, C.border)
 
 local glass = box:CreateTexture(nil, "ARTWORK")
 glass:SetAtlas("common-search-magnifyingglass")
-glass:SetSize(12, 12)
-glass:SetPoint("LEFT", 8, 0)
-glass:SetVertexColor(C.muted[1], C.muted[2], C.muted[3])
+glass:SetSize(14, 14)
+glass:SetPoint("LEFT", 10, 0)
+Style.PaintVertex(glass, C.muted)
 
-local placeholder = Style.Text(box, 11, C.muted)
-placeholder:SetPoint("LEFT", 24, 0)
+local placeholder = Style.Text(box, 12, C.muted)
+placeholder:SetPoint("LEFT", 30, 0)
 placeholder:SetText("Search settings")
+
+profileButton:SetPoint("RIGHT", undoSlot, "LEFT", -12, 0)
+local themeGap = CreateFrame("Frame", nil, titleBar)
+themeGap:SetPoint("LEFT", box, "RIGHT")
+themeGap:SetPoint("RIGHT", profileButton, "LEFT")
+themeGap:SetHeight(1)
+themeGap:SetScript("OnSizeChanged", function(self, width)
+    themePicker:ClearAllPoints()
+    themePicker:SetPoint("LEFT", self, "LEFT", math.floor((width - themePicker:GetWidth()) / 2 + 0.5), 0)
+end)
+themePicker:SetPoint("LEFT", themeGap, "LEFT", 0, 0)
 
 ns.tour = { window = frame, menu = rail, search = box, profile = profileButton, minimize = minimizeX }
 
 local results = CreateFrame("Frame", nil, frame)
 results:SetFrameLevel(frame:GetFrameLevel() + 300)
-results:SetPoint("TOPRIGHT", box, "BOTTOMRIGHT", 0, -4)
-results:SetWidth(380)
+results:SetPoint("TOPLEFT", box, "BOTTOMLEFT", 0, -4)
+results:SetWidth(420)
 results:EnableMouse(true)
 Style.Panel(results, C.window, C.border)
 results:Hide()
@@ -1431,15 +1861,12 @@ function SetMinimized(min)
             end
         end
         flash:Hide()
-        footerLine:Hide()
-        titleVersion:Hide()
-        titleLine:Hide()
-        box:Hide()
         results:Hide()
         scrollTrack:Hide()
         scrollThumb:Hide()
         frame:SetSize(BAR_WIDTH, BAR_HEIGHT)
         frame:SetClampRectInsets(0, 0, 0, 0)
+        frame:SetClampedToScreen(true)
         PlaceBar((fullRight or BAR_WIDTH) - BAR_WIDTH, fullTop or UIParent:GetHeight() / frame:GetScale())
         miniBar:Show()
         ns.UpdateMiniBar()
@@ -1450,10 +1877,6 @@ function SetMinimized(min)
                 child:Show()
             end
         end
-        footerLine:Show()
-        titleVersion:Show()
-        titleLine:Show()
-        box:Show()
         frame:SetSize(WIDTH, restoreHeight)
         LooseClamp()
         if fullLeft and fullTop then
