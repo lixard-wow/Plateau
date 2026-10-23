@@ -39,6 +39,7 @@ Core\CVars.lua
 Core\AutoProfile.lua
 Core\Commands.lua
 Core\Minimap.lua
+Driver\StockEvents.lua
 Driver\PlateDriver.lua
 Features\InterruptReady.lua
 Features\UnitColors.lua
