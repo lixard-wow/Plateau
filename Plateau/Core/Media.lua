@@ -271,6 +271,48 @@ function ns.WarmThemeFonts()
     end
 end
 
+local ALPHABETS = {
+    { "korean", "Fonts\\2002.TTF" },
+    { "simplifiedchinese", "Fonts\\ARKai_T.ttf" },
+    { "traditionalchinese", "Fonts\\blei00d.TTF" },
+    { "russian", "Fonts\\FRIZQT___CYR.TTF" },
+}
+local families = {}
+local familyCount = 0
+
+local function Family(file, size, flags)
+    if not CreateFontFamily then return nil end
+    local key = file .. "|" .. size .. "|" .. (flags or "")
+    local family = families[key]
+    if family == nil then
+        local members = { { alphabet = "roman", file = file, height = size, flags = flags or "" } }
+        for _, entry in ipairs(ALPHABETS) do
+            members[#members + 1] = { alphabet = entry[1], file = entry[2], height = size, flags = flags or "" }
+        end
+        familyCount = familyCount + 1
+        local ok, created = pcall(CreateFontFamily, "PlateauFontFamily" .. familyCount, members)
+        family = ok and created or false
+        families[key] = family
+    end
+    return family or nil
+end
+
+local function UseFamily(fontString, file, size, flags)
+    local family = Family(file, size, flags)
+    if not family then return end
+    local r, g, b, a = fontString:GetTextColor()
+    local justifyH, justifyV = fontString:GetJustifyH(), fontString:GetJustifyV()
+    fontString:SetFontObject(family)
+    fontString:SetTextColor(r, g, b, a)
+    fontString:SetJustifyH(justifyH)
+    fontString:SetJustifyV(justifyV)
+    if fontString.slShadow ~= nil then
+        local shadow = fontString.slShadow
+        fontString.slShadow = nil
+        ns.ApplyShadow(fontString, shadow)
+    end
+end
+
 local pending = {}
 local scheduled = false
 
@@ -280,6 +322,7 @@ local function Retry()
         request.tries = request.tries + 1
         if fontString:SetFont(request.file, request.size, request.flags) then
             pending[fontString] = nil
+            UseFamily(fontString, request.file, request.size, request.flags)
         elseif request.tries >= MAX_TRIES then
             fontString:SetFont(FALLBACK, request.size, request.flags)
             pending[fontString] = nil
@@ -298,6 +341,7 @@ function ns.ApplyFont(fontString, file, size, flags)
     fontString.slFontFile, fontString.slFontSize, fontString.slFontFlags = file, size, flags
     if fontString:SetFont(file, size, flags) then
         pending[fontString] = nil
+        UseFamily(fontString, file, size, flags)
         return
     end
     pending[fontString] = { file = file, size = size, flags = flags, tries = 0 }
