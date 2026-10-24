@@ -803,6 +803,10 @@ function ns.Widgets.ShareProfile(parent)
             else
                 importMessage:SetText(T("Imported as %s. It is your default profile, but an automatic rule keeps %s active."):format(name, Plateau.DB.profileName))
             end
+            local missing = Plateau.DB:MissingMedia(name)
+            if #missing > 0 then
+                importMessage:SetText(importMessage:GetText() .. " " .. T("Some fonts or textures come from addons not installed here, so defaults are used: %s."):format(table.concat(missing, ", ")))
+            end
             nameBox:SetText("")
             importEdit:SetText("")
             Refreshed()

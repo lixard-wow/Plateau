@@ -1152,6 +1152,28 @@ local function Copy(source)
     return copy
 end
 
+local EXPORT_CVARS = {
+    "ShowQuestUnitCircles", "SoftTargetIconEnemy", "SoftTargetIconFriend", "SoftTargetIconInteract",
+    "SoftTargetNameplateSize", "UnitNameEnemyMinionName", "UnitNameEnemyPlayerName", "UnitNameFocused",
+    "UnitNameFriendlyGuardianName", "UnitNameFriendlyMinionName", "UnitNameFriendlyPetName",
+    "UnitNameFriendlyPlayerName", "UnitNameFriendlySpecialNPCName", "UnitNameFriendlyTotemName", "UnitNameHostleNPC",
+    "UnitNameInteractiveNPC", "UnitNameNPC", "UnitNameNonCombatCreatureName", "UnitNameOwn", "nameplateAuraScale",
+    "nameplateBottomInset", "nameplateCastBarDisplay", "nameplateDebuffPadding", "nameplateEnemyNpcAuraDisplay",
+    "nameplateEnemyPlayerAuraDisplay", "nameplateForceShowUnitName", "nameplateFriendlyPlayerAuraDisplay",
+    "nameplateInfoDisplay", "nameplateMaxDistance", "nameplateMaxScale", "nameplateMinAlpha", "nameplateMinScale",
+    "nameplateMotionSpeed", "nameplateOccludedAlphaMult", "nameplateOtherAtBase", "nameplateOverlapH",
+    "nameplateOverlapV", "nameplatePlayRemovalAnimation", "nameplateSelectedScale", "nameplateShowAll",
+    "nameplateShowClassColor", "nameplateShowDebuffsOnFriendly", "nameplateShowEnemies", "nameplateShowEnemyGuardians",
+    "nameplateShowEnemyMinions", "nameplateShowEnemyMinus", "nameplateShowEnemyPets", "nameplateShowEnemyTotems",
+    "nameplateShowFriendlyClassColor", "nameplateShowFriendlyNpcs", "nameplateShowFriendlyPlayerGuardians",
+    "nameplateShowFriendlyPlayerMinions", "nameplateShowFriendlyPlayerPets", "nameplateShowFriendlyPlayerTotems",
+    "nameplateShowFriendlyPlayers", "nameplateShowFriendlyRealmName", "nameplateShowOffscreen",
+    "nameplateShowOnlyNameForFriendlyPlayerUnits", "nameplateSimplifiedTypes", "nameplateSize",
+    "nameplateStackingTypes", "nameplateStyle", "nameplateTargetRadialPosition", "nameplateThreatDisplay",
+    "nameplateTopInset", "nameplateUseClassColorForFriendlyPlayerUnitNames"
+}
+DB.EXPORT_CVARS = EXPORT_CVARS
+
 local GAME_CVAR_PREFIXES = { "^nameplate", "^SoftTarget", "^UnitName" }
 local GAME_CVARS = { ShowQuestUnitCircles = true }
 local OCCLUDED_KINDS = { world = true, dungeon = true, raid = true, delve = true, pvp = true }
@@ -1201,6 +1223,12 @@ function DB:ExportGame()
     if ns.CVars then
         for name, value in pairs(ns.CVars:ManagedCopy()) do
             if GameCVar(name) then
+                game.cvars[name] = tostring(value)
+            end
+        end
+        for _, name in ipairs(EXPORT_CVARS) do
+            local value = ns.CVars:Get(name)
+            if value ~= nil and game.cvars[name] == nil then
                 game.cvars[name] = tostring(value)
             end
         end
@@ -1325,6 +1353,42 @@ function DB:ImportProfile(name, text, activate)
         reload = needsReload == true
     end
     return ok, name, state, reload
+end
+
+local function AddOnInstalled(name)
+    local addons = C_AddOns
+    if not addons then return true end
+    if addons.DoesAddOnExist then
+        return addons.DoesAddOnExist(name) == true
+    end
+    if addons.GetAddOnInfo then
+        local _, _, _, _, reason = addons.GetAddOnInfo(name)
+        return reason ~= "MISSING"
+    end
+    return true
+end
+
+function DB:MissingMedia(name)
+    local profile = self.saved.profiles[name]
+    local found, missing = {}, {}
+    local function Scan(value)
+        if type(value) == "table" then
+            for _, child in pairs(value) do
+                Scan(child)
+            end
+        elseif type(value) == "string" then
+            local addon = value:match("^[Ii]nterface[\\/][Aa]dd[Oo]ns[\\/]([^\\/]+)[\\/]")
+            if addon and not found[addon] then
+                found[addon] = true
+                if not AddOnInstalled(addon) then
+                    missing[#missing + 1] = addon
+                end
+            end
+        end
+    end
+    Scan(profile and rawget(profile, "look"))
+    table.sort(missing)
+    return missing
 end
 
 function DB:DeleteProfile(name)

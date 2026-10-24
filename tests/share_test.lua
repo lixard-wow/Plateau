@@ -53,6 +53,11 @@ check(not DB:ImportProfile("Bad", "!SL1!zzzz"), "damaged string rejected")
 local applied = {}
 ns.CVars = {
     ManagedCopy = function() return { nameplateMaxDistance = "45", nameplateOverlapV = "1.2", Gamma = "2" } end,
+    Get = function(_, name)
+        if name == "nameplateMaxDistance" then return "45" end
+        if name == "nameplateShowFriendlyNpcs" then return "1" end
+        if name == "UnitNameFriendlyPlayerName" then return "0" end
+    end,
     Set = function(_, name, value) applied[name] = value end,
 }
 C_CVar = { GetCVar = function(name) return name:find("^nameplate") and "0" or nil end }
@@ -60,6 +65,7 @@ DB.saved.global.hideInstancePets = true
 local gameText = DB:ExportProfile()
 local gamePayload = ns.Share.Decode(gameText)
 check(gamePayload.game and gamePayload.game.cvars.nameplateMaxDistance == "45" and gamePayload.game.cvars.Gamma == nil, "export carries Plateau's Blizzard nameplate settings only")
+check(gamePayload.game.cvars.nameplateShowFriendlyNpcs == "1" and gamePayload.game.cvars.UnitNameFriendlyPlayerName == "0", "export carries Blizzard settings Plateau shows even when Plateau never changed them")
 DB.saved.global.hideInstancePets = nil
 check(DB:ImportProfile("Game off", gameText, false) and next(applied) == nil, "importing without activating leaves Blizzard settings alone")
 check(DB:ImportProfile("Game on", gameText, true) and applied.nameplateMaxDistance == "45" and applied.nameplateOverlapV == "1.2", "activating an import applies its Blizzard nameplate settings")
@@ -126,3 +132,32 @@ local ranged = okRange and DB.saved.profiles[rangeName].look
 check(ranged and ranged.plate.width == 40 and ranged.castbar.height == 40, "imported numbers are kept inside the matching slider range")
 check(ranged and ranged.name.size == 12, "numbers without a known slider range are left alone")
 Share.ranges = nil
+
+local listed = {}
+for _, name in ipairs(DB.EXPORT_CVARS) do
+    listed[name] = true
+end
+local missing = {}
+local pipe = io.popen('git ls-files "Plateau/*.lua" "Plateau_Options/*.lua"')
+for path in pipe:lines() do
+    if not path:find("/Libs/") then
+        local handle = io.open(path, "rb")
+        local source = handle:read("*a")
+        handle:close()
+        for name in source:gmatch('"([%a]+)"') do
+            if (name:find("^nameplate%u") or name:find("^SoftTarget%u") or name:find("^UnitName%u") or name == "ShowQuestUnitCircles") and not listed[name] then
+                missing[#missing + 1] = name .. " (" .. path .. ")"
+            end
+        end
+    end
+end
+pipe:close()
+check(#missing == 0, "every Blizzard setting Plateau touches is in the export" .. (#missing > 0 and (": missing " .. table.concat(missing, ", ")) or ""))
+
+C_AddOns = { DoesAddOnExist = function(name) return name == "SharedMedia_Here" end }
+local slash = string.char(92)
+DB:Set("look.name.font", "Interface" .. slash .. "AddOns" .. slash .. "SharedMedia_Gone" .. slash .. "fonts" .. slash .. "Pretty.ttf")
+DB:Set("look.castbar.font", "interface/addons/SharedMedia_Here/fonts/Fine.ttf")
+local missingMedia = DB:MissingMedia(DB.profileName)
+check(#missingMedia == 1 and missingMedia[1] == "SharedMedia_Gone", "an import names the media addons it needs that aren't installed")
+C_AddOns = nil

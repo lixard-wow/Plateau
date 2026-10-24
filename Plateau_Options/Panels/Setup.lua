@@ -91,6 +91,10 @@ function Widgets.SetupImport(parent)
             else
                 message:SetText(T("Imported as %s and now active."):format(name))
             end
+            local missing = Plateau.DB:MissingMedia(name)
+            if #missing > 0 then
+                message:SetText(message:GetText() .. " " .. T("Some fonts or textures come from addons not installed here, so defaults are used: %s."):format(table.concat(missing, ", ")))
+            end
             edit:SetText("")
             edit:ClearFocus()
             if ns.RefreshAll then
