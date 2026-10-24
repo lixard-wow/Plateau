@@ -7,7 +7,7 @@ local THUMB_SIZE = 13
 
 function ns.Widgets.Slider(parent, spec)
     local min, max, step = spec.min, spec.max, spec.step or 1
-    local pattern = step < 1 and "%.2f" or "%d"
+    local pattern = step < 0.01 and "%.3f" or step < 1 and "%.2f" or "%d"
 
     local row = CreateFrame("Frame", nil, parent)
     row:EnableMouse(true)

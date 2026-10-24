@@ -22,6 +22,18 @@ local function ValuesEqual(a, b)
     return na ~= nil and nb ~= nil and na == nb
 end
 
+local LIMITS = {
+    nameplateMotionSpeed = { max = 0.2, fallback = "0.025" },
+}
+
+local function Within(name, value)
+    local limit, number = LIMITS[name], tonumber(value)
+    if limit and number and number > limit.max then
+        return limit.fallback
+    end
+    return value
+end
+
 local function Store()
     local global = ns.DB.saved.global
     global.cvars = global.cvars or {}
@@ -61,6 +73,29 @@ function CVars:Apply()
     end
     pending = false
     local store = Store()
+    for name in pairs(LIMITS) do
+        local original = store.original[name]
+        if original ~= nil then
+            store.original[name] = Within(name, original)
+        end
+        local managed = store.managed[name]
+        if managed ~= nil and Within(name, managed) ~= managed then
+            store.managed[name] = nil
+            local fixed = Within(name, managed)
+            if not ValuesEqual(fixed, store.original[name] or fixed) then
+                store.managed[name] = fixed
+            else
+                store.original[name] = nil
+                store.restore[name] = fixed
+            end
+        end
+        if store.managed[name] == nil and store.restore[name] == nil and not store.override[name] then
+            local live = GetCVar(name)
+            if live ~= nil and Within(name, live) ~= live then
+                store.restore[name] = Within(name, live)
+            end
+        end
+    end
     for name, override in pairs(store.override) do
         if not ValuesEqual(GetCVar(name), override.value) then
             Write(name, override.value)
@@ -86,7 +121,7 @@ end
 
 function CVars:Set(name, value)
     local store = Store()
-    value = tostring(value)
+    value = Within(name, tostring(value))
     if store.original[name] == nil then
         store.original[name] = UserValue(store, name)
     end

@@ -813,38 +813,37 @@ local STACK_PRESETS = {
     StackPreset("spread", "Spread out", "More room between nameplates, so they overlap less. Big pulls take more of the screen.", { "1.5", "1.1" }),
 }
 
-local MOTION = "nameplateMotionSpeed"
-local SLIDE_DEFAULT = 0.25
+local MOTION = { cvar = "nameplateMotionSpeed", default = 0.025, max = 0.15, fastest = "0.2" }
 
 local function Instant()
-    return Near(MOTION, "1")
+    return Near(MOTION.cvar, MOTION.fastest)
 end
 
 local function SlideSpeed()
     local saved = tonumber(Plateau.DB.saved.global.slideSpeed)
-    if saved and saved < 1 then return saved end
-    local current = tonumber(CVars:Get(MOTION))
-    if current and current > 0 and current < 1 then return current end
-    return SLIDE_DEFAULT
+    if saved and saved > 0 and saved <= MOTION.max then return saved end
+    local current = tonumber(CVars:Get(MOTION.cvar))
+    if current and current > 0 and current <= MOTION.max then return current end
+    return MOTION.default
 end
 
 local function InstantMovement()
     return {
         type = "Toggle",
-        label = "Instant movement",
-        tooltip = "Nameplates jump to their new spot instead of sliding. Turning it off goes back to your Slide speed.",
+        label = "Fastest movement",
+        tooltip = "Nameplates slide to their new spot as fast as they can while staying smooth. Turning it off goes back to your Slide speed.",
         get = Instant,
         set = function(value)
             if value then
                 Plateau.DB.saved.global.slideSpeed = SlideSpeed()
-                CVars:Set(MOTION, "1")
+                CVars:Set(MOTION.cvar, MOTION.fastest)
             else
-                CVars:Set(MOTION, tostring(SlideSpeed()))
+                CVars:Set(MOTION.cvar, tostring(SlideSpeed()))
             end
         end,
         reset = function()
             Plateau.DB.saved.global.slideSpeed = nil
-            CVars:Release(MOTION)
+            CVars:Release(MOTION.cvar)
         end,
         resetLabel = "Right-click to reset to what it was before Plateau changed it.",
     }
@@ -854,29 +853,31 @@ local function SlideSpeedSlider(enabled)
     return {
         type = "Slider",
         label = "Slide speed",
-        path = "cvar." .. MOTION,
+        path = "cvar." .. MOTION.cvar,
         gameSetting = true,
-        min = 0.05, max = 0.95, step = 0.01,
-        tooltip = "How much of the way to its stacked spot a nameplate moves each frame. Low values glide slowly and can look like overlapping while a pack moves. It never goes to 0, because nameplates would stop moving apart.",
+        min = 0.005, max = MOTION.max, step = 0.005,
+        tooltip = "How much of the way to its stacked spot a nameplate moves each frame. The game's default is 0.025. Low values glide slowly; high values settle faster.",
         get = function()
             if Instant() then return SlideSpeed() end
-            return tonumber(CVars:Get(MOTION)) or SlideSpeed()
+            local current = tonumber(CVars:Get(MOTION.cvar))
+            if current and current <= MOTION.max then return current end
+            return SlideSpeed()
         end,
         set = function(value)
             Plateau.DB.saved.global.slideSpeed = value
             if not Instant() then
-                CVars:Set(MOTION, tostring(value))
+                CVars:Set(MOTION.cvar, tostring(value))
             end
         end,
         reset = function()
             Plateau.DB.saved.global.slideSpeed = nil
-            CVars:Release(MOTION)
+            CVars:Release(MOTION.cvar)
         end,
         resetLabel = "Right-click to reset to what it was before Plateau changed it.",
         enabledIf = function() return enabled() and not Instant() end,
         disabledReason = function()
             if not enabled() then return "Turn on Stack enemy or Stack friendly nameplates to use this." end
-            return "Turn off Instant movement to use this."
+            return "Turn off Fastest movement to use this."
         end,
     }
 end

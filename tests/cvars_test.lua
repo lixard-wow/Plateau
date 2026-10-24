@@ -20,10 +20,10 @@ check(ns.DB.saved.global.cvars.original.nameplateShowAll == "0", "original remem
 CVars:Set("nameplateShowAll", 0)
 check(not CVars:IsManaged("nameplateShowAll") and game.nameplateShowAll == "0", "setting back to original stops managing")
 
-CVars:Set("nameplateMotionSpeed", 0.5)
+CVars:Set("nameplateMotionSpeed", 0.1)
 game.nameplateMotionSpeed = "0.025"
 CVars:Apply()
-check(game.nameplateMotionSpeed == "0.5", "apply re-sets a managed value the game changed")
+check(game.nameplateMotionSpeed == "0.1", "apply re-sets a managed value the game changed")
 CVars:Release("nameplateMotionSpeed")
 check(game.nameplateMotionSpeed == "0.025" and not CVars:IsManaged("nameplateMotionSpeed"), "release restores original")
 
@@ -99,3 +99,25 @@ check(game.nameplateOccludedAlphaMult == "0.8" and CVars:IsOverridden("nameplate
 game.nameplateOccludedAlphaMult = "1"
 onEvent(CVars, "PLAYER_LOGIN")
 check(game.nameplateOccludedAlphaMult == "0.8" and not CVars:IsOverridden("nameplateOccludedAlphaMult"), "the next login out of combat finishes the restore")
+
+ns.DB.saved.global.cvars = nil
+game.nameplateMotionSpeed = "0.025"
+CVars:Set("nameplateMotionSpeed", 1)
+check(game.nameplateMotionSpeed == "0.025" and not CVars:IsManaged("nameplateMotionSpeed"), "a slide speed too fast to stay smooth is not used")
+CVars:Set("nameplateMotionSpeed", 0.2)
+check(game.nameplateMotionSpeed == "0.2", "the fastest smooth slide speed is allowed")
+
+ns.DB.saved.global.cvars = { managed = { nameplateMotionSpeed = "0.25" }, original = { nameplateMotionSpeed = "0.025" }, restore = {}, override = {} }
+game.nameplateMotionSpeed = "0.25"
+CVars:Apply()
+check(game.nameplateMotionSpeed == "0.025" and not CVars:IsManaged("nameplateMotionSpeed"), "an old too-fast slide speed goes back to the game's default on login")
+
+ns.DB.saved.global.cvars = { managed = { nameplateMotionSpeed = "1" }, original = { nameplateMotionSpeed = "0.05" }, restore = {}, override = {} }
+game.nameplateMotionSpeed = "1"
+CVars:Apply()
+check(game.nameplateMotionSpeed == "0.025", "old instant movement becomes a smooth slide on login")
+
+ns.DB.saved.global.cvars = nil
+game.nameplateMotionSpeed = "0.9"
+CVars:Apply()
+check(game.nameplateMotionSpeed == "0.025", "a too-fast slide speed left over from before is fixed on login")

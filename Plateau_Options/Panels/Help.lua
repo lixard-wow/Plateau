@@ -95,7 +95,7 @@ ns.helpTopics = {
         category = "Pages",
         title = "Stacking page",
         keywords = "stacking stack overlap spacing movement slide",
-        text = "Stacking holds the stacking switches, the spacing presets and Show stacking boxes, which draws the area the game keeps apart. Stacking bounds and spacing decide how much of each nameplate counts. Movement holds Instant movement and how fast nameplates slide. Position moves nameplates up or down.",
+        text = "Stacking holds the stacking switches, the spacing presets and Show stacking boxes, which draws the area the game keeps apart. Stacking bounds and spacing decide how much of each nameplate counts. Movement holds Fastest movement and how fast nameplates slide. Position moves nameplates up or down.",
     },
     {
         category = "Pages",
@@ -269,7 +269,7 @@ ns.helpTopics = {
         category = "How do I",
         title = "Stop nameplates overlapping",
         keywords = "overlap stacking stack spacing slide crowded",
-        text = "Open Stacking. Under Stacking, click a preset to apply it: Tight, Balanced or Spread out. They change only the spacing between nameplates. Turn on Show stacking boxes to see the area the game keeps apart. If nameplates overlap because your name or cast bar takes extra room, change Stacking bounds to include it. Turn on Instant movement under Movement if you also want nameplates to jump straight to their spot.",
+        text = "Open Stacking. Under Stacking, click a preset to apply it: Tight, Balanced or Spread out. They change only the spacing between nameplates. Turn on Show stacking boxes to see the area the game keeps apart. If nameplates overlap because your name or cast bar takes extra room, change Stacking bounds to include it. Turn on Fastest movement under Movement if you want nameplates to reach their spot sooner.",
     },
     {
         category = "How do I",
