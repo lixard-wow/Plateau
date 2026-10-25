@@ -1492,6 +1492,11 @@ local function OffScreen()
         CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the bottom of the screen. 0.10 is 10% of the screen height.")
     )
 end
+local CLICK_CAST = {
+    { value = "off", label = "Off" },
+    { value = "always", label = "Always" },
+    { value = "casting", label = "While casting" },
+}
 local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
 local COMBAT_PATHS = { "look.idle" }
 local TARGET_LOOK = {}
@@ -1679,8 +1684,16 @@ ns.sections = {
           tooltip = "Makes the clickable area taller without enlarging the nameplate." }),
         BaseSpec({ type = "Slider", path = "look.plate.clickOffsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Moves the clickable area up or down without changing its size." }),
-        BaseSpec({ type = "Toggle", path = "look.plate.clickCastBar", label = "Include cast bar in clickable area",
-          tooltip = "Clicking an enemy's cast bar also targets it." }),
+        { type = "Dropdown", path = "look.plate.clickCastBar", label = "Include cast bar in clickable area", options = CLICK_CAST,
+          get = function()
+              local value = Plateau.DB:Get("look.plate.clickCastBar")
+              if value == true then return "always" elseif value == "casting" then return "casting" end
+              return "off"
+          end,
+          set = function(value)
+              Plateau.DB:Set("look.plate.clickCastBar", value == "always" or (value == "casting" and "casting") or false)
+          end,
+          tooltip = "Clicking an enemy's cast bar also targets it. While casting adds it only when a cast bar is up; test it in combat." },
 
         { type = "Header", label = "Friendly nameplates" },
         BaseSpec({ type = "Toggle", path = "look.plate.clickThroughFriendly", label = "Click-through friendly nameplates",

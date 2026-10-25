@@ -631,6 +631,7 @@ function Castbar:Disable(plate)
     TrackCasting(bar, false)
     if plate.casting then
         plate.casting = false
+        ns.Driver:CastChanged(plate)
         ns.Scaling:Apply(plate)
         ns.Elements.Name:RefreshShown(plate)
         if plate.rangeAlpha ~= 1 then
@@ -752,6 +753,7 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
     bar.holding = true
     if plate.casting then
         plate.casting = false
+        ns.Driver:CastChanged(plate)
         ns.Scaling:Apply(plate)
         ns.Elements.Name:RefreshShown(plate)
         if plate.rangeAlpha ~= 1 then
@@ -892,6 +894,7 @@ function Castbar:Refresh(plate, unit, ending)
     if not plate.casting then
         ns.Fire("CAST_START", unit, plate)
         plate.casting = true
+        ns.Driver:CastChanged(plate)
         ns.Scaling:Apply(plate)
         ns.Elements.Name:RefreshShown(plate)
         if plate.rangeAlpha ~= 1 then

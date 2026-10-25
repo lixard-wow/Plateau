@@ -281,6 +281,32 @@ local function BuildMissing(plate)
     end
 end
 
+local function PlaceClick(plate)
+    local click, size, look = plate.clickArea, views.enemy.plate, views[plate.state]
+    local shift = size.clickOffsetY or 0
+    if plate.nameOnly then
+        shift = shift + (views.enemy.friendly.nameOffsetY or 0)
+    end
+    local mode = size.clickCastBar
+    local withCast = mode == true or (mode == "casting" and plate.casting == true and plate.preview == nil)
+    local cast = look.castbar
+    local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
+    local extra = withCast and (castHeight + cast.gap + cast.borderSize * 2) or 0
+    if click.x == size.clickX and click.y == size.clickY and click.shift == shift and click.extra == extra then return false end
+    if click.IsAnchoringRestricted and click:IsAnchoringRestricted() then return false end
+    click.x, click.y, click.shift, click.extra = size.clickX, size.clickY, shift, extra
+    click.changed = true
+    click:ClearAllPoints()
+    click:SetPoint("TOPLEFT", plate, "TOPLEFT", -size.clickX, size.clickY + shift)
+    click:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", size.clickX, -size.clickY + shift - extra)
+    return true
+end
+
+function Driver:CastChanged(plate)
+    if not plate.active or views.enemy.plate.clickCastBar ~= "casting" then return end
+    if PlaceClick(plate) then ApplyHitTest(plate) end
+end
+
 local function StylePlate(plate)
     BuildMissing(plate)
     local look = views[plate.state]
@@ -288,21 +314,8 @@ local function StylePlate(plate)
     plate.styleVersion = styleVersion
     plate.nameOnly = plate.state == "friendly" and views.enemy.friendly.nameOnly == true
     SizePlate(plate, look)
-    local click, size = plate.clickArea, views.enemy.plate
-    local shift = size.clickOffsetY or 0
-    if plate.nameOnly then
-        shift = shift + (views.enemy.friendly.nameOffsetY or 0)
-    end
-    local cast = look.castbar
-    local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
-    local extra = size.clickCastBar and (castHeight + cast.gap + cast.borderSize * 2) or 0
-    if click.x ~= size.clickX or click.y ~= size.clickY or click.shift ~= shift or click.extra ~= extra then
-        click.x, click.y, click.shift, click.extra = size.clickX, size.clickY, shift, extra
-        click.changed = true
-        click:ClearAllPoints()
-        click:SetPoint("TOPLEFT", plate, "TOPLEFT", -size.clickX, size.clickY + shift)
-        click:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", size.clickX, -size.clickY + shift - extra)
-    end
+    local click = plate.clickArea
+    PlaceClick(plate)
     click.border:Layout(1)
     click.border:SetColor(0.27, 0.82, 0.76, 0.9)
     UpdateClickArea(plate)
