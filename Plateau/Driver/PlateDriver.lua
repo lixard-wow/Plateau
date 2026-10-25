@@ -35,11 +35,24 @@ local function AddOverlay(plate)
 
     local click = CreateFrame("Frame", nil, plate)
     click:SetFrameLevel(overlay:GetFrameLevel() + 30)
-    click.fill = click:CreateTexture(nil, "BACKGROUND")
+    local reach = CreateFrame("StatusBar", nil, click)
+    reach:SetAllPoints()
+    reach:SetOrientation("VERTICAL")
+    reach:SetReverseFill(true)
+    reach:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+    reach:SetStatusBarColor(0, 0, 0, 0)
+    reach:SetMinMaxValues(0, 1)
+    reach:SetValue(1)
+    click.reach = reach
+    click.edge = reach:GetStatusBarTexture()
+    local shown = CreateFrame("Frame", nil, click)
+    shown:SetPoint("TOPLEFT", click, "TOPLEFT")
+    shown:SetPoint("BOTTOMRIGHT", click.edge, "BOTTOMRIGHT")
+    click.fill = shown:CreateTexture(nil, "BACKGROUND")
     click.fill:SetAllPoints()
     click.fill:SetColorTexture(0.27, 0.82, 0.76, 0.18)
     click.fill:Hide()
-    click.border = ns.CreateBorder(click, click, "OVERLAY")
+    click.border = ns.CreateBorder(shown, shown, "OVERLAY")
     click.border:Hide()
     plate.clickArea = click
     plate.state = "enemy"
@@ -82,7 +95,11 @@ local function ApplyHitTest(plate)
         if clickThroughFriendly and plate.isFriendly and base.ClearAllHitTestPoints then
             base:ClearAllHitTestPoints()
         else
-            base:SetAllHitTestPoints(plate.clickArea)
+            local click = plate.clickArea
+            base:SetHitTestPoints({
+                { point = "TOPLEFT", relativeTo = click, relativePoint = "TOPLEFT", offsetX = 0, offsetY = 0 },
+                { point = "BOTTOMRIGHT", relativeTo = click.edge, relativePoint = "BOTTOMRIGHT", offsetX = 0, offsetY = 0 },
+            })
         end
         plate.clickArea.changed = false
     else
@@ -281,16 +298,24 @@ local function BuildMissing(plate)
     end
 end
 
+local function UpdateReach(plate)
+    local click = plate.clickArea
+    local casting = plate.casting == true and plate.preview == nil
+    click.reach:SetValue(casting and 1 or 1 - (click.castShare or 0))
+end
+
 local function PlaceClick(plate)
     local click, size, look = plate.clickArea, views.enemy.plate, views[plate.state]
     local shift = size.clickOffsetY or 0
     if plate.nameOnly then
         shift = shift + (views.enemy.friendly.nameOffsetY or 0)
     end
-    local withCast = size.clickCastBar and (not size.clickCastOnly or (plate.casting == true and plate.preview == nil))
     local cast = look.castbar
     local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
-    local extra = withCast and (castHeight + cast.gap + cast.borderSize * 2) or 0
+    local extra = size.clickCastBar and (castHeight + cast.gap + cast.borderSize * 2) or 0
+    local total = (plate:GetHeight() or look.plate.height) + size.clickY * 2 + extra
+    click.castShare = (size.clickCastBar and size.clickCastOnly and total > 0) and math.min(0.9, extra / total) or 0
+    UpdateReach(plate)
     if click.x == size.clickX and click.y == size.clickY and click.shift == shift and click.extra == extra then return false end
     if InCombatLockdown() and click.IsAnchoringRestricted and click:IsAnchoringRestricted() then
         hitTestPending = true
@@ -307,7 +332,7 @@ end
 function Driver:CastChanged(plate)
     local size = views.enemy.plate
     if not plate.active or not (size.clickCastBar and size.clickCastOnly) then return end
-    if PlaceClick(plate) then ApplyHitTest(plate) end
+    UpdateReach(plate)
 end
 
 local function StylePlate(plate)
