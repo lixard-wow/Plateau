@@ -1497,7 +1497,7 @@ local CLICK_CAST = {
     { value = "always", label = "Always" },
     { value = "casting", label = "While casting" },
 }
-local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
+local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickCastOnly", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
 local COMBAT_PATHS = { "look.idle" }
 local TARGET_LOOK = {}
 for _, key in ipairs({ "ring", "ringColor", "ringSize", "colorBar", "barColor", "texture", "overlayPattern", "overlayAlpha",
@@ -1686,12 +1686,11 @@ ns.sections = {
           tooltip = "Moves the clickable area up or down without changing its size." }),
         { type = "Dropdown", path = "look.plate.clickCastBar", label = "Include cast bar in clickable area", options = CLICK_CAST,
           get = function()
-              local value = Plateau.DB:Get("look.plate.clickCastBar")
-              if value == true then return "always" elseif value == "casting" then return "casting" end
-              return "off"
+              if not Plateau.DB:Get("look.plate.clickCastBar") then return "off" end
+              return Plateau.DB:Get("look.plate.clickCastOnly") and "casting" or "always"
           end,
           set = function(value)
-              Plateau.DB:Set("look.plate.clickCastBar", value == "always" or (value == "casting" and "casting") or false)
+              Plateau.DB:SetMany({ ["look.plate.clickCastBar"] = value ~= "off", ["look.plate.clickCastOnly"] = value == "casting" })
           end,
           tooltip = "Clicking an enemy's cast bar also targets it. While casting adds it only when a cast bar is up; test it in combat." },
 

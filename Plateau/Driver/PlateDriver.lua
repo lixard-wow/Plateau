@@ -287,8 +287,7 @@ local function PlaceClick(plate)
     if plate.nameOnly then
         shift = shift + (views.enemy.friendly.nameOffsetY or 0)
     end
-    local mode = size.clickCastBar
-    local withCast = mode == true or (mode == "casting" and plate.casting == true and plate.preview == nil)
+    local withCast = size.clickCastBar and (not size.clickCastOnly or (plate.casting == true and plate.preview == nil))
     local cast = look.castbar
     local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
     local extra = withCast and (castHeight + cast.gap + cast.borderSize * 2) or 0
@@ -303,7 +302,8 @@ local function PlaceClick(plate)
 end
 
 function Driver:CastChanged(plate)
-    if not plate.active or views.enemy.plate.clickCastBar ~= "casting" then return end
+    local size = views.enemy.plate
+    if not plate.active or not (size.clickCastBar and size.clickCastOnly) then return end
     if PlaceClick(plate) then ApplyHitTest(plate) end
 end
 

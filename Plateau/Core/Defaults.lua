@@ -12,6 +12,7 @@ ns.defaults = {
             clickY = 0,
             clickOffsetY = 0,
             clickCastBar = false,
+            clickCastOnly = false,
             followBlizzardSize = false,
             stackSpace = "name",
             clickThroughFriendly = false,
