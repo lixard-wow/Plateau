@@ -292,7 +292,10 @@ local function PlaceClick(plate)
     local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
     local extra = withCast and (castHeight + cast.gap + cast.borderSize * 2) or 0
     if click.x == size.clickX and click.y == size.clickY and click.shift == shift and click.extra == extra then return false end
-    if click.IsAnchoringRestricted and click:IsAnchoringRestricted() then return false end
+    if InCombatLockdown() and click.IsAnchoringRestricted and click:IsAnchoringRestricted() then
+        hitTestPending = true
+        return false
+    end
     click.x, click.y, click.shift, click.extra = size.clickX, size.clickY, shift, extra
     click.changed = true
     click:ClearAllPoints()
@@ -1434,6 +1437,7 @@ Driver:SetScript("OnEvent", function(_, event, arg)
             hitTestPending = false
             for _, plate in pairs(platesByUnit) do
                 if plate.active then
+                    PlaceClick(plate)
                     ApplyHitTest(plate)
                 end
             end
