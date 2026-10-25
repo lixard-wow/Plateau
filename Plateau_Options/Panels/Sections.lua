@@ -1451,7 +1451,7 @@ local SIZE_PATHS = {
 local SIZE_CVARS = { "nameplateSize", "nameplateAuraScale", "nameplateMinScale", "nameplateMaxScale" }
 local FADING_PATHS = { "look.range", "look.target.dimOthers", "look.target.dimCombatOnly", "look.target.dimSkipFriendly" }
 local FADING_CVARS = { "nameplateOccludedAlphaMult", "nameplateMinAlpha", "nameplatePlayRemovalAnimation" }
-local LAYERING_PATHS = { "look.plate.stackSpace", "look.plate.offsetY" }
+local LAYERING_PATHS = { "look.plate.stackSpace", "look.plate.stackX", "look.plate.stackY", "look.plate.stackOffsetY", "look.plate.offsetY" }
 local LAYERING_CVARS = { "nameplateStackingTypes", "nameplateOverlapV", "nameplateOverlapH", "nameplateMotionSpeed", "nameplateOtherAtBase",
     "nameplateShowOffscreen", "nameplateTargetRadialPosition", "nameplateTopInset", "nameplateBottomInset" }
 local NAME_CVARS = { "UnitNameOwn", "UnitNameNonCombatCreatureName", "UnitNameFriendlyPlayerName", "UnitNameFriendlyMinionName",
@@ -1650,6 +1650,12 @@ ns.sections = {
           get = function() return Plateau.DB:Get("look.plate.stackSpace") end,
           set = function(value) Plateau.DB:Set("look.plate.stackSpace", value) end,
           tooltip = "Which parts of a nameplate count when stacking. Larger bounds spread big pulls further up the screen." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+        Gate(BaseSpec({ type = "Slider", path = "look.plate.stackX", label = "Stacking box width", min = -40, max = 40,
+          tooltip = "Widens or narrows the stacking box on both sides. Wider pushes side-by-side nameplates apart." }), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+        Gate(BaseSpec({ type = "Slider", path = "look.plate.stackY", label = "Stacking box height", min = -20, max = 30,
+          tooltip = "Makes the stacking box taller or shorter above and below. Shorter packs pulls tighter." }), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+        Gate(BaseSpec({ type = "Slider", path = "look.plate.stackOffsetY", label = "Stacking box offset", min = -30, max = 30,
+          tooltip = "Moves the stacking box up or down without changing its size." }), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
         Gate(CVarSlider("nameplateOverlapV", "Vertical spacing", 0.3, 2, 0.05, "Vertical space between stacked nameplates."), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
         Gate(CVarSlider("nameplateOverlapH", "Horizontal spacing", 0.3, 2, 0.05, "Horizontal space between stacked nameplates."), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
 

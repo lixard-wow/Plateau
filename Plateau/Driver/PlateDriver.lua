@@ -266,10 +266,14 @@ local function SizePlate(plate, look)
     local width, height = look.plate.width * (plate.idleW or 1) * simplified, look.plate.height * (plate.idleH or 1) * simplified
     plate.rawWidth, plate.rawHeight = width, height
     ns.SnapPlateSize(plate)
-    local above, below = StackSpace(look, views.enemy.plate.stackSpace)
+    local size = views.enemy.plate
+    local above, below = StackSpace(look, size.stackSpace)
+    local padX, padY = size.stackX or 0, size.stackY or 0
     local stackRegion = plate.stackRegion
-    local stackHeight = height + above + below
-    local bottom = -height / 2 - below
+    local stackWidth = math.max(4, width + padX * 2)
+    local stackHeight = math.max(4, height + above + below + padY * 2)
+    local bottom = -height / 2 - below - padY + (size.stackOffsetY or 0)
+    width = stackWidth
     if stackRegion.width ~= width or stackRegion.height ~= stackHeight or stackRegion.base ~= bottom then
         stackRegion.width, stackRegion.height, stackRegion.base = width, stackHeight, bottom
         stackRegion:ClearAllPoints()
