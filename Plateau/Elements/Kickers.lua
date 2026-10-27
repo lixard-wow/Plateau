@@ -6,7 +6,7 @@ local UnitExists = UnitExists
 local UnitClassBase = UnitClassBase
 local UnitName = UnitName
 local issecretvalue = issecretvalue
-local type, pairs, ipairs, time = type, pairs, ipairs, time
+local type, pairs, ipairs, time, next = type, pairs, ipairs, time, next
 
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 local CLASS_SHEET = "Interface\\WorldStateFrame\\Icons-Classes"
@@ -31,7 +31,8 @@ end
 if type(INTERRUPT) == "string" then KEYWORDS[#KEYWORDS + 1] = INTERRUPT:lower() end
 
 local includeSelf = {}
-local owners = {}
+local segments = { { low = 0, high = 8, owners = {} } }
+local classes = {}
 local version = 0
 
 local Kickers = {
@@ -75,32 +76,52 @@ local function OwnMarker()
     if marker and marker >= 1 and marker <= 8 then return marker end
 end
 
+local function Segments(byMarker)
+    local list, low = {}, nil
+    for value = 0, 8 do
+        local owned = byMarker[value]
+        if owned then
+            if low then list[#list + 1] = { low = low, high = value - 1, owners = {} } end
+            low = nil
+            list[#list + 1] = { low = value, high = value, owners = owned }
+        elseif not low then
+            low = value
+        end
+    end
+    if low then list[#list + 1] = { low = low, high = 8, owners = {} } end
+    return list
+end
+Kickers.Segments = Segments
+
+local function Refresh(plate)
+    if plate.built[Kickers] and Kickers.enabledIn[plate.state] then
+        Kickers:Update(plate, plate.unit)
+    end
+end
+
 local function Rebuild()
     local marks, now = Marks(), time()
     for guid, mark in pairs(marks) do
         if type(mark) ~= "table" or now - (mark.at or 0) > MARK_LIFE then marks[guid] = nil end
     end
-    local list = {}
+    local byMarker = {}
     local wantSelf = includeSelf.enemy ~= false
     for _, unit in ipairs(UNITS) do
-        if UnitExists(unit) and (unit ~= "player" or wantSelf) then
+        if UnitExists(unit) then
             local guid = Readable(UnitGUID(unit))
+            if guid then classes[guid] = Readable(UnitClassBase(unit)) end
             local marker = guid and marks[guid] and marks[guid].marker
             if unit == "player" then marker = OwnMarker() or marker end
-            if marker then
-                list[marker] = list[marker] or {}
-                local entry = list[marker]
-                entry[#entry + 1] = { class = Readable(UnitClassBase(unit)), name = Readable(UnitName(unit)) }
+            if marker and (unit ~= "player" or wantSelf) then
+                byMarker[marker] = byMarker[marker] or {}
+                local owned = byMarker[marker]
+                owned[#owned + 1] = { guid = guid, class = classes[guid], name = Readable(UnitName(unit)) }
             end
         end
     end
-    owners = list
+    segments = Segments(byMarker)
     version = version + 1
-    ns.Driver:ForEachActive(function(plate)
-        if plate.built[Kickers] and Kickers.enabledIn[plate.state] then
-            Kickers:Update(plate, plate.unit)
-        end
-    end)
+    ns.Driver:ForEachActive(Refresh)
 end
 Kickers.Rebuild = Rebuild
 
@@ -150,98 +171,137 @@ watcher:SetScript("OnEvent", function(_, event, text, ...)
     pcall(OnChat, text, guid)
 end)
 
-local function Gate(lane, low)
-    local bar = CreateFrame("StatusBar", nil, lane)
+local function Gate(parent)
+    local bar = CreateFrame("StatusBar", nil, parent)
     bar:SetAllPoints()
     bar:SetStatusBarTexture(WHITE)
     bar:SetStatusBarColor(0, 0, 0, 0)
-    bar:SetMinMaxValues(low, low + 1)
+    bar:SetMinMaxValues(0, 1)
     bar:SetValue(0)
     return bar
 end
 
-local function Lane(plate, marker)
-    local lane = CreateFrame("Frame", nil, plate.kickHolder)
-    lane:SetPoint("TOPLEFT")
-    lane:SetPoint("BOTTOMRIGHT")
-    lane.open = Gate(lane, marker - 1)
-    lane.shut = Gate(lane, marker)
-    local clip = CreateFrame("Frame", nil, lane)
+local function Segment(plate, index)
+    local seg = plate.kickSegs[index]
+    if seg then return seg end
+    seg = CreateFrame("Frame", nil, plate.kickHolder)
+    seg:SetPoint("TOPLEFT")
+    seg:SetPoint("BOTTOMRIGHT")
+    seg.open = Gate(seg)
+    seg.shut = Gate(seg)
+    local clip = CreateFrame("Frame", nil, seg)
     clip:SetClipsChildren(true)
-    clip:SetPoint("TOPLEFT", lane.shut:GetStatusBarTexture(), "TOPRIGHT")
-    clip:SetPoint("BOTTOMRIGHT", lane.open:GetStatusBarTexture(), "BOTTOMRIGHT")
+    clip:SetPoint("TOPLEFT", seg.shut:GetStatusBarTexture(), "TOPRIGHT")
+    clip:SetPoint("BOTTOMRIGHT", seg.open:GetStatusBarTexture(), "BOTTOMRIGHT")
     local content = CreateFrame("Frame", nil, clip)
-    content:SetAllPoints(lane)
-    lane.content = content
-    lane.icons = {}
-    plate.kickLanes[marker] = lane
-    return lane
+    content:SetAllPoints(seg)
+    seg.content = content
+    seg.icons = {}
+    plate.kickSegs[index] = seg
+    return seg
 end
 
-local function Icon(lane, index)
-    local icon = lane.icons[index]
+local function Icon(seg, index)
+    local icon = seg.icons[index]
     if icon then return icon end
-    icon = {
-        edge = lane.content:CreateTexture(nil, "OVERLAY", nil, 1),
-        art = lane.content:CreateTexture(nil, "OVERLAY", nil, 2),
-    }
-    icon.edge:SetColorTexture(0, 0, 0, 1)
-    lane.icons[index] = icon
+    icon = CreateFrame("Frame", nil, seg.content)
+    icon.edge = icon:CreateTexture(nil, "OVERLAY", nil, 1)
+    icon.edge:SetAllPoints()
+    icon.art = icon:CreateTexture(nil, "OVERLAY", nil, 2)
+    icon.art:SetPoint("TOPLEFT", 1, -1)
+    icon.art:SetPoint("BOTTOMRIGHT", -1, 1)
+    local cd = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
+    cd:SetAllPoints(icon.art)
+    cd:SetDrawEdge(false)
+    cd:SetHideCountdownNumbers(false)
+    if cd.SetCountdownFont then pcall(cd.SetCountdownFont, cd, "GameFontHighlightSmallOutline") end
+    icon.cd = cd
+    seg.icons[index] = icon
     return icon
 end
 
-local function PaintIcon(icon, lane, index, owner, size)
-    local x = (index - 1) * (size + GAP)
-    icon.edge:ClearAllPoints()
-    icon.edge:SetPoint("TOPLEFT", lane, "TOPLEFT", x, 0)
-    icon.edge:SetSize(size, size)
-    icon.art:ClearAllPoints()
-    icon.art:SetPoint("TOPLEFT", icon.edge, "TOPLEFT", 1, -1)
-    icon.art:SetPoint("BOTTOMRIGHT", icon.edge, "BOTTOMRIGHT", -1, 1)
-    ClassIcon(icon.art, owner.class)
-    local color = owner.class and C_ClassColor and C_ClassColor.GetClassColor(owner.class)
+local function ApplyCooldown(icon)
+    local cd = icon.cd
+    if icon.sample then
+        cd:SetCooldown(GetTime() - 6, 15)
+        return
+    end
+    local duration = ns.Kicks:Duration(icon.guid)
+    if duration and cd.SetCooldownFromDurationObject then
+        cd:SetCooldownFromDurationObject(duration)
+    else
+        cd:Clear()
+    end
+end
+
+local function PaintIcon(icon, seg, slot, entry, size)
+    icon:ClearAllPoints()
+    icon:SetPoint("TOPLEFT", seg, "TOPLEFT", (slot - 1) * (size + GAP), 0)
+    icon:SetSize(size, size)
+    ClassIcon(icon.art, entry.class)
+    local color = entry.class and C_ClassColor and C_ClassColor.GetClassColor(entry.class)
     if color then
         icon.edge:SetColorTexture(color.r, color.g, color.b, 1)
     else
         icon.edge:SetColorTexture(0, 0, 0, 1)
     end
-    icon.edge:Show()
-    icon.art:Show()
+    icon.guid, icon.sample = entry.guid, entry.sample
+    ApplyCooldown(icon)
+    icon:Show()
 end
 
-local function Sync(plate, list)
-    if plate.kickVersion == version and not list then return end
-    plate.kickVersion = list and -1 or version
-    local size = plate.kickSize or 18
-    local source = list or owners
-    local widest = 1
-    for marker = 1, 8 do
-        local entries = source[marker]
-        local lane = plate.kickLanes[marker]
-        if entries then
-            lane = lane or Lane(plate, marker)
-            for index, owner in ipairs(entries) do
-                PaintIcon(Icon(lane, index), lane, index, owner, size)
-            end
-            for index = #entries + 1, #lane.icons do
-                lane.icons[index].edge:Hide()
-                lane.icons[index].art:Hide()
-            end
-            if #entries > widest then widest = #entries end
-            lane:Show()
-        elseif lane then
-            lane:Hide()
+local function Entries(seg, kicked)
+    local list, seen = {}, {}
+    for _, owner in ipairs(seg.owners) do
+        list[#list + 1] = owner
+        if owner.guid then seen[owner.guid] = true end
+    end
+    if kicked then
+        local extra = {}
+        for guid in pairs(kicked) do
+            if not seen[guid] then extra[#extra + 1] = guid end
+        end
+        table.sort(extra)
+        for _, guid in ipairs(extra) do
+            list[#list + 1] = { guid = guid, class = classes[guid] }
         end
     end
-    plate.kickHolder:SetSize(widest * size + (widest - 1) * GAP, size)
+    return list
+end
+
+local function Sync(plate, specs, kicked)
+    local size = plate.kickSize or 18
+    local widest = 0
+    for index, spec in ipairs(specs) do
+        local seg = Segment(plate, index)
+        local entries = Entries(spec, kicked)
+        if #entries > 0 then
+            seg.open:SetMinMaxValues(spec.low - 1, spec.low)
+            seg.shut:SetMinMaxValues(spec.high, spec.high + 1)
+            for slot, entry in ipairs(entries) do
+                PaintIcon(Icon(seg, slot), seg, slot, entry, size)
+            end
+            for slot = #entries + 1, #seg.icons do
+                seg.icons[slot]:Hide()
+            end
+            if #entries > widest then widest = #entries end
+            seg:Show()
+        else
+            seg:Hide()
+        end
+    end
+    for index = #specs + 1, #plate.kickSegs do
+        plate.kickSegs[index]:Hide()
+    end
+    plate.kickHolder:SetSize(math.max(widest * size + (widest - 1) * GAP, 1), size)
+    return widest > 0
 end
 
 local function Feed(plate, value)
-    for marker = 1, 8 do
-        local lane = plate.kickLanes[marker]
-        if lane and lane:IsShown() then
-            lane.open:SetValue(value)
-            lane.shut:SetValue(value)
+    for _, seg in ipairs(plate.kickSegs) do
+        if seg:IsShown() then
+            seg.open:SetValue(value)
+            seg.shut:SetValue(value)
         end
     end
 end
@@ -252,7 +312,7 @@ function Kickers:Create(plate)
     holder:SetSize(1, 1)
     holder:Hide()
     plate.kickHolder = holder
-    plate.kickLanes = {}
+    plate.kickSegs = {}
 end
 
 function Kickers:Configure(db, state)
@@ -278,6 +338,8 @@ function Kickers:Enable(plate, unit)
 end
 
 function Kickers:Disable(plate)
+    if not plate.active then ns.Kicks:Forget(plate) end
+    plate.kickVersion = nil
     plate.kickHolder:Hide()
 end
 
@@ -285,13 +347,39 @@ function Kickers:OnEvent(plate, _, unit)
     self:Update(plate, unit)
 end
 
+function Kickers:PlateChanged(plate)
+    plate.kickVersion = nil
+    Refresh(plate)
+end
+
+function Kickers:CooldownChanged()
+    local me = ns.Kicks.me
+    if not me then return end
+    ns.Driver:ForEachActive(function(plate)
+        if plate.kickHolder and plate.kickHolder:IsShown() then
+            for _, seg in ipairs(plate.kickSegs) do
+                for _, icon in ipairs(seg.icons) do
+                    if icon.guid == me and icon:IsShown() then ApplyCooldown(icon) end
+                end
+            end
+        end
+    end)
+end
+
 function Kickers:Update(plate, unit)
     local holder = plate.kickHolder
-    if plate.isFriendly or not unit or not next(owners) then
+    if plate.isFriendly or not unit then
         holder:Hide()
         return
     end
-    Sync(plate)
+    if plate.kickVersion ~= version then
+        plate.kickVersion = version
+        plate.kickAny = Sync(plate, segments, ns.Kicks:On(plate))
+    end
+    if not plate.kickAny then
+        holder:Hide()
+        return
+    end
     local index = GetRaidTargetIndex(unit)
     Feed(plate, type(index) == "nil" and 0 or index)
     holder:Show()
@@ -299,13 +387,14 @@ end
 
 function Kickers:Preview(plate, state)
     local holder = plate.kickHolder
+    plate.kickVersion = nil
     if not state.showKickers then
         holder:Hide()
         return
     end
-    local marker = state.raidMarker or 8
-    local list = { [marker] = { { class = UnitClassBase("player") } } }
-    Sync(plate, list)
+    local marker = state.raidMarker or 0
+    local sample = { { low = 0, high = 8, owners = { { class = UnitClassBase("player"), sample = true } } } }
+    Sync(plate, sample)
     Feed(plate, marker)
     holder:Show()
 end

@@ -45,8 +45,20 @@ local extras = {
     PALADIN = { 31935 },
 }
 
+local kickIDs = {}
+for _, list in pairs(candidates) do
+    for _, entry in ipairs(list) do kickIDs[entry[1]] = true end
+end
+for _, list in pairs(extras) do
+    for _, id in ipairs(list) do kickIDs[id] = true end
+end
+
 local InterruptReady = CreateFrame("Frame")
 ns.InterruptReady = InterruptReady
+
+function InterruptReady:IsKick(id)
+    return kickIDs[id] == true
+end
 
 local spellID, activeID
 local extraIDs = {}

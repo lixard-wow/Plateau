@@ -50,3 +50,12 @@ check(global.kickMarks["Player-1-B"] == nil, "old announces expire")
 FocusControlDB = { marker = 7 }
 handler(nil, "GROUP_ROSTER_UPDATE")
 check(true, "own FocusControl marker rebuild runs")
+
+local function Shape(list)
+    local parts = {}
+    for _, seg in ipairs(list) do parts[#parts + 1] = seg.low .. "-" .. seg.high .. (#seg.owners > 0 and "*" or "") end
+    return table.concat(parts, " ")
+end
+check(Shape(Kickers.Segments({})) == "0-8", "no owners: one range covers every marker and no marker")
+check(Shape(Kickers.Segments({ [8] = { {} } })) == "0-7 8-8*", "skull owned: skull alone, the rest shared")
+check(Shape(Kickers.Segments({ [1] = { {} }, [5] = { {} } })) == "0-0 1-1* 2-4 5-5* 6-8", "star and moon owned split the gaps around them")
