@@ -2762,6 +2762,21 @@ ns.sections = {
     ), GateList(On("look.kickers.enabled"), "Turn on Show kicker icons to use this.",
         { type = "Toggle", path = "look.kickers.includeSelf", label = "Include me",
           tooltip = "Shows your own icon on your marker's mob too." },
+        { type = "Dropdown", path = "look.kickers.iconStyle", label = "Icon picture", options = {
+            { value = "class", label = "Class icon" },
+            { value = "spec", label = "Spec icon" },
+            { value = "spell", label = "Interrupt spell icon" },
+          }, tooltip = "What each kicker's icon shows. Falls back to the class icon when the spec or spell isn't known yet." },
+        { type = "Dropdown", path = "look.kickers.where", label = "Where it shows", options = {
+            { value = "all", label = "Everywhere" },
+            { value = "dungeons", label = "Dungeons and keys only" },
+          }, tooltip = "Where kicker icons show." },
+        { type = "Toggle", path = "look.kickers.keepReady", label = "Keep icons after the cooldown",
+          tooltip = "Off removes a kick's icon from the mob once that interrupt is ready again. Marker icons always stay." },
+        { type = "Toggle", path = "look.kickers.countdown", label = "Countdown numbers",
+          tooltip = "Shows the seconds left on each icon's cooldown." },
+        { type = "Slider", path = "look.kickers.countdownSize", label = "Countdown size", min = 6, max = 24,
+          tooltip = "Size of the countdown numbers." },
         { type = "Slider", path = "look.kickers.size", label = "Icon size", min = 10, max = 40,
           tooltip = "Size of each kicker icon." },
         Placement("look.kickers")

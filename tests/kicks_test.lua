@@ -89,3 +89,12 @@ check(not on("nameplate3", "Player-1-B") and not on("nameplate3", "Player-1-C"),
 Kicks:Forget(plates.nameplate1)
 check(Kicks:On(plates.nameplate1) == nil, "a plate that goes away forgets its kicks")
 check(Kicks.KickFor({ class = "PRIEST", spec = 256 }) == nil and Kicks.KickFor({ class = "PRIEST", spec = 258 }) == 15487, "specs without an interrupt have none")
+
+now = 300
+stop("nameplate2", "Player-1-B")
+Kicks:Remove("Player-1-B", plates.nameplate2)
+check(on("nameplate2", "Player-1-B"), "a cooldown that ends right as the icon lands does not remove it")
+now = 330
+Kicks:Remove("Player-1-B", plates.nameplate2)
+check(not on("nameplate2", "Player-1-B"), "with Keep icons off, a finished cooldown removes the kick's icon")
+check(Kicks:Info("Player-1-B") == 2139, "a party member's interrupt spell is known for the spell icon")

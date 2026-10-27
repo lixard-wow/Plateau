@@ -31,6 +31,7 @@ end
 if type(INTERRUPT) == "string" then KEYWORDS[#KEYWORDS + 1] = INTERRUPT:lower() end
 
 local includeSelf = {}
+local inDungeon = false
 local segments = { { low = 0, high = 8, owners = {} } }
 local classes = {}
 local version = 0
@@ -70,6 +71,23 @@ local function ClassIcon(texture, class)
     end
 end
 
+local function Picture(texture, entry, style)
+    local spell, spec = ns.Kicks:Info(entry.guid)
+    local file
+    if style == "spell" and spell then
+        file = C_Spell.GetSpellTexture(spell)
+    elseif style == "spec" and spec and GetSpecializationInfoByID then
+        file = select(4, GetSpecializationInfoByID(spec))
+    end
+    if file then
+        texture:SetTexture(file)
+        texture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    else
+        texture:SetTexCoord(0, 1, 0, 1)
+        ClassIcon(texture, entry.class)
+    end
+end
+
 local function OwnMarker()
     local db = FocusControlDB
     local marker = type(db) == "table" and tonumber(db.marker)
@@ -104,6 +122,8 @@ local function Rebuild()
     for guid, mark in pairs(marks) do
         if type(mark) ~= "table" or now - (mark.at or 0) > MARK_LIFE then marks[guid] = nil end
     end
+    local _, kind = IsInInstance()
+    inDungeon = kind == "party"
     local byMarker = {}
     local wantSelf = includeSelf.enemy ~= false
     for _, unit in ipairs(UNITS) do
@@ -214,7 +234,10 @@ local function Icon(seg, index)
     cd:SetAllPoints(icon.art)
     cd:SetDrawEdge(false)
     cd:SetHideCountdownNumbers(false)
-    if cd.SetCountdownFont then pcall(cd.SetCountdownFont, cd, "GameFontHighlightSmallOutline") end
+    cd:SetScript("OnCooldownDone", function()
+        local look = icon.plate and icon.plate.kickLook
+        if icon.kicked and look and look.keepReady == false then ns.Kicks:Remove(icon.guid, icon.plate) end
+    end)
     icon.cd = cd
     seg.icons[index] = icon
     return icon
@@ -236,11 +259,24 @@ local function ApplyCooldown(icon)
     end
 end
 
-local function PaintIcon(icon, seg, slot, entry, size)
+local function Countdown(icon, plate)
+    local look = plate.kickLook
+    local cd = icon.cd
+    cd:SetHideCountdownNumbers(not (look and look.countdown))
+    local text = look and look.countdown and cd.GetCountdownFontString and cd:GetCountdownFontString()
+    if text then
+        local view = ns.DB.views[plate.state] or ns.DB.views.enemy
+        ns.ApplyFont(text, view.name.font, look.countdownSize, "OUTLINE")
+    end
+end
+
+local function PaintIcon(icon, seg, slot, entry, size, plate)
     icon:ClearAllPoints()
     icon:SetPoint("TOPLEFT", seg, "TOPLEFT", (slot - 1) * (size + GAP), 0)
     icon:SetSize(size, size)
-    ClassIcon(icon.art, entry.class)
+    Picture(icon.art, entry, plate.kickLook and plate.kickLook.iconStyle)
+    icon.plate, icon.kicked = plate, entry.kicked
+    Countdown(icon, plate)
     local color = entry.class and C_ClassColor and C_ClassColor.GetClassColor(entry.class)
     if color then
         icon.edge:SetColorTexture(color.r, color.g, color.b, 1)
@@ -265,7 +301,7 @@ local function Entries(seg, kicked)
         end
         table.sort(extra)
         for _, guid in ipairs(extra) do
-            list[#list + 1] = { guid = guid, class = classes[guid] }
+            list[#list + 1] = { guid = guid, class = classes[guid], kicked = true }
         end
     end
     return list
@@ -281,7 +317,7 @@ local function Sync(plate, specs, kicked)
             seg.open:SetMinMaxValues(spec.low - 1, spec.low)
             seg.shut:SetMinMaxValues(spec.high, spec.high + 1)
             for slot, entry in ipairs(entries) do
-                PaintIcon(Icon(seg, slot), seg, slot, entry, size)
+                PaintIcon(Icon(seg, slot), seg, slot, entry, size, plate)
             end
             for slot = #entries + 1, #seg.icons do
                 seg.icons[slot]:Hide()
@@ -328,10 +364,9 @@ end
 function Kickers:Style(plate, db)
     local holder = plate.kickHolder
     holder:SetAlpha(db.alpha)
-    if plate.kickSize ~= db.size then
-        plate.kickSize = db.size
-        plate.kickVersion = nil
-    end
+    plate.kickSize = db.size
+    plate.kickLook = db
+    plate.kickVersion = nil
     ns.PlaceIcon(holder, plate, db.position, db.gap, db.offsetX, db.offsetY)
 end
 
@@ -369,7 +404,8 @@ end
 
 function Kickers:Update(plate, unit)
     local holder = plate.kickHolder
-    if plate.isFriendly or not unit then
+    local look = plate.kickLook
+    if plate.isFriendly or not unit or (look and look.where == "dungeons" and not inDungeon) then
         holder:Hide()
         return
     end
@@ -394,7 +430,7 @@ function Kickers:Preview(plate, state)
         return
     end
     local marker = state.raidMarker or 0
-    local sample = { { low = 0, high = 8, owners = { { class = UnitClassBase("player"), sample = true } } } }
+    local sample = { { low = 0, high = 8, owners = { { guid = ns.Kicks.me, class = UnitClassBase("player"), sample = true } } } }
     Sync(plate, sample)
     Feed(plate, marker)
     holder:Show()

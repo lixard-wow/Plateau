@@ -4,6 +4,7 @@ local ns = { Elements = {}, DB = { saved = { global = global } },
     Driver = { RegisterElement = function() end, ForEachActive = function(_, fn) for _, p in ipairs(active) do fn(p) end end } }
 function issecretvalue() return false end
 time = os.time
+function IsInInstance() return false, "none" end
 local handler
 function CreateFrame()
     return { RegisterEvent = function() end, SetScript = function(_, _, fn) handler = fn end }

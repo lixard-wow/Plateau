@@ -99,6 +99,30 @@ function Kicks:Forget(plate)
     plates[plate] = nil
 end
 
+function Kicks:Remove(guid, plate)
+    local list = plates[plate]
+    if not (list and list[guid]) then return end
+    if GetTime() - list[guid] < 1.5 then return end
+    list[guid] = nil
+    if not next(list) then plates[plate] = nil end
+    if where[guid] == plate then where[guid] = nil end
+    Changed(plate)
+end
+
+local function PlayerSpec()
+    local id = ns.CurrentSpec()
+    if id and id > 0 then return id end
+end
+
+function Kicks:Info(guid)
+    if not guid then return nil end
+    if guid == (self.me or Me()) then
+        return ns.InterruptReady:GetSpellID(), PlayerSpec()
+    end
+    local member = members[guid]
+    if member then return member.kick, member.spec end
+end
+
 function Kicks:Members()
     return members
 end
