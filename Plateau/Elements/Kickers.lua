@@ -226,9 +226,11 @@ local function ApplyCooldown(icon)
         cd:SetCooldown(GetTime() - 6, 15)
         return
     end
-    local duration = ns.Kicks:Duration(icon.guid)
+    local duration, start, length = ns.Kicks:Cooldown(icon.guid)
     if duration and cd.SetCooldownFromDurationObject then
         cd:SetCooldownFromDurationObject(duration)
+    elseif start then
+        cd:SetCooldown(start, length)
     else
         cd:Clear()
     end
@@ -352,14 +354,13 @@ function Kickers:PlateChanged(plate)
     Refresh(plate)
 end
 
-function Kickers:CooldownChanged()
-    local me = ns.Kicks.me
-    if not me then return end
+function Kickers:CooldownChanged(guid)
+    if not guid then return end
     ns.Driver:ForEachActive(function(plate)
         if plate.kickHolder and plate.kickHolder:IsShown() then
             for _, seg in ipairs(plate.kickSegs) do
                 for _, icon in ipairs(seg.icons) do
-                    if icon.guid == me and icon:IsShown() then ApplyCooldown(icon) end
+                    if icon.guid == guid and icon:IsShown() then ApplyCooldown(icon) end
                 end
             end
         end

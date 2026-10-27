@@ -2757,7 +2757,7 @@ ns.sections = {
     Section("kickers", "Kick tracker", "look.kickers", Join(List(
         { type = "Header", label = "Who kicks which mob", first = true },
         { type = "Toggle", path = "look.kickers.enabled", label = "Show kicker icons",
-          tooltip = "Shows a party member's class icon on the mob with their interrupt marker, and yours on the mob you last kicked with your kick's cooldown." },
+          tooltip = "Shows a party member's class icon on the mob with their interrupt marker, and on the mob they last kicked, with their interrupt's cooldown. In keys a kick only shows when Plateau can prove who it was." },
         { type = "Note", label = "Plateau learns markers from party chat, like FocusControl's \"Interrupt target set to {skull}\" at the ready check. Yours comes from FocusControl.", height = 36 }
     ), GateList(On("look.kickers.enabled"), "Turn on Show kicker icons to use this.",
         { type = "Toggle", path = "look.kickers.includeSelf", label = "Include me",
