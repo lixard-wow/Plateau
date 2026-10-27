@@ -375,6 +375,8 @@ local function AddHotspots(plate)
     threatSpot.setting = "Show threat percent"
     Hotspot(plate, plate.faction, "faction", "Faction icon", 80, 1,
         Drag.PositionSpec({ path = "look.faction", region = plate.faction, anchor = AtPlate(plate) }))
+    Hotspot(plate, plate.kickHolder, "kickers", "Kicker icons", 80, 1,
+        Drag.PositionSpec({ path = "look.kickers", region = plate.kickHolder, anchor = AtPlate(plate) }))
     Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true
     Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 60, 0, castbarDrag).setting = "Show spell icon"
     local castTarget = Hotspot(plate, plate.castbar.target, "castbar", "Cast target", 65, 2,
@@ -580,6 +582,7 @@ local function ApplySample()
     sample.quest = On("look.quest.enabled") and baseQuest or nil
     sample.classPower = On("look.classPower.enabled")
     sample.showFaction = sectionKey == "faction" or nil
+    sample.showKickers = sectionKey == "kickers" or nil
     sample.enemyPower = On("look.enemyPower.enabled")
     sample.forces = (On("look.forces.enabled") and Plateau.flavor ~= "forever") and baseForces or nil
     local auras = {}

@@ -1069,6 +1069,7 @@ local DESCRIPTIONS = {
     quest = { desc = "Quest icons and quest progress on enemies." },
     classification = { desc = "The elite, rare and boss badge." },
     faction = { desc = "The Horde or Alliance icon on players." },
+    kickers = { desc = "Party members' class icons on the mobs they interrupt." },
     friendly = { desc = "Nameplates for your group and other friendly units." },
     help = { desc = "Answers, commands and how to report a problem." },
     addon = { desc = "Preferences for this settings window. Not part of a profile." },
@@ -1150,7 +1151,7 @@ local RAIL_GROUPS = {
     { label = "Behavior", keys = { "showing", "size", "fading", "layering", "clicking" } },
     { label = "Targets", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
-    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction" } },
+    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction", "kickers" } },
     { label = "Friendly", keys = { "friendly" } },
     { label = "Help", keys = { "help" } },
 }

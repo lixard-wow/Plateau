@@ -228,6 +228,16 @@ ns.defaults = {
             hideEmpty = false,
             glowMax = false,
         },
+        kickers = {
+            enabled = true,
+            includeSelf = true,
+            size = 18,
+            position = "RIGHT",
+            gap = 4,
+            offsetX = 0,
+            offsetY = 0,
+            alpha = 1,
+        },
         faction = {
             enabled = false,
             onlyPvP = true,

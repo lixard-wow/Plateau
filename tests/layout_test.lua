@@ -64,7 +64,7 @@ local groups = {
     { label = "Behavior", keys = { "showing", "size", "fading", "layering", "clicking" } },
     { label = "Targets", keys = { "target", "focus", "mouseover", "combat" } },
     { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
-    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction" } },
+    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction", "kickers" } },
     { label = "Friendly", keys = { "friendly" } },
     { label = "Help", keys = { "help" } },
 }
