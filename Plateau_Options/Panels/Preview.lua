@@ -334,9 +334,9 @@ local function AddHotspots(plate)
     Hotspot(plate, plate, "target", "Target", 1, 6)
     Hotspot(plate, plate, "focus", "Focus", 1, 6)
     Hotspot(plate, plate, "mouseover", "Mouseover", 1, 6)
-    Hotspot(plate, plate, "shield", "Buff warnings", 1, 6)
+    Hotspot(plate, plate, "shield", "Warnings", 1, 6)
     Hotspot(plate, plate.health, function() return here.healthColors and "healthColors" or "health" end,
-        function() return here.healthColors and "Health bar colors" or "Health bar" end, 20, 0)
+        function() return here.healthColors and "Colors" or "Health bar" end, 20, 0)
     Hotspot(plate, plate.castbar, "castbar", "Cast bar", 60, 0, castbarDrag)
     Hotspot(plate, plate.healthText, "healthText", "Health text", 80, 3,
         Drag.PositionSpec({ path = "look.healthText", positionKey = "anchor", text = true, fixedGap = 3, region = plate.healthText, anchor = AtHealth(plate) })).setting = "Show health text"
