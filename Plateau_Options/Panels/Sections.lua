@@ -1542,7 +1542,7 @@ ns.sections = {
           tooltip = "Nameplates grow and shrink smoothly instead of snapping." },
         { type = "Header", label = "Enemy type scale" },
         { type = "Toggle", path = "look.scaling.enabled", label = "Scale by enemy type", wide = true,
-          tooltip = "Sizes enemy nameplates by type, using the same types as the Health bar colors." },
+          tooltip = "Sizes enemy nameplates by type, using the same enemy types as the Colors page." },
         Gate({ type = "Slider", path = "look.scaling.boss", label = "Bosses", min = 0.5, max = 1.6, step = 0.05,
           tooltip = "Size of boss nameplates." }, On("look.scaling.enabled"), "Turn on Scale by enemy type to use this."),
         Gate({ type = "Slider", path = "look.scaling.caster", label = "Casters", min = 0.5, max = 1.6, step = 0.05,
@@ -1768,7 +1768,7 @@ ns.sections = {
 
         { type = "Header", label = "Bar" },
         { type = "Dropdown", path = "look.health.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
-          tooltip = "Fill texture of the health bar. Your target and focus can use their own on the Target and Focus pages." },
+          tooltip = "Fill texture of the health bar. Your target and focus can use their own on the Target and focus page." },
         { type = "Dropdown", path = "look.health.overlayPattern", label = "Overlay pattern", options = OverlayPatterns, unknown = "Custom pattern",
           tooltip = "A pattern drawn over the bar texture, tinted to match the bar." },
         Gate({ type = "Slider", path = "look.health.overlayAlpha", label = "Overlay opacity", min = 0, max = 1, step = 0.05,
@@ -1879,7 +1879,7 @@ ns.sections = {
     Section("healthColors", "Health bar colors", { "look.colors.tapped", "look.colors.showTapped", "look.colors.healthGradient", "look.colors.healthLow", "look.colors.healthFade", "look.colors.customReaction", "look.colors.hostile", "look.colors.neutral", "look.colors.friendly", "look.colors.classColors", "look.colors.mobTypes", "look.colors.mobTypesInstancesOnly", "look.colors.boss", "look.colors.bossColor", "look.colors.lieutenant", "look.colors.lieutenantColor", "look.colors.higher", "look.colors.higherColor", "look.colors.caster", "look.colors.casterColor", "look.colors.elite", "look.colors.eliteColor", "look.colors.trivial", "look.colors.trivialColor" }, List(
         { type = "Header", label = "Colorblind presets", first = true },
         { type = "Presets", presets = Plateau.presets.palettes },
-        { type = "Note", label = "Color priority: target or focus, tapped, threat (Threat page), quest (Quest icon page), enemy type or class, reaction. The colors below follow that order.", height = 32 },
+        { type = "Note", label = "Color priority: target or focus, tapped, threat, quest (set on Icons), enemy type or class, reaction. The colors below follow that order.", height = 32 },
 
         { type = "Header", label = "Tapped enemies" },
         { type = "ToggleColor", path = "look.colors.showTapped", colorPath = "look.colors.tapped", label = "Tapped by another player",
@@ -1962,7 +1962,7 @@ ns.sections = {
         FriendlyPlayersGate({ type = "Dropdown", path = "look.friendly.nameMode", label = "Shorten player names", options = SHORTEN_NAMES, limited = Style.limited.friendly, visibleIf = function() return Plateau.flavor == "forever" end,
           tooltip = "How friendly player names are shortened." }),
         FriendlyPlayersGate(CVarSlider("nameplateSize", "Blizzard nameplate size", 1, 5, 1,
-            "Blizzard's Nameplate Size, from 1 (Small) to 5 (Huge). Sizes friendly player names and every nameplate the game draws, including the personal resource display. Same setting as on the Size page.")),
+            "Blizzard's Nameplate Size, from 1 (Small) to 5 (Huge). Also sizes friendly names and every nameplate the game draws. Same setting as on the Size page.")),
         CVarToggle("nameplateUseClassColorForFriendlyPlayerUnitNames", "Class-colored player names",
             "Colors friendly player names by class, including on Blizzard's nameplates."),
         NameOnlyGate(Gate({ type = "Color", path = "look.friendly.playerNameColor", label = "Player name color",
@@ -2112,7 +2112,7 @@ ns.sections = {
         { type = "Color", path = "look.name.color", label = "Text color",
           tooltip = "Color of the name. Player names can use class colors instead." },
         { type = "Toggle", path = "look.name.classColors", label = "Use class colors for player names",
-          tooltip = "Colors enemy player names by class. Friendly players are set on the Friendly nameplates page." },
+          tooltip = "Colors enemy player names by class. Friendly players are set on the Friendly page." },
         { type = "Toggle", path = "look.name.matchBar", label = "Match health bar color",
           tooltip = "Enemy names use the health bar's current color." },
         { type = "Dropdown", path = "look.name.position", label = "Position", options = NAME_POSITIONS,
@@ -2329,7 +2329,7 @@ ns.sections = {
               tooltip = "The cast bar flashes this color when a cast is interrupted." }))),
 
     Section("shield", "Buff warnings", { "look.shield.alertImportant", "look.shield.alertColor", "look.shield.alertDefensive", "look.shield.defensiveColor", "look.shield.alertEnrage", "look.shield.enrageColor", "look.shield.alertMagic", "look.shield.magicColor", "look.shield.alertOnlyMine", "look.shield.alertSize", "look.shield.alertTexture", "look.shield.alertTextureAlpha", "look.shield.alertOrder" }, List(
-        { type = "Note", label = "Marks enemies that have certain buffs with a colored border or a health bar overlay. Buff icons are on Enemy buffs and Important auras.", height = 32 },
+        { type = "Note", label = "Marks enemies that have certain buffs with a colored border or a health bar overlay. Buff icons are on the Enemy buffs and Important tabs.", height = 32 },
 
         { type = "Header", label = "Warnings" },
         { type = "ToggleColor", path = "look.shield.alertImportant", colorPath = "look.shield.alertColor", label = "Important buff",
@@ -2739,7 +2739,7 @@ ns.sections = {
     Section("kickers", "Kick tracker", "look.kickers", Join(List(
         { type = "Header", label = "Who kicks which mob", first = true },
         { type = "Toggle", path = "look.kickers.enabled", label = "Show kicker icons",
-          tooltip = "Shows a party member's class icon on the mob with their interrupt marker, and on the mob they last kicked, with their interrupt's cooldown. In keys a kick only shows when Plateau can prove who it was." },
+          tooltip = "Shows a party member's icon on the enemy they are marked to kick and on the one they last kicked, with their interrupt's cooldown. In keys a kick only shows when Plateau can tell who it was." },
         { type = "Note", label = "Plateau learns markers from party chat, like FocusControl's \"Interrupt target set to {skull}\" at the ready check. Yours comes from FocusControl.", height = 36 }
     ), GateList(On("look.kickers.enabled"), "Turn on Show kicker icons to use this.",
         { type = "Toggle", path = "look.kickers.includeSelf", label = "Include me",
@@ -2826,9 +2826,9 @@ ns.sections = {
             { type = "ShareProfile", label = "Export active profile", keywords = "import profile profile export string paste a plateau profile string activate after import profile name",
               tooltip = "Export the active profile as a text string, or import a string as a new profile." },
             { type = "Header", label = "What a profile includes", collapsible = true, collapsed = true, keywords = "scope saved shared game settings spell lists automatic rules export" },
-            { type = "Note", label = "In a profile: every Plateau setting on the Nameplates, Behavior, Targets, Auras, Icons and Friendly pages. Blizzard's own settings, which some of those pages also show, are not part of a profile.", height = 32 },
+            { type = "Note", label = "In a profile: every Plateau setting except those on Window and Profiles. Blizzard's own settings, which some pages also show, are not part of a profile.", height = 32 },
             { type = "Note", label = "Aura spell lists (Hidden spells and Allowed spells) are saved in the profile and per specialization, so a different profile or specialization shows a different set.", height = 32 },
-            { type = "Note", label = "Not in a profile: your default profile and the automatic switching rules (saved per character), Blizzard's nameplate settings (saved once for your account and shared by every profile and character), Plateau settings (the gear button), and boss phase lines (saved for your account). Export and import carry the look, the aura spell lists and your boss phase lines; importing adds those boss lines to yours.", height = 58 }
+            { type = "Note", label = "Not in a profile: your default profile and automatic rules (per character), and Blizzard's nameplate settings, Window settings and boss phase lines (per account). Export still carries your boss phase lines.", height = 58 }
         ),
     },
 }
