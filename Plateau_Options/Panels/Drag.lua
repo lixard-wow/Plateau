@@ -18,6 +18,7 @@ local selected
 local selectionFrame
 local keys
 local lastDragged = false
+local UpdateReadout
 
 local function Range(path)
     return ns.sliderRanges and ns.sliderRanges[path]
@@ -33,6 +34,9 @@ local function Apply(values)
     Plateau.DB:SetMany(values)
     if ns.RefreshAll then
         ns.RefreshAll()
+    end
+    if UpdateReadout then
+        UpdateReadout()
     end
 end
 
@@ -401,6 +405,9 @@ function Start(spec)
     spec.grabX = x - (left + right) / 2
     spec.grabY = y - (top + bottom) / 2
     active = spec
+    if UpdateReadout then
+        UpdateReadout()
+    end
     lastDragged = true
     driver:Show()
 end
@@ -491,6 +498,10 @@ function Drag.PositionSpec(opts)
     function spec.Nudge(dx, dy)
         local _, _, nudgeX, nudgeY = Resolve()
         return Extra(OffsetNudge(nudgeX, nudgeY)(dx, dy))
+    end
+    function spec.Readout()
+        local _, _, readX, readY = Resolve()
+        return { { "x", readX }, { "y", readY } }
     end
     function spec.Mover()
         return opts.region
@@ -596,6 +607,7 @@ function Drag.AuraSpec(plate, key)
         name = path,
         paths = { sidePath, alignPath, xPath, yPath },
         Nudge = OffsetNudge(xPath, yPath),
+        Readout = function() return { { "x", xPath }, { "y", yPath } } end,
     }
     local function Group()
         return plate.fakeAuras[key]
@@ -789,6 +801,12 @@ function Drag.NameSpec(plate)
         local sign = Get(positionPath) == "BOTTOM" and -1 or 1
         return { [gapPath] = Clamp((Get(gapPath) or 0) + dy * sign, -10, 30) }
     end
+    function spec.Readout()
+        if plate.nameOnly then
+            return { { "gap", gapPath } }
+        end
+        return { { "x", shiftPath }, { "gap", gapPath } }
+    end
     return spec
 end
 
@@ -830,6 +848,9 @@ function Drag.CastbarSpec(plate)
     function spec.Nudge(_, dy)
         if dy == 0 then return nil end
         return { [gapPath] = Clamp((Get(gapPath) or 0) - dy, 0, 30) }
+    end
+    function spec.Readout()
+        return { { "gap", gapPath } }
     end
     return spec
 end
@@ -896,6 +917,7 @@ function Drag.EnemyPowerSpec(plate)
         name = path,
         paths = { positionPath, xPath, yPath },
         Nudge = OffsetNudge(xPath, yPath),
+        Readout = function() return { { "x", xPath }, { "y", yPath } } end,
     }
     function spec.Mover()
         return plate.enemyPowerBar
@@ -946,6 +968,131 @@ end
 
 local ARROWS = { UP = { 0, 1 }, DOWN = { 0, -1 }, LEFT = { -1, 0 }, RIGHT = { 1, 0 } }
 
+local readout
+
+local function Signed(value)
+    value = math.floor((tonumber(value) or 0) + 0.5)
+    return value > 0 and ("+" .. value) or tostring(value)
+end
+
+local function Fields()
+    return selected and selected.Readout and selected.Readout() or {}
+end
+
+local function StopEditing(field)
+    field.edit:ClearFocus()
+    field.edit:Hide()
+    field.button:Show()
+end
+
+local function StartEditing(field)
+    for _, other in ipairs(readout.fields) do
+        if other ~= field and other.edit:IsShown() then
+            StopEditing(other)
+        end
+    end
+    field.button:Hide()
+    field.edit:SetText(tostring(math.floor((tonumber(Get(field.path)) or 0) + 0.5)))
+    field.edit:Show()
+    field.edit:SetFocus()
+    field.edit:HighlightText()
+end
+
+local function Commit(field)
+    local value = tonumber(field.edit:GetText())
+    StopEditing(field)
+    if value and field.path then
+        Apply({ [field.path] = math.floor(value + 0.5) })
+    end
+end
+
+local function BuildReadout(parent)
+    readout = CreateFrame("Frame", nil, parent)
+    readout:SetFrameLevel(parent:GetFrameLevel() + 230)
+    readout:SetHeight(15)
+    Style.Fill(readout, C.accent)
+    Style.Border(readout, C.edge)
+    readout:Hide()
+    readout.fields = {}
+    for i = 1, 2 do
+        local field = {}
+        field.label = Style.Text(readout, 11, C.primaryText)
+        field.button = CreateFrame("Button", nil, readout)
+        field.button:SetHeight(15)
+        field.value = Style.Text(field.button, 11, C.primaryText)
+        field.value:SetPoint("CENTER")
+        field.button:SetScript("OnClick", function() StartEditing(field) end)
+        field.button:SetScript("OnEnter", function() Style.PaintText(field.value, C.window) end)
+        field.button:SetScript("OnLeave", function() Style.PaintText(field.value, C.primaryText) end)
+        Style.Tooltip(field.button, { label = "Type a value", tooltip = "Click to type an exact value. Enter applies, Tab moves to the other value, Esc cancels." })
+        field.edit = CreateFrame("EditBox", nil, readout)
+        field.edit:SetSize(30, 13)
+        field.edit:SetAutoFocus(false)
+        field.edit:SetMaxLetters(5)
+        field.edit:SetFontObject("GameFontHighlightSmall")
+        field.edit:SetTextInsets(2, 2, 0, 0)
+        Style.Fill(field.edit, C.field)
+        field.edit:Hide()
+        field.edit:SetScript("OnEnterPressed", function() Commit(field) end)
+        field.edit:SetScript("OnEscapePressed", function() StopEditing(field) end)
+        field.edit:SetScript("OnEditFocusLost", function()
+            if field.edit:IsShown() then
+                StopEditing(field)
+            end
+        end)
+        field.edit:SetScript("OnTabPressed", function()
+            Commit(field)
+            local list = readout.fields
+            local nextField = list[i % 2 + 1]
+            if nextField.path then
+                StartEditing(nextField)
+            end
+        end)
+        readout.fields[i] = field
+    end
+end
+
+function UpdateReadout()
+    if not readout then return end
+    local list = Fields()
+    if not selected or not selected.spot or active or #list == 0 or not selectionFrame:IsShown() then
+        for _, field in ipairs(readout.fields) do
+            if field.edit:IsShown() then
+                StopEditing(field)
+            end
+        end
+        readout:Hide()
+        return
+    end
+    local x = 4
+    for i, field in ipairs(readout.fields) do
+        local entry = list[i]
+        field.path = entry and entry[2]
+        field.label:SetShown(entry ~= nil)
+        field.button:SetShown(entry ~= nil and not field.edit:IsShown())
+        if entry then
+            field.label:SetText(entry[1])
+            field.label:ClearAllPoints()
+            field.label:SetPoint("LEFT", x, 0)
+            x = x + field.label:GetStringWidth() + 3
+            field.value:SetText(Signed(Get(entry[2])))
+            local width = math.max(field.value:GetStringWidth() + 6, 14)
+            field.button:SetWidth(width)
+            field.button:ClearAllPoints()
+            field.button:SetPoint("LEFT", x, 0)
+            field.edit:ClearAllPoints()
+            field.edit:SetPoint("LEFT", x, 0)
+            x = x + math.max(width, field.edit:IsShown() and 30 or 0) + 8
+        elseif field.edit:IsShown() then
+            StopEditing(field)
+        end
+    end
+    readout:SetWidth(x - 4)
+    readout:ClearAllPoints()
+    readout:SetPoint("BOTTOMLEFT", selectionFrame, "TOPRIGHT", 4, -15)
+    readout:Show()
+end
+
 function Drag.Select(spec)
     selected = spec
     if spec and spec.spot then
@@ -959,6 +1106,11 @@ function Drag.Select(spec)
     if not InCombatLockdown() then
         keys:EnableKeyboard(spec ~= nil)
     end
+    UpdateReadout()
+end
+
+if ns.OnRefresh then
+    ns.OnRefresh(function() UpdateReadout() end)
 end
 
 function Drag.GetSelected()
@@ -975,6 +1127,7 @@ function Drag.SetDotParent(frame)
     Style.Border(selectionFrame, C.accent)
     Style.ThemedBorder(selectionFrame)
     selectionFrame:Hide()
+    BuildReadout(frame)
 
     keys = CreateFrame("Frame", nil, frame)
     keys:EnableKeyboard(false)
@@ -1010,6 +1163,7 @@ function Drag.SetDotParent(frame)
         end
         selected = nil
         selectionFrame:Hide()
+        UpdateReadout()
         propagatePending = false
         keys:SetPropagateKeyboardInput(true)
         keys:EnableKeyboard(false)

@@ -70,6 +70,8 @@ end
 function Frame:SetColorTexture() end
 function Frame:SetDrawLayer() end
 
+for _, name in ipairs({ "SetHeight", "SetWidth", "SetText", "SetFontObject", "SetAutoFocus", "SetMaxLetters", "SetTextInsets", "ClearFocus", "SetFocus", "HighlightText" }) do Frame[name] = Frame[name] or function() end end
+
 function CreateFrame(_, _, parent) return NewFrame(parent) end
 UIParent = NewFrame():Rect(0, 4000, 4000, 0)
 
@@ -97,7 +99,10 @@ Plateau = {
 }
 
 local ns = { Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintVertex = function(t, c, a, s) s = s or 1 t:SetVertexColor((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintText = function(t, c, a) t:SetTextColor(c[1] or 0, c[2] or 0, c[3] or 0, a or c[4] or 1) end, PixelInset = function() end, PixelWidth = function() end, PixelHeight = function() end, RefreshPixels = function() end, 
-    colors = { muted = { 0.5, 0.5, 0.5 }, accent = { 1, 1, 1 } },
+    colors = { muted = { 0.5, 0.5, 0.5 }, accent = { 1, 1, 1 }, primaryText = { 0, 0, 0 }, window = { 0, 0, 0 } },
+    Text = function(parent) local text = NewFrame(parent) text.GetStringWidth = function() return 10 end return text end,
+    Fill = function(frame) return frame:CreateTexture() end,
+    Tooltip = function() end,
     Border = function() end,
     ThemedBorder = function() end,
     StateColor = function() return { 1, 1, 1 } end,
@@ -322,3 +327,14 @@ end
 Drop(questSpec, questSpot, cx, cy, cx - 60, cy)
 check(questIcon.anchor == plate and questIcon.l < homeL - 30, "an icon dropped somewhere new is drawn there, attached to the plate")
 ns.RefreshAll = nil
+
+local function Read(spec)
+    local out = {}
+    for _, entry in ipairs(spec.Readout and spec.Readout() or {}) do
+        out[#out + 1] = entry[1] .. "=" .. entry[2]
+    end
+    return table.concat(out, " ")
+end
+check(Read(questSpec) == "x=look.quest.offsetX y=look.quest.offsetY", "the readout shows an icon's x and y offsets")
+check(Read(castSpec) == "gap=look.castbar.gap" and Read(powerSpec) == "x=look.enemyPower.offsetX y=look.enemyPower.offsetY", "the readout shows the cast bar gap and the power bar offsets")
+check(Read(nameSpec):match("gap=look.name.gap") ~= nil and Read(spellSpec) == "", "the readout shows the name gap, and nothing for the spell name, which only snaps")
