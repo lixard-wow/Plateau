@@ -904,7 +904,7 @@ local function SlideSpeedSlider(enabled)
         resetLabel = "Right-click to reset to what it was before Plateau changed it.",
         enabledIf = function() return enabled() and not Instant() end,
         disabledReason = function()
-            if not enabled() then return "Turn on Stack enemy or Stack friendly nameplates to use this." end
+            if not enabled() then return "Turn on Stack enemy nameplates or Stack friendly nameplates to use this." end
             return "Turn off Fastest movement to use this."
         end,
     }
@@ -1650,7 +1650,7 @@ ns.sections = {
         CVarBitToggle("nameplateStackingTypes", STACK.Enemy, "Stack enemy nameplates", "Enemy nameplates move apart instead of overlapping."),
         CVarBitToggle("nameplateStackingTypes", STACK.Friendly, "Stack friendly nameplates", "Friendly nameplates move apart instead of overlapping."),
         Gate({ type = "Presets", presets = STACK_PRESETS, instant = true, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack",
-          tooltip = "Ready-made spacing between stacked nameplates." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+          tooltip = "Ready-made spacing between stacked nameplates." }, StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
         { type = "Note", label = "Click a preset to apply it. The underlined preset is in use.", height = 24 },
         Gate({ type = "Toggle", label = "Show stacking boxes",
           get = function() return ns.stackBoxesOn == true end,
@@ -1658,21 +1658,21 @@ ns.sections = {
               ns.stackBoxesOn = value
               Plateau.SetStackBoxes(value)
           end,
-          tooltip = "Outlines the area each nameplate keeps clear when stacking. Stays on until you turn it off or /reload." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+          tooltip = "Outlines the area each nameplate keeps clear when stacking. Stays on until you turn it off or /reload." }, StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
 
         { type = "Header", label = "Stacking bounds and spacing" },
         Gate({ type = "Dropdown", label = "Stacking bounds", options = STACK_SPACES,
           get = function() return Plateau.DB:Get("look.plate.stackSpace") end,
           set = function(value) Plateau.DB:Set("look.plate.stackSpace", value) end,
-          tooltip = "Which parts of a nameplate count when stacking. Larger bounds spread big pulls further up the screen." }, StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+          tooltip = "Which parts of a nameplate count when stacking. Larger bounds spread big pulls further up the screen." }, StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
         Gate(BaseSpec({ type = "Slider", path = "look.plate.stackX", label = "Stacking box width", min = -40, max = 40,
-          tooltip = "Widens or narrows the stacking box on both sides. Wider pushes side-by-side nameplates apart." }), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+          tooltip = "Widens or narrows the stacking box on both sides. Wider pushes side-by-side nameplates apart." }), StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
         Gate(BaseSpec({ type = "Slider", path = "look.plate.stackY", label = "Stacking box height", min = -20, max = 30,
-          tooltip = "Makes the stacking box taller or shorter above and below. Shorter packs pulls tighter." }), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+          tooltip = "Makes the stacking box taller or shorter above and below. Shorter packs pulls tighter." }), StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
         Gate(BaseSpec({ type = "Slider", path = "look.plate.stackOffsetY", label = "Stacking box offset", min = -30, max = 30,
-          tooltip = "Moves the stacking box up or down without changing its size." }), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
-        Gate(CVarSlider("nameplateOverlapV", "Vertical spacing", 0.3, 2, 0.05, "Vertical space between stacked nameplates."), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
-        Gate(CVarSlider("nameplateOverlapH", "Horizontal spacing", 0.3, 2, 0.05, "Horizontal space between stacked nameplates."), StackingOn, "Turn on Stack enemy or Stack friendly nameplates to use this."),
+          tooltip = "Moves the stacking box up or down without changing its size." }), StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
+        Gate(CVarSlider("nameplateOverlapV", "Vertical spacing", 0.3, 2, 0.05, "Vertical space between stacked nameplates."), StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
+        Gate(CVarSlider("nameplateOverlapH", "Horizontal spacing", 0.3, 2, 0.05, "Horizontal space between stacked nameplates."), StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
 
         { type = "Note", warn = true, height = 32,
           visibleIf = function()

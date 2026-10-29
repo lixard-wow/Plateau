@@ -422,3 +422,32 @@ DB:Set("look.plate.stackSpace", "name")
 check(Shown("keep room for a cast bar on every nameplate") == false, "no stacking warning for Health bar and name")
 DB:Set("look.plate.stackSpace", "barcast")
 check(Shown("keep room for a cast bar on every nameplate") == "layering", "stacking bounds that include the cast bar warn about tall stacks")
+
+local unnamed = {}
+for _, section in ipairs(sections) do
+    for _, spec in ipairs(section.controls) do
+        if spec.enabledIf and spec.disabledReason == nil then
+            unnamed[#unnamed + 1] = section.key .. ": " .. tostring(spec.label)
+        end
+    end
+end
+check(#unnamed == 0, "every setting that can be dimmed says which switch turns it on" .. (#unnamed > 0 and (": " .. table.concat(unnamed, "; ")) or ""))
+
+local allLabels, missingSwitch = {}, {}
+for _, section in ipairs(sections) do
+    for _, spec in ipairs(section.controls) do
+        if type(spec.label) == "string" then allLabels[spec.label] = true end
+    end
+end
+for _, section in ipairs(sections) do
+    for _, spec in ipairs(section.controls) do
+        local reason = type(spec.disabledReason) == "string" and spec.disabledReason or nil
+        local names = reason and reason:match("^Turn [onf]+ (.-) to use this%.$")
+        if names and not names:match("^at least one of") and not names:match("%%s") then
+            for name in (names .. " or "):gmatch("(.-) or ") do
+                if not allLabels[name] then missingSwitch[#missingSwitch + 1] = section.key .. ": " .. name end
+            end
+        end
+    end
+end
+check(#missingSwitch == 0, "every switch a dimmed setting points to exists" .. (#missingSwitch > 0 and (": " .. table.concat(missingSwitch, "; ")) or ""))
