@@ -508,14 +508,11 @@ ns.Drag.SetTargets(SnapTargets)
 AddHotspots(plate)
 
 local slot = layout.undoSlot
-local redoButton = ns.Widgets.Button(slot, "Redo", 70, function() ns.Undo.Redo() end)
-redoButton:SetHeight(30)
+local redoButton = ns.TextButton(slot, "Redo", function() ns.Undo.Redo() end)
 redoButton:SetPoint("RIGHT", slot, "RIGHT", 0, 0)
 
-local undoButton = ns.Widgets.Button(slot, "Undo", 100)
-undoButton:SetHeight(30)
-Style.DropArrow(undoButton)
-undoButton:SetPoint("RIGHT", redoButton, "LEFT", -6, 0)
+local undoButton = ns.TextButton(slot, "Undo")
+undoButton:SetPoint("RIGHT", redoButton, "LEFT", -10, 0)
 undoButton:SetScript("OnClick", function(self)
     local options = {}
     for i, label in ipairs(ns.Undo.History()) do
@@ -529,15 +526,18 @@ end)
 
 local function UpdateUndo(canUndo, canRedo)
     undoButton:SetEnabled(canUndo)
-    undoButton:SetAlpha(canUndo and 1 or 0.4)
+    undoButton.restColor = canUndo and C.text or C.faint
+    Style.PaintText(undoButton.label, undoButton.restColor)
     local count = ns.Undo.Count()
     if count > 0 then
         undoButton.label:SetFormattedText("Undo (%d)", count)
     else
         undoButton.label:SetText("Undo")
     end
+    undoButton:Fit()
     redoButton:SetEnabled(canRedo)
-    redoButton:SetAlpha(canRedo and 1 or 0.4)
+    redoButton.restColor = canRedo and C.text or C.faint
+    Style.PaintText(redoButton.label, redoButton.restColor)
 end
 ns.Undo.OnChanged(UpdateUndo)
 UpdateUndo(false, false)
@@ -658,10 +658,11 @@ function ns.ShowKickMarkerCast()
     ns.SetPreviewPick("cast", "kickCooldown")
 end
 
-local snapButton = ns.Widgets.Button(ns.previewBar, "", 94)
-snapButton:SetPoint("RIGHT", ns.previewBar, "RIGHT", -12, 0)
+local snapButton = ns.TextButton(ns.previewBar, "")
+snapButton:SetPoint("RIGHT", ns.previewBar, "RIGHT", -10, 0)
 local function PaintSnap()
-    snapButton.label:SetText(ns.Drag.SnapEnabled() and "Snap: On" or "Snap: Off")
+    snapButton.label:SetFormattedText(Style.T("Snap %s"), "|cffe2dccf" .. Style.T(ns.Drag.SnapEnabled() and "on" or "off") .. "|r")
+    snapButton:Fit()
 end
 snapButton:SetScript("OnClick", function()
     ns.Drag.SetSnapEnabled(not ns.Drag.SnapEnabled())
