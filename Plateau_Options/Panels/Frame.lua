@@ -5,12 +5,12 @@ local C = Style.colors
 local Widgets = ns.Widgets
 local T = Style.T
 
-local WIDTH, HEIGHT = 1100, 720
+local WIDTH, HEIGHT = 1100, 800
 local RAIL = 176
 local PAD = 20
 local TITLE = 30
 local TOP = TITLE + 1
-local TABLE = 176
+local TABLE = 248
 local RULER_X, RULER_Y = 14, 28
 local TOOLS = 24
 local PAGE_HEAD = 40
@@ -273,6 +273,14 @@ local previewStage = CreateFrame("Frame", nil, tableFrame)
 previewStage:SetPoint("TOPLEFT", RULER_Y, -RULER_X)
 previewStage:SetPoint("BOTTOMRIGHT", 0, TOOLS)
 previewStage:SetClipsChildren(true)
+
+local dots = tableFrame:CreateTexture(nil, "BACKGROUND", nil, 1)
+dots:SetPoint("TOPLEFT", RULER_Y, -RULER_X)
+dots:SetPoint("BOTTOMRIGHT")
+dots:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\dots", "REPEAT", "REPEAT")
+dots:SetHorizTile(true)
+dots:SetVertTile(true)
+Style.PaintVertex(dots, C.border, 0.9)
 
 local anchorMark = CreateFrame("Frame", nil, previewStage)
 anchorMark:SetSize(9, 9)
