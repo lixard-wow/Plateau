@@ -62,3 +62,15 @@ PlateauDB = { profiles = { Default = {} }, profileKeys = {}, assignments = { ["A
 DB:Init()
 DB:Shutdown()
 check(PlateauDB.assignments["A - R"] == nil and PlateauDB.assignments["B - R"].content.raid == "Slim", "characters with no automatic switching rules aren't saved; real rules are kept")
+
+PlateauDB = { profiles = { Default = {} }, profileKeys = {} }
+DB:Init()
+local plain = not DB:IsChanged("look.castbar.height") and not DB:IsChanged("look.castbar.readyColor") and not DB:IsChanged("look.castbar")
+DB:Set("look.castbar.height", 17)
+DB:Set("look.castbar.readyColor", { 0, 1, 0 })
+local marked = DB:IsChanged("look.castbar.height") and DB:IsChanged("look.castbar.readyColor")
+DB:Reset("look.castbar.height")
+local sameAgain = DB.profile.look.castbar.height
+DB:Set("look.castbar.height", sameAgain)
+check(plain and marked and not DB:IsChanged("look.castbar.height") and not DB:IsChanged("look.nope"), "a setting is marked changed only while it differs from Plateau's default")
+DB:Shutdown()

@@ -22,6 +22,7 @@ local CONTENT_WIDTH = WIDTH - RAIL - 1 - PAD - SCROLL_GUTTER
 local COLUMN = math.floor((CONTENT_WIDTH - COLUMN_GAP) / 2)
 local PAIR_GAP = CONTENT_WIDTH - COLUMN * 2
 local SCROLL_TOP = TOP + TABLE + PAGE_HEAD
+local MARK_ROOM = 10
 
 ns.layout = {
     width = WIDTH, title = TOP, preview = TABLE - RULER_X - TOOLS, pad = PAD, rail = RAIL, content = CONTENT_WIDTH, column = COLUMN,
@@ -319,7 +320,7 @@ sectionCount:SetPoint("BOTTOMLEFT", sectionTitle, "BOTTOMRIGHT", 10, 2)
 local BANNER = 22
 
 local scroll = CreateFrame("ScrollFrame", nil, frame)
-scroll:SetPoint("TOPLEFT", RAIL + 1 + PAD, -SCROLL_TOP)
+scroll:SetPoint("TOPLEFT", RAIL + 1 + PAD - MARK_ROOM, -SCROLL_TOP)
 scroll:SetPoint("BOTTOMRIGHT", -SCROLL_GUTTER, 2)
 scroll:EnableMouseWheel(true)
 
@@ -477,7 +478,7 @@ local function PlaceRow(row, x, top, lineHeight, stretch)
         row.widget:SetHeight(lineHeight)
     end
     row.widget:ClearAllPoints()
-    row.widget:SetPoint("TOPLEFT", x, -top)
+    row.widget:SetPoint("TOPLEFT", x + MARK_ROOM, -top)
     row.y = top
 end
 
@@ -573,9 +574,25 @@ end
 
 local function LayoutPage(page)
     local count = 0
+    local filter = ns.changedOnly == true
+    local changedParts = {}
+    if filter then
+        for _, row in ipairs(page.rows) do
+            if row.changed then
+                changedParts[row.part or false] = true
+            end
+        end
+    end
     for _, row in ipairs(page.rows) do
-        local hidden = row.group ~= nil and page.collapsed[row.group] == true
+        local hidden = not filter and row.group ~= nil and page.collapsed[row.group] == true
         local visible = Logic.RowShown(row.spec, hidden)
+        if visible and filter then
+            if row.spec.part then
+                visible = changedParts[row.part or false] == true
+            elseif row.spec.type ~= "Header" then
+                visible = row.changed == true
+            end
+        end
         row.widget:SetShown(visible)
         if visible then
             ApplyEnabled(row)
@@ -588,6 +605,17 @@ local function LayoutPage(page)
     local columns = { 0, 0 }
     local function Bottom()
         return math.max(columns[1], columns[2])
+    end
+    if filter then
+        for _, block in ipairs(page.blocks) do
+            if block.header and not block.header.spec.part and block.header.widget:IsShown() then
+                local any = false
+                for _, row in ipairs(block.rows) do
+                    any = any or row.widget:IsShown()
+                end
+                block.header.widget:SetShown(any)
+            end
+        end
     end
     for _, block in ipairs(page.blocks) do
         local any = block.header ~= nil and block.header.widget:IsShown()
@@ -625,10 +653,40 @@ local function LayoutPage(page)
     page:SetHeight(Bottom() + PAD)
 end
 
+local function SpecChanged(spec)
+    if spec.type == "Header" or spec.type == "Note" then return false end
+    for _, path in ipairs(ns.SpecPaths(spec)) do
+        if path and Plateau.DB:IsChanged(path) then
+            return true
+        end
+    end
+    return false
+end
+
+local function Mark(row)
+    local edge = row.widget:CreateTexture(nil, "OVERLAY", nil, 0)
+    edge:SetSize(6, 10)
+    edge:SetPoint("TOPRIGHT", row.widget, "TOPLEFT", -3, -6)
+    Style.Paint(edge, C.edge, 1)
+    local fill = row.widget:CreateTexture(nil, "OVERLAY", nil, 1)
+    fill:SetSize(4, 8)
+    fill:SetPoint("CENTER", edge)
+    Style.Paint(fill, C.accent, 1)
+    row.mark = { edge, fill }
+end
+
 local function RefreshPage(page)
     for _, row in ipairs(page.rows) do
         if row.widget.Refresh and not (row.group and page.collapsed[row.group]) then
             row.widget:Refresh()
+        end
+        row.changed = SpecChanged(row.spec)
+        if row.changed and not row.mark then
+            Mark(row)
+        end
+        if row.mark then
+            row.mark[1]:SetShown(row.changed)
+            row.mark[2]:SetShown(row.changed)
         end
     end
     LayoutPage(page)
@@ -674,7 +732,7 @@ end
 
 local function BuildPage(section)
     local page = CreateFrame("Frame", nil, scroll)
-    page:SetWidth(CONTENT_WIDTH)
+    page:SetWidth(CONTENT_WIDTH + MARK_ROOM)
     page.rows = {}
     page.sectionKey = section.key
     page.collapsed = {}
@@ -1097,6 +1155,25 @@ Confirming(resetSection, "Reset page", function()
 end)
 resetSection:HookScript("OnClick", function(self) self:Fit() end)
 
+local changedButton = TextButton(pageHead, "Changed only")
+changedButton:SetPoint("RIGHT", resetSection, "LEFT", -12, 0)
+Style.Tooltip(changedButton, { label = "Changed only", tooltip = "Shows only the settings that differ from Plateau's defaults. A mark sits beside each one; right-click a setting to reset it." })
+local function PaintChanged()
+    changedButton.restColor = ns.changedOnly and C.accent or nil
+    Style.PaintText(changedButton.label, ns.changedOnly and C.accent or C.muted)
+end
+changedButton:SetScript("OnClick", function()
+    ns.changedOnly = not ns.changedOnly or nil
+    PaintChanged()
+    if shown and pages[shown.key] then
+        RefreshPage(pages[shown.key])
+        PageCount(pages[shown.key])
+        scroll:SetVerticalScroll(0)
+        UpdateThumb()
+    end
+end)
+PaintChanged()
+
 resetAll = TextButton(pageHead, "Reset profile")
 resetAll:SetPoint("BOTTOMRIGHT", 0, 8)
 resetAll:Hide()
@@ -1205,7 +1282,8 @@ end)
 function UpdateChrome()
     local helpPage = current ~= nil and current.key == "help"
     banner:SetShown(helpPage)
-    scroll:SetPoint("TOPLEFT", RAIL + 1 + PAD, -(helpPage and (SCROLL_TOP + BANNER) or SCROLL_TOP))
+    changedButton:SetShown(not helpPage)
+    scroll:SetPoint("TOPLEFT", RAIL + 1 + PAD - MARK_ROOM, -(helpPage and (SCROLL_TOP + BANNER) or SCROLL_TOP))
     UpdateThumb()
     if ns.RefreshChips then
         ns.RefreshChips()

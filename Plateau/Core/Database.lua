@@ -1443,6 +1443,25 @@ function DB:Get(path)
     return nil, false
 end
 
+function DB:IsChanged(path)
+    local parent, parentDefault, key = Walk(path)
+    if not parent then return false end
+    local value, default = rawget(parent, key), parentDefault[key]
+    if value == nil or IsGroup(default) then return false end
+    if type(value) == "table" and type(default) == "table" then
+        for i = 1, 4 do
+            if math.abs((value[i] or 1) - (default[i] or 1)) > 0.001 then
+                return true
+            end
+        end
+        return false
+    end
+    if type(value) == "number" and type(default) == "number" then
+        return math.abs(value - default) > 0.0001
+    end
+    return value ~= default
+end
+
 local function Assign(path, value)
     local parent, parentDefault, key = Walk(path)
     if not parent then
