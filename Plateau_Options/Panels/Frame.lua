@@ -1669,4 +1669,50 @@ frame:HookScript("OnHide", function()
     results:Hide()
     box:ClearFocus()
     ns.Widgets.HidePrompts()
+    local global = Plateau.DB.saved.global
+    global.lastScroll = shown and { key = shown.key, offset = math.floor(Offset(scroll) + 0.5) } or nil
 end)
+
+frame:HookScript("OnShow", function()
+    local saved = Plateau.DB.saved.global.lastScroll
+    if not (saved and shown and saved.key == shown.key and saved.offset and saved.offset > 0) then return end
+    C_Timer.After(0, function()
+        if frame:IsShown() and shown and saved.key == shown.key then
+            scroll:SetVerticalScroll(math.max(0, math.min(Range(scroll), saved.offset)))
+            UpdateThumb()
+        end
+    end)
+end)
+
+local SHORTCUTS = {
+    Z = function() ns.Undo.Undo(1) end,
+    Y = function() ns.Undo.Redo() end,
+    F = function() box:SetFocus() end,
+}
+local shortcuts = CreateFrame("Frame", nil, frame)
+shortcuts:EnableKeyboard(false)
+shortcuts:SetScript("OnKeyDown", function(self, key)
+    if InCombatLockdown() then return end
+    local action = IsControlKeyDown() and SHORTCUTS[key]
+    self:SetPropagateKeyboardInput(not action)
+    if action then
+        action()
+    end
+end)
+local function ArmShortcuts(on)
+    if InCombatLockdown() then return end
+    shortcuts:SetPropagateKeyboardInput(true)
+    shortcuts:EnableKeyboard(on)
+end
+shortcuts:RegisterEvent("PLAYER_REGEN_DISABLED")
+shortcuts:RegisterEvent("PLAYER_REGEN_ENABLED")
+shortcuts:SetScript("OnEvent", function(_, event)
+    if event == "PLAYER_REGEN_DISABLED" then
+        shortcuts:SetPropagateKeyboardInput(true)
+        shortcuts:EnableKeyboard(false)
+    else
+        ArmShortcuts(frame:IsShown())
+    end
+end)
+frame:HookScript("OnShow", function() ArmShortcuts(true) end)
+frame:HookScript("OnHide", function() ArmShortcuts(false) end)
