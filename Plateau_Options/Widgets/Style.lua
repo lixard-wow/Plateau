@@ -211,9 +211,9 @@ Style.BUTTON_RADIUS = Style.theme.buttonRadius
 function Style.DropArrow(button)
     local arrow = button:CreateTexture(nil, "OVERLAY")
     arrow:SetTexture("Interface\\AddOns\\" .. addonName .. "\\Art\\Icons\\icon_chevron_down")
-    arrow:SetSize(12, 12)
-    arrow:SetPoint("RIGHT", -7, 0)
-    local idle, hover = Style.colors.icon or Style.colors.muted, Style.colors.iconHover or Style.colors.text
+    arrow:SetSize(10, 10)
+    arrow:SetPoint("RIGHT", -5, 0)
+    local idle, hover = Style.colors.accent, Style.colors.accentHi
     Style.PaintVertex(arrow, idle)
     button:HookScript("OnEnter", function() Style.PaintVertex(arrow, hover) end)
     button:HookScript("OnLeave", function() Style.PaintVertex(arrow, idle) end)
@@ -700,19 +700,45 @@ function Style.SetBorderColor(frame, color)
     end
 end
 
-Style.ROW_HEIGHT = 28
-Style.LABEL_WIDTH = 200
-Style.CONTROL_X = 210
-Style.CONTROL_WIDTH = 240
+function Style.Bar(parent, width, height)
+    local bar = CreateFrame("Frame", nil, parent)
+    bar:SetSize(width, height)
+    local back = Style.Panel(bar, Style.colors.field, Style.colors.edge)
+    local fill = bar:CreateTexture(nil, "ARTWORK", nil, 0)
+    fill:SetPoint("TOPLEFT", back)
+    fill:SetPoint("BOTTOMLEFT", back)
+    Style.Paint(fill, Style.colors.accent, 1)
+    local spark = bar:CreateTexture(nil, "ARTWORK", nil, 1)
+    spark:SetPoint("TOPRIGHT", fill)
+    spark:SetPoint("BOTTOMRIGHT", fill)
+    Style.PixelWidth(spark)
+    Style.Paint(spark, Style.colors.accentHi, 1)
+    bar.back, bar.fill, bar.spark = back, fill, spark
+    function bar:SetFraction(fraction)
+        fraction = math.max(0, math.min(1, fraction or 0))
+        local inner = math.max(self:GetWidth() - 2 * Style.PixelUnit(self), 0)
+        fill:SetShown(fraction > 0)
+        spark:SetShown(fraction > 0)
+        fill:SetWidth(math.max(inner * fraction, 0.001))
+        self.fraction = fraction
+    end
+    bar:SetScript("OnSizeChanged", function(self) self:SetFraction(self.fraction) end)
+    return bar
+end
+
+Style.ROW_HEIGHT = 22
+Style.LABEL_WIDTH = 156
+Style.CONTROL_X = 164
+Style.CONTROL_WIDTH = 170
 
 function Style.RowLabel(row, spec)
-    local label = Style.Text(row, 13, Style.colors.text)
+    local label = Style.Text(row, 12, Style.colors.text)
     label:SetPoint("LEFT", 0, 0)
     label:SetWidth(Style.LABEL_WIDTH)
     label:SetWordWrap(true)
     label:SetMaxLines(2)
     label:SetText(spec.label)
-    row:SetHeight(label:GetStringHeight() > 16 and 40 or Style.ROW_HEIGHT)
+    row:SetHeight(label:GetStringHeight() > 15 and 32 or Style.ROW_HEIGHT)
     return label
 end
 

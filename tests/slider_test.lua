@@ -6,6 +6,10 @@ function Frame:EnableMouse() end
 function Frame:SetPoint() end
 function Frame:SetSize() end
 function Frame:SetHeight() end
+function Frame:SetWidth() end
+function Frame:SetFrameLevel() end
+function Frame:GetFrameLevel() return 1 end
+function Frame:HighlightText() end
 function Frame:SetFont() end
 function Frame:SetTextColor() end
 function Frame:SetJustifyH() end
@@ -61,7 +65,8 @@ local labelHits = {}
 local ns = {
     Widgets = {},
     Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintVertex = function(t, c, a, s) s = s or 1 t:SetVertexColor((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintText = function(t, c, a) t:SetTextColor(c[1] or 0, c[2] or 0, c[3] or 0, a or c[4] or 1) end, PixelInset = function() end, PixelWidth = function() end, PixelHeight = function() end, RefreshPixels = function() end, 
-        colors = { border = {}, text = {} },
+        colors = { border = {}, text = {}, field = {} },
+        buttonFont = "font",
         font = "font",
         SetFont = function(fontString, file, size, flags) fontString:SetFont(file, size, flags) end,
         CONTROL_X = 0,
@@ -72,6 +77,11 @@ local ns = {
             return hit
         end,
         Fill = function() end,
+        Bar = function(parent)
+            local bar = CreateFrame("Frame", nil, parent)
+            function bar:SetFraction(fraction) self.fraction = fraction end
+            return bar
+        end,
         Border = function() end,
         Field = function() end,
         Themed = function() end,
@@ -106,11 +116,8 @@ check(labelHit ~= nil and labelHit ~= row and labelHit ~= track, "the label has 
 track.left, track.width = 100, 200
 row:Refresh()
 
-local THUMB = 13
 local function CursorFor(value)
-    local usable = 200 - THUMB
-    local fraction = value / 100
-    return 100 + THUMB / 2 + fraction * usable
+    return 100 + value / 100 * 200
 end
 
 local function IsTarget(list, frame)

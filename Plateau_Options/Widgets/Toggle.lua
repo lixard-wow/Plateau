@@ -4,69 +4,22 @@ local Style = ns.Style
 local C = Style.colors
 
 local FADED = 0.3
-local TRACK_WIDTH, TRACK_HEIGHT = 34, 18
-local PILL = 9
-local KNOB = 12
-local OFF_X, ON_X = 3, TRACK_WIDTH - KNOB - 3
-local KNOB_ON = { 1, 1, 1, 1 }
-local DURATION = 0.2
+local BAR_WIDTH, BAR_HEIGHT = 24, 10
 
 local function MakeToggle(parent, spec)
     local row = CreateFrame("Button", nil, parent)
     local label = Style.RowLabel(row, spec)
     local labelHit = Style.LabelHit(label)
 
-    local track = CreateFrame("Frame", nil, row)
-    track:SetSize(TRACK_WIDTH, TRACK_HEIGHT)
+    local track = Style.Bar(row, BAR_WIDTH, BAR_HEIGHT)
     track:SetPoint("LEFT", Style.CONTROL_X, 0)
-    local fill, edge = Style.Panel(track, C.field, C.border, PILL)
-    local knob = Style.Rounded(track, C.muted, "ARTWORK", 0, "circle")
-    knob:SetSize(KNOB, KNOB)
-
-    local currentX = OFF_X
-    local function PlaceKnob(x)
-        currentX = x
-        knob:ClearAllPoints()
-        knob:SetPoint("LEFT", track, "LEFT", x, 0)
-    end
-    PlaceKnob(OFF_X)
-
-    local animFrom, animTo, animElapsed = OFF_X, OFF_X, DURATION
-    local ticker = CreateFrame("Frame", nil, track)
-    ticker:Hide()
-    ticker:SetScript("OnUpdate", function(self, delta)
-        animElapsed = animElapsed + delta
-        local t = math.min(animElapsed / DURATION, 1)
-        local eased = 1 - (1 - t) ^ 3
-        PlaceKnob(animFrom + (animTo - animFrom) * eased)
-        if t >= 1 then
-            self:Hide()
-        end
-    end)
 
     local hovered = false
-    function row:SetOn(on, instant)
-        local changed = self.on ~= on
+    function row:SetOn(on)
         self.on = on
-        local tint = Style.StateColor()
-        if on then
-            Style.PaintVertex(fill, hovered and C.primaryHover or tint)
-            Style.PaintVertex(edge, hovered and C.primaryHover or tint)
-            Style.PaintVertex(knob, KNOB_ON)
-        else
-            Style.PaintVertex(fill, hovered and C.hover or C.field)
-            Style.PaintVertex(edge, hovered and tint or C.border)
-            Style.PaintVertex(knob, hovered and C.text or C.muted)
-        end
-        local target = on and ON_X or OFF_X
-        if instant or not changed then
-            ticker:Hide()
-            animFrom, animTo, animElapsed = target, target, DURATION
-            PlaceKnob(target)
-        else
-            animFrom, animTo, animElapsed = currentX, target, 0
-            ticker:Show()
-        end
+        track:SetFraction(on and 1 or 0)
+        Style.PaintVertex(track.back, (hovered and not on) and C.hover or C.field)
+        Style.Paint(track.fill, hovered and C.accentHi or C.accent, 1)
     end
 
     local function RefreshEverything()
@@ -111,7 +64,7 @@ local function MakeToggle(parent, spec)
     track:HookScript("OnLeave", function() UpdateHover(false) end)
     Style.Tooltip(track, { label = spec.label, tooltip = spec.tooltip, limited = spec.limited })
 
-    row:SetOn(false, true)
+    row:SetOn(false)
     return row
 end
 
@@ -119,8 +72,7 @@ function ns.Widgets.Toggle(parent, spec)
     local row = MakeToggle(parent, spec)
 
     function row:Refresh()
-        self:SetOn(ns.SpecGet(spec) == true, not self.initialized)
-        self.initialized = true
+        self:SetOn(ns.SpecGet(spec) == true)
         Style.OverrideLabel(self.label, spec)
     end
 
@@ -131,12 +83,11 @@ function ns.Widgets.ToggleColor(parent, spec)
     local row = MakeToggle(parent, spec)
 
     local swatch = ns.Widgets.MakeSwatch(row, spec.colorPath)
-    swatch:SetPoint("LEFT", row.track, "RIGHT", 12, 0)
+    swatch:SetPoint("LEFT", row.track, "RIGHT", 8, 0)
 
     function row:Refresh()
         local on = ns.Get(spec.path) == true
-        self:SetOn(on, not self.initialized)
-        self.initialized = true
+        self:SetOn(on)
         swatch:Refresh()
         swatch:SetAlpha(on and 1 or FADED)
         Style.OverrideLabel(self.label, spec)

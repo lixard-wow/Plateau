@@ -75,23 +75,23 @@ end
 
 function ns.Widgets.Header(parent, spec)
     local row = CreateFrame("Frame", nil, parent)
-    row:SetHeight(26)
-
-    local tick = row:CreateTexture(nil, "ARTWORK")
-    tick:SetSize(4, 14)
-    tick:SetPoint("LEFT", 0, 0)
-    local tint = Style.StateColor()
-    Style.Paint(tick, tint, 1)
+    row:SetHeight(22)
 
     local text = Style.Text(row, 14, C.heading)
-    Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE + 2, "")
-    text:SetPoint("LEFT", tick, "RIGHT", 9, 0)
+    Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE, "")
+    text:SetPoint("BOTTOMLEFT", 0, 4)
     text:SetText(spec.label)
+
+    local rule = row:CreateTexture(nil, "ARTWORK")
+    rule:SetPoint("BOTTOMLEFT")
+    rule:SetPoint("BOTTOMRIGHT")
+    Style.PixelHeight(rule)
+    Style.Paint(rule, C.line, 1)
 
     if spec.collapsible then
         row:EnableMouse(true)
         local state = Style.Text(row, 11, C.muted)
-        state:SetPoint("RIGHT", 0, 0)
+        state:SetPoint("BOTTOMRIGHT", 0, 4)
         function row:SetCollapsed(collapsed)
             state:SetText(collapsed and "Show" or "Hide")
         end
@@ -139,7 +139,7 @@ local WARN_ICON = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:12:12:0:0|t
 
 function ns.Widgets.Note(parent, spec)
     local row = CreateFrame("Frame", nil, parent)
-    local text = Style.Text(row, spec.size or 12, spec.warn and C.warn or (spec.bright and C.text or C.muted))
+    local text = Style.Text(row, spec.size or 11, spec.warn and C.warn or (spec.bright and C.text or C.muted))
     local prefix = spec.warn and WARN_ICON or ""
     text:SetWordWrap(true)
     if spec.bright then

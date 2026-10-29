@@ -37,7 +37,13 @@ local db = {}
 local ns = {
     Widgets = {},
     Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintVertex = function(t, c, a, s) s = s or 1 t:SetVertexColor((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintText = function(t, c, a) t:SetTextColor(c[1] or 0, c[2] or 0, c[3] or 0, a or c[4] or 1) end, PixelInset = function() end, PixelWidth = function() end, PixelHeight = function() end, RefreshPixels = function() end, 
-        colors = { border = { 0.2, 0.2, 0.2, 1 }, field = { 0.1, 0.1, 0.1, 1 }, muted = { 0.5, 0.5, 0.5, 1 }, text = { 0.9, 0.9, 0.9, 1 }, hover = { 0.3, 0.3, 0.3, 1 }, primaryHover = { 0.6, 0.6, 0.6, 1 } },
+        colors = { border = { 0.2, 0.2, 0.2, 1 }, field = { 0.1, 0.1, 0.1, 1 }, muted = { 0.5, 0.5, 0.5, 1 }, text = { 0.9, 0.9, 0.9, 1 }, hover = { 0.3, 0.3, 0.3, 1 }, accent = { 1, 1, 1, 1 }, accentHi = { 0.6, 0.6, 0.6, 1 }, edge = { 0, 0, 0, 1 } },
+        Bar = function(parent)
+            local bar = CreateFrame("Frame", nil, parent)
+            bar.back, bar.fill = setmetatable({}, Frame), setmetatable({}, Frame)
+            function bar:SetFraction(fraction) self.fraction = fraction end
+            return bar
+        end,
         CONTROL_X = 0,
         RowLabel = function() return setmetatable({}, Frame) end,
         LabelHit = function(label)
@@ -114,11 +120,11 @@ check(db[spec.path] == false, "left-clicking the label text still toggles the va
 row:Fire("OnClick")
 check(db[spec.path] == true, "clicking elsewhere on the row (native Button click) still toggles the value too")
 
-local edge = trackEdges[track]
+check(track.fraction == 1, "an on switch is a full bar")
 track:Fire("OnEnter")
-check(edge ~= nil and edge.vertex and edge.vertex[1] == 0.6, "hovering an on switch brightens its rounded track")
+check(track.fill.color and track.fill.color[1] == 0.6, "hovering an on switch brightens its fill")
 track:Fire("OnLeave")
-check(edge ~= nil and edge.vertex and edge.vertex[1] == 1, "leaving an on switch puts the accent back on its track")
+check(track.fill.color and track.fill.color[1] == 1, "leaving an on switch puts the accent back on its fill")
 
 resetTargets, tooltips = {}, {}
 local colorSpec = { path = "look.test.colorOn", colorPath = "look.test.color", label = "Colored toggle", tooltip = "Toggles a colored thing." }

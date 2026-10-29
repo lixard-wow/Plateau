@@ -3,7 +3,7 @@ local _, ns = ...
 local Style = ns.Style
 local C = Style.colors
 
-local THUMB_SIZE = 13
+local BAR_HEIGHT = 12
 
 function ns.Widgets.Slider(parent, spec)
     local min, max, step = spec.min, spec.max, spec.step or 1
@@ -14,41 +14,24 @@ function ns.Widgets.Slider(parent, spec)
     local label = Style.RowLabel(row, spec)
     local labelHit = Style.LabelHit(label)
 
-    local box = CreateFrame("EditBox", nil, row)
-    box:SetSize(52, 18)
-    box:SetPoint("RIGHT")
-    box:SetAutoFocus(false)
-    Style.SetFont(box, Style.font, 11, "")
-    Style.PaintText(box, C.text)
-    box:SetJustifyH("RIGHT")
-    box:SetTextInsets(4, 5, 0, 0)
-    Style.Field(box, C.field, C.border)
-
-    local track = CreateFrame("Frame", nil, row)
+    local track = Style.Bar(row, Style.CONTROL_WIDTH, BAR_HEIGHT)
     track:SetPoint("LEFT", Style.CONTROL_X, 0)
-    track:SetPoint("RIGHT", box, "LEFT", -12, 0)
-    track:SetHeight(14)
     track:EnableMouse(true)
 
-    local groove = track:CreateTexture(nil, "BACKGROUND")
-    groove:SetPoint("LEFT")
-    groove:SetPoint("RIGHT")
-    groove:SetHeight(4)
-    Style.Paint(groove, C.border, 1)
-
-    local thumb = track:CreateTexture(nil, "OVERLAY")
-    thumb:SetSize(THUMB_SIZE, THUMB_SIZE)
-    Style.Themed(thumb, 1)
-    local round = track:CreateMaskTexture()
-    round:SetTexture("Interface\\Masks\\CircleMaskScalable", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-    round:SetAllPoints(thumb)
-    thumb:AddMaskTexture(round)
-
-    local fill = track:CreateTexture(nil, "ARTWORK")
-    fill:SetPoint("LEFT", groove)
-    fill:SetPoint("RIGHT", thumb, "CENTER")
-    fill:SetHeight(4)
-    Style.Themed(fill, 1)
+    local box = CreateFrame("EditBox", nil, track)
+    box:SetPoint("TOPRIGHT", -1, -1)
+    box:SetPoint("BOTTOMRIGHT", -1, 1)
+    box:SetWidth(44)
+    box:SetFrameLevel(track:GetFrameLevel() + 2)
+    box:SetAutoFocus(false)
+    Style.SetFont(box, Style.buttonFont, 10, "OUTLINE")
+    Style.PaintText(box, C.text)
+    box:SetJustifyH("RIGHT")
+    box:SetTextInsets(2, 3, 0, 0)
+    local typing = box:CreateTexture(nil, "BACKGROUND")
+    typing:SetAllPoints()
+    Style.Paint(typing, C.field, 1)
+    typing:Hide()
 
     local function Clean(value)
         value = math.max(min, math.min(max, value))
@@ -59,15 +42,10 @@ function ns.Widgets.Slider(parent, spec)
     local currentValue, lastValue
 
     local function PositionThumb(value)
-        local width = track:GetWidth()
-        if not width or width <= 0 or value == nil then return end
-        local usable = math.max(width - THUMB_SIZE, 1)
+        if value == nil then return end
         local fraction = (max > min) and (value - min) / (max - min) or 0
-        fraction = math.max(0, math.min(1, fraction))
-        thumb:ClearAllPoints()
-        thumb:SetPoint("LEFT", track, "LEFT", fraction * usable, 0)
+        track:SetFraction(fraction)
     end
-    track:SetScript("OnSizeChanged", function() PositionThumb(currentValue) end)
 
     local function SetDisplay(value)
         currentValue = value
@@ -123,9 +101,7 @@ function ns.Widgets.Slider(parent, spec)
         local width, left = track:GetWidth(), track:GetLeft()
         if not width or width <= 0 or not left then return currentValue or lastValue or min end
         local cursorX = GetCursorPosition() / track:GetEffectiveScale()
-        local usable = math.max(width - THUMB_SIZE, 1)
-        local fraction = (cursorX - left - THUMB_SIZE / 2) / usable
-        fraction = math.max(0, math.min(1, fraction))
+        local fraction = math.max(0, math.min(1, (cursorX - left) / width))
         return min + fraction * (max - min)
     end
 
@@ -165,11 +141,11 @@ function ns.Widgets.Slider(parent, spec)
         self:ClearFocus()
     end)
     box:SetScript("OnEditFocusGained", function(self)
-        Style.SetBorderColor(self, Style.StateColor())
+        typing:Show()
         self:HighlightText()
     end)
-    box:SetScript("OnEditFocusLost", function(self)
-        Style.SetBorderColor(self, C.border)
+    box:SetScript("OnEditFocusLost", function()
+        typing:Hide()
     end)
 
     Style.Tooltip(labelHit, spec)

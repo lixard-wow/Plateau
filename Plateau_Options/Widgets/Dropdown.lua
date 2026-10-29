@@ -290,10 +290,10 @@ function ns.Widgets.Dropdown(parent, spec)
     local labelHit = Style.LabelHit(label)
 
     local button = CreateFrame("Button", nil, row)
-    button:SetHeight(22)
+    button:SetHeight(18)
     button:SetPoint("LEFT", Style.CONTROL_X, 0)
     button:SetWidth(Style.CONTROL_WIDTH)
-    Style.ButtonBox(button, C.field, nil, C.border)
+    Style.ButtonBox(button, C.field, nil, C.edge, C.hover)
     row.label = label
     row.button = button
     Style.DropArrow(button)

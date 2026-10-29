@@ -3,7 +3,7 @@ local _, ns = ...
 local Style = ns.Style
 local C = Style.colors
 
-local SWATCH_SIZE = 16
+local SWATCH_WIDTH, SWATCH_HEIGHT = 24, 10
 
 local pickerStrata
 local function LiftPicker()
@@ -19,11 +19,10 @@ end
 
 function ns.Widgets.MakeSwatch(parent, path, setter)
     local swatch = CreateFrame("Button", nil, parent)
-    swatch:SetSize(SWATCH_SIZE, SWATCH_SIZE)
-    Style.Fill(swatch, { 0.3, 0.3, 0.3, 1 })
+    swatch:SetSize(SWATCH_WIDTH, SWATCH_HEIGHT)
+    Style.Fill(swatch, C.edge)
     local color = swatch:CreateTexture(nil, "ARTWORK")
     Style.PixelInset(color, swatch)
-    Style.Border(swatch, C.border)
 
     function swatch:Refresh()
         local value = ns.Get(path)
