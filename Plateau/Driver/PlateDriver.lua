@@ -899,6 +899,9 @@ settler:SetScript("OnUpdate", function(self)
         end
         if frames <= 1 or not plate.active then
             settling[plate] = nil
+            if plate.active and not plate.preview then
+                ApplyHitTest(plate)
+            end
         else
             settling[plate] = frames - 1
             any = true
@@ -1262,6 +1265,10 @@ function Driver:Restyle(reason)
         plateOffsetY = offsetY
         for base, plate in pairs(platesByBase) do
             AnchorPlate(plate, base)
+            if plate.active then
+                settling[plate] = SETTLE_FRAMES
+                settler:Show()
+            end
         end
     end
     hideFriendlyCombat = views.enemy.friendly.hideInCombat == true
