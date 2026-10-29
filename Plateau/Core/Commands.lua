@@ -480,8 +480,9 @@ Plateau = {
         ns.ResolveConflict(entry)
     end,
     DisableSelf = function()
-        C_AddOns.DisableAddOn("Plateau_Options")
-        C_AddOns.DisableAddOn("Plateau")
+        local character = UnitGUID("player")
+        C_AddOns.DisableAddOn("Plateau_Options", character)
+        C_AddOns.DisableAddOn("Plateau", character)
     end,
     IgnoreConflict = function(name)
         local global = ns.DB.saved.global
