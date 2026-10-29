@@ -1,6 +1,5 @@
 local _, ns = ...
 
-local L = ns.L
 local CreateFrame = CreateFrame
 local InCombatLockdown = InCombatLockdown
 local ShouldAurasBeSecret = C_Secrets and C_Secrets.ShouldAurasBeSecret
