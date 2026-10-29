@@ -26,7 +26,7 @@ local MARK_ROOM = 10
 
 ns.layout = {
     width = WIDTH, title = TOP, preview = TABLE - RULER_X - TOOLS, pad = PAD, rail = RAIL, content = CONTENT_WIDTH, column = COLUMN,
-    previewTop = TOP + RULER_X, previewLeft = RAIL + 1 + RULER_Y, previewRight = 1,
+    plateScale = 1.5, previewTop = TOP + RULER_X, previewLeft = RAIL + 1 + RULER_Y, previewRight = 1,
 }
 
 local Logic = ns.PageLogic
@@ -212,11 +212,12 @@ local function Ruler(vertical)
         local length = vertical and height or width
         if issecretvalue(length) then return end
         local origin = math.floor((vertical and length - TOOLS or length) / 2)
-        local first, last = -math.floor(origin / TICK), math.floor((length - origin) / TICK)
+        local step = TICK * ns.layout.plateScale
+        local first, last = -math.floor(origin / step), math.floor((length - origin) / step)
         local n, shown = 0, 0
         for k = first, last do
             n = n + 1
-            local pos = origin + k * TICK
+            local pos = math.floor(origin + k * step + 0.5)
             local major = k % (MAJOR / TICK) == 0
             local tick = ticks[n]
             if not tick then

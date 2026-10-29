@@ -4,7 +4,7 @@ local Style = ns.Style
 local C = Style.colors
 local layout = ns.layout
 
-local PLATE_SCALE = 1.5
+local PLATE_SCALE = layout.plateScale
 local HINT = "Click a part to edit it. Drag to move it, or drag it to Turned off to hide it. Shift places it freely; arrow keys move it 1 px, with Shift 10 px."
 
 local sectionKey, editingTitle
@@ -815,10 +815,10 @@ crossWatch:SetScript("OnUpdate", function()
     crossH:ClearAllPoints()
     crossH:SetPoint("LEFT", rulerLeft, "TOPLEFT", 0, -y)
     crossH:SetPoint("RIGHT", panel, "TOPRIGHT", 0, -y)
-    SetTag(tagX, x - math.floor(panel:GetWidth() / 2))
+    SetTag(tagX, (x - math.floor(panel:GetWidth() / 2)) / PLATE_SCALE)
     tagX:ClearAllPoints()
     tagX:SetPoint("CENTER", rulerTop, "TOPLEFT", x, -rulerTop:GetHeight() / 2)
-    SetTag(tagY, math.floor(panel:GetHeight() / 2) - y)
+    SetTag(tagY, (math.floor(panel:GetHeight() / 2) - y) / PLATE_SCALE)
     tagY:ClearAllPoints()
     tagY:SetPoint("CENTER", rulerLeft, "TOPLEFT", rulerLeft:GetWidth() / 2, -y)
     cross:Show()
