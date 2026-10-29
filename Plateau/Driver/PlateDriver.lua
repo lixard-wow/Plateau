@@ -1141,19 +1141,9 @@ local function DrawPreview(plate)
         sampleStale[state] = nil
         ConfigureState(state, sampleLooks[state])
     end
-    local real = views[state]
-    local forced = plate.previewLook and real and plate.previewLook(real)
-    if forced then
-        views[state] = forced
-        ConfigureState(state, forced)
-    end
     StylePlate(plate)
     RenderPreview(plate)
     ns.RoundLayout(plate)
-    if forced then
-        views[state] = real
-        ConfigureState(state, real)
-    end
     ns.pixelBorders = false
 end
 
