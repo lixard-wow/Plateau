@@ -386,7 +386,7 @@ local function AddHotspots(plate)
     Hotspot(plate, plate.kickHolder, "kickers", "Kicker icons", 80, 1,
         Drag.PositionSpec({ path = "look.kickers", region = plate.kickHolder, anchor = AtPlate(plate) }))
     Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true
-    Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 60, 0, castbarDrag).setting = "Show spell icon"
+    Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 62, 0, Drag.CastIconSpec(plate)).setting = "Show spell icon"
     local castTarget = Hotspot(plate, plate.castbar.target, "castbar", "Cast target", 65, 2,
         Drag.PositionSpec({ path = "look.castbar", positionKey = "targetPosition", xKey = "targetOffsetX", yKey = "targetOffsetY", fixedGap = 2, region = plate.castbar.target, anchor = function() return plate.castbar end }))
     castTarget.fitText = true
@@ -815,10 +815,10 @@ crossWatch:SetScript("OnUpdate", function()
     crossH:ClearAllPoints()
     crossH:SetPoint("LEFT", rulerLeft, "TOPLEFT", 0, -y)
     crossH:SetPoint("RIGHT", panel, "TOPRIGHT", 0, -y)
-    SetTag(tagX, x)
+    SetTag(tagX, x - math.floor(panel:GetWidth() / 2))
     tagX:ClearAllPoints()
     tagX:SetPoint("CENTER", rulerTop, "TOPLEFT", x, -rulerTop:GetHeight() / 2)
-    SetTag(tagY, y)
+    SetTag(tagY, math.floor(panel:GetHeight() / 2) - y)
     tagY:ClearAllPoints()
     tagY:SetPoint("CENTER", rulerLeft, "TOPLEFT", rulerLeft:GetWidth() / 2, -y)
     cross:Show()

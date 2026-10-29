@@ -211,43 +211,51 @@ local function Ruler(vertical)
     ruler:SetScript("OnSizeChanged", function(self, width, height)
         local length = vertical and height or width
         if issecretvalue(length) then return end
-        local count = math.floor(length / TICK)
-        for i = 0, count do
-            local major = i % (MAJOR / TICK) == 0
-            local tick = ticks[i]
+        local origin = math.floor((vertical and length - TOOLS or length) / 2)
+        local first, last = -math.floor(origin / TICK), math.floor((length - origin) / TICK)
+        local n, shown = 0, 0
+        for k = first, last do
+            n = n + 1
+            local pos = origin + k * TICK
+            local major = k % (MAJOR / TICK) == 0
+            local tick = ticks[n]
             if not tick then
                 tick = self:CreateTexture(nil, "ARTWORK")
-                ticks[i] = tick
+                ticks[n] = tick
             end
-            Style.Paint(tick, major and C.faint or C.border, 1)
+            Style.Paint(tick, (k == 0 and C.accent) or (major and C.faint) or C.border, 1)
             tick:ClearAllPoints()
             if vertical then
-                tick:SetPoint("TOPRIGHT", 0, -i * TICK)
+                tick:SetPoint("TOPRIGHT", 0, -pos)
                 tick:SetSize(major and 8 or 4, 1)
             else
-                tick:SetPoint("BOTTOMLEFT", i * TICK, 0)
+                tick:SetPoint("BOTTOMLEFT", pos, 0)
                 tick:SetSize(1, major and 8 or 4)
             end
             tick:Show()
-            if major and i > 0 then
-                local label = labels[i]
+            if major and pos > 6 and pos < length - 6 then
+                shown = shown + 1
+                local label = labels[shown]
                 if not label then
                     label = Style.Text(self, 9, C.faint)
-                    labels[i] = label
+                    labels[shown] = label
                 end
                 label:ClearAllPoints()
                 if vertical then
-                    label:SetPoint("TOPRIGHT", -10, -i * TICK + 5)
+                    label:SetPoint("TOPRIGHT", -10, -pos + 5)
+                    label:SetText(-k * TICK)
                 else
-                    label:SetPoint("BOTTOMLEFT", i * TICK + 3, 5)
+                    label:SetPoint("BOTTOMLEFT", pos + 3, 5)
+                    label:SetText(k * TICK)
                 end
-                label:SetText(i * TICK)
                 label:Show()
             end
         end
-        for i = count + 1, #ticks do
+        for i = n + 1, #ticks do
             ticks[i]:Hide()
-            if labels[i] then labels[i]:Hide() end
+        end
+        for i = shown + 1, #labels do
+            labels[i]:Hide()
         end
     end)
     if vertical then

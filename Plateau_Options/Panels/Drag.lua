@@ -864,6 +864,45 @@ end
 
 local SPELL_NAME_SPOTS = { "LEFT", "CENTER", "RIGHT" }
 
+function Drag.CastIconSpec(plate)
+    local sidePath = "look.castbar.iconSide"
+    local spec = {
+        name = "look.castbar.icon",
+        paths = { sidePath },
+        keepSize = true,
+    }
+    function spec.Mover()
+        return plate.castbar.icon
+    end
+    function spec.Candidates()
+        local span = Get("look.castbar.iconSpan")
+        local anchor = span and plate or plate.castbar
+        local list = {}
+        for _, side in ipairs({ "LEFT", "RIGHT" }) do
+            local other = side == "LEFT" and "RIGHT" or "LEFT"
+            local point = span and "TOP" .. other or other
+            local mx, my = PointXY(plate.castbar.icon, point)
+            list[#list + 1] = {
+                id = side,
+                point = point,
+                anchor = anchor,
+                relPoint = span and "TOP" .. side or side,
+                mx = mx,
+                my = my,
+                Values = function()
+                    return { [sidePath] = side }
+                end,
+            }
+        end
+        return list
+    end
+    function spec.Nudge(dx)
+        if dx == 0 then return nil end
+        return { [sidePath] = dx < 0 and "LEFT" or "RIGHT" }
+    end
+    return spec
+end
+
 function Drag.SpellNameSpec(plate)
     local justifyPath = "look.castbar.textJustify"
     local spec = {
