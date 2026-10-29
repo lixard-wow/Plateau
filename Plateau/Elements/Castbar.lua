@@ -609,6 +609,16 @@ function Castbar:Enable(plate, unit)
     self:Refresh(plate, unit)
 end
 
+local function SetCasting(plate, casting)
+    plate.casting = casting
+    ns.Driver:CastChanged(plate)
+    ns.Scaling:Apply(plate)
+    ns.Elements.Name:RefreshShown(plate)
+    if plate.rangeAlpha ~= 1 then
+        ns.Driver:RefreshAlpha(plate)
+    end
+end
+
 function Castbar:Disable(plate)
     local bar = plate.castbar
     if not bar:IsShown() and not bar.holding and bar.duration == nil then
@@ -630,13 +640,7 @@ function Castbar:Disable(plate)
     bar.mustStop:SetAlpha(0)
     TrackCasting(bar, false)
     if plate.casting then
-        plate.casting = false
-        ns.Driver:CastChanged(plate)
-        ns.Scaling:Apply(plate)
-        ns.Elements.Name:RefreshShown(plate)
-        if plate.rangeAlpha ~= 1 then
-            ns.Driver:RefreshAlpha(plate)
-        end
+        SetCasting(plate, false)
     end
     bar:Hide()
     TargetShownChanged(plate)
@@ -752,13 +756,7 @@ function Castbar:ShowInterrupted(plate, interruptedBy)
     bar.interruptText:Show()
     bar.holding = true
     if plate.casting then
-        plate.casting = false
-        ns.Driver:CastChanged(plate)
-        ns.Scaling:Apply(plate)
-        ns.Elements.Name:RefreshShown(plate)
-        if plate.rangeAlpha ~= 1 then
-            ns.Driver:RefreshAlpha(plate)
-        end
+        SetCasting(plate, false)
     end
     bar.holdUntil = GetTime() + s.interruptHold
     C_Timer.After(s.interruptHold, bar.holdCallback)
@@ -893,13 +891,7 @@ function Castbar:Refresh(plate, unit, ending)
     TrackCasting(bar, true)
     if not plate.casting then
         ns.Fire("CAST_START", unit, plate)
-        plate.casting = true
-        ns.Driver:CastChanged(plate)
-        ns.Scaling:Apply(plate)
-        ns.Elements.Name:RefreshShown(plate)
-        if plate.rangeAlpha ~= 1 then
-            ns.Driver:RefreshAlpha(plate)
-        end
+        SetCasting(plate, true)
     end
     UpdateKickMarker(bar)
     bar:Show()
