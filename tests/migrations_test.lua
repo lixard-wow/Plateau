@@ -9,7 +9,7 @@ local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 PlateauDB = { version = 1, profiles = { Default = { look = { highlight = { color = { 1, 0, 0, 1 }, size = 3 }, castbar = { height = 14 } } } }, profileKeys = {} }
 ns.DB:Init()
 local t = ns.DB.profile.look.target
-check(PlateauDB.version == 29, "schema bumped to the latest version")
+check(PlateauDB.version == 30, "schema bumped to the latest version")
 check(t.ringColor[1] == 1 and t.ringColor[2] == 0, "v1 ring color ends up in target.ringColor")
 check(t.ringSize == 3, "v1 ring size ends up in target.ringSize")
 check(rawget(ns.DB.profile.look, "highlight") == nil, "highlight group removed")
@@ -20,7 +20,7 @@ check(PlateauDB.profiles.Default.look.target.ringSize == 3, "migrated value surv
 
 PlateauDB = nil
 ns.DB:Init()
-check(PlateauDB.version == 29 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
+check(PlateauDB.version == 30 and ns.DB.profile.look.target.ringSize == 2, "fresh install starts at the latest version with defaults")
 
 PlateauDB = { version = 1, profiles = { Default = { look = { health = { tapped = { 0.2, 0.2, 0.9, 1 }, borderSize = 2 } } } }, profileKeys = {} }
 ns.DB:Init()
@@ -203,7 +203,7 @@ PlateauDB = { version = 15, profiles = {
 }, profileKeys = { ["Stalador - Iridikron"] = "On" } }
 ns.DB:Init()
 local on = PlateauDB.profiles.On.look.scaling
-check(PlateauDB.version == 29 and on.castFront == nil and on.layerByType == nil, "v16 then v28: old layering settings are cleared")
+check(PlateauDB.version == 30 and on.castFront == nil and on.layerByType == nil, "v16 then v28: old layering settings are cleared")
 check(on.layerByType == nil and on.layerOrder == nil and on.boss == 1.3, "v16: the old layering keys are removed and other scaling settings kept")
 local off = PlateauDB.profiles.Off.look.scaling
 check(off.castFront == nil and off.layerByType == nil and off.layerOrder == nil, "v16: priority layering off leaves nothing behind")
@@ -284,4 +284,14 @@ local renamed = PlateauDB.profiles
 check(renamed.Heavy and renamed.Heavy.look.plate.width == 177 and renamed["Bold and crisp"] == nil and PlateauDB.global.accountProfile == "Heavy"
     and PlateauDB.global.builtins.Heavy and PlateauDB.profileKeys["Stalador - Iridikron"] == "Heavy", "v29: built-in looks take their new names, with the character, account default and built-in mark")
 check(renamed.Flat.look.plate.width == 99 and renamed["Clean and flat"] ~= nil, "v29: a profile you already named like a new look is left alone")
+ns.DB:Shutdown()
+
+PlateauDB = { version = 29, global = { builtins = { Heavy = true } },
+    profiles = { Default = { look = { raidMarker = { position = "TOP" } } }, Heavy = { look = { plate = { width = 125 }, raidMarker = { position = "TOP" }, level = { enabled = true } } } },
+    profileKeys = {} }
+ns.DB:Init()
+local heavy, mine = PlateauDB.profiles.Heavy.look, PlateauDB.profiles.Default.look
+check(heavy.raidMarker.position == "LEFT" and heavy.level.enabled == false and heavy.auras.important.enabled == true and heavy.plate.width == 125,
+    "v30: saved built-in looks take the shared layout and keep their bar")
+check(mine.raidMarker.position == "TOP", "v30: your own profiles are left alone")
 ns.DB:Shutdown()

@@ -2,7 +2,7 @@ local _, ns = ...
 
 local L = ns.L
 
-local SCHEMA_VERSION = 29
+local SCHEMA_VERSION = 30
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -107,6 +107,25 @@ local function ForEachLook(db, fix)
 end
 
 local migrations = {
+    [30] = function(db)
+        local seeded = db.global and db.global.builtins or {}
+        for name, profile in pairs(db.profiles or {}) do
+            local entry = ns.Builtins and ns.Builtins.ByName(name)
+            if entry and seeded[name] and type(profile) == "table" and ns.SharedLookValues then
+                for path, value in pairs(ns.SharedLookValues({ key = entry.key })) do
+                    local node, parent, key = profile, nil, nil
+                    for part in path:gmatch("[^%.]+") do
+                        if parent then
+                            if type(parent[key]) ~= "table" then parent[key] = {} end
+                            node = parent[key]
+                        end
+                        parent, key = node, part
+                    end
+                    parent[key] = value
+                end
+            end
+        end
+    end,
     [29] = function(db)
         RenameProfile(db, "Familiar layout", "Blizzard-like")
         RenameProfile(db, "Classic unit frames", "Unit frame")

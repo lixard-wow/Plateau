@@ -12,9 +12,9 @@ ns.presets = {
         {
             key = "familiar",
             label = "Blizzard-like",
-            summary = "Small flat bar, name below, health value and percent.",
+            summary = "Small flat bar with a soft dark edge.",
             accent = { 0.98, 0.72, 0.28, 1 },
-            tooltip = "Small flat bar with the name below and health value and percent. Glow and corner brackets on your target; other nameplates dim in combat.",
+            tooltip = "120 by 14 flat bar with a soft dark edge. Glow and corner brackets on your target.",
             values = {
                 ["look.plate.width"] = 120,
                 ["look.plate.height"] = 14,
@@ -89,9 +89,9 @@ ns.presets = {
         {
             key = "minimal",
             label = "Minimal",
-            summary = "Thin bar with the name on its edge, and nothing else.",
+            summary = "Thin bar with a fine black edge.",
             accent = { 0.27, 0.82, 0.76, 1 },
-            tooltip = "Thin 100 by 12 bar with the name on its top edge and no health text. Slim cast bar; other nameplates fade in combat.",
+            tooltip = "100 by 12 bar with a fine black edge and a spark. Glow on your target.",
             values = {
                 ["look.plate.width"] = 100,
                 ["look.plate.height"] = 12,
@@ -144,9 +144,9 @@ ns.presets = {
         {
             key = "classic",
             label = "Unit frame",
-            summary = "Glossy bar in a grey tooltip border, health percent in the middle.",
+            summary = "Glossy bar in a grey tooltip border.",
             accent = { 0.9, 0.28, 0.37, 1 },
-            tooltip = "Glossy bar in a grey tooltip border with health percent in the middle; glow on your target.",
+            tooltip = "140 by 12 glossy bar in a grey tooltip border. Glow on your target.",
             values = {
                 ["look.plate.width"] = 140,
                 ["look.plate.height"] = 12,
@@ -184,9 +184,9 @@ ns.presets = {
         {
             key = "flat",
             label = "Flat",
-            summary = "Flat bar, name above, tall cast bar, soft glow on your target.",
+            summary = "Tall flat bar with a dark inner edge.",
             accent = { 0.31, 0.56, 0.97, 1 },
-            tooltip = "Flat 156 by 17 bar with the name above and health percent on the right. Tall cast bar; glow on your target.",
+            tooltip = "156 by 17 flat bar with a dark inner edge and a tall cast bar. Glow on your target.",
             values = {
                 ["look.plate.width"] = 156,
                 ["look.plate.height"] = 17,
@@ -246,9 +246,9 @@ ns.presets = {
         {
             key = "bold",
             label = "Heavy",
-            summary = "Shaded bar, bold outlined text, arrows on your target.",
+            summary = "Shaded bar with a thick border.",
             accent = { 0.66, 0.52, 0.98, 1 },
-            tooltip = "Thin shaded bar with bold outlined text and the cast target inside the cast bar. Arrows on your target.",
+            tooltip = "125 by 16 shaded bar with a thick slate border. Arrows on your target.",
             values = {
                 ["look.plate.width"] = 125,
                 ["look.plate.height"] = 16,
@@ -307,9 +307,9 @@ ns.presets = {
         {
             key = "inside",
             label = "Compact",
-            summary = "Name and health inside one wide bar, for big pulls.",
+            summary = "Short wide bar with the name inside, for big pulls.",
             accent = { 0.52, 0.84, 0.35, 1 },
-            tooltip = "Wide bar with the name on the left and health on the right, for the shortest nameplates. Slim cast bar without an icon.",
+            tooltip = "150 by 18 bar with the name inside on the left and health on the right, so each plate takes little height.",
             values = {
                 ["look.plate.width"] = 150,
                 ["look.plate.height"] = 18,
@@ -472,6 +472,110 @@ function ns.PresetLook(preset)
     end
     preset.look = look
     return look
+end
+
+local SHARED = {
+    ["look.name.position"] = "TOP",
+    ["look.name.justify"] = "CENTER",
+    ["look.name.offsetX"] = 0,
+    ["look.name.hideCasting"] = false,
+    ["look.healthText.enabled"] = true,
+    ["look.healthText.format"] = "percent",
+    ["look.healthText.anchor"] = "CENTER",
+    ["look.healthText.offsetX"] = 0,
+    ["look.healthText.offsetY"] = 0,
+    ["look.level.enabled"] = false,
+    ["look.classification.enabled"] = false,
+    ["look.raidMarker.enabled"] = true,
+    ["look.raidMarker.position"] = "LEFT",
+    ["look.raidMarker.gap"] = 4,
+    ["look.raidMarker.size"] = 20,
+    ["look.raidMarker.offsetX"] = 0,
+    ["look.raidMarker.offsetY"] = 0,
+    ["look.quest.position"] = "TOPRIGHT",
+    ["look.quest.gap"] = 2,
+    ["look.quest.offsetX"] = 0,
+    ["look.quest.offsetY"] = 0,
+    ["look.forces.position"] = "INSIDELEFT",
+    ["look.forces.offsetX"] = 0,
+    ["look.forces.offsetY"] = 0,
+    ["look.castbar.showIcon"] = true,
+    ["look.castbar.iconSide"] = "LEFT",
+    ["look.castbar.iconSpan"] = false,
+    ["look.castbar.textJustify"] = "LEFT",
+    ["look.castbar.showTimer"] = true,
+    ["look.castbar.timerPosition"] = "INSIDERIGHT",
+    ["look.castbar.showTarget"] = false,
+    ["look.auras.mine.enabled"] = true,
+    ["look.auras.mine.side"] = "TOP",
+    ["look.auras.mine.align"] = "LEFT",
+    ["look.auras.mine.offsetX"] = 0,
+    ["look.auras.mine.offsetY"] = 18,
+    ["look.auras.important.enabled"] = true,
+    ["look.auras.important.side"] = "TOP",
+    ["look.auras.important.align"] = "RIGHT",
+    ["look.auras.important.offsetX"] = 0,
+    ["look.auras.important.offsetY"] = 18,
+    ["look.auras.purge.enabled"] = true,
+    ["look.auras.purge.side"] = "LEFT",
+    ["look.auras.purge.align"] = "LEFT",
+    ["look.auras.purge.offsetX"] = -28,
+    ["look.auras.purge.offsetY"] = 0,
+    ["look.auras.cc.enabled"] = true,
+    ["look.auras.cc.side"] = "RIGHT",
+    ["look.auras.cc.align"] = "LEFT",
+    ["look.auras.cc.offsetX"] = 4,
+    ["look.auras.cc.offsetY"] = 0,
+}
+
+local SHARED_DEFAULTS = {
+    "look.target.dimOthers", "look.target.dimCombatOnly", "look.range.enabled", "look.range.alpha",
+    "look.castbar.timerOffsetX", "look.castbar.targetPosition", "look.castbar.targetOffsetX", "look.castbar.targetSize",
+    "look.classification.position", "look.classification.size", "look.classification.gap", "look.classification.offsetX",
+    "look.classification.offsetY", "look.classification.showElite", "look.quest.size",
+    "look.auras.mine.maxIcons", "look.auras.mine.perRow", "look.classPower.enabled", "look.enemyPower.enabled",
+}
+
+local OWN = {
+    inside = {
+        ["look.name.position"] = "CENTER",
+        ["look.name.justify"] = "LEFT",
+        ["look.healthText.anchor"] = "RIGHT",
+        ["look.healthText.offsetX"] = -3,
+        ["look.forces.position"] = "TOP",
+        ["look.forces.gap"] = 2,
+    },
+}
+
+local function SharedDefault(path)
+    local node = ns.defaults
+    for part in path:gmatch("[^%.]+") do
+        if type(node) ~= "table" then return nil end
+        node = node[part]
+    end
+    return node
+end
+
+function ns.SharedLookValues(preset)
+    local values = {}
+    for path, value in pairs(SHARED) do
+        values[path] = value
+    end
+    for _, path in ipairs(SHARED_DEFAULTS) do
+        values[path] = SharedDefault(path)
+    end
+    for path, value in pairs(OWN[preset.key] or {}) do
+        values[path] = value
+    end
+    return values
+end
+
+for _, group in ipairs({ ns.presets.looks, ns.presets.styles }) do
+    for _, preset in ipairs(group) do
+        for path, value in pairs(ns.SharedLookValues(preset)) do
+            preset.values[path] = value
+        end
+    end
 end
 
 Complete(ns.presets.looks)
