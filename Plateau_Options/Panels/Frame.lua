@@ -267,8 +267,8 @@ local function Ruler(vertical)
     end
     return ruler
 end
-Ruler(false)
-Ruler(true)
+ns.layout.rulerTop = Ruler(false)
+ns.layout.rulerLeft = Ruler(true)
 
 local previewStage = CreateFrame("Frame", nil, tableFrame)
 previewStage:SetPoint("TOPLEFT", RULER_Y, -RULER_X)

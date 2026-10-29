@@ -747,6 +747,83 @@ function ns.SetPreviewFocus(key)
     end
 end
 
+local rulerTop, rulerLeft = layout.rulerTop, layout.rulerLeft
+local cross = CreateFrame("Frame", nil, panel:GetParent())
+cross:SetAllPoints(panel:GetParent())
+cross:SetFrameLevel(panel:GetFrameLevel() + 230)
+cross:Hide()
+
+local crossV = cross:CreateTexture(nil, "OVERLAY")
+crossV:SetPoint("TOP", rulerTop, "TOP")
+crossV:SetPoint("BOTTOM", panel, "BOTTOM")
+Style.PixelWidth(crossV)
+local crossH = cross:CreateTexture(nil, "OVERLAY")
+crossH:SetPoint("LEFT", rulerLeft, "LEFT")
+crossH:SetPoint("RIGHT", panel, "RIGHT")
+Style.PixelHeight(crossH)
+
+local function CrossTag()
+    local tag = CreateFrame("Frame", nil, cross)
+    tag:SetFrameLevel(cross:GetFrameLevel() + 2)
+    tag:SetHeight(12)
+    tag.fill = Style.Fill(tag, C.accent)
+    tag.text = Style.Text(tag, 9, C.primaryText, "CENTER")
+    tag.text:SetPoint("CENTER", 0, 0)
+    return tag
+end
+local tagX, tagY = CrossTag(), CrossTag()
+
+local function PaintCross()
+    Style.Paint(crossV, C.accent, 0.35)
+    Style.Paint(crossH, C.accent, 0.35)
+    Style.Paint(tagX.fill, C.accent, 1)
+    Style.Paint(tagY.fill, C.accent, 1)
+    Style.PaintText(tagX.text, C.primaryText)
+    Style.PaintText(tagY.text, C.primaryText)
+end
+PaintCross()
+Style.OnTheme(PaintCross)
+
+local function MoverCenter(spec)
+    local mover = spec.Mover and spec.Mover()
+    local left, right, top, bottom = mover and mover:GetLeft(), mover and mover:GetRight(), mover and mover:GetTop(), mover and mover:GetBottom()
+    local stageLeft, stageTop = panel:GetLeft(), panel:GetTop()
+    if not (left and stageLeft) then return nil end
+    local ratio = mover:GetEffectiveScale() / panel:GetEffectiveScale()
+    return (left + right) / 2 * ratio - stageLeft, stageTop - (top + bottom) / 2 * ratio
+end
+
+local function SetTag(tag, value)
+    tag.text:SetText(math.floor(value + 0.5))
+    tag:SetWidth(math.max(18, tag.text:GetStringWidth() + 6))
+end
+
+local crossWatch = CreateFrame("Frame", nil, panel)
+crossWatch:SetScript("OnUpdate", function()
+    local spec = ns.Drag.Active()
+    local x, y
+    if spec then
+        x, y = MoverCenter(spec)
+    end
+    if not x or x < 0 or y < 0 or x > panel:GetWidth() or y > panel:GetHeight() then
+        cross:Hide()
+        return
+    end
+    crossV:ClearAllPoints()
+    crossV:SetPoint("TOP", rulerTop, "TOPLEFT", x, 0)
+    crossV:SetPoint("BOTTOM", panel, "BOTTOMLEFT", x, 0)
+    crossH:ClearAllPoints()
+    crossH:SetPoint("LEFT", rulerLeft, "TOPLEFT", 0, -y)
+    crossH:SetPoint("RIGHT", panel, "TOPRIGHT", 0, -y)
+    SetTag(tagX, x)
+    tagX:ClearAllPoints()
+    tagX:SetPoint("CENTER", rulerTop, "TOPLEFT", x, -rulerTop:GetHeight() / 2)
+    SetTag(tagY, y)
+    tagY:ClearAllPoints()
+    tagY:SetPoint("CENTER", rulerLeft, "TOPLEFT", rulerLeft:GetWidth() / 2, -y)
+    cross:Show()
+end)
+
 local TRAY_WIDTH, TILE_HEIGHT, TILE_GAP, TRAY_PAD, TRAY_HEAD = 164, 18, 3, 6, 16
 local SKULL = { 0.75, 1, 0.25, 0.5 }
 
