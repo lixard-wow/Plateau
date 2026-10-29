@@ -221,11 +221,6 @@ function Style.DropArrow(button)
     return arrow
 end
 
-Style.FONT_CHOICES = {
-    { value = PLEX, label = "IBM Plex Sans Condensed" },
-    { value = ALEGREYA, label = "Alegreya SC" },
-}
-
 Style.SCALE_MIN, Style.SCALE_MAX = 0.6, 1.4
 
 local function SavedGlobal()
@@ -269,23 +264,17 @@ end
 local gameFont = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
 local useGameFont = Plateau.ActiveLocale ~= nil and NON_LATIN[Plateau.ActiveLocale()] == true
 
-local function ChosenFont(key, themeFont)
-    local saved = SavedGlobal()[key]
-    for _, choice in ipairs(Style.FONT_CHOICES) do
-        if choice.value == saved then
-            return saved
-        end
-    end
+local function ChosenFont(themeFont)
     return useGameFont and gameFont or themeFont
 end
 
-Style.font = ChosenFont("optionsFont", Style.theme.body)
-Style.headingFont = ChosenFont("optionsHeadingFont", Style.theme.heading)
-Style.titleFont = ChosenFont("optionsHeadingFont", Style.theme.titleFont[1])
+Style.font = ChosenFont(Style.theme.body)
+Style.headingFont = ChosenFont(Style.theme.heading)
+Style.titleFont = ChosenFont(Style.theme.titleFont[1])
 Style.TITLE_SIZE = Style.theme.titleFont[2]
-Style.sectionFont = ChosenFont("optionsHeadingFont", Style.theme.sectionFont[1])
+Style.sectionFont = ChosenFont(Style.theme.sectionFont[1])
 Style.SECTION_SIZE = Style.theme.sectionFont[2]
-Style.buttonFont = ChosenFont("optionsFont", Style.theme.buttonFont[1])
+Style.buttonFont = ChosenFont(Style.theme.buttonFont[1])
 Style.BUTTON_SIZE = Style.theme.buttonFont[2]
 Style.HEADER_HEIGHT = Style.theme.headerHeight
 Style.ICON_BUTTON = Style.theme.iconButton

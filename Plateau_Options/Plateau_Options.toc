@@ -1,5 +1,5 @@
 ## Interface: 120100, 120105, 16001
-## Title: |cff36c2c9Plateau Nameplates Options|r
+## Title: |cffd07a3cPlateau Nameplates Options|r
 ## Notes: Settings for Plateau Nameplates. Loads only when opened.
 ## Author: lixard-wow
 ## Version: 0.1.3

@@ -217,20 +217,6 @@ local function Fonts()
     return MediaList(BUILTIN_FONTS, "font")
 end
 
-function ns.OptionsFonts()
-    local options = { { value = "", label = "Theme font" } }
-    local seen = {}
-    for _, list in ipairs({ Style.FONT_CHOICES, Fonts() }) do
-        for _, option in ipairs(list) do
-            if not seen[option.value] then
-                seen[option.value] = true
-                options[#options + 1] = option
-            end
-        end
-    end
-    return options
-end
-
 local function Bars()
     return MediaList(BUILTIN_BARS, "statusbar")
 end
@@ -2784,34 +2770,16 @@ ns.sections = {
 
     {
         key = "addon",
-        title = "Plateau settings",
+        title = "Window",
         reset = function()
-            local global = Plateau.DB.saved.global
-            local reload = global.optionsFont ~= nil or global.optionsHeadingFont ~= nil
-            global.optionsScale, global.optionsFont, global.optionsHeadingFont = nil, nil, nil
+            Plateau.DB.saved.global.optionsScale = nil
             ns.ApplyScale()
-            if reload then
-                ns.PromptReload()
-            end
         end,
         controls = List(
-            { type = "Note", label = "Plateau's own preferences for this settings window, not your nameplates. They are saved once for your account and are not part of a profile.", height = 24 },
+            { type = "Note", label = "Saved for your account, not part of a profile.", height = 24 },
             { type = "Header", label = "Other nameplate addons" },
             { type = "Conflicts" },
             { type = "Header", label = "Settings window" },
-            { type = "Dropdown", label = "Settings window theme",
-              options = { { value = "workbench", label = "Workbench" }, { value = "ledger", label = "Artisan Ledger" }, { value = "horde", label = "Horde" }, { value = "alliance", label = "Alliance" }, { value = "classic", label = "Slate" } },
-              get = function() return Style.ThemeKey() end,
-              set = function(value)
-                  ns.ApplyTheme(value)
-              end,
-              tooltip = "The colors of Plateau's settings window and pop-ups. Nameplates are not affected." },
-            { type = "Dropdown", label = "Brand color", keywords = "color colour brand icon minimap class rainbow cycle random logo",
-              options = { { value = "class", label = "Class color" }, { value = "cycle", label = "Color cycle" }, { value = "random", label = "Random each login" } },
-              get = function() return Plateau.Brand:Mode() end,
-              set = function(value) Plateau.Brand:SetMode(value) end,
-              reset = function() Plateau.Brand:SetMode("class") end,
-              tooltip = "The color of Plateau's icon and name on the minimap button, game menu button and chat messages." },
             { type = "Slider", label = "Settings window scale", min = Style.SCALE_MIN, max = Style.SCALE_MAX, step = 0.05, applyOnRelease = true, keywords = "size zoom bigger smaller options window ui scale",
               get = function() return Style.Scale() end,
               set = function(value)
@@ -2823,33 +2791,6 @@ ns.sections = {
                   ns.ApplyScale()
               end,
               tooltip = "The size of this settings window. It snaps to the nearest size where every line falls on whole screen pixels, so it changes in steps and stays sharp whatever UI scale you or other addons use. Nameplates are not affected." },
-            { type = "Header", label = "Fonts" },
-            { type = "Dropdown", label = "Text font", keywords = "font typeface options window",
-              options = function() return ns.OptionsFonts() end,
-              get = function() return Plateau.DB.saved.global.optionsFont or "" end,
-              set = function(value)
-                  if value == (Plateau.DB.saved.global.optionsFont or "") then return end
-                  Plateau.DB.saved.global.optionsFont = value ~= "" and value or nil
-                  ns.PromptReload()
-              end,
-              reset = function()
-                  Plateau.DB.saved.global.optionsFont = nil
-                  ns.PromptReload()
-              end,
-              tooltip = "The font for text in this settings window. Nameplates are not affected. Requires a reload." },
-            { type = "Dropdown", label = "Heading font", keywords = "font typeface title header options window",
-              options = function() return ns.OptionsFonts() end,
-              get = function() return Plateau.DB.saved.global.optionsHeadingFont or "" end,
-              set = function(value)
-                  if value == (Plateau.DB.saved.global.optionsHeadingFont or "") then return end
-                  Plateau.DB.saved.global.optionsHeadingFont = value ~= "" and value or nil
-                  ns.PromptReload()
-              end,
-              reset = function()
-                  Plateau.DB.saved.global.optionsHeadingFont = nil
-                  ns.PromptReload()
-              end,
-              tooltip = "The font for titles and headings in this settings window. Requires a reload." },
             { type = "Header", label = "Help and access" },
             { type = "Toggle", label = "Show what's new after updates", keywords = "changelog changes update patch notes version",
               get = function() return not Plateau.DB.saved.global.whatsNewOff end,

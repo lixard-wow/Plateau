@@ -372,102 +372,23 @@ ns.brand = {
     { 0.98, 0.72, 0.28, 1 },
 }
 
-local Brand = CreateFrame("Frame")
+local Brand = {}
 ns.Brand = Brand
 
-local BRAND_MODES = { class = true, cycle = true, random = true }
-local CYCLE_SECONDS = 12
-local CYCLE_STEP = 0.05
-local FALLBACK = { 0.21, 0.76, 0.79 }
-local current = { FALLBACK[1], FALLBACK[2], FALLBACK[3] }
-local brandListeners = {}
-local hue = 0
-local randomColor
-
-local function HsvToRgb(h, s, v)
-    local i = math.floor(h * 6)
-    local f = h * 6 - i
-    local p, q, t = v * (1 - s), v * (1 - f * s), v * (1 - (1 - f) * s)
-    i = i % 6
-    if i == 0 then return v, t, p end
-    if i == 1 then return q, v, p end
-    if i == 2 then return p, v, t end
-    if i == 3 then return p, q, v end
-    if i == 4 then return t, p, v end
-    return v, p, q
-end
-
-local function ClassColor()
-    local _, class = UnitClass("player")
-    local color = class and ((C_ClassColor and C_ClassColor.GetClassColor(class)) or (RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]))
-    if color then
-        return color.r, color.g, color.b
-    end
-    return FALLBACK[1], FALLBACK[2], FALLBACK[3]
-end
-
-local function SetBrandColor(r, g, b)
-    if current[1] == r and current[2] == g and current[3] == b then return end
-    current[1], current[2], current[3] = r, g, b
-    for i = 1, #brandListeners do
-        brandListeners[i](r, g, b)
-    end
-end
-
-function Brand:Mode()
-    local saved = ns.DB and ns.DB.saved and ns.DB.saved.global.brandColor
-    return BRAND_MODES[saved] and saved or "class"
-end
-
-function Brand:SetMode(mode)
-    if not (ns.DB and ns.DB.saved) then return end
-    ns.DB.saved.global.brandColor = (BRAND_MODES[mode] and mode ~= "class") and mode or nil
-    self:Refresh()
-end
+local OCHRE = { 0xd0 / 255, 0x7a / 255, 0x3c / 255 }
 
 function Brand:Color()
-    return current[1], current[2], current[3]
+    return OCHRE[1], OCHRE[2], OCHRE[3]
 end
 
 function Brand:Hex()
-    return ("ff%02x%02x%02x"):format(current[1] * 255 + 0.5, current[2] * 255 + 0.5, current[3] * 255 + 0.5)
+    return "ffd07a3c"
 end
 
 function Brand:Text(text)
-    return "|c" .. self:Hex() .. text .. "|r"
+    return "|cffd07a3c" .. text .. "|r"
 end
 
 function Brand:OnChange(callback)
-    brandListeners[#brandListeners + 1] = callback
-    callback(current[1], current[2], current[3])
+    callback(OCHRE[1], OCHRE[2], OCHRE[3])
 end
-
-function Brand:Refresh()
-    local mode = self:Mode()
-    self:SetShown(mode == "cycle")
-    if mode == "class" then
-        SetBrandColor(ClassColor())
-    elseif mode == "random" then
-        if not randomColor then
-            randomColor = { HsvToRgb(math.random(), 0.6, 1) }
-        end
-        SetBrandColor(randomColor[1], randomColor[2], randomColor[3])
-    else
-        SetBrandColor(HsvToRgb(hue, 0.6, 1))
-    end
-end
-
-local sinceStep = 0
-Brand:Hide()
-Brand:SetScript("OnUpdate", function(_, elapsed)
-    hue = (hue + elapsed / CYCLE_SECONDS) % 1
-    sinceStep = sinceStep + elapsed
-    if sinceStep < CYCLE_STEP then return end
-    sinceStep = 0
-    SetBrandColor(HsvToRgb(hue, 0.6, 1))
-end)
-Brand:RegisterEvent("PLAYER_LOGIN")
-Brand:SetScript("OnEvent", function(self)
-    if ns.disabled then return end
-    self:Refresh()
-end)

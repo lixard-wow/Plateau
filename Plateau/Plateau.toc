@@ -1,5 +1,5 @@
 ## Interface: 120100, 120105, 16001
-## Title: |cff36c2c9Plateau Nameplates|r
+## Title: |cffd07a3cPlateau Nameplates|r
 ## Notes: Fast, readable enemy nameplates.
 ## Author: lixard-wow
 ## Version: 0.1.3

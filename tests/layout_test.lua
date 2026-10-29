@@ -174,7 +174,7 @@ local function labelsOf(section)
     return set
 end
 local addonLabels = labelsOf(byKey.addon)
-check(addonLabels["Settings window theme"] and addonLabels["Settings window scale"] and addonLabels["Text font"] and addonLabels["Heading font"] and addonLabels["Show settings tooltips"] and addonLabels["Show Plateau in game menu"], "the gear page holds theme, scale, fonts and the other preferences")
+check(addonLabels["Settings window scale"] and addonLabels["Show settings tooltips"] and addonLabels["Show Plateau in game menu"] and not addonLabels["Settings window theme"] and not addonLabels["Text font"], "the Window page holds the scale and the other preferences, with no theme or font pickers")
 check(Logic.OFF_MENU.addon == true, "the gear page stays off the sidebar")
 check(Logic.FindKeyed(byKey.help, "diagnostics") == nil, "Help no longer has a Diagnostics section; /plt debug has the numbers")
 
@@ -286,7 +286,7 @@ check(foundOn("enemy target name", "name"), "Enemy target name is found on Name"
 check(foundOn("health threshold markers", "health"), "Health threshold markers are found on Health bar")
 check(foundOn("stacking presets", "layering") and foundOn("tight balanced", "layering"), "stacking presets are searchable on Layering and stacking")
 check(foundOn("movement speed", "layering") and foundOn("behind walls", "fading"), "movement and line-of-sight fading are searchable on their new pages")
-check(foundOn("window scale", "addon") and foundOn("heading font", "addon") and foundOn("settings window theme", "addon"), "Plateau settings are searchable")
+check(foundOn("window scale", "addon"), "the Window page is searchable")
 check(foundOn("rename profile", "profiles") and foundOn("copy settings from", "profiles") and foundOn("delete profile", "profiles"), "profile actions are searchable")
 check(foundOn("export active profile", "profiles") and foundOn("activate after import", "profiles"), "export and import are searchable")
 check(foundOn("default profile", "profiles"), "Default profile is searchable")
