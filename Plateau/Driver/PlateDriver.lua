@@ -1400,36 +1400,27 @@ Driver:RegisterEvent("PLAYER_REGEN_DISABLED")
 Driver:RegisterEvent("CVAR_UPDATE")
 Driver:RegisterEvent("ENCOUNTER_START")
 Driver:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
-Driver:SetScript("OnEvent", function(_, event, arg)
-    if ns.disabled then return end
-    if event == "PLAYER_REGEN_ENABLED" and restyleAfterCombat then
-        restyleAfterCombat = false
-        restyleQueue:Show()
+local function CombatChanged(entering)
+    inCombat = entering
+    if not inCombat then
+        poolWarmer:Show()
     end
-    if event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
-        inCombat = event == "PLAYER_REGEN_DISABLED"
-        if not inCombat then
-            poolWarmer:Show()
-        end
-        if (dimCombatOnly and targetPlate) or hideFriendlyCombat then
-            for _, plate in pairs(platesByUnit) do
-                if plate.active then
-                    Driver:RefreshAlpha(plate)
-                end
+    if (dimCombatOnly and targetPlate) or hideFriendlyCombat then
+        for _, plate in pairs(platesByUnit) do
+            if plate.active then
+                Driver:RefreshAlpha(plate)
             end
         end
     end
-    if event == "ENCOUNTER_START" or event == "INSTANCE_ENCOUNTER_ENGAGE_UNIT" or event == "PLAYER_REGEN_DISABLED" then
-        RecheckWatched()
-    end
-    if event == "ENCOUNTER_START" or event == "INSTANCE_ENCOUNTER_ENGAGE_UNIT" then
-        return
-    end
-    if event == "CVAR_UPDATE" then
-        if arg == SIMPLIFIED_CVAR then
-            Driver:RequestRestyle(false)
+end
+
+local events = {
+    PLAYER_REGEN_ENABLED = function()
+        if restyleAfterCombat then
+            restyleAfterCombat = false
+            restyleQueue:Show()
         end
-    elseif event == "PLAYER_REGEN_ENABLED" then
+        CombatChanged(false)
         if hitTestPending then
             hitTestPending = false
             for _, plate in pairs(platesByUnit) do
@@ -1439,17 +1430,32 @@ Driver:SetScript("OnEvent", function(_, event, arg)
                 end
             end
         end
-    elseif event == "PLAYER_REGEN_DISABLED" then
-        return
-    elseif event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
-        UpdateEmphasis()
-    elseif event == "UPDATE_MOUSEOVER_UNIT" then
+    end,
+    PLAYER_REGEN_DISABLED = function()
+        CombatChanged(true)
+        RecheckWatched()
+    end,
+    ENCOUNTER_START = RecheckWatched,
+    INSTANCE_ENCOUNTER_ENGAGE_UNIT = RecheckWatched,
+    CVAR_UPDATE = function(name)
+        if name == SIMPLIFIED_CVAR then
+            Driver:RequestRestyle(false)
+        end
+    end,
+    PLAYER_TARGET_CHANGED = UpdateEmphasis,
+    PLAYER_FOCUS_CHANGED = UpdateEmphasis,
+    UPDATE_MOUSEOVER_UNIT = function()
         SetMouseover(CurrentHover())
-    elseif event == "WORLD_CURSOR_TOOLTIP_UPDATE" then
-        OnWorldCursor(arg)
-    elseif event == "NAME_PLATE_UNIT_ADDED" then
-        OnUnitAdded(arg)
-    elseif event == "NAME_PLATE_UNIT_REMOVED" then
-        OnUnitRemoved(arg)
+    end,
+    WORLD_CURSOR_TOOLTIP_UPDATE = OnWorldCursor,
+    NAME_PLATE_UNIT_ADDED = OnUnitAdded,
+    NAME_PLATE_UNIT_REMOVED = OnUnitRemoved,
+}
+
+Driver:SetScript("OnEvent", function(_, event, arg)
+    if ns.disabled then return end
+    local handler = events[event]
+    if handler then
+        handler(arg)
     end
 end)
