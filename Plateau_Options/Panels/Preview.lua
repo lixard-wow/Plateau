@@ -5,7 +5,7 @@ local C = Style.colors
 local layout = ns.layout
 
 local PLATE_SCALE = 1.5
-local HINT = "Click a part to edit it. Drag to move it; hold Shift to place it freely."
+local HINT = "Click a part to edit it. Drag to move it; hold Shift to place it freely. Arrow keys move it 1 px, with Shift 10 px."
 
 local sectionKey, editingTitle
 local here = {}

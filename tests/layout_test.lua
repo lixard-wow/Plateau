@@ -114,7 +114,7 @@ check(groupCovers(byKey.health, "look.plate.pixelPerfect") and not groupCovers(b
 
 local onName, onHealthText = paths(byKey.name), paths(byKey.healthText)
 check(onName["look.enemyTarget.enabled"] and not onHealthText["look.enemyTarget.enabled"], "the enemy target toggle moved from Health text to Name")
-for _, key in ipairs({ "classColors", "anchor", "offsetX", "offsetY", "size" }) do
+for _, key in ipairs({ "classColors", "anchor", "size" }) do
     local path = "look.enemyTarget." .. key
     check(onName[path] and not onHealthText[path], path .. " lives on Name")
 end
@@ -324,7 +324,18 @@ for _, section in ipairs(sections) do
 end
 check(simplifyCount == 1, "each simplify option is listed once")
 local questLabels = labelsOf(byKey.quest)
-check(questLabels["Position"] and questLabels["Progress position"] and questLabels["Progress horizontal offset"], "the quest icon and its progress count each have their own position")
+check(questLabels["Position"] and questLabels["Progress position"], "the quest icon and its progress count each have their own position")
+local offsetSliders = {}
+for _, section in ipairs(sections) do
+    for _, spec in ipairs(section.controls) do
+        if spec.type == "Slider" and spec.path and not spec.path:match("^look%.plate%.") and (spec.path:match("%.offset[XY]$") or spec.path:match("%.timerOffset[XY]$") or spec.path:match("%.targetOffset[XY]$")) then
+            offsetSliders[#offsetSliders + 1] = spec.path
+        end
+    end
+end
+check(#offsetSliders == 0, "parts that drag on the preview have no offset sliders" .. (#offsetSliders > 0 and (": " .. table.concat(offsetSliders, ", ")) or ""))
+local kept = nsOpt.sliderRanges or {}
+check(kept["look.name.offsetX"] and kept["look.name.offsetX"][2] == 150 and kept["look.auras.mine.offsetY"] and kept["look.castbar.timerOffsetX"], "offsets without a slider keep their range for dragging and imports")
 local gameTagged = 0
 for _, spec in ipairs(byKey.showing.controls) do
     if spec.gameSetting then gameTagged = gameTagged + 1 end

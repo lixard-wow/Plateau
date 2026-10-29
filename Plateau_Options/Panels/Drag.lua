@@ -996,7 +996,7 @@ function Drag.SetDotParent(frame)
             return
         end
         self:SetPropagateKeyboardInput(false)
-        local step = IsShiftKeyDown() and 5 or 1
+        local step = IsShiftKeyDown() and 10 or 1
         Nudge(arrow[1] * step, arrow[2] * step)
     end)
     keys:RegisterEvent("PLAYER_REGEN_DISABLED")

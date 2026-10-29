@@ -514,11 +514,7 @@ local function Placement(path)
         { type = "Dropdown", path = path .. ".position", label = "Position", options = SIDES,
           tooltip = "Which side of the health bar this sits on, or on top of it." },
         { type = "Slider", path = path .. ".gap", label = "Distance", min = 0, max = 20,
-          tooltip = "Space between this and the edge of the health bar. Has no effect at Inside bar, center." },
-        { type = "Slider", path = path .. ".offsetX", label = "Horizontal offset", min = -40, max = 40,
-          tooltip = "Moves it left or right." },
-        { type = "Slider", path = path .. ".offsetY", label = "Vertical offset", min = -40, max = 40,
-          tooltip = "Moves it up or down." }
+          tooltip = "Space between this and the edge of the health bar. Has no effect at Inside bar, center." }
 end
 
 local function Section(key, title, group, controls)
@@ -1340,10 +1336,6 @@ local function AuraLayoutControls(path)
           tooltip = "Where the row starts when the icons are above or below the nameplate." },
         { type = "Dropdown", path = path .. ".grow", label = "Growth direction", options = AURA_GROW,
           tooltip = "The direction new icons are added, and where a new row or column starts. Automatic follows Position and Alignment." },
-        { type = "Slider", path = path .. ".offsetX", label = "Horizontal offset", min = -80, max = 80,
-          tooltip = "Nudges this group of icons left (negative) or right (positive)." },
-        { type = "Slider", path = path .. ".offsetY", label = "Vertical offset", min = -80, max = 80,
-          tooltip = "Nudges this group of icons down (negative) or up (positive)." },
         { type = "Slider", path = path .. ".size", label = "Icon size", min = 10, max = 48,
           tooltip = "How big each icon in this group is." },
         { type = "Dropdown", path = path .. ".shape", label = "Icon shape", options = AURA_SHAPES,
@@ -2060,10 +2052,6 @@ ns.sections = {
           tooltip = "Where the raid icon sits around a friendly health bar." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
         Gate({ type = "Slider", path = "look.friendly.raidMarker.gap", label = "Distance", min = 0, max = 20,
           tooltip = "Space between the raid icon and the friendly nameplate." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetX", label = "Horizontal offset", min = -40, max = 40,
-          tooltip = "Moves the raid icon left or right." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
-        Gate({ type = "Slider", path = "look.friendly.raidMarker.offsetY", label = "Vertical offset", min = -40, max = 40,
-          tooltip = "Moves the raid icon up or down." }, FriendlyRaidMarkerOn, FriendlyRaidMarkerReason),
 
         { type = "Header", label = "Blizzard's friendly nameplates" },
         { type = "Note", label = "Change the friendly nameplates the game draws, such as in dungeons, raids and arenas.", height = 24 },
@@ -2087,11 +2075,7 @@ ns.sections = {
         { type = "Toggle", path = "look.healthText.percentSign", label = "Show % sign",
           tooltip = "Shows a % sign after percentages." },
         { type = "Dropdown", path = "look.healthText.anchor", label = "Position", options = TEXT_POSITIONS,
-          tooltip = "Where the health text sits on the health bar." },
-        { type = "Slider", path = "look.healthText.offsetX", label = "Horizontal offset", min = -50, max = 50,
-          tooltip = "Nudges the health text left (negative) or right (positive)." },
-        { type = "Slider", path = "look.healthText.offsetY", label = "Vertical offset", min = -30, max = 30,
-          tooltip = "Nudges the health text down (negative) or up (positive)." }
+          tooltip = "Where the health text sits on the health bar." }
     ), List(
         { type = "Header", label = "When to show" }
     ), GateList(HealthTextOn, TEXT_ON,
@@ -2137,8 +2121,6 @@ ns.sections = {
           tooltip = "Aligns the name left, center or right." },
         { type = "Slider", path = "look.name.gap", label = "Distance from bar", min = -10, max = 30,
           tooltip = "Space between the name and the health bar. When the name is inside the bar, moves it up or down." },
-        { type = "Slider", path = "look.name.offsetX", label = "Sideways offset", min = -150, max = 150,
-          tooltip = "Moves the name left or right from where its alignment puts it." },
         { type = "Dropdown", path = "look.name.mode", label = "Shorten names", options = SHORTEN_NAMES, limited = Plateau.flavor ~= "forever" and Style.limited.names or nil,
           tooltip = "Shortens enemy names to a word or initials." .. RETAIL_NAME_NOTE },
         { type = "Dropdown", label = "Long names", options = OVERFLOW_NAMES, path = "look.name.overflow",
@@ -2167,11 +2149,7 @@ ns.sections = {
         { type = "ToggleColor", path = "look.enemyTarget.meColor", colorPath = "look.enemyTarget.meColorValue", label = "Color when targeting you",
           tooltip = "The target's name turns this color when the enemy is targeting you." },
         { type = "Dropdown", path = "look.enemyTarget.anchor", label = "Position", options = TEXT_POSITIONS,
-          tooltip = "Where the target's name sits on the health bar." },
-        { type = "Slider", path = "look.enemyTarget.offsetX", label = "Horizontal offset", min = -50, max = 50,
-          tooltip = "Nudges this text left (negative) or right (positive)." },
-        { type = "Slider", path = "look.enemyTarget.offsetY", label = "Vertical offset", min = -30, max = 30,
-          tooltip = "Nudges this text down (negative) or up (positive)." }
+          tooltip = "Where the target's name sits on the health bar." }
     ), List(
         { type = "Header", label = "Enemy target font" }
     ), GateList(EnemyTargetOn, ENEMY_TARGET_ON, FontControls("look.enemyTarget")), NamesOverHeads())), NAME_CVARS),
@@ -2192,11 +2170,7 @@ ns.sections = {
         { type = "Color", path = "look.level.color", label = "Custom level color",
           tooltip = "Level color when Color by difficulty is off. Boss and unknown levels stay red." },
         { type = "Dropdown", path = "look.level.anchor", label = "Position", options = LEVEL_POSITIONS,
-          tooltip = "Where the level text sits on the bar." },
-        { type = "Slider", path = "look.level.offsetX", label = "Horizontal offset", min = -50, max = 50,
-          tooltip = "Nudges the level text left (negative) or right (positive)." },
-        { type = "Slider", path = "look.level.offsetY", label = "Vertical offset", min = -30, max = 30,
-          tooltip = "Nudges the level text down (negative) or up (positive)." }
+          tooltip = "Where the level text sits on the bar." }
     ), List(
         { type = "Header", label = "When to show" }
     ), GateList(LevelOn, LEVEL_ON,
@@ -2311,10 +2285,6 @@ ns.sections = {
           tooltip = "Seconds remaining when the timer starts showing tenths. 0 never shows them." }, On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this."),
         Gate({ type = "Dropdown", path = "look.castbar.timerPosition", label = "Cast timer position", options = SIDES,
           tooltip = "Where the cast timer sits on the bar." }, On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this."),
-        Gate({ type = "Slider", path = "look.castbar.timerOffsetX", label = "Cast timer horizontal offset", min = -40, max = 40,
-          tooltip = "Nudges the cast timer left (negative) or right (positive)." }, On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this."),
-        Gate({ type = "Slider", path = "look.castbar.timerOffsetY", label = "Cast timer vertical offset", min = -40, max = 40,
-          tooltip = "Nudges the cast timer down (negative) or up (positive)." }, On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this."),
 
         { type = "Header", label = "Cast target" },
         { type = "ToggleColor", path = "look.castbar.showTarget", colorPath = "look.castbar.targetColor", label = "Show cast target",
@@ -2330,10 +2300,6 @@ ns.sections = {
               return list
           end)(),
           tooltip = "Where the cast target's name sits on the bar." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
-        Gate({ type = "Slider", path = "look.castbar.targetOffsetX", label = "Cast target horizontal offset", min = -40, max = 40,
-          tooltip = "Nudges the cast target's name left (negative) or right (positive)." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
-        Gate({ type = "Slider", path = "look.castbar.targetOffsetY", label = "Cast target vertical offset", min = -40, max = 40,
-          tooltip = "Nudges the cast target's name down (negative) or up (positive)." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
 
         { type = "Header", label = "Text size" }
     ), List(FontControls("look.castbar")), List(
@@ -2615,11 +2581,7 @@ ns.sections = {
             { type = "Dropdown", path = "look.quest.progress.position", label = "Progress position", options = TEXT_POSITIONS,
               tooltip = "Where the progress count sits on the nameplate. Drag it in the preview to move it freely." },
             { type = "Slider", path = "look.quest.progress.gap", label = "Progress distance", min = 0, max = 20,
-              tooltip = "Space between the progress count and the edge of the health bar." },
-            { type = "Slider", path = "look.quest.progress.offsetX", label = "Progress horizontal offset", min = -40, max = 40,
-              tooltip = "Moves the progress count left or right." },
-            { type = "Slider", path = "look.quest.progress.offsetY", label = "Progress vertical offset", min = -40, max = 40,
-              tooltip = "Moves the progress count up or down." }),
+              tooltip = "Space between the progress count and the edge of the health bar." }),
         List(
         { type = "Header", label = "Quest enemy color" },
         { type = "ToggleColor", path = "look.colors.quest", colorPath = "look.colors.questColor", label = "Color quest enemies",
@@ -2691,10 +2653,6 @@ ns.sections = {
           tooltip = "Height of the power bar." },
         { type = "Slider", path = "look.enemyPower.width", label = "Width", min = 0, max = 300,
           tooltip = "Width of the power bar. 0 matches the health bar." },
-        { type = "Slider", path = "look.enemyPower.offsetX", label = "Horizontal offset", min = -40, max = 40,
-          tooltip = "Nudges the power bar left (negative) or right (positive)." },
-        { type = "Slider", path = "look.enemyPower.offsetY", label = "Vertical offset", min = -40, max = 40,
-          tooltip = "Nudges the power bar down (negative) or up (positive)." },
         { type = "Slider", path = "look.enemyPower.alpha", label = "Opacity", min = 0.1, max = 1, step = 0.05,
           tooltip = "Opacity of the power bar and its text." },
         { type = "Dropdown", path = "look.enemyPower.texture", label = "Bar texture", options = Bars, unknown = "Custom texture",
@@ -2918,6 +2876,51 @@ for _, section in ipairs(ns.sections) do
             sliderRanges[spec.path] = { spec.min, spec.max }
         end
     end
+end
+for path, range in pairs({
+    ["look.auras.cc.offsetX"] = { -80, 80 },
+    ["look.auras.cc.offsetY"] = { -80, 80 },
+    ["look.auras.important.offsetX"] = { -80, 80 },
+    ["look.auras.important.offsetY"] = { -80, 80 },
+    ["look.auras.mine.offsetX"] = { -80, 80 },
+    ["look.auras.mine.offsetY"] = { -80, 80 },
+    ["look.auras.purge.offsetX"] = { -80, 80 },
+    ["look.auras.purge.offsetY"] = { -80, 80 },
+    ["look.castbar.targetOffsetX"] = { -40, 40 },
+    ["look.castbar.targetOffsetY"] = { -40, 40 },
+    ["look.castbar.timerOffsetX"] = { -40, 40 },
+    ["look.castbar.timerOffsetY"] = { -40, 40 },
+    ["look.classPower.offsetX"] = { -40, 40 },
+    ["look.classPower.offsetY"] = { -40, 40 },
+    ["look.classification.offsetX"] = { -40, 40 },
+    ["look.classification.offsetY"] = { -40, 40 },
+    ["look.enemyPower.offsetX"] = { -40, 40 },
+    ["look.enemyPower.offsetY"] = { -40, 40 },
+    ["look.enemyTarget.offsetX"] = { -50, 50 },
+    ["look.enemyTarget.offsetY"] = { -30, 30 },
+    ["look.faction.offsetX"] = { -40, 40 },
+    ["look.faction.offsetY"] = { -40, 40 },
+    ["look.forces.offsetX"] = { -40, 40 },
+    ["look.forces.offsetY"] = { -40, 40 },
+    ["look.friendly.raidMarker.offsetX"] = { -40, 40 },
+    ["look.friendly.raidMarker.offsetY"] = { -40, 40 },
+    ["look.healthText.offsetX"] = { -50, 50 },
+    ["look.healthText.offsetY"] = { -30, 30 },
+    ["look.kickers.offsetX"] = { -40, 40 },
+    ["look.kickers.offsetY"] = { -40, 40 },
+    ["look.level.offsetX"] = { -50, 50 },
+    ["look.level.offsetY"] = { -30, 30 },
+    ["look.name.offsetX"] = { -150, 150 },
+    ["look.quest.offsetX"] = { -40, 40 },
+    ["look.quest.offsetY"] = { -40, 40 },
+    ["look.quest.progress.offsetX"] = { -40, 40 },
+    ["look.quest.progress.offsetY"] = { -40, 40 },
+    ["look.raidMarker.offsetX"] = { -40, 40 },
+    ["look.raidMarker.offsetY"] = { -40, 40 },
+    ["look.threatText.offsetX"] = { -40, 40 },
+    ["look.threatText.offsetY"] = { -40, 40 },
+}) do
+    sliderRanges[path] = sliderRanges[path] or range
 end
 ns.sliderRanges = sliderRanges
 if Plateau.SetImportRanges then
