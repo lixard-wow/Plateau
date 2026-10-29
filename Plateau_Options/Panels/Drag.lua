@@ -746,7 +746,7 @@ function Drag.NameSpec(plate)
         local bestSpot, bestGap
         for _, spot in ipairs(NAME_SPOTS) do
             local gap = gaps[spot.id]
-            if gap >= -10.5 and gap <= 30.5 and (not bestGap or math.abs(gap) < math.abs(bestGap)) then
+            if gap >= -10.5 and gap <= 100.5 and (not bestGap or math.abs(gap) < math.abs(bestGap)) then
                 bestSpot, bestGap = spot, gap
             end
         end
@@ -825,7 +825,7 @@ function Drag.CastbarSpec(plate)
         local bottom = plate:GetBottom()
         if not bottom then return nil end
         local gap = bottom - (cy + plate.castbar:GetHeight() / 2) - (plate.castShift or 0)
-        if gap < -0.5 or gap > 30.5 then return nil end
+        if gap < -0.5 or gap > 60.5 then return nil end
         return { [gapPath] = Clamp(gap, 0, 60) }
     end
     function spec.Candidates()

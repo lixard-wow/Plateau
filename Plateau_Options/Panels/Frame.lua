@@ -677,7 +677,7 @@ end
 
 local function RefreshPage(page)
     for _, row in ipairs(page.rows) do
-        if row.widget.Refresh and not (row.group and page.collapsed[row.group]) then
+        if row.widget.Refresh and (ns.changedOnly or not (row.group and page.collapsed[row.group])) then
             row.widget:Refresh()
         end
         row.changed = SpecChanged(row.spec)
@@ -1687,7 +1687,7 @@ end)
 local SHORTCUTS = {
     Z = function() ns.Undo.Undo(1) end,
     Y = function() ns.Undo.Redo() end,
-    F = function() box:SetFocus() end,
+    F = function() C_Timer.After(0, function() box:SetFocus() end) end,
 }
 local shortcuts = CreateFrame("Frame", nil, frame)
 shortcuts:EnableKeyboard(false)

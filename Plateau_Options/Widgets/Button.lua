@@ -506,7 +506,7 @@ function ns.DrawLookSample(area, preset, width)
     ns.LookView(area, "sample:" .. preset.key, width):Set(Plateau.PresetLook(preset))
 end
 
-function ns.ImportPeek(box, name)
+function ns.ImportPeek(box, name, edit)
     local area = CreateFrame("Frame", nil, box)
     area:SetPoint("TOPRIGHT", -1, -1)
     area:SetPoint("BOTTOMRIGHT", -1, 1)
@@ -527,6 +527,9 @@ function ns.ImportPeek(box, name)
             view:Set(look)
         end
         area:SetShown(look and true or false)
+        if edit then
+            edit:SetTextInsets(6, look and 156 or 6, 6, 6)
+        end
     end
 end
 
