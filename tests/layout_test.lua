@@ -343,13 +343,13 @@ end
 check(gameTagged >= 2, "Blizzard settings are tagged as game settings")
 
 local helpTopics = nsOpt.helpTopics
-check(#helpTopics >= 40, "Help topics are loaded for the Help search")
+check(#helpTopics >= 5 and #helpTopics <= 10, "Help keeps a short list of topics")
 local titles = {}
 for _, topic in ipairs(helpTopics) do
     check(type(topic.title) == "string" and type(topic.text) == "string" and type(topic.category) == "string", "Help topic " .. tostring(topic.title) .. " has a title, category and text")
     titles[topic.title] = true
 end
-check(titles["Dimmed settings and collapsed sections"] and not titles["The minimized bar"], "the Help topics match the window (no minimized bar)")
+check(titles["Limited settings in dungeons and raids"] and titles["Slash commands"] and not titles["Size page"], "Help keeps the topics the settings cannot show and drops the per-page ones")
 
 local function hasPath(key, path)
     return paths(byKey[key])[path] == true
