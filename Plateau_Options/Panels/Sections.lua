@@ -2790,7 +2790,7 @@ ns.sections = {
                   Plateau.DB.saved.global.optionsScale = nil
                   ns.ApplyScale()
               end,
-              tooltip = "The size of this settings window. It snaps to the nearest size where every line falls on whole screen pixels, so it changes in steps and stays sharp whatever UI scale you or other addons use. Nameplates are not affected." },
+              tooltip = "The size of this settings window. Nameplates are not affected." },
             { type = "Header", label = "Help and access" },
             { type = "Toggle", label = "Show what's new after updates", keywords = "changelog changes update patch notes version",
               get = function() return not Plateau.DB.saved.global.whatsNewOff end,

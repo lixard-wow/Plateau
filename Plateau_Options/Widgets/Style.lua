@@ -239,8 +239,7 @@ function Style.PixelScale()
     if type(base) ~= "number" or base <= 0 or type(factor) ~= "number" or factor <= 0 then
         return wanted
     end
-    local pixels = math.max(1, math.floor(base * wanted / factor + 0.5))
-    return pixels * factor / base
+    return wanted * factor / base
 end
 
 function Style.SnapWindow(frame)
