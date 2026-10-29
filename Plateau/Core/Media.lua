@@ -250,7 +250,7 @@ local RETRY_DELAY = 0.1
 local MAX_TRIES = 10
 local FALLBACK = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
 
-local THEME_FONTS = { "Barlow-Regular", "Barlow-SemiBold", "BarlowCondensed-Bold", "Cinzel-Bold", "SourceSans3-Regular", "SourceSans3-Bold" }
+local THEME_FONTS = { "IBMPlexSansCondensed-Medium", "IBMPlexSansCondensed-SemiBold", "AlegreyaSC-Bold" }
 local fontsWarmed = false
 
 function ns.WarmThemeFonts()

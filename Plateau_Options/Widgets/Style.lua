@@ -14,12 +14,9 @@ local function Hex(value)
 end
 
 local FONTS = "Interface\\AddOns\\" .. addonName .. "\\Media\\Fonts\\"
-local BARLOW = FONTS .. "Barlow-Regular.ttf"
-local BARLOW_COND = FONTS .. "BarlowCondensed-Bold.ttf"
-local BARLOW_SEMI = FONTS .. "Barlow-SemiBold.ttf"
-local CINZEL = FONTS .. "Cinzel-Bold.ttf"
-local SOURCE = FONTS .. "SourceSans3-Regular.ttf"
-local SOURCE_BOLD = FONTS .. "SourceSans3-Bold.ttf"
+local PLEX = FONTS .. "IBMPlexSansCondensed-Medium.ttf"
+local PLEX_SEMI = FONTS .. "IBMPlexSansCondensed-SemiBold.ttf"
+local ALEGREYA = FONTS .. "AlegreyaSC-Bold.ttf"
 
 Style.THEME_ORDER = { "survey" }
 
@@ -86,13 +83,13 @@ Style.THEMES = {
 }
 
 Style.SHAPE = {
-    body = BARLOW,
-    heading = BARLOW_COND,
+    body = PLEX,
+    heading = ALEGREYA,
     radius = 0,
     buttonRadius = 0,
-    titleFont = { BARLOW_COND, 17 },
-    sectionFont = { BARLOW_SEMI, 12 },
-    buttonFont = { BARLOW_SEMI, 13 },
+    titleFont = { ALEGREYA, 17 },
+    sectionFont = { ALEGREYA, 14 },
+    buttonFont = { PLEX_SEMI, 12 },
     headerHeight = 46,
     iconButton = 28,
     headerFill = true,
@@ -225,11 +222,8 @@ function Style.DropArrow(button)
 end
 
 Style.FONT_CHOICES = {
-    { value = BARLOW, label = "Barlow" },
-    { value = BARLOW_COND, label = "Barlow Condensed" },
-    { value = SOURCE, label = "Source Sans 3" },
-    { value = SOURCE_BOLD, label = "Source Sans 3 Bold" },
-    { value = CINZEL, label = "Cinzel" },
+    { value = PLEX, label = "IBM Plex Sans Condensed" },
+    { value = ALEGREYA, label = "Alegreya SC" },
 }
 
 Style.SCALE_MIN, Style.SCALE_MAX = 0.6, 1.4
@@ -277,8 +271,10 @@ local useGameFont = Plateau.ActiveLocale ~= nil and NON_LATIN[Plateau.ActiveLoca
 
 local function ChosenFont(key, themeFont)
     local saved = SavedGlobal()[key]
-    if type(saved) == "string" and saved ~= "" then
-        return saved
+    for _, choice in ipairs(Style.FONT_CHOICES) do
+        if choice.value == saved then
+            return saved
+        end
     end
     return useGameFont and gameFont or themeFont
 end
