@@ -89,9 +89,9 @@ function EnemyPower:Style(plate, db)
     end
     local back = db.backgroundColor
     bar.back:SetVertexColor(back[1], back[2], back[3], back[4])
-    ns.SetBarTexture(bar, db.texture or WHITE)
+    ns.SetBarTexture(bar, db.texture)
     ns.ApplyFont(bar.text, db.font, db.textSize, db.outline)
-    local anchor = db.textAnchor or "CENTER"
+    local anchor = db.textAnchor
     bar.text:ClearAllPoints()
     bar.text:SetPoint(anchor, bar, anchor, anchor == "LEFT" and 2 or anchor == "RIGHT" and -2 or 0, 0)
     bar.text:SetJustifyH(anchor)

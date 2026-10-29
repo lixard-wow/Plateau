@@ -234,8 +234,8 @@ function Name:Style(plate, db)
         y = y + ns.DB.views.enemy.friendly.nameOffsetY
     end
     local justify = plate.nameOnly and "CENTER" or db.justify
-    local shift = plate.nameOnly and 0 or (db.offsetX or 0)
-    local width = db.width or 0
+    local shift = plate.nameOnly and 0 or db.offsetX
+    local width = db.width
     if width == 0 and plate.nameOnly then
         width = 300
     end

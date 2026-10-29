@@ -177,8 +177,8 @@ function Scaling:Configure(db, state)
     s.combatScale = db.combatScale
     s.idleScale = db.idleScale
     s.mouseoverGrow = db.mouseoverGrow == true
-    s.mouseoverScale = db.mouseoverScale or 1
-    s.friendlyScale = db.friendlyScale or 1
+    s.mouseoverScale = db.mouseoverScale
+    s.friendlyScale = db.friendlyScale
     if state == "enemy" then
         smoothScale = db.smooth == true
     end

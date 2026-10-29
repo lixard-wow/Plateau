@@ -154,7 +154,7 @@ function Health:Style(plate, db)
     sparkTexture:ClearAllPoints()
     sparkTexture:SetPoint("TOP", fill, "TOP" .. edge)
     sparkTexture:SetPoint("BOTTOM", fill, "BOTTOM" .. edge)
-    sparkTexture:SetWidth(db.sparkWidth or 2)
+    sparkTexture:SetWidth(db.sparkWidth)
     sparkTexture:SetVertexColor(db.sparkColor[1], db.sparkColor[2], db.sparkColor[3], db.sparkColor[4])
     sparkTexture:SetShown(db.spark == true)
 end

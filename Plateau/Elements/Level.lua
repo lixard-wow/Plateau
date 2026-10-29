@@ -48,7 +48,7 @@ function Level:Configure(db, state)
     s.hideAtPlayerLevel = db.hideAtPlayerLevel
     s.r, s.g, s.b, s.a = db.color[1], db.color[2], db.color[3], db.color[4]
     s.hideInInstances = db.hideInInstances == true
-    s.bossText = db.bossText or "unknown"
+    s.bossText = db.bossText
     s.markRares = db.markRares == true
     s.hideTrivial = db.hideTrivial == true
     s.version = (s.version or 0) + 1

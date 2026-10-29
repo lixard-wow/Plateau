@@ -268,11 +268,11 @@ local function SizePlate(plate, look)
     ns.SnapPlateSize(plate)
     local size = views.enemy.plate
     local above, below = StackSpace(look, size.stackSpace)
-    local padX, padY = size.stackX or 0, size.stackY or 0
+    local padX, padY = size.stackX, size.stackY
     local stackRegion = plate.stackRegion
     local stackWidth = math.max(4, width + padX * 2)
     local stackHeight = math.max(4, height + above + below + padY * 2)
-    local bottom = -height / 2 - below - padY + (size.stackOffsetY or 0)
+    local bottom = -height / 2 - below - padY + size.stackOffsetY
     width = stackWidth
     if stackRegion.width ~= width or stackRegion.height ~= stackHeight or stackRegion.base ~= bottom then
         stackRegion.width, stackRegion.height, stackRegion.base = width, stackHeight, bottom
@@ -314,7 +314,7 @@ end
 
 local function PlaceClick(plate)
     local click, size, look = plate.clickArea, views.enemy.plate, views[plate.state]
-    local shift = size.clickOffsetY or 0
+    local shift = size.clickOffsetY
     if plate.nameOnly then
         shift = shift + (views.enemy.friendly.nameOffsetY or 0)
     end

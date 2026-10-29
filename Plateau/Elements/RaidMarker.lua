@@ -78,7 +78,7 @@ function RaidMarker:Style(plate, db)
     icon:SetSize(db.size, db.size)
     icon:SetAlpha(db.alpha)
     ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
-    plate.markerRingBase = { db.tintSize or 2, ns.HealthBorderOffset(ns.DB.views[plate.state]) }
+    plate.markerRingBase = { db.tintSize, ns.HealthBorderOffset(ns.DB.views[plate.state]) }
     plate.markerRingOffset = nil
     LayoutRing(plate)
 end

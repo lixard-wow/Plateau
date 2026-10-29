@@ -104,14 +104,14 @@ local function StyleButton(button, group, container)
     button.iconTexture:SetTexCoord(0.08, 0.92, top, bottom)
     button.cooldownFrame:SetDrawSwipe(db.swipe ~= false)
     PlaceText(button.timer, button, db.timerPosition)
-    PlaceText(button.stacks, button, db.stackPosition or "BOTTOMRIGHT")
+    PlaceText(button.stacks, button, db.stackPosition)
     button:SetMouseClickEnabled(false)
     button:EnableMouseMotion(config.tooltips == true)
     if button.SetHideTooltipInCombat then
         button:SetHideTooltipInCombat(not config.tooltipsInCombat)
     end
 
-    local borderSize = db.borderSize or 1
+    local borderSize = db.borderSize
     button.border:Layout(borderSize)
     button.border:SetShown(borderSize > 0)
     local borderColor = db.borderColor
@@ -447,7 +447,7 @@ end
 local PERMANENT_CUTOFF = 31536000
 
 local function Candidates(base, db, groupKey)
-    local maxDuration = (db.maxDuration or 0) > 0 and db.maxDuration or nil
+    local maxDuration = db.maxDuration > 0 and db.maxDuration or nil
     if not maxDuration and db.hidePermanent then
         maxDuration = PERMANENT_CUTOFF
     end
