@@ -31,7 +31,6 @@ ns.presets = {
                 ["look.healthText.font"] = ARIAL_NARROW,
                 ["look.healthText.format"] = "both",
                 ["look.healthText.decimals"] = 1,
-                ["look.healthText.color"] = { 0.9, 0.9, 0.9, 1 },
                 ["look.healthText.anchor"] = "CENTER",
                 ["look.healthText.offsetX"] = 0,
                 ["look.level.font"] = ARIAL_NARROW,
@@ -51,16 +50,12 @@ ns.presets = {
                 ["look.castbar.timerOffsetX"] = -2,
                 ["look.castbar.showSpark"] = true,
                 ["look.castbar.showTarget"] = false,
-                ["look.castbar.uninterruptible"] = { 0.5, 0.5, 0.5, 1 },
-                ["look.castbar.interruptedColor"] = { 1, 0.1, 0.1, 1 },
                 ["look.target.ring"] = false,
                 ["look.target.glow"] = true,
-                ["look.target.glowColor"] = { 0, 0.52, 1, 0.75 },
                 ["look.target.brackets"] = true,
                 ["look.target.bracketStyle"] = "claim",
                 ["look.target.bracketSize"] = 8,
                 ["look.target.bracketGap"] = 2,
-                ["look.target.bracketColor"] = { 0.8, 0.8, 0.8, 1 },
                 ["look.target.dimOthers"] = 0.6,
                 ["look.target.dimCombatOnly"] = true,
                 ["look.range.enabled"] = true,
@@ -106,8 +101,6 @@ ns.presets = {
                 ["look.health.border"] = { 0, 0, 0, 0.9 },
                 ["look.health.spark"] = true,
                 ["look.health.smooth"] = true,
-                ["look.colors.hostile"] = { 0.7, 0.2, 0.1, 1 },
-                ["look.colors.neutral"] = { 1, 0.8, 0, 1 },
                 ["look.name.font"] = ARIAL_NARROW,
                 ["look.name.size"] = 11,
                 ["look.name.gap"] = -3,
@@ -123,10 +116,8 @@ ns.presets = {
                 ["look.castbar.textJustify"] = "CENTER",
                 ["look.castbar.showTimer"] = false,
                 ["look.castbar.showTarget"] = false,
-                ["look.castbar.uninterruptible"] = { 0.8, 0.3, 0.3, 1 },
                 ["look.target.ring"] = false,
                 ["look.target.glow"] = true,
-                ["look.target.glowColor"] = { 0.3, 0.7, 1, 0.6 },
                 ["look.target.glowSize"] = 8,
                 ["look.target.dimOthers"] = 0.5,
                 ["look.target.dimCombatOnly"] = true,
@@ -175,7 +166,6 @@ ns.presets = {
                 ["look.healthText.offsetX"] = 0,
                 ["look.healthText.outline"] = "",
                 ["look.healthText.shadow"] = true,
-                ["look.healthText.colorByHealth"] = true,
                 ["look.level.outline"] = "",
                 ["look.level.shadow"] = true,
                 ["look.castbar.texture"] = GLOSS,
@@ -192,7 +182,6 @@ ns.presets = {
                 ["look.raidMarker.size"] = 16,
                 ["look.target.ring"] = false,
                 ["look.target.glow"] = true,
-                ["look.target.glowColor"] = { 1, 1, 0.5, 0.6 },
             },
         },
         {
@@ -208,11 +197,6 @@ ns.presets = {
                 ["look.health.background"] = { 0.12, 0.12, 0.12, 1 },
                 ["look.health.border"] = { 0.067, 0.067, 0.067, 1 },
                 ["look.health.borderInside"] = true,
-                ["look.colors.hostile"] = { 0.8, 0.137, 0.137, 1 },
-                ["look.colors.neutral"] = { 0.81, 0.72, 0.19, 1 },
-                ["look.colors.casterColor"] = { 0.231, 0.51, 0.965, 1 },
-                ["look.colors.bossColor"] = { 0.518, 0.243, 0.984, 1 },
-                ["look.colors.lieutenantColor"] = { 0.518, 0.243, 0.984, 1 },
                 ["look.name.font"] = ARIAL_NARROW,
                 ["look.name.size"] = 11,
                 ["look.name.outline"] = "",
@@ -233,17 +217,12 @@ ns.presets = {
                 ["look.castbar.background"] = { 0.1, 0.1, 0.1, 0.9 },
                 ["look.castbar.borderStyle"] = "none",
                 ["look.castbar.showSpark"] = true,
-                ["look.castbar.uninterruptible"] = { 0.45, 0.45, 0.45, 1 },
-                ["look.castbar.interruptedColor"] = { 0.8, 0, 0, 1 },
-                ["look.castbar.importantColor"] = { 1, 0.2, 0.2, 1 },
                 ["look.castbar.timerOffsetX"] = -3,
                 ["look.castbar.targetPosition"] = "INSIDERIGHT",
                 ["look.castbar.targetOffsetX"] = -30,
                 ["look.castbar.targetSize"] = 10,
-                ["look.castbar.targetClassColor"] = true,
                 ["look.target.ring"] = false,
                 ["look.target.glow"] = true,
-                ["look.target.glowColor"] = { 0.41, 0.67, 1, 1 },
                 ["look.target.glowSize"] = 6,
                 ["look.auras.mine.align"] = "CENTER",
                 ["look.auras.mine.offsetY"] = 18,
@@ -283,11 +262,6 @@ ns.presets = {
                 ["look.health.border"] = { 0.16, 0.24, 0.23, 1 },
                 ["look.health.borderSize"] = 2,
                 ["look.health.spark"] = true,
-                ["look.colors.casterColor"] = { 0, 0.45, 0.74, 1 },
-                ["look.colors.bossColor"] = { 0, 1, 0.98, 1 },
-                ["look.colors.lieutenantColor"] = { 0.47, 0, 0.62, 1 },
-                ["look.colors.trivialColor"] = { 0.7, 0.56, 0.33, 1 },
-                ["look.colors.mobTypesInstancesOnly"] = true,
                 ["look.name.font"] = ARIAL_NARROW,
                 ["look.name.size"] = 12,
                 ["look.name.shadow"] = true,
@@ -311,18 +285,11 @@ ns.presets = {
                 ["look.castbar.showTimer"] = false,
                 ["look.castbar.targetPosition"] = "INSIDERIGHT",
                 ["look.castbar.targetSize"] = 10,
-                ["look.castbar.targetClassColor"] = true,
-                ["look.castbar.uninterruptible"] = { 0.51, 0.75, 0.76, 1 },
-                ["look.castbar.readyColor"] = { 0, 1, 0, 1 },
-                ["look.castbar.notReadyColor"] = { 1, 0, 0, 1 },
-                ["look.castbar.interruptedColor"] = { 0.99, 0.21, 0.88, 1 },
-                ["look.castbar.importantColor"] = { 1, 0.09, 0.15, 1 },
                 ["look.target.ring"] = false,
                 ["look.target.arrows"] = true,
                 ["look.target.arrowStyle"] = "chevron",
                 ["look.target.arrowSize"] = 16,
                 ["look.mouseover.ring"] = true,
-                ["look.mouseover.ringColor"] = { 0.69, 0.37, 0.92, 1 },
                 ["look.mouseover.ringSize"] = 2,
                 ["look.auras.mine.offsetY"] = 18,
                 ["look.auras.purge.side"] = "LEFT",
@@ -513,19 +480,6 @@ function ns.PresetLook(preset)
     return look
 end
 
-local function DropColors(list)
-    local colors = ns.DB:ColorPaths().set
-    for _, preset in ipairs(list) do
-        for path in pairs(preset.values) do
-            if colors[path] then
-                preset.values[path] = nil
-            end
-        end
-    end
-end
-
-DropColors(ns.presets.looks)
-DropColors(ns.presets.styles)
 Complete(ns.presets.looks)
 Complete(ns.presets.styles)
 
