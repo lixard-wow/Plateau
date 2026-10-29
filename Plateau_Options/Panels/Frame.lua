@@ -657,7 +657,7 @@ local function PlanBlocks(controls)
     blocks[1] = block
     for index, spec in ipairs(controls) do
         if spec.type == "Header" then
-            block = { indexes = {}, headerIndex = index }
+            block = { indexes = {}, headerIndex = index, wide = spec.part == true or nil }
             blocks[#blocks + 1] = block
         else
             block.indexes[#block.indexes + 1] = index
@@ -723,11 +723,144 @@ local function BuildPage(section)
     return page
 end
 
+local PAGE_GROUPS = {
+    { label = "Plate", pages = {
+        { key = "bar", title = "Health bar", parts = { "health" } },
+        { key = "colors", title = "Colors", parts = { "healthColors", "threatColors" } },
+        { key = "text", title = "Text", parts = { "name", "healthText", "level" } },
+        { key = "castbar", title = "Cast bar", parts = { "castbar" } },
+        { key = "auras", title = "Auras", tabs = { "auraMine", "auraCC", "auraPurge", "auraImportant", "shield", "auraAll" } },
+        { key = "icons", title = "Icons", parts = { "raidMarker", "classification", "quest", "faction", "classPower", "enemyPower" } },
+    } },
+    { label = "In combat", pages = {
+        { key = "targets", title = "Target and focus", tabs = { "target", "focus", "mouseover" } },
+        { key = "kicks", title = "Interrupts", parts = { "kickers" } },
+        { key = "dungeons", title = "Dungeons and raids", parts = { "forces", "threatText", "bossPhases" } },
+    } },
+    { label = "Showing", pages = {
+        { key = "visibility", title = "Visibility", parts = { "showing", "fading", "combat" } },
+        { key = "size", title = "Size", parts = { "size" } },
+        { key = "stacking", title = "Stacking and clicks", parts = { "layering", "clicking" } },
+    } },
+    { pages = {
+        { key = "friendly", title = "Friendly", parts = { "friendly" } },
+        { key = "profiles", title = "Profiles", parts = { "profiles", "addon" } },
+        { key = "help", title = "Help", parts = { "help" } },
+    } },
+}
+local TAB_TITLES = { auraMine = "Your debuffs", auraImportant = "Important", shield = "Warnings", auraAll = "Text and tooltips" }
+
+local sectionsByKey = {}
+for _, section in ipairs(ns.sections) do
+    sectionsByKey[section.key] = section
+end
+
+local pagesByKey, partPage = {}, {}
+
+local function Groups(section)
+    if type(section.group) == "table" then
+        return section.group
+    end
+    return section.group and { section.group } or {}
+end
+
+local function ResetPart(section)
+    if section.reset then
+        section.reset()
+    else
+        for _, path in ipairs(Groups(section)) do
+            Plateau.DB:Reset(path)
+        end
+    end
+end
+
+local function MergePicks(parts)
+    local picks, seen = {}, {}
+    for _, part in ipairs(parts) do
+        for _, pick in ipairs(part.picks or {}) do
+            if not seen[pick.label] then
+                seen[pick.label] = true
+                picks[#picks + 1] = pick
+            end
+        end
+    end
+    return #picks > 0 and picks or nil
+end
+
+local function PageFrom(def)
+    local parts = {}
+    for _, key in ipairs(def.tabs or def.parts) do
+        if sectionsByKey[key] then
+            parts[#parts + 1] = sectionsByKey[key]
+        end
+    end
+    if #parts == 0 then return nil end
+    local page = { key = def.key, title = def.title, parts = parts, here = {} }
+    for _, part in ipairs(parts) do
+        page.here[part.key] = true
+    end
+    if def.tabs then
+        page.tabs = parts
+        for _, part in ipairs(parts) do
+            part.tabTitle = TAB_TITLES[part.key] or part.title
+            part.here = { [part.key] = true }
+            partPage[part.key] = { page = page, tab = part, offset = 0 }
+        end
+        return page
+    end
+    local controls, single = {}, #parts == 1
+    for _, part in ipairs(parts) do
+        if not single then
+            controls[#controls + 1] = { type = "Header", label = part.title, part = true }
+        end
+        partPage[part.key] = { page = page, offset = #controls, start = not single and #controls or nil }
+        for _, spec in ipairs(part.controls) do
+            controls[#controls + 1] = spec
+        end
+        page.noReset = page.noReset or part.noReset
+        page.resetAll = page.resetAll or part.resetAll
+    end
+    page.controls = controls
+    page.picks = MergePicks(parts)
+    page.reset = function()
+        for _, part in ipairs(parts) do
+            if not part.noReset then
+                ResetPart(part)
+            end
+        end
+    end
+    return page
+end
+
+local railGroups = {}
+for _, group in ipairs(PAGE_GROUPS) do
+    local built = { label = group.label, pages = {}, keys = {} }
+    for _, def in ipairs(group.pages) do
+        local page = PageFrom(def)
+        if page then
+            built.pages[#built.pages + 1] = page
+            pagesByKey[page.key] = page
+            for _, part in ipairs(page.parts) do
+                built.keys[#built.keys + 1] = part.key
+            end
+        end
+    end
+    railGroups[#railGroups + 1] = built
+end
+ns.railGroups = railGroups
+
+local shown
+
+local function Shown(page, tab)
+    if not page.tabs then return page end
+    return tab or page.activeTab or page.tabs[1]
+end
+
 function ns.UpdateClickAreas()
     local on = frame:IsShown() and ns.clickAreasOn == true
     Plateau.SetClickAreas(on, on)
-    if ns.SetPreviewSection and current then
-        ns.SetPreviewSection(current.key)
+    if ns.SetPreviewSection and shown then
+        ns.SetPreviewSection(shown.key, shown.here, shown.tabTitle and (T(current.title) .. ": " .. T(shown.tabTitle)) or shown.title)
     end
 end
 
@@ -736,34 +869,92 @@ local function PageCount(page)
     sectionCount:SetText(count > 0 and T(count == 1 and "%d setting" or "%d settings"):format(count) or "")
 end
 
-function Select(section)
-    ns.HideDropdownList()
-    if current then
-        local currentPage = pages[current.key]
-        if currentPage then
-            currentPage:Hide()
-        end
-        if railButtons[current.key] then
-            railButtons[current.key]:SetSelected(false)
-        end
-    end
-    current = section
-    Plateau.DB.saved.global.lastSection = section.key
+local tabButtons = {}
 
-    local page = pages[section.key]
-    if not page then
-        page = BuildPage(section)
-        pages[section.key] = page
+local function UpdateTabs()
+    local list = current and current.tabs or {}
+    local anchor
+    for i = 1, math.max(#list, #tabButtons) do
+        local part = list[i]
+        local button = tabButtons[i]
+        if part and not button then
+            button = CreateFrame("Button", nil, pageHead)
+            button:SetHeight(18)
+            button.back = CreateFrame("Frame", nil, button)
+            button.back:SetAllPoints()
+            Style.Border(button.back, C.edge)
+            Style.Fill(button.back, C.accent)
+            local top = CreateFrame("Frame", nil, button)
+            top:SetAllPoints()
+            top:SetFrameLevel(button.back:GetFrameLevel() + 1)
+            button.label = Style.Text(top, 12, C.muted)
+            button.label:SetPoint("CENTER")
+            button:SetScript("OnEnter", function(self)
+                if not self.on then Style.PaintText(self.label, C.text) end
+            end)
+            button:SetScript("OnLeave", function(self)
+                Style.PaintText(self.label, self.on and C.primaryText or C.muted)
+            end)
+            tabButtons[i] = button
+        end
+        if part then
+            local on = part == shown
+            button.on = on
+            button.label:SetText(T(part.tabTitle))
+            button:SetWidth(button.label:GetStringWidth() + 16)
+            Style.PaintText(button.label, on and C.primaryText or C.muted)
+            button.back:SetShown(on)
+            button:ClearAllPoints()
+            if anchor then
+                button:SetPoint("LEFT", anchor, "RIGHT", 4, 0)
+            else
+                button:SetPoint("LEFT", sectionTitle, "RIGHT", 12, 0)
+            end
+            button:SetScript("OnClick", function() Select(current, part) end)
+            button:Show()
+            anchor = button
+        elseif button then
+            button:Hide()
+        end
     end
-    scroll:SetScrollChild(page)
+    sectionCount:ClearAllPoints()
+    if anchor then
+        sectionCount:SetPoint("LEFT", anchor, "RIGHT", 12, 0)
+    else
+        sectionCount:SetPoint("BOTTOMLEFT", sectionTitle, "BOTTOMRIGHT", 10, 2)
+    end
+end
+
+function Select(page, tab)
+    ns.HideDropdownList()
+    if shown and pages[shown.key] then
+        pages[shown.key]:Hide()
+    end
+    if current and railButtons[current.key] then
+        railButtons[current.key]:SetSelected(false)
+    end
+    current = page
+    shown = Shown(page, tab)
+    if page.tabs then
+        page.activeTab = shown
+    end
+    Plateau.DB.saved.global.lastSection = shown.key
+
+    local view = pages[shown.key]
+    if not view then
+        view = BuildPage(shown)
+        pages[shown.key] = view
+    end
+    scroll:SetScrollChild(view)
     scroll:SetVerticalScroll(0)
-    page:Show()
-    RefreshPage(page)
-    if railButtons[section.key] then
-        railButtons[section.key]:SetSelected(true)
+    view:Show()
+    RefreshPage(view)
+    if railButtons[page.key] then
+        railButtons[page.key]:SetSelected(true)
     end
-    sectionTitle:SetText(section.title)
-    PageCount(page)
+    sectionTitle:SetText(page.title)
+    PageCount(view)
+    UpdateTabs()
     UpdateThumb()
     ns.UpdateClickAreas()
     UpdateChrome()
@@ -771,20 +962,14 @@ function Select(section)
         ns.PageChanged()
     end
     if resetSection then
-        resetSection:SetShown(not section.noReset)
-        resetAll:SetShown(section.resetAll == true)
+        resetSection:SetShown(not shown.noReset)
+        resetAll:SetShown(shown.resetAll == true)
     end
     if ns.UpdatePickButtons then
-        ns.UpdatePickButtons(section)
+        ns.UpdatePickButtons(shown)
     end
 end
 
-local RAIL_GROUPS = {
-    { label = "Plate", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield", "raidMarker", "quest", "classification", "faction", "classPower", "enemyPower" } },
-    { label = "In combat", keys = { "target", "focus", "mouseover", "kickers", "threatText", "forces" } },
-    { label = "Showing", keys = { "showing", "size", "fading", "layering", "clicking", "combat" } },
-    { keys = { "friendly", "profiles", "addon", "help" } },
-}
 local RAIL_ROW = 22
 local RAIL_LABEL = 22
 local RAIL_GAP = 14
@@ -807,12 +992,7 @@ railScroll:SetScript("OnMouseWheel", function(self, delta)
 end)
 railScroll:SetScript("OnScrollRangeChanged", UpdateRailThumb)
 
-local sectionsByKey = {}
-for _, section in ipairs(ns.sections) do
-    sectionsByKey[section.key] = section
-end
-
-local function RailButton(section, y)
+local function RailButton(page, y)
     local button = CreateFrame("Button", nil, railContent)
     button:SetHeight(RAIL_ROW)
     button:SetPoint("TOPLEFT", 0, -y)
@@ -830,7 +1010,7 @@ local function RailButton(section, y)
     local label = Style.Text(button, 13, C.muted)
     label:SetPoint("LEFT", 14, 0)
     label:SetPoint("RIGHT", -8, 0)
-    label:SetText(section.title)
+    label:SetText(page.title)
 
     function button:SetSelected(selected)
         self.selected = selected
@@ -842,14 +1022,14 @@ local function RailButton(section, y)
 
     button:SetScript("OnEnter", function() Style.PaintText(label, C.text) end)
     button:SetScript("OnLeave", function(self) Style.PaintText(label, self.selected and C.text or C.muted) end)
-    button:SetScript("OnClick", function() Select(section) end)
-    railButtons[section.key] = button
+    button:SetScript("OnClick", function() Select(page) end)
+    railButtons[page.key] = button
     return button
 end
 
 do
     local y = 0
-    for i, group in ipairs(RAIL_GROUPS) do
+    for i, group in ipairs(railGroups) do
         if i > 1 then
             y = y + RAIL_GAP
         end
@@ -860,31 +1040,18 @@ do
             label:SetText(group.label)
             y = y + RAIL_LABEL
         end
-        for _, key in ipairs(group.keys) do
-            local section = sectionsByKey[key]
-            if section then
-                RailButton(section, y)
-                y = y + RAIL_ROW
-            end
+        for _, page in ipairs(group.pages) do
+            RailButton(page, y)
+            y = y + RAIL_ROW
         end
     end
     railContent:SetHeight(y + 10)
 end
 
-ns.railGroups = RAIL_GROUPS
-
 resetSection = TextButton(pageHead, "Reset page")
 resetSection:SetPoint("BOTTOMRIGHT", 0, 8)
 Confirming(resetSection, "Reset page", function()
-    if current.reset then
-        current.reset()
-    elseif type(current.group) == "table" then
-        for _, group in ipairs(current.group) do
-            Plateau.DB:Reset(group)
-        end
-    else
-        Plateau.DB:Reset(current.group)
-    end
+    ResetPart(shown)
     ns.RefreshAll()
 end)
 resetSection:HookScript("OnClick", function(self) self:Fit() end)
@@ -936,7 +1103,7 @@ function ns.UpdatePickButtons(section)
             button:SetScript("OnClick", function(self)
                 ns.ShowList(self, pick.options, pick.get(), function(value)
                     pick.set(value)
-                    ns.UpdatePickButtons(current)
+                    ns.UpdatePickButtons(shown)
                 end, { width = 260 })
             end)
             button:Show()
@@ -1011,8 +1178,8 @@ function ns.OnRefresh(callback)
 end
 
 function ns.RefreshAll()
-    if current then
-        local page = pages[current.key]
+    if shown then
+        local page = pages[shown.key]
         if page then
             RefreshPage(page)
             PageCount(page)
@@ -1046,12 +1213,24 @@ cvarWatcher:SetScript("OnEvent", function()
     end)
 end)
 
+local function Locate(key)
+    local where = partPage[key]
+    if where then
+        return where.page, where.tab, where
+    end
+    return pagesByKey[key]
+end
+
+local ScrollToRow
+
 function ns.SelectSection(key)
-    for _, section in ipairs(ns.sections) do
-        if section.key == key then
-            Select(section)
-            return
-        end
+    local page, tab, where = Locate(key)
+    if not page then return end
+    if page ~= current or (tab and tab ~= shown) then
+        Select(page, tab)
+    end
+    if where and where.start and pages[page.key] then
+        ScrollToRow(pages[page.key], where.start + 1)
     end
 end
 
@@ -1060,7 +1239,16 @@ frame:SetScript("OnShow", function()
     KeepOnScreen()
     Style.RefreshPixels()
     ns.UpdateProfileLabel()
-    Select(current or sectionsByKey[Plateau.DB.saved.global.lastSection] or sectionsByKey.health or ns.sections[1])
+    if current then
+        Select(current, shown)
+    else
+        local page, tab = Locate(Plateau.DB.saved.global.lastSection)
+        if page then
+            Select(page, tab)
+        else
+            Select(railGroups[1].pages[1])
+        end
+    end
     Plateau.RefreshDirtyPreviews()
 end)
 
@@ -1096,9 +1284,7 @@ local function Flash(widget)
     end)
 end
 
-function ns.OpenSetting(sectionKey, index)
-    ns.SelectSection(sectionKey)
-    local page = pages[sectionKey]
+function ScrollToRow(page, index, flashIt)
     local row = page and page.rows[index]
     if not row then return end
     local group = row.group or (row.spec.collapsible and index or nil)
@@ -1112,8 +1298,19 @@ function ns.OpenSetting(sectionKey, index)
         end
         scroll:SetVerticalScroll(math.max(0, math.min(Range(scroll), row.y - 24)))
         UpdateThumb()
-        Flash(row.widget)
+        if flashIt then
+            Flash(row.widget)
+        end
     end)
+end
+
+function ns.OpenSetting(sectionKey, index)
+    local page, tab, where = Locate(sectionKey)
+    if not page then return end
+    if page ~= current or (tab and tab ~= shown) then
+        Select(page, tab)
+    end
+    ScrollToRow(pages[shown.key], (where and where.offset or 0) + index, true)
 end
 
 function ns.OpenLink(target)
@@ -1169,6 +1366,15 @@ end
 
 local function BuildIndex()
     for _, entry in ipairs(Logic.BuildSettingsIndex(ns.sections)) do
+        index[#index + 1] = entry
+    end
+    local own = {}
+    for key, page in pairs(pagesByKey) do
+        if not sectionsByKey[key] then
+            own[#own + 1] = { key = key, title = page.title, controls = {} }
+        end
+    end
+    for _, entry in ipairs(Logic.BuildSettingsIndex(own)) do
         index[#index + 1] = entry
     end
 end

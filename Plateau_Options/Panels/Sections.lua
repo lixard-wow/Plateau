@@ -1730,7 +1730,7 @@ ns.sections = {
           tooltip = "Shows the cast bar on out-of-combat nameplates." }, On("look.idle.enabled"), "Turn on Customize out-of-combat nameplates to use this.")
     )),
 
-    Section("health", "Health bar", { "look.health", "look.execute", "look.bossPhases", "look.plate.width", "look.plate.height", "look.plate.pixelPerfect", "look.shield.absorbs", "look.shield.absorbColor", "look.shield.absorbStyle", "look.shield.absorbPosition", "look.shield.absorbGlow" }, List(
+    Section("health", "Health bar", { "look.health", "look.execute", "look.plate.width", "look.plate.height", "look.plate.pixelPerfect", "look.shield.absorbs", "look.shield.absorbColor", "look.shield.absorbStyle", "look.shield.absorbPosition", "look.shield.absorbGlow" }, List(
         { type = "Header", label = "Size", first = true },
         { type = "Slider", path = "look.plate.width", label = "Width", min = 60, max = 300,
           tooltip = "Width of every nameplate. The cast bar matches it." },
@@ -1794,9 +1794,11 @@ ns.sections = {
         Gate({ type = "Slider", path = "look.execute.line2", label = "Second marker", min = 0, max = 99,
           tooltip = "Health percentage for the second marker. 0 hides it." }, On("look.execute.lines"), "Turn on Show health markers to use this."),
         Gate({ type = "Slider", path = "look.execute.lineWidth", label = "Marker thickness", min = 1, max = 4,
-          tooltip = "Thickness of the marker lines." }, On("look.execute.lines"), "Turn on Show health markers to use this."),
+          tooltip = "Thickness of the marker lines." }, On("look.execute.lines"), "Turn on Show health markers to use this.")
+    )),
 
-        { type = "Header", label = "Boss phase lines" },
+    Section("bossPhases", "Boss phase lines", "look.bossPhases", List(
+        { type = "Header", label = "Boss phase lines", first = true },
         { type = "ToggleColor", path = "look.bossPhases.enabled", colorPath = "look.bossPhases.color", label = "Show boss phase lines",
           tooltip = "Draws lines on boss health bars where the fight changes phase." },
         Gate({ type = "Slider", path = "look.bossPhases.lineWidth", label = "Phase line thickness", min = 1, max = 4,
@@ -2603,8 +2605,7 @@ ns.sections = {
         GateList(On("look.forces.enabled"), "Turn on Show enemy forces to use this.", FontControls("look.forces"))
     )),
 
-    Section("threatText", "Threat", { "look.threatText", "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.showThreatWarning", "look.colors.threatWarning", "look.colors.showThreatGood", "look.colors.threatGood", "look.colors.showOffTank", "look.colors.offTankColor" }, Join(
-        List(
+    Section("threatColors", "Threat colors", { "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.showThreatWarning", "look.colors.threatWarning", "look.colors.showThreatGood", "look.colors.threatGood", "look.colors.showOffTank", "look.colors.offTankColor" }, List(
             { type = "Header", label = "Threat colors", first = true },
             { type = "ToggleColor", path = "look.colors.threat", colorPath = "look.colors.threatBad", label = "Threat colors",
               tooltip = "Colors enemies by threat in combat. This color means threat is wrong: a tank lost aggro, or anyone else has it." },
@@ -2615,8 +2616,12 @@ ns.sections = {
             Gate({ type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood", label = "Threat safe color",
               tooltip = "Used when threat is where it should be." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
             Gate({ type = "ToggleColor", path = "look.colors.showOffTank", colorPath = "look.colors.offTankColor", label = "Off-tank color",
-              tooltip = "Tanks only. Used for enemies held by another tank in your group." }, On("look.colors.threat"), "Turn on Threat colors to use this."),
-            { type = "Header", label = "Threat percent" },
+              tooltip = "Tanks only. Used for enemies held by another tank in your group." }, On("look.colors.threat"), "Turn on Threat colors to use this.")
+    )),
+
+    Section("threatText", "Threat percent", "look.threatText", Join(
+        List(
+            { type = "Header", label = "Threat percent", first = true },
             { type = "Note", label = "Your threat on each enemy as a percentage. 100% means you have aggro. The game may hide this number on Retail.", height = 32 },
             { type = "Toggle", path = "look.threatText.enabled", label = "Show threat percent",
               tooltip = "Shows your threat on each enemy NPC as a percentage." },
@@ -2859,7 +2864,7 @@ local SECTION_PICKS = {
         HeaderPick("enemy", "Preview enemy", PREVIEW_ENEMIES, "The kind of enemy the preview shows, so you can see its color." .. NOT_SAVED),
         HeaderPick("threat", "Preview threat", PREVIEW_THREAT, "The threat state the preview shows, so you can see its color." .. NOT_SAVED),
     },
-    threatText = {
+    threatColors = {
         HeaderPick("threat", "Preview threat", PREVIEW_THREAT, "The threat state the preview shows, so you can see its color." .. NOT_SAVED),
     },
     classification = { HeaderPick("badge", "Preview badge", PREVIEW_BADGES, "The badge the preview shows." .. NOT_SAVED) },

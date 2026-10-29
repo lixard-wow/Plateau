@@ -134,4 +134,29 @@ if ok then
     check(#failed == 0, "every page builds (" .. built .. " built)" .. (#failed > 0 and ("; " .. table.concat(failed, " | ")) or ""))
     local refreshed = pcall(nsOpt.RefreshAll)
     check(refreshed, "refreshing the open page works")
+    local pages, placed, bad = 0, {}, {}
+    for _, group in ipairs(nsOpt.railGroups) do
+        for _, page in ipairs(group.pages) do
+            pages = pages + 1
+            budget = 0
+            local done, why = pcall(nsOpt.SelectSection, page.key)
+            if not done then
+                bad[#bad + 1] = page.key .. ": " .. tostring(why)
+            end
+            for _, part in ipairs(page.parts) do
+                if placed[part.key] then
+                    bad[#bad + 1] = part.key .. " is on two pages"
+                end
+                placed[part.key] = true
+            end
+        end
+    end
+    for _, section in ipairs(nsOpt.sections) do
+        if not placed[section.key] then
+            bad[#bad + 1] = section.key .. " is on no page"
+        end
+    end
+    check(#bad == 0, pages .. " sidebar pages open and hold every part once" .. (#bad > 0 and ("; " .. table.concat(bad, " | ")) or ""))
+    local opened = pcall(nsOpt.OpenSetting, "level", 2) and pcall(nsOpt.OpenSetting, "focus", 2) and pcall(nsOpt.OpenSetting, "addon", 2)
+    check(opened, "opening a setting inside a merged page or a tab works")
 end

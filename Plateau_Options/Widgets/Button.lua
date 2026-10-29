@@ -75,10 +75,14 @@ end
 
 function ns.Widgets.Header(parent, spec)
     local row = CreateFrame("Frame", nil, parent)
-    row:SetHeight(22)
+    row:SetHeight(spec.part and 34 or 22)
 
-    local text = Style.Text(row, 14, C.heading)
-    Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE, "")
+    local text = Style.Text(row, 14, spec.part and C.title or C.heading)
+    if spec.part then
+        Style.SetFont(text, Style.titleFont, 18, "")
+    else
+        Style.SetFont(text, Style.sectionFont, Style.SECTION_SIZE, "")
+    end
     text:SetPoint("BOTTOMLEFT", 0, 4)
     text:SetText(spec.label)
 

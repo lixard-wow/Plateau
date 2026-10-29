@@ -8,6 +8,7 @@ local PLATE_SCALE = 1.5
 local HINT = "Click a part to edit it. Drag to move it; hold Shift to place it freely."
 
 local sectionKey, editingTitle
+local here = {}
 
 local STATE_NOTES = {
     target = "The preview plate is shown as your target.",
@@ -23,7 +24,13 @@ local function Hint()
     if editingTitle then
         parts[#parts + 1] = T("Editing: %s (outlined)."):format(T(editingTitle))
     end
-    if WORLD_ONLY[sectionKey] then
+    local worldOnly = next(here) ~= nil
+    for key in pairs(here) do
+        if not WORLD_ONLY[key] then
+            worldOnly = false
+        end
+    end
+    if worldOnly then
         parts[#parts + 1] = T("Applies to in-world nameplates; the preview does not show it.")
     else
         if STATE_NOTES[sectionKey] then
@@ -151,7 +158,7 @@ local function Hotspot(plate, region, sectionKey, label, level, pad, drag)
 end
 
 local function DragOf(spot)
-    if spot and spot.friendlyHere and sectionKey == "friendly" then
+    if spot and spot.friendlyHere and here.friendly then
         return nil
     end
     return spot and spot.drag
@@ -327,8 +334,8 @@ local function AddHotspots(plate)
     Hotspot(plate, plate, "focus", "Focus", 1, 6)
     Hotspot(plate, plate, "mouseover", "Mouseover", 1, 6)
     Hotspot(plate, plate, "shield", "Buff warnings", 1, 6)
-    Hotspot(plate, plate.health, function() return sectionKey == "healthColors" and "healthColors" or "health" end,
-        function() return sectionKey == "healthColors" and "Health bar colors" or "Health bar" end, 20, 0)
+    Hotspot(plate, plate.health, function() return here.healthColors and "healthColors" or "health" end,
+        function() return here.healthColors and "Health bar colors" or "Health bar" end, 20, 0)
     Hotspot(plate, plate.castbar, "castbar", "Cast bar", 60, 0, castbarDrag)
     Hotspot(plate, plate.healthText, "healthText", "Health text", 80, 3,
         Drag.PositionSpec({ path = "look.healthText", positionKey = "anchor", text = true, fixedGap = 3, region = plate.healthText, anchor = AtHealth(plate) })).setting = "Show health text"
@@ -336,20 +343,20 @@ local function AddHotspots(plate)
         Drag.PositionSpec({ path = "look.enemyTarget", positionKey = "anchor", text = true, fixedGap = 3, region = plate.enemyTarget, anchor = AtHealth(plate) })).setting = "Show enemy target name"
     Hotspot(plate, plate.level, "level", "Level", 80, 3,
         Drag.PositionSpec({ path = "look.level", positionKey = "anchor", text = true, fixedGap = 3, region = plate.level, anchor = AtHealth(plate) }))
-    local nameSpot = Hotspot(plate, plate.name, function() return sectionKey == "friendly" and "friendly" or "name" end, "Name", 70, 1, Drag.NameSpec(plate))
+    local nameSpot = Hotspot(plate, plate.name, function() return here.friendly and "friendly" or "name" end, "Name", 70, 1, Drag.NameSpec(plate))
     nameSpot.fitText = true
     nameSpot.friendlyHere = true
     Hotspot(plate, plate.raidMarker, "raidMarker", "Raid target icon", 80, 0,
         Drag.PositionSpec({
-            path = function() return sectionKey == "friendly" and "look.friendly.raidMarker" or "look.raidMarker" end,
+            path = function() return here.friendly and "look.friendly.raidMarker" or "look.raidMarker" end,
             readPath = function()
-                if sectionKey == "friendly" and Plateau.DB:Get("look.friendly.raidMarker.own") then
+                if here.friendly and Plateau.DB:Get("look.friendly.raidMarker.own") then
                     return "look.friendly.raidMarker"
                 end
                 return "look.raidMarker"
             end,
             extra = function()
-                if sectionKey ~= "friendly" then
+                if not here.friendly then
                     return {}
                 end
                 local own = Plateau.DB:Get("look.friendly.raidMarker.own")
@@ -443,7 +450,7 @@ local function UpdateEditing()
     local boxes, scale = {}, nil
     if sectionKey then
         for _, spot in ipairs(spots) do
-            if spot:IsShown() and Resolve(spot.sectionKey) == sectionKey then
+            if spot:IsShown() and here[Resolve(spot.sectionKey)] then
                 local l, r, t, b = Bounds(spot)
                 if l then
                     scale = spot:GetEffectiveScale()
@@ -562,7 +569,7 @@ local function ApplySample()
     cast.interrupted = kind == "interrupted"
     sample.cast = cast
     local executeOn = On("look.execute.highlight") or On("look.execute.lines")
-    sample.health = (sectionKey == "health" and executeOn) and 0.12 or baseHealth
+    sample.health = (here.health and executeOn) and 0.12 or baseHealth
     local enemy = picks.enemy
     sample.mobType = MOB_TYPES[enemy] and enemy or "caster"
     sample.isPlayer = enemy == "enemyPlayer" or nil
@@ -571,18 +578,18 @@ local function ApplySample()
     sample.tapped = enemy == "tapped" or nil
     sample.classification = picks.badge
     sample.threat = picks.threat ~= "none" and picks.threat or nil
-    sample.questColor = (sectionKey == "quest" and On("look.colors.quest")) or nil
+    sample.questColor = (here.quest and On("look.colors.quest")) or nil
     sample.levelOffset = 1
     sample.outOfRange = nil
-    sample.isTarget = sectionKey == "target"
-    sample.isFocus = sectionKey == "focus"
-    sample.mouseover = sectionKey == "mouseover"
+    sample.isTarget = here.target == true
+    sample.isFocus = here.focus == true
+    sample.mouseover = here.mouseover == true
     sample.absorb = On("look.shield.absorbs") and 0.15 or 0
     sample.raidMarker = On("look.raidMarker.enabled") and baseMarker or nil
     sample.quest = On("look.quest.enabled") and baseQuest or nil
     sample.classPower = On("look.classPower.enabled")
-    sample.showFaction = sectionKey == "faction" or nil
-    sample.showKickers = sectionKey == "kickers" or nil
+    sample.showFaction = here.faction
+    sample.showKickers = here.kickers
     sample.enemyPower = On("look.enemyPower.enabled")
     sample.forces = (On("look.forces.enabled") and Plateau.flavor ~= "forever") and baseForces or nil
     local auras = {}
@@ -594,7 +601,7 @@ local function ApplySample()
         end
     end
     sample.auras = auras
-    local warnings = sectionKey == "shield"
+    local warnings = here.shield == true
     sample.alerts.important = warnings and On("look.shield.alertImportant")
     sample.alerts.defensive = warnings and On("look.shield.alertDefensive")
     sample.alerts.enrage = warnings and On("look.shield.alertEnrage")
@@ -639,7 +646,7 @@ end
 
 local function PreviewChanged()
     ApplySample()
-    if sectionKey ~= "friendly" then
+    if not here.friendly then
         Plateau.SetPreviewState(plate, sample)
     end
     UpdateHotspots()
@@ -671,23 +678,18 @@ end)
 PaintSnap()
 Style.Tooltip(snapButton, { label = "Snapping", tooltip = "On: dragged parts snap to the guide dots. Off: they land where you drop them. Hold Shift to skip snapping once." })
 
-function ns.SetPreviewSection(key)
+function ns.SetPreviewSection(key, parts, title)
     if key ~= sectionKey then
         castPlayer:Hide()
         ResetPicks()
     end
     sectionKey = key
-    editingTitle = nil
-    for _, section in ipairs(ns.sections) do
-        if section.key == key then
-            editingTitle = section.title
-            break
-        end
-    end
+    here = parts or { [key] = true }
+    editingTitle = title
     ApplySample()
-    Plateau.SetPreviewState(plate, key == "friendly" and friendlySample or sample)
+    Plateau.SetPreviewState(plate, here.friendly and friendlySample or sample)
     UpdateHotspots()
-    if key == "castbar" and not castPlayer:IsShown() then
+    if here.castbar and not castPlayer:IsShown() then
         PlayCast()
     end
     if not hovered then

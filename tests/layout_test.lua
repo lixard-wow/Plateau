@@ -59,14 +59,10 @@ local function paths(section)
 end
 
 local groups = {
-    { label = "Profile", keys = { "profiles" } },
-    { label = "Nameplates", keys = { "health", "healthColors", "healthText", "name", "level", "castbar", "threatText", "enemyPower", "classPower", "forces" } },
-    { label = "Behavior", keys = { "showing", "size", "fading", "layering", "clicking" } },
-    { label = "Targets", keys = { "target", "focus", "mouseover", "combat" } },
-    { label = "Auras", keys = { "auraAll", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield" } },
-    { label = "Icons", keys = { "raidMarker", "quest", "classification", "faction", "kickers" } },
-    { label = "Friendly", keys = { "friendly" } },
-    { label = "Help", keys = { "help" } },
+    { label = "Plate", keys = { "health", "healthColors", "threatColors", "name", "healthText", "level", "castbar", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield", "auraAll", "raidMarker", "classification", "quest", "faction", "classPower", "enemyPower" } },
+    { label = "In combat", keys = { "target", "focus", "mouseover", "kickers", "forces", "threatText", "bossPhases" } },
+    { label = "Showing", keys = { "showing", "fading", "combat", "size", "layering", "clicking" } },
+    { keys = { "friendly", "profiles", "addon", "help" } },
 }
 local problems = Logic.RailProblems(groups, sections)
 check(#problems == 0, "the sidebar order lists every page exactly once" .. (#problems > 0 and (": " .. table.concat(problems, "; ")) or ""))
@@ -84,9 +80,9 @@ local onQuest = paths(byKey.quest)
 for _, path in ipairs({ "look.colors.bossColor", "look.colors.casterColor", "look.colors.hostile", "look.colors.tapped", "look.colors.classColors", "look.colors.mobTypes", "look.colors.healthGradient" }) do
     check(onColors[path] and not onHealth[path], path .. " is on Health bar colors")
 end
-local onThreat = paths(byKey.threatText)
-for _, path in ipairs({ "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.offTankColor", "look.threatText.enabled" }) do
-    check(onThreat[path] and not onHealth[path] and not onColors[path], path .. " is on Threat")
+local onThreat = paths(byKey.threatColors)
+for _, path in ipairs({ "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.offTankColor" }) do
+    check(onThreat[path] and not onHealth[path] and not onColors[path], path .. " is on Threat colors")
 end
 for _, path in ipairs({ "look.colors.quest", "look.colors.questColor", "look.colors.questExcludeBoss" }) do
     check(onQuest[path] and not onHealth[path] and not onColors[path], path .. " is on Quest icon only")
@@ -113,7 +109,7 @@ end
 for _, path in ipairs({ "look.colors.bossColor", "look.colors.hostile", "look.colors.healthGradient" }) do
     check(groupCovers(byKey.healthColors, path) and not groupCovers(byKey.health, path), "resetting Health bar colors covers " .. path .. " and resetting Health bar does not")
 end
-check(groupCovers(byKey.threatText, "look.colors.threatBad") and groupCovers(byKey.threatText, "look.threatText.enabled") and not groupCovers(byKey.healthColors, "look.colors.threatBad"), "resetting Threat covers threat colors and threat percent")
+check(groupCovers(byKey.threatColors, "look.colors.threatBad") and groupCovers(byKey.threatText, "look.threatText.enabled") and not groupCovers(byKey.threatText, "look.colors.threatBad") and not groupCovers(byKey.healthColors, "look.colors.threatBad"), "resetting Threat colors and Threat percent each cover their own part")
 check(groupCovers(byKey.health, "look.plate.pixelPerfect") and not groupCovers(byKey.size, "look.plate.pixelPerfect"), "resetting Health bar covers pixel-perfect borders")
 
 local onName, onHealthText = paths(byKey.name), paths(byKey.healthText)
@@ -276,7 +272,7 @@ check(foundOn("cast bar colors", "castbar"), "cast bar colors are found on Cast 
 check(not foundOn("cast bar colors", "health") or foundOn("cast bar colors", "castbar"), "the moved cast colors point at Cast bar")
 check(foundOn("interrupt ready", "castbar") and not foundOn("interrupt ready", "health"), "Interrupt ready is only found on Cast bar")
 check(foundOn("enemy types", "healthColors") and foundOn("reaction colors", "healthColors") and foundOn("colorblind presets", "healthColors"), "enemy type, reaction and palette colors are found on Health bar colors")
-check(foundOn("threat colors", "threatText") and foundOn("threat percent", "threatText"), "threat colors and threat percent are found on Threat")
+check(foundOn("threat colors", "threatColors") and foundOn("threat percent", "threatText"), "threat colors and threat percent are found on their parts")
 check(foundOn("color quest enemies", "quest"), "quest enemy color is found on Quest icon")
 check(foundOn("dim", "fading") and foundOn("fade", "fading"), "searching dim or fade finds the non-target opacity setting on Fading")
 for _, query in ipairs({ "transparency", "colour", "kick", "bigger", "healthbar", "pvp", "hitbox", "gray", "low health", "skull" }) do
@@ -298,7 +294,7 @@ check(foundOn("hidden spells", "auraMine") and foundOn("allowed spells", "auraCC
 check(foundOn("hide on same-level normal enemies", "level"), "renamed Level settings are searchable")
 check(foundOn("use class colors for player names", "name") and foundOn("long names", "name"), "renamed Name settings are searchable")
 check(foundOn("hostile", "healthColors") and foundOn("mob", "size"), "hostile and mob find enemy settings")
-check(foundOn("aggro", "threatText") and foundOn("hp", "healthText"), "aggro finds Threat and hp finds Health text")
+check(foundOn("aggro", "threatColors") and foundOn("hp", "healthText"), "aggro finds Threat and hp finds Health text")
 check(foundOn("ally", "friendly") and foundOn("totem", "friendly"), "ally and totem find Friendly settings")
 check(foundOn("cc", "auraCC") and foundOn("combo points", "classPower"), "player shorthand finds crowd control and class resource")
 check(byKey.personal == nil and foundOn("line of sight", "fading"), "there is no personal resource display page and line of sight finds its setting")
