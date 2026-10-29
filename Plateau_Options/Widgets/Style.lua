@@ -695,8 +695,10 @@ function Style.SetBorderColor(frame, color)
         Style.PaintVertex(roundEdge, color)
         return
     end
+    local edges = rawget(frame, "borderEdges")
+    if not edges then return end
     for i = 1, 4 do
-        Style.Paint(frame.borderEdges[i], color)
+        Style.Paint(edges[i], color)
     end
 end
 

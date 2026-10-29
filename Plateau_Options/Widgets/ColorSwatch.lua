@@ -20,7 +20,7 @@ end
 function ns.Widgets.MakeSwatch(parent, path, setter)
     local swatch = CreateFrame("Button", nil, parent)
     swatch:SetSize(SWATCH_WIDTH, SWATCH_HEIGHT)
-    Style.Fill(swatch, C.edge)
+    local edge = Style.Fill(swatch, C.edge)
     local color = swatch:CreateTexture(nil, "ARTWORK")
     Style.PixelInset(color, swatch)
 
@@ -117,7 +117,8 @@ function ns.Widgets.MakeSwatch(parent, path, setter)
         LiftPicker()
     end)
 
-    Style.HoverBorder(swatch, swatch)
+    swatch:HookScript("OnEnter", function() Style.Paint(edge, C.accent, 1) end)
+    swatch:HookScript("OnLeave", function() Style.Paint(edge, C.edge, 1) end)
     return swatch
 end
 
