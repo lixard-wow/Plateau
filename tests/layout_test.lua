@@ -59,7 +59,7 @@ local function paths(section)
 end
 
 local groups = {
-    { label = "Plate", keys = { "health", "healthColors", "threatColors", "name", "healthText", "level", "castbar", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield", "auraAll", "raidMarker", "classification", "quest", "faction", "classPower", "enemyPower" } },
+    { label = "Plate", keys = { "health", "healthColors", "threatColors", "plateText", "name", "healthText", "level", "castbar", "auraMine", "auraCC", "auraPurge", "auraImportant", "shield", "auraAll", "raidMarker", "classification", "quest", "faction", "classPower", "enemyPower" } },
     { label = "In combat", keys = { "target", "focus", "mouseover", "kickers", "forces", "threatText", "bossPhases" } },
     { label = "Showing", keys = { "showing", "fading", "combat", "size", "layering", "clicking" } },
     { keys = { "friendly", "profiles", "addon", "help" } },
@@ -114,7 +114,7 @@ check(groupCovers(byKey.health, "look.plate.pixelPerfect") and not groupCovers(b
 
 local onName, onHealthText = paths(byKey.name), paths(byKey.healthText)
 check(onName["look.enemyTarget.enabled"] and not onHealthText["look.enemyTarget.enabled"], "the enemy target toggle moved from Health text to Name")
-for _, key in ipairs({ "classColors", "anchor", "offsetX", "offsetY", "font", "size", "outline", "shadow" }) do
+for _, key in ipairs({ "classColors", "anchor", "offsetX", "offsetY", "size" }) do
     local path = "look.enemyTarget." .. key
     check(onName[path] and not onHealthText[path], path .. " lives on Name")
 end
@@ -207,7 +207,19 @@ check(customScale and Logic.IsEnabled(customScale) == false, "Custom target scal
 DB:Set("look.target.useBlizzardScale", false)
 check(Logic.IsEnabled(customScale) == true, "Custom target scale is available when Blizzard scaling is off")
 
-check(hasHeader(byKey.auraAll, "Text") and hasHeader(byKey.auraAll, "Tooltips"), "shared aura text and tooltips live on the Aura text and tooltips page")
+check(hasHeader(byKey.auraAll, "Tooltips") and not hasHeader(byKey.auraAll, "Text"), "aura tooltips have their own tab and aura text has no separate font")
+local fontPaths = {}
+for _, spec in ipairs(byKey.plateText.controls) do
+    for _, path in ipairs(spec.paths or {}) do fontPaths[path] = true end
+end
+local strays = {}
+for _, section in ipairs(sections) do
+    for _, spec in ipairs(section.controls) do
+        if spec.path and spec.path:match("%.font$") or spec.path and spec.path:match("%.outline$") then strays[#strays + 1] = spec.path end
+    end
+end
+check(fontPaths["look.name.font"] and fontPaths["look.auras.outline"] and fontPaths["look.castbar.shadow"] and fontPaths["look.enemyPower.font"] and not fontPaths["look.enemyPower.shadow"], "All plate text sets the font, outline and shadow of every plate text")
+check(#strays == 0, "no page keeps its own plate font or outline" .. (#strays > 0 and (": " .. table.concat(strays, ", ")) or ""))
 for _, key in ipairs({ "auraMine", "auraCC", "auraPurge", "auraImportant" }) do
     check(hasHeader(byKey[key], "Show") and hasHeader(byKey[key], "Which auras") and hasHeader(byKey[key], "Layout") and hasHeader(byKey[key], "Icon"), key .. " uses the same Show, Which auras, Layout and Icon sections")
     check(not hasHeader(byKey[key], "Extras") and not hasHeader(byKey[key], "Aura text (all groups)"), key .. " has no leftover Extras or aura text sections")
@@ -287,7 +299,7 @@ check(foundOn("rename profile", "profiles") and foundOn("copy settings from", "p
 check(foundOn("export active profile", "profiles") and foundOn("activate after import", "profiles"), "export and import are searchable")
 check(foundOn("default profile", "profiles"), "Default profile is searchable")
 check(foundOn("no override", "profiles"), "automatic switching terms are searchable")
-check(foundOn("aura text", "auraAll"), "shared aura text is found on Aura text and tooltips")
+check(foundOn("aura tooltips", "auraAll") and foundOn("font outline", "plateText"), "aura tooltips and the shared font are searchable")
 check(foundOn("maximum aura duration", "auraPurge") and foundOn("sort order", "auraCC"), "shared aura controls are found on each aura page")
 check(foundOn("only warn for buffs you can remove", "shield") and foundOn("warning priority", "shield"), "buff warning controls are searchable")
 check(foundOn("hidden spells", "auraMine") and foundOn("allowed spells", "auraCC") and foundOn("hidden spells", "auraPurge") and foundOn("allowed spells", "auraImportant"), "spell lists are searchable on every aura page")

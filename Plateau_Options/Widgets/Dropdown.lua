@@ -324,7 +324,7 @@ function ns.Widgets.Dropdown(parent, spec)
 
     function row:Refresh()
         local value = Get()
-        local text = spec.unknown or tostring(value)
+        local text = type(spec.unknown) == "function" and spec.unknown(value) or spec.unknown or tostring(value)
         local icon
         for _, option in ipairs(Options()) do
             if option.value == value then
@@ -352,7 +352,7 @@ function ns.Widgets.Dropdown(parent, spec)
         end)
     end)
 
-    if not spec.get or spec.reset then
+    if not spec.get or spec.reset or spec.paths then
         Style.RightClickReset(labelHit, spec, RefreshEverything)
     end
 

@@ -727,7 +727,7 @@ local PAGE_GROUPS = {
     { label = "Plate", pages = {
         { key = "bar", title = "Health bar", parts = { "health" } },
         { key = "colors", title = "Colors", parts = { "healthColors", "threatColors" } },
-        { key = "text", title = "Text", parts = { "name", "healthText", "level" } },
+        { key = "text", title = "Text", parts = { "plateText", "name", "healthText", "level" } },
         { key = "castbar", title = "Cast bar", parts = { "castbar" } },
         { key = "auras", title = "Auras", tabs = { "auraMine", "auraCC", "auraPurge", "auraImportant", "shield", "auraAll" } },
         { key = "icons", title = "Icons", parts = { "raidMarker", "classification", "quest", "faction", "classPower", "enemyPower" } },
@@ -748,7 +748,7 @@ local PAGE_GROUPS = {
         { key = "help", title = "Help", parts = { "help" } },
     } },
 }
-local TAB_TITLES = { auraMine = "Your debuffs", auraImportant = "Important", shield = "Warnings", auraAll = "Text and tooltips" }
+local TAB_TITLES = { auraMine = "Your debuffs", auraImportant = "Important", shield = "Warnings", auraAll = "Tooltips" }
 
 local sectionsByKey = {}
 for _, section in ipairs(ns.sections) do

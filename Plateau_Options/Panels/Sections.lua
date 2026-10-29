@@ -340,14 +340,60 @@ end
 
 local function FontControls(path)
     return
-        { type = "Dropdown", path = path .. ".font", label = "Font", options = Fonts, unknown = "Custom font",
-          tooltip = "The typeface used for this text." },
         { type = "Slider", path = path .. ".size", label = "Font size", min = 6, max = 24,
-          tooltip = "How big the text is." },
-        { type = "Dropdown", path = path .. ".outline", label = "Font outline", options = OUTLINES,
+          tooltip = "How big the text is. The font, outline and shadow are set once for all plate text on the Text page." }
+end
+
+local function PlateText()
+    local groups = { "name", "enemyTarget", "healthText", "level", "castbar", "auras", "threatText", "forces", "enemyPower" }
+    local function Paths(field)
+        local list = {}
+        for _, group in ipairs(groups) do
+            if field ~= "shadow" or group ~= "enemyPower" then
+                list[#list + 1] = "look." .. group .. "." .. field
+            end
+        end
+        return list
+    end
+    local function Shared(field)
+        local paths = Paths(field)
+        local first = ns.Get(paths[1])
+        for i = 2, #paths do
+            if ns.Get(paths[i]) ~= first then return nil end
+        end
+        return first
+    end
+    local function SetAll(field, value)
+        local values = {}
+        for _, path in ipairs(Paths(field)) do
+            values[path] = value
+        end
+        Plateau.DB:SetMany(values)
+    end
+    local function Unknown(value)
+        return value == nil and "Mixed" or "Custom font"
+    end
+    local all = {}
+    for _, field in ipairs({ "font", "outline", "shadow" }) do
+        for _, path in ipairs(Paths(field)) do
+            all[#all + 1] = path
+        end
+    end
+    return all, {
+        { type = "Header", label = "Font", first = true },
+        { type = "Dropdown", label = "Font", options = Fonts, unknown = Unknown, paths = Paths("font"),
+          get = function() return Shared("font") end,
+          set = function(value) SetAll("font", value) end,
+          tooltip = "The typeface for every text on the nameplate: name, health, level, cast bar, auras and the rest. Mixed means they differ; picking one sets them all." },
+        { type = "Dropdown", label = "Font outline", options = OUTLINES, unknown = Unknown, paths = Paths("outline"),
+          get = function() return Shared("outline") end,
+          set = function(value) SetAll("outline", value) end,
           tooltip = "The dark edge drawn around each letter, to keep it readable over any background." },
-        { type = "Toggle", path = path .. ".shadow", label = "Text shadow",
+        { type = "Toggle", label = "Text shadow", paths = Paths("shadow"),
+          get = function() return Shared("shadow") == true end,
+          set = function(value) SetAll("shadow", value == true) end,
           tooltip = "Adds a soft dark shadow behind the text, on top of the outline." }
+    }
 end
 
 local THREAT_DISPLAY = {
@@ -1374,18 +1420,9 @@ local function AuraPage(key, title, path, groupKey, intro, introHeight, showLabe
     ))
 end
 
-local AURA_TEXT_PATHS = { "look.auras.font", "look.auras.outline", "look.auras.shadow", "look.auras.tooltips", "look.auras.tooltipsInCombat" }
-
 local function AuraTextControls()
     return List(
-        { type = "Note", label = "Settings shared by every aura group: the time and stack text on each icon, and tooltips.", height = 24 },
-        { type = "Header", label = "Text" },
-        { type = "Dropdown", path = "look.auras.font", label = "Font", options = Fonts, unknown = "Custom font",
-          tooltip = "The typeface for the time and stack text on every aura icon." },
-        { type = "Dropdown", path = "look.auras.outline", label = "Font outline", options = OUTLINES,
-          tooltip = "A dark edge around the aura text to keep it readable." },
-        { type = "Toggle", path = "look.auras.shadow", label = "Text shadow",
-          tooltip = "Adds a soft dark shadow behind the aura text." },
+        { type = "Note", label = "Shared by every aura group. The aura text uses the font set for all plate text on the Text page.", height = 24 },
         { type = "Header", label = "Tooltips" },
         { type = "Toggle", path = "look.auras.tooltips", label = "Show aura tooltips",
           tooltip = "Shows the aura's tooltip when you mouse over its icon. Clicking still targets the enemy." },
@@ -2080,7 +2117,7 @@ ns.sections = {
         { type = "ToggleColor", path = "look.healthText.executeColor", colorPath = "look.healthText.executeTextColor", label = "Execute range color",
           tooltip = "The text turns this color in execute range. The threshold is set on the Health bar page." }
     ), List(
-        { type = "Header", label = "Font" }
+        { type = "Header", label = "Text size" }
     ), GateList(HealthTextOn, TEXT_ON, FontControls("look.healthText")))),
 
     WithCVars(Section("name", "Name", { "look.name", "look.enemyTarget" }, Join(List(
@@ -2117,7 +2154,7 @@ ns.sections = {
         { type = "Toggle", path = "look.name.hideCasting", label = "Hide while casting",
           tooltip = "Hides an enemy's name while its cast bar is showing." }
     ), List(
-        { type = "Header", label = "Font" }
+        { type = "Header", label = "Text size" }
     ), GateList(NameOn, NAME_ON, FontControls("look.name")), List(
         { type = "Header", label = "Enemy target name" },
         { type = "Toggle", path = "look.enemyTarget.enabled", label = "Show enemy target name",
@@ -2170,7 +2207,7 @@ ns.sections = {
         { type = "Toggle", path = "look.level.hideInInstances", label = "Hide in dungeons and raids",
           tooltip = "Hides levels in dungeons and raids." }
     ), List(
-        { type = "Header", label = "Font" }
+        { type = "Header", label = "Text size" }
     ), GateList(LevelOn, LEVEL_ON, FontControls("look.level")))),
 
     Section("castbar", "Cast bar", "look.castbar", Join(List(
@@ -2298,7 +2335,7 @@ ns.sections = {
         Gate({ type = "Slider", path = "look.castbar.targetOffsetY", label = "Cast target vertical offset", min = -40, max = 40,
           tooltip = "Nudges the cast target's name down (negative) or up (positive)." }, On("look.castbar.showTarget"), "Turn on Show cast target to use this."),
 
-        { type = "Header", label = "Font" }
+        { type = "Header", label = "Text size" }
     ), List(FontControls("look.castbar")), List(
         { type = "Header", label = "Interrupted casts" },
         { type = "ToggleColor", path = "look.castbar.showInterrupter", colorPath = "look.castbar.interruptedColor", label = "Show interrupter name",
@@ -2352,7 +2389,7 @@ ns.sections = {
         { type = "Note", label = "Changes made in combat apply after combat ends.", height = 24 }
     )),
 
-    Section("auraAll", "Aura text and tooltips", AURA_TEXT_PATHS, AuraTextControls()),
+    Section("auraAll", "Aura tooltips", { "look.auras.tooltips", "look.auras.tooltipsInCombat" }, AuraTextControls()),
     AuraPage("auraMine", "Your debuffs", "look.auras.mine", "mine",
         "Shows your damage-over-time effects and other debuffs on enemies.", 24,
         "Show your debuffs", "Shows icons for your debuffs on the enemy. Crowd control you apply shows in the Crowd control group.",
@@ -2601,7 +2638,7 @@ ns.sections = {
               tooltip = "Color of the enemy forces text." }, On("look.forces.enabled"), "Turn on Show enemy forces to use this.")
         ),
         GateList(On("look.forces.enabled"), "Turn on Show enemy forces to use this.", Placement("look.forces")),
-        List({ type = "Header", label = "Font" }),
+        List({ type = "Header", label = "Text size" }),
         GateList(On("look.forces.enabled"), "Turn on Show enemy forces to use this.", FontControls("look.forces"))
     )),
 
@@ -2631,7 +2668,7 @@ ns.sections = {
               tooltip = "Color of the threat percent text." }, On("look.threatText.enabled"), "Turn on Show threat percent to use this.")
         ),
         GateList(On("look.threatText.enabled"), "Turn on Show threat percent to use this.", Placement("look.threatText")),
-        List({ type = "Header", label = "Font" }),
+        List({ type = "Header", label = "Text size" }),
         GateList(On("look.threatText.enabled"), "Turn on Show threat percent to use this.", FontControls("look.threatText"))
     )),
 
@@ -2680,12 +2717,8 @@ ns.sections = {
           tooltip = "How the power text is shown." },
         { type = "Dropdown", path = "look.enemyPower.textAnchor", label = "Text position", options = POWER_TEXT_ANCHORS,
           tooltip = "Where the text sits on the power bar." },
-        { type = "Dropdown", path = "look.enemyPower.font", label = "Font", options = Fonts, unknown = "Custom font",
-          tooltip = "Font of the power text." },
         { type = "Slider", path = "look.enemyPower.textSize", label = "Font size", min = 6, max = 20,
-          tooltip = "Size of the power text." },
-        { type = "Dropdown", path = "look.enemyPower.outline", label = "Font outline", options = OUTLINES,
-          tooltip = "The dark edge drawn around each letter, to keep it readable over any background." }
+          tooltip = "Size of the power text." }
     ))),
 
     Section("classPower", "Class resource", "look.classPower", Join(
@@ -2845,6 +2878,11 @@ ns.sections = {
         ),
     },
 }
+
+do
+    local paths, controls = PlateText()
+    table.insert(ns.sections, 1, Section("plateText", "All plate text", paths, controls))
+end
 
 local MAINLINE_ONLY = { forces = true }
 if Plateau.flavor == "forever" then
