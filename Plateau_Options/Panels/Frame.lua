@@ -1262,6 +1262,11 @@ function frame:Toggle()
     self:SetShown(not self:IsShown())
 end
 
+function frame:OpenSection(key)
+    self:Show()
+    ns.SelectSection(key)
+end
+
 local flash = CreateFrame("Frame", nil, frame)
 flash:SetFrameLevel(frame:GetFrameLevel() + 60)
 Style.Border(flash, C.accent)
@@ -1394,7 +1399,6 @@ local placeholder = Style.Text(box, 12, C.faint)
 placeholder:SetPoint("LEFT", 7, 0)
 placeholder:SetText("Search")
 
-ns.tour = { window = frame, menu = rail, search = box, profile = profileButton, minimize = closeX }
 
 local results = CreateFrame("Frame", nil, frame)
 results:SetFrameLevel(frame:GetFrameLevel() + 300)

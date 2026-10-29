@@ -4,7 +4,7 @@ ns.helpTopics = {
     {
         category = "Getting started",
         title = "How Plateau works",
-        keywords = "overview basics start intro what is minimize profile",
+        keywords = "overview basics start intro what is profile",
         text = "Plateau replaces the way enemy nameplates look: the health bar, name, cast bar, auras and icons. Everything is drawn by Plateau, but the game still decides what is shown, so it keeps working in dungeons and raids.\n\nThis window has three parts. The preview at the top shows a sample nameplate that updates as you change things. The menu on the left lists a page for each part of the nameplate, grouped by what they do. The page on the right holds that part's settings.\n\nEvery change saves right away. There is no Apply or Save button. Settings live in a profile: each character has a default profile, and the active profile is the one you are editing.",
     },
     {
@@ -30,12 +30,6 @@ ns.helpTopics = {
         title = "Undo and redo",
         keywords = "undo redo history revert mistake back",
         text = "Undo and Redo are at the top right of the preview. Every change you make is remembered, and the list names each one, for example Height, Moved Raid target icon or Look: Clean and flat.\n\nClick Undo to step back one change. Open the list beside it to jump back several changes at once. Redo brings back what you undid, until you make a new change.\n\nUndo only tracks what you do while this window or the setup is open. It keeps the last 20 changes, and it also covers Blizzard's nameplate settings on every page. Switching profiles clears the list.",
-    },
-    {
-        category = "Getting started",
-        title = "The minimized bar",
-        keywords = "minimize restore bar small compact profile performance close hide",
-        text = "Minimize turns this window into a small bar with the Plateau icon and your active profile. The bar's top-right corner stays where the window's was. Click the icon, the name or Restore to bring the full window back exactly as it was. The x hides the settings; it never turns Plateau off.\n\nClick the profile name on the bar to pick a different profile without restoring the window. Hover the profile to see the default profile, why an automatic override is active, and any switch waiting for combat to end. Drag the bar anywhere else to move it.",
     },
     {
         category = "Getting started",
@@ -291,10 +285,21 @@ local C = Style.colors
 local controls = {
     { type = "Note", label = "Every feature of Plateau is explained below. On this page, search finds help topics only.", height = 24 },
     { type = "Actions", buttons = {
-        { label = "Replay the tour", width = 150, click = function() if ns.StartTour then ns.StartTour() end end },
         { label = "Run first-time setup", width = 170, click = function() if PlateauSetup then PlateauSetup:Open() end end },
     } },
 }
+
+for i, entry in ipairs(ns.changelog or {}) do
+    controls[#controls + 1] = { type = "Header", label = Style.T("What's new in %s"):format(entry.version), collapsible = i > 1, collapsed = i > 1, keywords = "changelog changes update patch notes version whatsnew" }
+    for _, part in ipairs(entry.sections) do
+        if part.title then
+            controls[#controls + 1] = { type = "Note", label = part.title, size = 14, bright = true, padTop = 8 }
+        end
+        for _, item in ipairs(part.items) do
+            controls[#controls + 1] = { type = "Note", label = "- " .. item, size = 12, bright = true }
+        end
+    end
+end
 
 local category
 for _, topic in ipairs(ns.helpTopics) do

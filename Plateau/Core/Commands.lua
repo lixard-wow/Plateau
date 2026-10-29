@@ -162,40 +162,24 @@ local function OpenLocalePicker()
     end
 end
 
-local whatsNewWatcher = CreateFrame("Frame")
-local pendingSince
-
-local function OpenWhatsNew(since)
-    if InCombatLockdown() then
-        pendingSince = since or false
-        whatsNewWatcher:RegisterEvent("PLAYER_REGEN_ENABLED")
-        return
-    end
+local function OpenWhatsNew()
     ns.WarmThemeFonts()
     local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
-    if loaded and PlateauWhatsNew and PlateauWhatsNew.Open then
-        PlateauWhatsNew:Open(since)
+    if loaded and PlateauOptions and PlateauOptions.OpenSection then
+        PlateauOptions:OpenSection("help")
     elseif not loaded then
-        Say(L["Couldn't open what's new: %s"]:format(tostring(reason)))
+        Say(L["Couldn't open settings: %s"]:format(tostring(reason)))
     end
 end
-
-whatsNewWatcher:SetScript("OnEvent", function(self)
-    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-    local since = pendingSince
-    pendingSince = nil
-    OpenWhatsNew(since or nil)
-end)
 
 local function CheckWhatsNew()
     local global = ns.DB.saved.global
     local seen = global.lastSeenVersion
     if seen == ns.version or ns.version == "dev" then return end
-    if global.whatsNewOff then
-        global.lastSeenVersion = ns.version
-        return
+    global.lastSeenVersion = ns.version
+    if seen and not global.whatsNewOff then
+        Say(L["Updated to %s. Type /plt whatsnew to see what changed."]:format(ns.version))
     end
-    OpenWhatsNew(seen or "latest")
 end
 
 local NEW_USER_CVARS = { UnitNameNonCombatCreatureName = "1" }
@@ -238,7 +222,7 @@ local function Help()
     Say(L["Commands:"])
     print("  " .. L["/plt - open the settings"])
     print("  " .. L["/plt setup - pick a ready-made look"])
-    print("  " .. L["/plt whatsnew - show the changes in each version"])
+    print("  " .. L["/plt whatsnew - open the changes on the Help page"])
     print("  " .. L["/plt minimap - show or hide the minimap button"])
     print("  " .. L["/plt debug - version, profile and target details for bug reports"])
     print("  " .. L["/plt debug locale - preview a translation, or show translatable text in [[brackets]]"])
@@ -414,7 +398,7 @@ SlashCmdList.PLATEAU = function(input)
     elseif command == "setup" then
         OpenSetup()
     elseif command == "whatsnew" or command == "changelog" then
-        OpenWhatsNew(nil)
+        OpenWhatsNew()
     elseif command == "minimap" and ns.Minimap then
         local shown = not ns.Minimap:IsShown()
         ns.Minimap:SetShown(shown)

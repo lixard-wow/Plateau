@@ -697,7 +697,6 @@ function ns.SetPreviewSection(key, parts, title)
     end
 end
 
-ns.tour.preview, ns.tour.undo, ns.tour.snap = panel, undoButton, snapButton
 
 ns.RefreshPreviewEditing = UpdateHotspots
 

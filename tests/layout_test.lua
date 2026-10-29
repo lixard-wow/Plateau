@@ -349,7 +349,7 @@ for _, topic in ipairs(helpTopics) do
     check(type(topic.title) == "string" and type(topic.text) == "string" and type(topic.category) == "string", "Help topic " .. tostring(topic.title) .. " has a title, category and text")
     titles[topic.title] = true
 end
-check(titles["The minimized bar"] and titles["Dimmed settings and collapsed sections"], "the new Help topics exist")
+check(titles["Dimmed settings and collapsed sections"] and not titles["The minimized bar"], "the Help topics match the window (no minimized bar)")
 
 local function hasPath(key, path)
     return paths(byKey[key])[path] == true
