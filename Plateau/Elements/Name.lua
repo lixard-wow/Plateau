@@ -363,7 +363,7 @@ cvarWatcher:SetScript("OnEvent", function(_, event, name)
     if value ~= friendlyClassColors or realms ~= friendlyRealmNames then
         friendlyClassColors = value
         friendlyRealmNames = realms
-        ns.Driver:RequestRestyle(false, "friendly name settings")
+        ns.Driver:RequestRestyle(false)
     end
 end)
 

@@ -491,7 +491,7 @@ local function Refresh()
     UpdateRole()
     ReadInstance()
     if cfgs.enemy and (wasTank ~= isTank or wasInInstance ~= inInstance or wasInRaid ~= inRaid) then
-        ns.Driver:RequestRestyle(true, "role or instance changed")
+        ns.Driver:RequestRestyle(true)
     end
 end
 
@@ -514,7 +514,7 @@ UnitColors:SetScript("OnEvent", function(_, event)
     end
     if event == "PLAYER_LEVEL_UP" then
         if cfgs.enemy then
-            ns.Driver:RequestRestyle(true, "level up")
+            ns.Driver:RequestRestyle(true)
         end
         return
     end

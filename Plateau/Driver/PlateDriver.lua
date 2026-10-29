@@ -1230,28 +1230,17 @@ restyleQueue:SetScript("OnUpdate", function(self)
 end)
 
 local restyleAfterCombat = false
-local pendingReasons = {}
-local deferredReasons = {}
 
-function Driver:RequestRestyle(background, reason)
-    reason = reason or "other"
+function Driver:RequestRestyle(background)
     if background and InCombatLockdown() then
         restyleAfterCombat = true
-        deferredReasons[reason] = true
         return
     end
-    pendingReasons[reason] = true
     restyleQueue:Show()
 end
 
-function Driver:Restyle(reason)
+function Driver:Restyle()
     restyleQueue:Hide()
-    if reason then
-        pendingReasons[reason] = true
-    end
-    for key in pairs(pendingReasons) do
-        pendingReasons[key] = nil
-    end
     views = ns.DB.views
     dimAlpha = views.enemy.target.dimOthers
     ns.pixelPerfect = views.enemy.plate.pixelPerfect ~= false
@@ -1432,10 +1421,6 @@ Driver:SetScript("OnEvent", function(_, event, arg)
     if ns.disabled then return end
     if event == "PLAYER_REGEN_ENABLED" and restyleAfterCombat then
         restyleAfterCombat = false
-        for key in pairs(deferredReasons) do
-            pendingReasons[key] = true
-            deferredReasons[key] = nil
-        end
         restyleQueue:Show()
     end
     if event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
@@ -1459,7 +1444,7 @@ Driver:SetScript("OnEvent", function(_, event, arg)
     end
     if event == "CVAR_UPDATE" then
         if arg == SIMPLIFIED_CVAR then
-            Driver:RequestRestyle(false, "simplified plates setting")
+            Driver:RequestRestyle(false)
         end
     elseif event == "PLAYER_REGEN_ENABLED" then
         if hitTestPending then

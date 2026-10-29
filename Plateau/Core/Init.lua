@@ -89,6 +89,6 @@ loader:SetScript("OnEvent", function(self, event, name)
         ns.ApplyLocale(ns.DB.saved.global.previewLocale)
         ns.SetPseudoLocale(ns.DB.saved.global.pseudoLocale == true)
         ns.ApplyRealmMarker()
-        ns.Driver:Restyle("addon loaded")
+        ns.Driver:Restyle()
     end
 end)
