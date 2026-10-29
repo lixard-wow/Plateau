@@ -225,7 +225,6 @@ local function Help()
     print("  " .. L["/plt whatsnew - open the changes on the Help page"])
     print("  " .. L["/plt minimap - show or hide the minimap button"])
     print("  " .. L["/plt debug - version, profile and target details for bug reports"])
-    print("  " .. L["/plt debug locale - preview a translation, or show translatable text in [[brackets]]"])
     print("  " .. L["/plt reset - reset the active profile"])
     print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
 end
