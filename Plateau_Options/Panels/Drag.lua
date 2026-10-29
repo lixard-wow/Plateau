@@ -419,6 +419,13 @@ function Stop(spec)
     driver:Hide()
     snapCandidates = {}
 
+    local off = Drag.TrayDrop(spec)
+    if off then
+        Apply(off)
+        Settle(spec)
+        return
+    end
+
     if spec.Place and not Snapping() then
         local mover = spec.Mover()
         local left, right, top, bottom = mover:GetLeft(), mover:GetRight(), mover:GetTop(), mover:GetBottom()
@@ -1207,4 +1214,43 @@ end
 
 function Drag.IsDragging()
     return active ~= nil
+end
+
+function Drag.Active()
+    return active
+end
+
+local dropZone
+
+function Drag.SetDropZone(frame)
+    dropZone = frame
+end
+
+function Drag.OverTray(spec)
+    local spot = spec and spec.spot
+    return spot ~= nil and spot.trayOff ~= nil and dropZone ~= nil and dropZone:IsVisible() and dropZone:IsMouseOver()
+end
+
+function Drag.TrayDrop(spec)
+    if not Drag.OverTray(spec) then return nil end
+    local values = {}
+    for path, value in pairs(spec.spot.trayOff) do
+        values[path] = value
+    end
+    return values
+end
+
+function Drag.Enable(values)
+    Apply(values)
+end
+
+function Drag.Grab(spec, spot)
+    pressed = nil
+    lastDragged = false
+    spec.spot = spot
+    Start(spec)
+    if active == spec then
+        spec.grabX, spec.grabY = 0, 0
+    end
+    return active == spec
 end

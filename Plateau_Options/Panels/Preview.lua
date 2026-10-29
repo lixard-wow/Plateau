@@ -5,7 +5,7 @@ local C = Style.colors
 local layout = ns.layout
 
 local PLATE_SCALE = 1.5
-local HINT = "Click a part to edit it. Drag to move it; hold Shift to place it freely. Arrow keys move it 1 px, with Shift 10 px."
+local HINT = "Click a part to edit it. Drag to move it, or drag it to Turned off to hide it. Shift places it freely; arrow keys move it 1 px, with Shift 10 px."
 
 local sectionKey, editingTitle
 local here = {}
@@ -501,6 +501,8 @@ local function UpdateEditing()
     end
 end
 
+local RefreshTray
+
 local function UpdateHotspots()
     if not panel:IsVisible() then return end
     for _, spot in ipairs(spots) do
@@ -509,6 +511,9 @@ local function UpdateHotspots()
         spot:SetShown(visible)
     end
     UpdateEditing()
+    if RefreshTray then
+        RefreshTray()
+    end
 end
 
 local holder = CreateFrame("Frame", nil, panel)
@@ -596,8 +601,8 @@ local function ApplySample()
     sample.raidMarker = On("look.raidMarker.enabled") and baseMarker or nil
     sample.quest = On("look.quest.enabled") and baseQuest or nil
     sample.classPower = On("look.classPower.enabled")
-    sample.showFaction = here.faction
-    sample.showKickers = here.kickers
+    sample.showFaction = here.faction or On("look.faction.enabled")
+    sample.showKickers = here.kickers or On("look.kickers.enabled")
     sample.enemyPower = On("look.enemyPower.enabled")
     sample.forces = (On("look.forces.enabled") and Plateau.flavor ~= "forever") and baseForces or nil
     local auras = {}
@@ -741,6 +746,240 @@ function ns.SetPreviewFocus(key)
         UpdateEditing()
     end
 end
+
+local TRAY_WIDTH, TILE_HEIGHT, TILE_GAP, TRAY_PAD, TRAY_HEAD = 164, 18, 3, 6, 16
+local SKULL = { 0.75, 1, 0.25, 0.5 }
+
+local tray = CreateFrame("Frame", nil, panel)
+tray:SetPoint("TOPRIGHT", -8, -8)
+tray:SetPoint("BOTTOMRIGHT", -8, 8)
+tray:SetWidth(TRAY_WIDTH)
+tray:SetFrameLevel(panel:GetFrameLevel() + 185)
+tray:EnableMouse(true)
+local trayFill = Style.Fill(tray, C.window)
+Style.Paint(trayFill, C.window, 0.85)
+local trayBorder = CreateFrame("Frame", nil, tray)
+trayBorder:SetAllPoints()
+Style.Border(trayBorder, C.edge)
+tray.title = Style.Text(tray, 10, C.muted)
+tray.title:SetPoint("TOPLEFT", TRAY_PAD, -TRAY_PAD)
+tray.title:SetPoint("TOPRIGHT", -TRAY_PAD, -TRAY_PAD)
+tray.title:SetText("Turned off")
+tray.empty = Style.Text(tray, 10, C.faint)
+tray.empty:SetPoint("TOPLEFT", tray.title, "BOTTOMLEFT", 0, -8)
+tray.empty:SetPoint("RIGHT", -TRAY_PAD, 0)
+tray.empty:SetWordWrap(true)
+tray.empty:SetText("Everything is on the plate. Drag a part here to turn it off.")
+Style.Tooltip(tray, { label = "Turned off", tooltip = "Parts that are turned off wait here. Drag one onto the plate to turn it on, or drag a part from the plate here to turn it off. Click one to open its settings." })
+ns.Drag.SetDropZone(tray)
+
+hint:ClearAllPoints()
+hint:SetPoint("BOTTOMLEFT", layout.pad, 10)
+hint:SetPoint("BOTTOMRIGHT", -(TRAY_WIDTH + 16), 10)
+
+local TRAY = {
+    { label = "Name", section = "name", region = plate.name, paths = { "look.name.enabled" }, text = "Name" },
+    { label = "Health text", section = "healthText", region = plate.healthText, paths = { "look.healthText.enabled" }, text = "84%" },
+    { label = "Level", section = "level", region = plate.level, paths = { "look.level.enabled" }, text = "81" },
+    { label = "Enemy target", section = "name", region = plate.enemyTarget, paths = { "look.enemyTarget.enabled" }, text = "Tar" },
+    { label = "Threat", section = "threatText", region = plate.threatText, paths = { "look.threatText.enabled" }, text = "99" },
+    { label = "Raid icon", section = "raidMarker", region = plate.raidMarker, paths = { "look.raidMarker.enabled" }, texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons", coords = SKULL },
+    { label = "Elite icon", section = "classification", region = plate.classification, paths = { "look.classification.enabled" }, atlas = "nameplates-icon-elite-gold" },
+    { label = "Quest icon", section = "quest", region = plate.quest, paths = { "look.quest.enabled" }, atlas = "QuestNormal" },
+    { label = "Quest count", section = "quest", region = plate.questProgress, paths = { "look.quest.enabled", "look.quest.showProgress" }, text = "3/8" },
+    { label = "Faction", section = "faction", region = plate.faction, paths = { "look.faction.enabled" }, atlas = "UI-HUD-UnitFrame-Player-PVP-AllianceIcon" },
+    { label = "Kickers", section = "kickers", region = plate.kickHolder, paths = { "look.kickers.enabled" }, texture = "Interface\\Icons\\Ability_Kick" },
+    { label = "Enemy forces", section = "forces", region = plate.forces, paths = { "look.forces.enabled" }, text = "0.8", retail = true },
+    { label = "Enemy power", section = "enemyPower", region = plate.enemyPowerBar, paths = { "look.enemyPower.enabled" }, bar = { 0.2, 0.45, 1 } },
+    { label = "Class resource", section = "classPower", region = plate.classPower, paths = { "look.classPower.enabled" }, bar = { 1, 0.84, 0.3 } },
+    { label = "Spell icon", section = "castbar", region = plate.castbar.icon, paths = { "look.castbar.showIcon" }, texture = "Interface\\Icons\\Spell_Shadow_ShadowBolt" },
+    { label = "Cast target", section = "castbar", region = plate.castbar.target, paths = { "look.castbar.showTarget" }, text = "You" },
+    { label = "Cast time", section = "castbar", region = plate.castbar.timer, paths = { "look.castbar.showTimer" }, text = "1.2" },
+    { label = "Your debuffs", section = "auraMine", aura = "mine", paths = { "look.auras.enabled", "look.auras.mine.enabled" }, texture = "Interface\\Icons\\Spell_Shadow_ShadowWordPain" },
+    { label = "Crowd control", section = "auraCC", aura = "cc", paths = { "look.auras.enabled", "look.auras.cc.enabled" }, texture = "Interface\\Icons\\Spell_Nature_Polymorph" },
+    { label = "Enemy buffs", section = "auraPurge", aura = "purge", paths = { "look.auras.enabled", "look.auras.purge.enabled" }, texture = "Interface\\Icons\\Spell_Holy_PowerWordShield" },
+    { label = "Important", section = "auraImportant", aura = "important", paths = { "look.auras.enabled", "look.auras.important.enabled" }, texture = "Interface\\Icons\\Spell_Nature_LightningShield" },
+}
+ns.previewTray = TRAY
+
+local function TrayRegion(item)
+    if item.aura then
+        return plate.fakeAuras and plate.fakeAuras[item.aura]
+    end
+    return item.region
+end
+
+local function TraySpot(item)
+    local region = TrayRegion(item)
+    if not region then return nil end
+    for _, spot in ipairs(spots) do
+        if (spot.snapTarget or spot.region) == region and spot.drag then
+            return spot
+        end
+    end
+end
+
+local function ItemOn(item)
+    for _, path in ipairs(item.paths) do
+        if not On(path) then
+            return false
+        end
+    end
+    return true
+end
+
+for _, item in ipairs(TRAY) do
+    local spot = TraySpot(item)
+    if spot then
+        spot.trayOff = { [item.paths[#item.paths]] = false }
+    end
+end
+
+local function Glyph(tile, item, size)
+    local glyph
+    if item.text then
+        glyph = Style.Text(tile, 9, C.text, "CENTER")
+        glyph:SetText(item.text)
+        glyph:SetWidth(size + 8)
+    elseif item.bar then
+        glyph = tile:CreateTexture(nil, "ARTWORK")
+        glyph:SetColorTexture(item.bar[1], item.bar[2], item.bar[3], 1)
+        glyph:SetSize(size, math.max(3, math.floor(size / 4)))
+    else
+        glyph = tile:CreateTexture(nil, "ARTWORK")
+        if item.atlas then
+            glyph:SetAtlas(item.atlas)
+        else
+            glyph:SetTexture(item.texture)
+            if item.coords then
+                glyph:SetTexCoord(unpack(item.coords))
+            else
+                glyph:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+            end
+        end
+        glyph:SetSize(size, size)
+    end
+    return glyph
+end
+
+local pressedTile
+
+local function GrabFromTray(item)
+    local values = {}
+    for _, path in ipairs(item.paths) do
+        values[path] = true
+    end
+    ns.Drag.Enable(values)
+    Plateau.RestyleNow()
+    PreviewChanged()
+    local spot = TraySpot(item)
+    if spot and spot:IsShown() and ns.Drag.Grab(spot.drag, spot) then
+        SetHovered(spot)
+        return
+    end
+    ns.SelectSection(item.section)
+end
+
+local function MakeTile(item)
+    local tile = CreateFrame("Button", nil, tray)
+    tile:SetFrameLevel(tray:GetFrameLevel() + 2)
+    tile.fill = Style.Fill(tile, C.hover)
+    tile.full = Glyph(tile, item, 12)
+    tile.full:SetPoint("CENTER", tile, "LEFT", 11, 0)
+    tile.label = Style.Text(tile, 10, C.text)
+    tile.label:SetPoint("LEFT", 22, 0)
+    tile.label:SetPoint("RIGHT", -2, 0)
+    tile.label:SetText(item.label)
+    tile.small = Glyph(tile, item, 14)
+    tile.small:SetPoint("CENTER")
+    tile:HookScript("OnEnter", function(self)
+        Style.Paint(self.fill, C.buttonHover)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:SetText(Style.T(item.label), 1, 1, 1)
+        GameTooltip:AddLine(Style.T("Drag onto the plate to turn it on. Click to open its settings."), 0.7, 0.7, 0.7, true)
+        GameTooltip:Show()
+    end)
+    tile:HookScript("OnLeave", function(self)
+        Style.Paint(self.fill, C.hover)
+        GameTooltip:Hide()
+    end)
+    tile:SetScript("OnMouseDown", function(_, button)
+        if button ~= "LeftButton" then return end
+        local x, y = GetCursorPosition()
+        pressedTile = { item = item, x = x, y = y }
+    end)
+    tile:SetScript("OnClick", function()
+        if pressedTile and pressedTile.item == item then
+            pressedTile = nil
+            ns.SelectSection(item.section)
+        end
+    end)
+    tile:SetScript("OnUpdate", function()
+        local press = pressedTile
+        if not press or press.item ~= item then return end
+        if not IsMouseButtonDown("LeftButton") then
+            pressedTile = nil
+            return
+        end
+        local x, y = GetCursorPosition()
+        if math.abs(x - press.x) + math.abs(y - press.y) >= 4 * UIParent:GetEffectiveScale() then
+            pressedTile = nil
+            GameTooltip:Hide()
+            GrabFromTray(item)
+        end
+    end)
+    return tile
+end
+
+for _, item in ipairs(TRAY) do
+    item.tile = MakeTile(item)
+end
+
+function RefreshTray()
+    if here.friendly then
+        tray:Hide()
+        return
+    end
+    tray:Show()
+    local off = {}
+    for _, item in ipairs(TRAY) do
+        local available = not (item.retail and Plateau.flavor == "forever")
+        if available and not ItemOn(item) then
+            off[#off + 1] = item
+        end
+        item.tile:Hide()
+    end
+    tray.empty:SetShown(#off == 0)
+    local inner = TRAY_WIDTH - TRAY_PAD * 2
+    local room = (tray:GetHeight() or 0) - TRAY_PAD * 2 - TRAY_HEAD
+    local rows = math.max(1, math.floor((room + TILE_GAP) / (TILE_HEIGHT + TILE_GAP)))
+    local compact = #off > rows * 2
+    local columns = compact and 6 or 2
+    local width = math.floor((inner - TILE_GAP * (columns - 1)) / columns)
+    local height = compact and width or TILE_HEIGHT
+    for i, item in ipairs(off) do
+        local tile = item.tile
+        local column, row = (i - 1) % columns, math.floor((i - 1) / columns)
+        tile:ClearAllPoints()
+        tile:SetPoint("TOPLEFT", tray, "TOPLEFT", TRAY_PAD + column * (width + TILE_GAP), -(TRAY_PAD + TRAY_HEAD + row * (height + TILE_GAP)))
+        tile:SetSize(width, height)
+        tile.full:SetShown(not compact)
+        tile.label:SetShown(not compact)
+        tile.small:SetShown(compact)
+        tile:Show()
+    end
+end
+
+tray:SetScript("OnUpdate", function()
+    local over = ns.Drag.OverTray(ns.Drag.Active())
+    if over ~= tray.over then
+        tray.over = over
+        Style.Paint(trayFill, over and C.hover or C.window, 0.85)
+        Style.SetBorderColor(trayBorder, over and C.accent or C.edge)
+    end
+end)
+tray:SetScript("OnSizeChanged", function() RefreshTray() end)
+RefreshTray()
 
 Plateau.OnRestyle(UpdateHotspots)
 panel:SetScript("OnShow", UpdateHotspots)
