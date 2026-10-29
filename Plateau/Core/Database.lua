@@ -95,6 +95,14 @@ local RETIRED_QUEST_ICONS = {
     ["QuestBonusObjective"] = "QuestObjective",
 }
 
+local function ForEachLook(db, fix)
+    for _, profile in pairs(db.profiles or {}) do
+        if type(profile) == "table" then
+            fix(profile.look)
+        end
+    end
+end
+
 local migrations = {
     [28] = function(db)
         local function Clear(look)
@@ -103,11 +111,7 @@ local migrations = {
                 scaling.castFront, scaling.importantFront, scaling.mouseoverFront = nil, nil, nil
             end
         end
-        for _, profile in pairs(db.profiles or {}) do
-            if type(profile) == "table" then
-                Clear(profile.look)
-            end
-        end
+        ForEachLook(db, Clear)
     end,
     [27] = function(db)
         local function Clear(look)
@@ -116,11 +120,7 @@ local migrations = {
                 health.desaturate = nil
             end
         end
-        for _, profile in pairs(db.profiles or {}) do
-            if type(profile) == "table" then
-                Clear(profile.look)
-            end
-        end
+        ForEachLook(db, Clear)
     end,
     [26] = function(db)
         for _, profile in pairs(db.profiles or {}) do
@@ -141,11 +141,7 @@ local migrations = {
                 end
             end
         end
-        for _, profile in pairs(db.profiles or {}) do
-            if type(profile) == "table" then
-                Reset(profile.look)
-            end
-        end
+        ForEachLook(db, Reset)
     end,
     [24] = function(db)
         if type(db.global) == "table" then
@@ -183,11 +179,7 @@ local migrations = {
                 castbar.interruptible, castbar.channelColor = nil, nil
             end
         end
-        for _, profile in pairs(db.profiles or {}) do
-            if type(profile) == "table" then
-                Clear(profile.look)
-            end
-        end
+        ForEachLook(db, Clear)
     end,
     [19] = function(db)
         for name, profile in pairs(db.profiles or {}) do
@@ -209,11 +201,7 @@ local migrations = {
         end
     end,
     [16] = function(db)
-        for _, profile in pairs(db.profiles or {}) do
-            if type(profile) == "table" then
-                MigrateLayering(profile.look)
-            end
-        end
+        ForEachLook(db, MigrateLayering)
     end,
     [15] = function(db)
         for _, profile in pairs(db.profiles or {}) do
