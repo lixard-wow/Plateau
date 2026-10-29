@@ -9,6 +9,7 @@ local HINT = "Click a part to edit it. Drag to move it; hold Shift to place it f
 
 local sectionKey, editingTitle
 local here = {}
+local focus
 
 local STATE_NOTES = {
     target = "The preview plate is shown as your target.",
@@ -448,15 +449,22 @@ end
 
 local function UpdateEditing()
     local boxes, scale = {}, nil
-    if sectionKey then
+    local function Collect(only)
         for _, spot in ipairs(spots) do
-            if spot:IsShown() and here[Resolve(spot.sectionKey)] then
+            local key = Resolve(spot.sectionKey)
+            if spot:IsShown() and here[key] and (not only or only == key) then
                 local l, r, t, b = Bounds(spot)
                 if l then
                     scale = spot:GetEffectiveScale()
                     boxes[#boxes + 1] = { l, r, t, b }
                 end
             end
+        end
+    end
+    if sectionKey then
+        Collect(focus)
+        if focus and #boxes == 0 then
+            Collect(nil)
         end
     end
     local merged = true
@@ -685,6 +693,7 @@ function ns.SetPreviewSection(key, parts, title)
     end
     sectionKey = key
     here = parts or { [key] = true }
+    focus = nil
     editingTitle = title
     ApplySample()
     Plateau.SetPreviewState(plate, here.friendly and friendlySample or sample)
@@ -699,6 +708,14 @@ end
 
 
 ns.RefreshPreviewEditing = UpdateHotspots
+
+function ns.SetPreviewFocus(key)
+    if key == focus then return end
+    focus = key
+    if panel:IsVisible() then
+        UpdateEditing()
+    end
+end
 
 Plateau.OnRestyle(UpdateHotspots)
 panel:SetScript("OnShow", UpdateHotspots)

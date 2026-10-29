@@ -701,7 +701,8 @@ local function BuildPage(section)
             width = COLUMN
         end
         widget:SetWidth(width)
-        page.rows[index] = { widget = widget, spec = spec, y = 0, wide = wide, naturalHeight = widget:GetHeight(), group = groups[index] }
+        page.rows[index] = { widget = widget, spec = spec, y = 0, wide = wide, naturalHeight = widget:GetHeight(), group = groups[index],
+            part = section.partOf and section.partOf[index] or section.key }
     end
 
     page.blocks = {}
@@ -808,13 +809,16 @@ local function PageFrom(def)
         return page
     end
     local controls, single = {}, #parts == 1
+    page.partOf = {}
     for _, part in ipairs(parts) do
         if not single then
             controls[#controls + 1] = { type = "Header", label = part.title, part = true }
+            page.partOf[#controls] = part.key
         end
         partPage[part.key] = { page = page, offset = #controls, start = not single and #controls or nil }
         for _, spec in ipairs(part.controls) do
             controls[#controls + 1] = spec
+            page.partOf[#controls] = part.key
         end
         page.noReset = page.noReset or part.noReset
         page.resetAll = page.resetAll or part.resetAll
@@ -974,6 +978,27 @@ function Select(page, tab)
         ns.UpdatePickButtons(shown)
     end
 end
+
+local hoverWatch = CreateFrame("Frame", nil, frame)
+local hoverWait = 0
+hoverWatch:SetScript("OnUpdate", function(_, elapsed)
+    hoverWait = hoverWait - elapsed
+    if hoverWait > 0 then return end
+    hoverWait = 0.1
+    if not ns.SetPreviewFocus then return end
+    local part
+    local view = shown and pages[shown.key]
+    if view and scroll:IsMouseOver() then
+        for _, row in ipairs(view.rows) do
+            if row.widget:IsShown() and row.widget:IsMouseOver() then
+                part = row.part
+                break
+            end
+        end
+        if not part then return end
+    end
+    ns.SetPreviewFocus(part)
+end)
 
 local RAIL_ROW = 22
 local RAIL_LABEL = 22
