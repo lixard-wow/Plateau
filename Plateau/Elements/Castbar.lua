@@ -551,14 +551,14 @@ function Castbar:Style(plate, db)
         pair.name:SetPoint("LEFT", bar, "CENTER", x, 0)
         pair.target:ClearAllPoints()
         pair.target:SetPoint("RIGHT", bar, "CENTER", x, 0)
-        target.slPlaceAnchor = nil
+        target.plPlaceAnchor = nil
         target:ClearAllPoints()
         target:SetPoint("LEFT", pair.span, "CENTER", pair.gap / 2, db.targetOffsetY)
         target:SetJustifyH("LEFT")
         SyncCenteredPair(bar)
     elseif db.targetPosition == "AFTERNAME" then
         local target = bar.target
-        target.slPlaceAnchor = nil
+        target.plPlaceAnchor = nil
         target:ClearAllPoints()
         target:SetPoint("LEFT", bar.text, "RIGHT", 4 + db.targetOffsetX, db.targetOffsetY)
         target:SetJustifyH("LEFT")
@@ -572,7 +572,7 @@ function Castbar:Style(plate, db)
     ns.ApplyShadow(interruptText, db.shadow)
     local hit = db.interruptTextColor
     interruptText:SetTextColor(hit[1], hit[2], hit[3], hit[4])
-    interruptText.slPlaceAnchor = nil
+    interruptText.plPlaceAnchor = nil
     interruptText:ClearAllPoints()
     local x, y = db.interruptOffsetX, db.interruptOffsetY
     if db.interruptPosition == "SPELL" then

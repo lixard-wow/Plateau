@@ -33,22 +33,22 @@ ns.textPositions = {
 }
 
 function ns.PlaceIcon(region, anchor, key, gap, x, y)
-    if region.slPlaceAnchor == anchor and region.slPlaceKey == key and region.slPlaceGap == gap
-        and region.slPlaceX == x and region.slPlaceY == y then
+    if region.plPlaceAnchor == anchor and region.plPlaceKey == key and region.plPlaceGap == gap
+        and region.plPlaceX == x and region.plPlaceY == y then
         return
     end
-    region.slPlaceAnchor, region.slPlaceKey, region.slPlaceGap, region.slPlaceX, region.slPlaceY = anchor, key, gap, x, y
+    region.plPlaceAnchor, region.plPlaceKey, region.plPlaceGap, region.plPlaceX, region.plPlaceY = anchor, key, gap, x, y
     local position = ns.iconPositions[key] or ns.iconPositions.LEFT
     region:ClearAllPoints()
     region:SetPoint(position[1], anchor, position[2], position[3] * gap + x, position[4] * gap + y)
 end
 
 function ns.PlaceText(text, anchor, key, gap, x, y)
-    if text.slPlaceAnchor == anchor and text.slPlaceKey == key and text.slPlaceGap == gap
-        and text.slPlaceX == x and text.slPlaceY == y then
+    if text.plPlaceAnchor == anchor and text.plPlaceKey == key and text.plPlaceGap == gap
+        and text.plPlaceX == x and text.plPlaceY == y then
         return
     end
-    text.slPlaceAnchor, text.slPlaceKey, text.slPlaceGap, text.slPlaceX, text.slPlaceY = anchor, key, gap, x, y
+    text.plPlaceAnchor, text.plPlaceKey, text.plPlaceGap, text.plPlaceX, text.plPlaceY = anchor, key, gap, x, y
     local position = ns.textPositions[key] or ns.textPositions.CENTER
     text:ClearAllPoints()
     text:SetPoint(position[1], anchor, position[2], position[3] * gap + x, position[4] * gap + y)

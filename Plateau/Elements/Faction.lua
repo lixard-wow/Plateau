@@ -40,7 +40,7 @@ local function Place(plate)
     local icon, db = plate.faction, plate.factionPlace
     if not db then return end
     if plate.nameOnly then
-        icon.slPlaceAnchor = nil
+        icon.plPlaceAnchor = nil
         icon:ClearAllPoints()
         icon:SetPoint("RIGHT", plate.name, "LEFT", -2, 0)
     else

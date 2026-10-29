@@ -366,12 +366,12 @@ driver:SetScript("OnUpdate", OnUpdate)
 local function Settle(spec)
     local mover, points = spec.movedRegion, spec.savedPoints
     spec.movedRegion, spec.savedPoints = nil, nil
-    if not (mover and points) or mover.slPlaceAnchor ~= nil then return end
+    if not (mover and points) or mover.plPlaceAnchor ~= nil then return end
     mover:ClearAllPoints()
     for _, point in ipairs(points) do
         mover:SetPoint(point[1], point[2], point[3], point[4], point[5])
     end
-    mover.slPlaceAnchor, mover.slPlaceKey, mover.slPlaceGap, mover.slPlaceX, mover.slPlaceY =
+    mover.plPlaceAnchor, mover.plPlaceKey, mover.plPlaceGap, mover.plPlaceX, mover.plPlaceY =
         points.anchor, points.key, points.gap, points.x, points.y
 end
 
@@ -382,13 +382,13 @@ function Start(spec)
         pressed = nil
         return
     end
-    if mover.slPlaceAnchor ~= nil then
-        local points = { anchor = mover.slPlaceAnchor, key = mover.slPlaceKey, gap = mover.slPlaceGap, x = mover.slPlaceX, y = mover.slPlaceY }
+    if mover.plPlaceAnchor ~= nil then
+        local points = { anchor = mover.plPlaceAnchor, key = mover.plPlaceKey, gap = mover.plPlaceGap, x = mover.plPlaceX, y = mover.plPlaceY }
         for i = 1, mover:GetNumPoints() do
             points[i] = { mover:GetPoint(i) }
         end
         spec.movedRegion, spec.savedPoints = mover, points
-        mover.slPlaceAnchor = nil
+        mover.plPlaceAnchor = nil
     end
     if spec.keepSize then
         mover:SetSize(right - left, top - bottom)

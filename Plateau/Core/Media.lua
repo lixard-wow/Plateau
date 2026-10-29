@@ -309,9 +309,9 @@ local function UseFamily(fontString, file, size, flags)
     fontString:SetTextColor(r, g, b, a)
     fontString:SetJustifyH(justifyH)
     fontString:SetJustifyV(justifyV)
-    if fontString.slShadow ~= nil then
-        local shadow = fontString.slShadow
-        fontString.slShadow = nil
+    if fontString.plShadow ~= nil then
+        local shadow = fontString.plShadow
+        fontString.plShadow = nil
         ns.ApplyShadow(fontString, shadow)
     end
 end
@@ -338,10 +338,10 @@ local function Retry()
 end
 
 function ns.ApplyFont(fontString, file, size, flags)
-    if fontString.slFontFile == file and fontString.slFontSize == size and fontString.slFontFlags == flags then
+    if fontString.plFontFile == file and fontString.plFontSize == size and fontString.plFontFlags == flags then
         return
     end
-    fontString.slFontFile, fontString.slFontSize, fontString.slFontFlags = file, size, flags
+    fontString.plFontFile, fontString.plFontSize, fontString.plFontFlags = file, size, flags
     if fontString:SetFont(file, size, flags) then
         pending[fontString] = nil
         UseFamily(fontString, file, size, flags)
@@ -355,8 +355,8 @@ function ns.ApplyFont(fontString, file, size, flags)
 end
 
 function ns.ApplyShadow(fontString, enabled)
-    if fontString.slShadow == enabled then return end
-    fontString.slShadow = enabled
+    if fontString.plShadow == enabled then return end
+    fontString.plShadow = enabled
     if enabled then
         fontString:SetShadowOffset(1, -1)
         fontString:SetShadowColor(0, 0, 0, 1)

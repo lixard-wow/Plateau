@@ -59,7 +59,7 @@ function Level:Style(plate, db)
     ns.ApplyFont(text, db.font, db.size, db.outline)
     ns.ApplyShadow(text, db.shadow)
     if db.anchor == "NAME" then
-        text.slPlaceAnchor = nil
+        text.plPlaceAnchor = nil
         text:ClearAllPoints()
         text:SetPoint("RIGHT", plate.name or plate.health, "LEFT", -3 + db.offsetX, db.offsetY)
     else
