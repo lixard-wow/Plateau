@@ -518,9 +518,6 @@ Plateau = {
     OnRestyle = function(callback)
         ns.Driver:OnRestyle(callback)
     end,
-    RestyleNow = function()
-        ns.Driver:Restyle()
-    end,
     GetPlate = function(unit)
         return ns.Driver:GetPlate(unit)
     end,

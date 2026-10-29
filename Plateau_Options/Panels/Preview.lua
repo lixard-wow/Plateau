@@ -940,6 +940,7 @@ local function Glyph(tile, item, size)
 end
 
 local pressedTile
+local grabWaiter = CreateFrame("Frame", nil, tray)
 
 local function GrabFromTray(item)
     local values = {}
@@ -947,14 +948,19 @@ local function GrabFromTray(item)
         values[path] = true
     end
     ns.Drag.Enable(values)
-    Plateau.RestyleNow()
-    PreviewChanged()
-    local spot = TraySpot(item)
-    if spot and spot:IsShown() and ns.Drag.Grab(spot.drag, spot) then
-        SetHovered(spot)
-        return
-    end
-    ns.SelectSection(item.section)
+    local tries = 0
+    grabWaiter:SetScript("OnUpdate", function(self)
+        tries = tries + 1
+        PreviewChanged()
+        local spot = TraySpot(item)
+        if spot and spot:IsShown() and IsMouseButtonDown("LeftButton") and ns.Drag.Grab(spot.drag, spot) then
+            self:SetScript("OnUpdate", nil)
+            SetHovered(spot)
+        elseif tries >= 10 or not IsMouseButtonDown("LeftButton") then
+            self:SetScript("OnUpdate", nil)
+            ns.SelectSection(item.section)
+        end
+    end)
 end
 
 local function MakeTile(item)
