@@ -177,8 +177,8 @@ local function CheckWhatsNew()
     local seen = global.lastSeenVersion
     if seen == ns.version or ns.version == "dev" then return end
     global.lastSeenVersion = ns.version
-    if seen and not global.whatsNewOff then
-        Say(L["Updated to %s. Type /plt whatsnew to see what changed."]:format(ns.version))
+    if seen then
+        global.whatsNewUnread = true
     end
 end
 

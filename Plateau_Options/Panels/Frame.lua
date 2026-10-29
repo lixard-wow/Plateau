@@ -938,6 +938,12 @@ function Select(page, tab)
         page.activeTab = shown
     end
     Plateau.DB.saved.global.lastSection = shown.key
+    if page.key == "help" then
+        Plateau.DB.saved.global.whatsNewUnread = nil
+    end
+    if ns.UpdateHelpMark then
+        ns.UpdateHelpMark()
+    end
 
     local view = pages[shown.key]
     if not view then
@@ -1022,6 +1028,16 @@ local function RailButton(page, y)
     button:SetScript("OnEnter", function() Style.PaintText(label, C.text) end)
     button:SetScript("OnLeave", function(self) Style.PaintText(label, self.selected and C.text or C.muted) end)
     button:SetScript("OnClick", function() Select(page) end)
+    if page.key == "help" then
+        local mark = button:CreateTexture(nil, "ARTWORK")
+        mark:SetSize(4, 4)
+        mark:SetPoint("LEFT", label, "LEFT", label:GetStringWidth() + 6, 0)
+        Style.Paint(mark, C.accent, 1)
+        mark:Hide()
+        function ns.UpdateHelpMark()
+            mark:SetShown(Plateau.DB.saved.global.whatsNewUnread == true)
+        end
+    end
     railButtons[page.key] = button
     return button
 end
