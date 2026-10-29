@@ -769,6 +769,10 @@ function Castbar:OnEvent(plate, event, unit, _, _, interruptedBy)
     local bar = plate.castbar
     local recent = bar:IsShown() or (bar.stoppedAt ~= nil and GetTime() - bar.stoppedAt < 0.3)
     if s.showInterrupter and recent then
+        local named = issecretvalue(interruptedBy) or interruptedBy ~= nil
+        if bar.holding and not named and (event == "UNIT_SPELLCAST_INTERRUPTED" or event == "UNIT_SPELLCAST_CHANNEL_STOP") then
+            return
+        end
         if event == "UNIT_SPELLCAST_INTERRUPTED" then
             self:ShowInterrupted(plate, interruptedBy)
             return
