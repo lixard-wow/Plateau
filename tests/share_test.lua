@@ -21,6 +21,13 @@ local text = DB:ExportProfile()
 local exported = ns.Share.Decode(text)
 check(exported.look.colors.elite ~= nil and exported.look.colors.eliteColor ~= nil, "export carries every setting, not just changes")
 check(type(text) == "string" and text:sub(1, 5) == "!SL1!" and not text:find("[^%w%(%)!]"), "export is printable")
+local before = 0
+for _ in pairs(PlateauDB.profiles) do before = before + 1 end
+local peek = DB:PeekImport(text)
+local after = 0
+for _ in pairs(PlateauDB.profiles) do after = after + 1 end
+check(peek and peek.castbar.height == 18 and peek.castbar.readyColor[2] == 1 and peek.plate.width ~= nil and after == before, "peeking at a string shows its full look and saves nothing")
+check(DB:PeekImport("not a profile") == nil, "peeking at a broken string shows nothing")
 
 local offPaths = { "look.level.enabled", "look.castbar.showIcon", "look.target.ring", "look.friendly.npcs", "look.auras.cc.dispelBorder" }
 for _, path in ipairs(offPaths) do

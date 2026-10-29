@@ -454,47 +454,81 @@ function ns.Widgets.Presets(parent, spec)
     return row
 end
 
-function ns.AllLooks()
-    local list = {}
-    for _, group in ipairs({ Plateau.presets.looks, Plateau.presets.styles }) do
-        for _, preset in ipairs(group) do
-            list[#list + 1] = preset
-        end
-    end
-    return list
-end
-
-local function LookSample()
-    return {
-        health = 0.72,
-        maxHealth = 72700,
-        name = "Wastelander Phaseblade",
-        levelOffset = 1,
-        classification = "elite",
-        mobType = "caster",
-        auras = {},
-        absorb = 0,
-        alerts = {},
-        cast = {
-            progress = 0.6,
-            name = "Shadow Bolt",
-            icon = "Interface\\Icons\\Spell_Shadow_ShadowBolt",
-            timer = "1.4",
-        },
-    }
-end
-
-function ns.DrawLookSample(area, preset, width)
-    local look = Plateau.PresetLook(preset)
-    local name = "sample:" .. preset.key
-    Plateau.SetSampleLook(name, look)
-    local holder = CreateFrame("Frame", nil, area)
-    holder:SetSize(1, 1)
-    holder:SetPoint("CENTER", 0, 0)
-    holder:SetScale(math.min(0.7, width / look.plate.width))
-    local plate = Plateau.CreatePreview(holder, LookSample(), name)
-    plate:SetPoint("CENTER")
-end
+function ns.AllLooks()
+    local list = {}
+    for _, group in ipairs({ Plateau.presets.looks, Plateau.presets.styles }) do
+        for _, preset in ipairs(group) do
+            list[#list + 1] = preset
+        end
+    end
+    return list
+end
+
+local function LookSample()
+    return {
+        health = 0.72,
+        maxHealth = 72700,
+        name = "Wastelander Phaseblade",
+        levelOffset = 1,
+        classification = "elite",
+        mobType = "caster",
+        auras = {},
+        absorb = 0,
+        alerts = {},
+        cast = {
+            progress = 0.6,
+            name = "Shadow Bolt",
+            icon = "Interface\\Icons\\Spell_Shadow_ShadowBolt",
+            timer = "1.4",
+        },
+    }
+end
+
+function ns.LookView(area, name, width, largest)
+    local holder = CreateFrame("Frame", nil, area)
+    holder:SetSize(1, 1)
+    holder:SetPoint("CENTER", 0, 0)
+    local view = {}
+    function view:Set(look)
+        Plateau.SetSampleLook(name, look)
+        holder:SetScale(math.min(largest or 0.7, width / look.plate.width))
+        if self.plate then
+            Plateau.SetPreviewState(self.plate, LookSample())
+        else
+            self.plate = Plateau.CreatePreview(holder, LookSample(), name)
+            self.plate:SetPoint("CENTER")
+        end
+    end
+    return view
+end
+
+function ns.DrawLookSample(area, preset, width)
+    ns.LookView(area, "sample:" .. preset.key, width):Set(Plateau.PresetLook(preset))
+end
+
+function ns.ImportPeek(box, name)
+    local area = CreateFrame("Frame", nil, box)
+    area:SetPoint("TOPRIGHT", -1, -1)
+    area:SetPoint("BOTTOMRIGHT", -1, 1)
+    area:SetWidth(150)
+    area:SetFrameLevel(box:GetFrameLevel() + 5)
+    area:SetClipsChildren(true)
+    Style.Fill(area, C.window)
+    local edge = area:CreateTexture(nil, "BORDER")
+    edge:SetPoint("TOPLEFT")
+    edge:SetPoint("BOTTOMLEFT")
+    Style.PixelWidth(edge)
+    Style.Paint(edge, C.border, 1)
+    area:Hide()
+    local view = ns.LookView(area, name, 136, 1)
+    return function(text)
+        local look = type(text) == "string" and text:find("%S") and Plateau.DB:PeekImport(text)
+        if look then
+            view:Set(look)
+        end
+        area:SetShown(look and true or false)
+    end
+end
 
 function ns.Widgets.SpellList(parent, spec)
     local row = CreateFrame("Frame", nil, parent)

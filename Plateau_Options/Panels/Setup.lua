@@ -51,6 +51,8 @@ function Widgets.SetupImport(parent)
     edit:SetWidth(CONTENT_WIDTH - 12)
     edit:SetTextInsets(6, 6, 6, 6)
     edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    local peek = ns.ImportPeek(box, "sample:setupImport")
+    edit:SetScript("OnTextChanged", function(self) peek(self:GetText()) end)
     box:SetScrollChild(edit)
     box:EnableMouseWheel(true)
     box:SetScript("OnMouseWheel", function(self, delta)
@@ -159,6 +161,14 @@ local ownRow = Widgets.Dropdown(body, {
 ownRow:SetWidth(CONTENT_WIDTH)
 ownRow:SetPoint("TOPLEFT")
 
+local PREVIEW = 76
+local stage = CreateFrame("Frame", nil, body)
+stage:SetSize(CONTENT_WIDTH, PREVIEW)
+stage:SetClipsChildren(true)
+Style.Fill(stage, C.header)
+Style.Border(stage, C.edge)
+local stageView = ns.LookView(stage, "sample:setup", CONTENT_WIDTH - 40, 1.2)
+
 local list = CreateFrame("Frame", nil, body)
 list:SetWidth(CONTENT_WIDTH)
 
@@ -180,12 +190,19 @@ for _, entry in ipairs(Plateau.Builtins.list) do
     end
 end
 
+local function ShowLook(preset)
+    if preset and stage:IsShown() then
+        stageView:Set(Plateau.PresetLook(preset))
+    end
+end
+
 local function PaintRows()
     for _, row in ipairs(rows) do
         local on = row.preset == chosen
         row.edge:SetShown(on)
         row.fill:SetShown(on)
     end
+    ShowLook(chosen)
 end
 
 for i, preset in ipairs(looks) do
@@ -222,6 +239,8 @@ for i, preset in ipairs(looks) do
         if frame.Use then frame.Use() end
     end)
     Style.Tooltip(row, { label = preset.label, tooltip = preset.tooltip })
+    row:HookScript("OnEnter", function() ShowLook(preset) end)
+    row:HookScript("OnLeave", function() ShowLook(chosen) end)
     rows[i] = row
 end
 list:SetHeight(#looks * LOOK_ROW)
@@ -257,6 +276,12 @@ local function Layout()
     if ownRow:IsShown() then
         ownRow:Refresh()
         y = ownRow:GetHeight() + 10
+    end
+    stage:ClearAllPoints()
+    stage:SetPoint("TOPLEFT", 0, -y)
+    stage:SetShown(not importing)
+    if not importing then
+        y = y + PREVIEW + 8
     end
     list:ClearAllPoints()
     list:SetPoint("TOPLEFT", 0, -y)
@@ -331,9 +356,9 @@ function frame:Open()
     importing = false
     heading:SetText(T(character and TEXT.characterTitle or TEXT.title))
     intro:SetText(T(character and TEXT.characterIntro or TEXT.intro))
-    PaintRows()
     Layout()
     self:Show()
+    PaintRows()
     Plateau.RefreshDirtyPreviews()
 end
 

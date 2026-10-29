@@ -1268,18 +1268,18 @@ function DB:ExportProfile()
     return ns.Share.Export(full, SCHEMA_VERSION)
 end
 
-function DB:ImportProfile(name, text, activate)
+local function ReadImport(text)
     local payload, reason = ns.Share.Decode(text)
     if not payload then
-        return false, reason
+        return nil, reason
     end
     local version = tonumber(payload.version) or SCHEMA_VERSION
     if version ~= version or version < 1 or version > 1e6 then
-        return false, L["This profile string is damaged."]
+        return nil, L["This profile string is damaged."]
     end
     version = math.floor(version)
     if version > SCHEMA_VERSION then
-        return false, L["This profile needs a newer version of Plateau."]
+        return nil, L["This profile needs a newer version of Plateau."]
     end
     local holder = { version = version, profiles = { import = {
         look = type(payload.look) == "table" and payload.look or {},
@@ -1287,10 +1287,42 @@ function DB:ImportProfile(name, text, activate)
     } } }
     local migrated, failures = pcall(Migrate, holder)
     if not migrated or #failures > 0 then
-        return false, L["This profile string is damaged."]
+        return nil, L["This profile string is damaged."]
     end
-    local imported = holder.profiles.import
-    local profile = { look = ns.Share.Sanitize(imported.look or {}, ns.defaults.look), specSpells = CleanSpecSpells(payload.specSpells) }
+    return payload, ns.Share.Sanitize(holder.profiles.import.look or {}, ns.defaults.look)
+end
+
+local function Overlay(base, over)
+    local copy = {}
+    for key, value in pairs(base) do
+        copy[key] = type(value) == "table" and Overlay(value, {}) or value
+    end
+    for key, value in pairs(over) do
+        if IsGroup(value) and type(copy[key]) == "table" then
+            copy[key] = Overlay(copy[key], value)
+        elseif type(value) == "table" then
+            copy[key] = Overlay(value, {})
+        else
+            copy[key] = value
+        end
+    end
+    return copy
+end
+
+function DB:PeekImport(text)
+    local payload, look = ReadImport(text)
+    if not payload then
+        return nil, look
+    end
+    return Overlay(ns.defaults.look, look)
+end
+
+function DB:ImportProfile(name, text, activate)
+    local payload, look = ReadImport(text)
+    if not payload then
+        return false, look
+    end
+    local profile = { look = look, specSpells = CleanSpecSpells(payload.specSpells) }
     if type(name) == "string" then
         name = name:gsub("|", ""):match("^%s*(.-)%s*$"):sub(1, NAME_LIMIT)
     end

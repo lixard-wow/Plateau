@@ -19,7 +19,7 @@ Stub.__index = function(self, key)
             obj.text = ...
         elseif key == "SetEnabled" then
             obj.enabled = ...
-        elseif key == "GetStringWidth" or key == "GetStringHeight" or key == "GetWidth" or key == "GetHeight" then
+        elseif key == "GetStringWidth" or key == "GetStringHeight" or key == "GetWidth" or key == "GetHeight" or key == "GetFrameLevel" then
             return 100
         elseif key == "CreateFontString" or key == "CreateTexture" then
             return setmetatable({}, Stub)

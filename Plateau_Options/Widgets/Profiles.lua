@@ -831,9 +831,11 @@ function ns.Widgets.ShareProfile(parent)
     local function UpdateImport()
         SetButtonEnabled(import, importEdit:GetText():find("%S") ~= nil)
     end
-    importEdit:SetScript("OnTextChanged", function()
+    local peek = ns.ImportPeek(importBox, "sample:import")
+    importEdit:SetScript("OnTextChanged", function(self)
         importMessage:SetText("")
         UpdateImport()
+        peek(self:GetText())
     end)
 
     function frame:Layout()
