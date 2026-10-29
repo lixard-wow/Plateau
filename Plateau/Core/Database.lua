@@ -106,9 +106,6 @@ local migrations = {
         for _, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" then
                 Clear(profile.look)
-                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
-                    Clear(override)
-                end
             end
         end
     end,
@@ -122,9 +119,6 @@ local migrations = {
         for _, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" then
                 Clear(profile.look)
-                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
-                    Clear(override)
-                end
             end
         end
     end,
@@ -150,9 +144,6 @@ local migrations = {
         for _, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" then
                 Reset(profile.look)
-                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
-                    Reset(override)
-                end
             end
         end
     end,
@@ -195,9 +186,6 @@ local migrations = {
         for _, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" then
                 Clear(profile.look)
-                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
-                    Clear(override)
-                end
             end
         end
     end,
@@ -224,9 +212,6 @@ local migrations = {
         for _, profile in pairs(db.profiles or {}) do
             if type(profile) == "table" then
                 MigrateLayering(profile.look)
-                for _, override in pairs(type(profile.states) == "table" and profile.states or {}) do
-                    MigrateLayering(override)
-                end
             end
         end
     end,

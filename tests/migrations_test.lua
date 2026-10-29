@@ -205,7 +205,6 @@ ns.DB:Init()
 local on = PlateauDB.profiles.On.look.scaling
 check(PlateauDB.version == 28 and on.castFront == nil and on.layerByType == nil, "v16 then v28: old layering settings are cleared")
 check(on.layerByType == nil and on.layerOrder == nil and on.boss == 1.3, "v16: the old layering keys are removed and other scaling settings kept")
-check(PlateauDB.profiles.On.states.friendly.scaling.castFront == nil and PlateauDB.profiles.On.states.friendly.scaling.layerByType == nil, "v16 then v28: state overrides are cleared too")
 local off = PlateauDB.profiles.Off.look.scaling
 check(off.castFront == nil and off.layerByType == nil and off.layerOrder == nil, "v16: priority layering off leaves nothing behind")
 ns.DB:Shutdown()
@@ -231,7 +230,6 @@ PlateauDB = { version = 20, profiles = { Default = { look = { castbar = { interr
 ns.DB:Init()
 local cleaned = PlateauDB.profiles.Default
 check(cleaned.look.castbar.interruptible == nil and cleaned.look.castbar.channelColor == nil and cleaned.look.castbar.height == 14, "v21: the removed no-interrupt cast colors are cleared, other cast bar settings kept")
-check(cleaned.states.target.castbar.interruptible == nil, "v21: they are cleared from state overrides too")
 ns.DB:Shutdown()
 
 load("Core/Presets.lua")
@@ -262,7 +260,7 @@ PlateauDB = { version = 24, profiles = {
 }, profileKeys = {} }
 ns.DB:Init()
 local arrows = PlateauDB.profiles.Default
-check(rawget(arrows.look.target, "arrowStyle") == nil and arrows.look.target.arrowStyle == "chevronDouble" and arrows.states.friendly.target.arrowStyle == nil, "v25: removed Blizzard arrow styles go back to the default arrow, state overrides too")
+check(rawget(arrows.look.target, "arrowStyle") == nil and arrows.look.target.arrowStyle == "chevronDouble" , "v25: removed Blizzard arrow styles go back to the default arrow")
 check(arrows.look.focus.arrowStyle == "triangle", "v25: Plateau's own arrow styles are kept")
 ns.DB:Shutdown()
 
