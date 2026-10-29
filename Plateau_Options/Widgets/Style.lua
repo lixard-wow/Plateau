@@ -446,8 +446,15 @@ function Style.RightClickReset(frame, spec, refresh)
     end)
 end
 
+local function Snap(texture)
+    texture:SetSnapToPixelGrid(true)
+    texture:SetTexelSnappingBias(0)
+    return texture
+end
+Style.Snap = Snap
+
 function Style.Fill(frame, color, layer)
-    local texture = frame:CreateTexture(nil, layer or "BACKGROUND")
+    local texture = Snap(frame:CreateTexture(nil, layer or "BACKGROUND"))
     texture:SetAllPoints()
     Style.Paint(texture, color)
     return texture
@@ -459,7 +466,7 @@ local ICONS = ART .. "Icons\\"
 
 function Style.Rounded(frame, color, layer, sublevel, radius)
     radius = radius or Style.RADIUS
-    local texture = frame:CreateTexture(nil, layer or "BACKGROUND", nil, sublevel or 0)
+    local texture = Snap(frame:CreateTexture(nil, layer or "BACKGROUND", nil, sublevel or 0))
     if radius == "circle" then
         texture:SetTexture(ICONS .. "circle")
     elseif radius > 0 then
@@ -499,16 +506,25 @@ local function ApplyPixel(region, how)
 end
 
 function Style.PixelWidth(region)
+    if region.SetSnapToPixelGrid then
+        Snap(region)
+    end
     pixelSized[region] = "width"
     ApplyPixel(region, "width")
 end
 
 function Style.PixelHeight(region)
+    if region.SetSnapToPixelGrid then
+        Snap(region)
+    end
     pixelSized[region] = "height"
     ApplyPixel(region, "height")
 end
 
 function Style.PixelInset(region, parent, pixels)
+    if region.SetSnapToPixelGrid then
+        Snap(region)
+    end
     local how = { parent, pixels or 1 }
     pixelSized[region] = how
     ApplyPixel(region, how)
@@ -637,7 +653,7 @@ end
 function Style.Border(frame, color)
     local edges = {}
     for i = 1, 4 do
-        edges[i] = frame:CreateTexture(nil, "BORDER")
+        edges[i] = Snap(frame:CreateTexture(nil, "BORDER"))
     end
     edges[1]:SetPoint("TOPLEFT")
     edges[1]:SetPoint("TOPRIGHT")
