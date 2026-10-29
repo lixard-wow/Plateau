@@ -5,7 +5,7 @@ local C = Style.colors
 
 local SNAP = 8
 local THRESHOLD = 4
-local LIMIT = 80
+local LIMIT = 200
 
 local Drag = {}
 ns.Drag = Drag
@@ -702,7 +702,7 @@ local NAME_SIDES = {
     { justify = "CENTER", side = "", dir = 0 },
     { justify = "RIGHT", side = "RIGHT", dir = -1 },
 }
-local NAME_SHIFT = 150
+local NAME_SHIFT = 200
 
 local function Point(vertical, side)
     local point = vertical .. side
@@ -719,7 +719,7 @@ function Drag.NameSpec(plate)
         return math.max(0, (plate.nameClip:GetHeight() - plate.name:GetHeight()) / 2)
     end
     local function Values(position, gap, justify, shift)
-        local values = { [positionPath] = position, [gapPath] = Clamp(gap, -10, 30) }
+        local values = { [positionPath] = position, [gapPath] = Clamp(gap, -10, 100) }
         if not plate.nameOnly then
             values[justifyPath] = justify
             values[shiftPath] = Clamp(shift, -NAME_SHIFT, NAME_SHIFT)
@@ -799,7 +799,7 @@ function Drag.NameSpec(plate)
         end
         if dy == 0 then return nil end
         local sign = Get(positionPath) == "BOTTOM" and -1 or 1
-        return { [gapPath] = Clamp((Get(gapPath) or 0) + dy * sign, -10, 30) }
+        return { [gapPath] = Clamp((Get(gapPath) or 0) + dy * sign, -10, 100) }
     end
     function spec.Readout()
         if plate.nameOnly then
@@ -826,7 +826,7 @@ function Drag.CastbarSpec(plate)
         if not bottom then return nil end
         local gap = bottom - (cy + plate.castbar:GetHeight() / 2) - (plate.castShift or 0)
         if gap < -0.5 or gap > 30.5 then return nil end
-        return { [gapPath] = Clamp(gap, 0, 30) }
+        return { [gapPath] = Clamp(gap, 0, 60) }
     end
     function spec.Candidates()
         local _, my = PointXY(plate.castbar, "TOP")
@@ -840,14 +840,14 @@ function Drag.CastbarSpec(plate)
                 mx = ax,
                 my = my,
                 Values = function(_, dy)
-                    return { [gapPath] = Clamp(-dy, 0, 30) }
+                    return { [gapPath] = Clamp(-dy, 0, 60) }
                 end,
             },
         }
     end
     function spec.Nudge(_, dy)
         if dy == 0 then return nil end
-        return { [gapPath] = Clamp((Get(gapPath) or 0) - dy, 0, 30) }
+        return { [gapPath] = Clamp((Get(gapPath) or 0) - dy, 0, 60) }
     end
     function spec.Readout()
         return { { "gap", gapPath } }

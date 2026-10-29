@@ -335,7 +335,7 @@ for _, section in ipairs(sections) do
 end
 check(#offsetSliders == 0, "parts that drag on the preview have no offset sliders" .. (#offsetSliders > 0 and (": " .. table.concat(offsetSliders, ", ")) or ""))
 local kept = nsOpt.sliderRanges or {}
-check(kept["look.name.offsetX"] and kept["look.name.offsetX"][2] == 150 and kept["look.auras.mine.offsetY"] and kept["look.castbar.timerOffsetX"], "offsets without a slider keep their range for dragging and imports")
+check(kept["look.name.offsetX"] and kept["look.name.offsetX"][2] == 200 and kept["look.auras.mine.offsetY"] and kept["look.castbar.timerOffsetX"], "offsets without a slider keep their range for dragging and imports")
 local gameTagged = 0
 for _, spec in ipairs(byKey.showing.controls) do
     if spec.gameSetting then gameTagged = gameTagged + 1 end

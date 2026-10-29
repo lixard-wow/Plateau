@@ -326,6 +326,11 @@ ns.RefreshAll = function()
 end
 Drop(questSpec, questSpot, cx, cy, cx - 60, cy)
 check(questIcon.anchor == plate and questIcon.l < homeL - 30, "an icon dropped somewhere new is drawn there, attached to the plate")
+coreNs.PlaceIcon(questIcon, plate, "TOPRIGHT", 2, 0, 0)
+db["look.quest.position"], db["look.quest.offsetX"], db["look.quest.offsetY"] = "TOPRIGHT", 0, 0
+local farX, farY = (questIcon.l + questIcon.r) / 2, (questIcon.t + questIcon.b) / 2
+Drop(questSpec, questSpot, farX, farY, farX, farY + 150)
+check(questIcon.t > homeT + 120, "an icon dragged far from the bar stays there instead of snapping back")
 ns.RefreshAll = nil
 
 local function Read(spec)
