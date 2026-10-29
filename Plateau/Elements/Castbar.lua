@@ -403,15 +403,15 @@ function Castbar:Configure(db, state)
     s.showKickMarker = db.kickMarker
     s.showInterrupter = db.showInterrupter
     s.interruptHold = db.interruptHold
-    s.interruptFormat = db.interruptFormat or "by"
+    s.interruptFormat = db.interruptFormat
     s.interruptClassColor = db.interruptClassColor ~= false
-    s.interruptTextColor = db.interruptTextColor or { 1, 1, 1, 1 }
+    s.interruptTextColor = db.interruptTextColor
     s.interruptKeepName = db.interruptKeepName == true
     s.interruptFlash = db.interruptFlash == true
     s.showSpellName = db.showSpellName ~= false
     s.drain = db.drainCasts == true
     s.shieldIcon = db.shieldIcon == true
-    s.showCasts = db.showCasts or "all"
+    s.showCasts = db.showCasts
     InterruptReady:SetColors(state, "normal", db.readyColor, db.notReadyColor)
     InterruptReady:SetColors(state, "important", db.importantReadyColor, db.importantNotReadyColor)
 end
@@ -420,8 +420,8 @@ function Castbar:Style(plate, db)
     local bar = plate.castbar
     local height, gap, size = (db.height and db.height > 0) and db.height or plate.rawHeight or plate:GetHeight(), db.gap, db.borderSize
     local look = ns.DB.views[plate.state]
-    local joined = db.joinBorder and (plate.castShift or 0) == 0 and (db.borderStyle or "pixel") == "pixel"
-        and look and (look.health.borderStyle or "pixel") == "pixel"
+    local joined = db.joinBorder and (plate.castShift or 0) == 0 and db.borderStyle == "pixel"
+        and look and look.health.borderStyle == "pixel"
     if joined then
         gap = ns.HealthBorderOffset(look)
     end
@@ -544,7 +544,7 @@ function Castbar:Style(plate, db)
     if pair.on then
         local target = bar.target
         local x = (3 - textRightInset) / 2
-        pair.gap = 4 + (db.targetOffsetX or 0)
+        pair.gap = 4 + db.targetOffsetX
         ns.ApplyFont(pair.name, db.font, db.size, db.outline)
         ns.ApplyFont(pair.target, db.font, db.targetSize, db.outline)
         pair.name:ClearAllPoints()
@@ -553,14 +553,14 @@ function Castbar:Style(plate, db)
         pair.target:SetPoint("RIGHT", bar, "CENTER", x, 0)
         target.slPlaceAnchor = nil
         target:ClearAllPoints()
-        target:SetPoint("LEFT", pair.span, "CENTER", pair.gap / 2, db.targetOffsetY or 0)
+        target:SetPoint("LEFT", pair.span, "CENTER", pair.gap / 2, db.targetOffsetY)
         target:SetJustifyH("LEFT")
         SyncCenteredPair(bar)
     elseif db.targetPosition == "AFTERNAME" then
         local target = bar.target
         target.slPlaceAnchor = nil
         target:ClearAllPoints()
-        target:SetPoint("LEFT", bar.text, "RIGHT", 4 + (db.targetOffsetX or 0), db.targetOffsetY or 0)
+        target:SetPoint("LEFT", bar.text, "RIGHT", 4 + db.targetOffsetX, db.targetOffsetY)
         target:SetJustifyH("LEFT")
     else
         bar.target:SetJustifyH("CENTER")
@@ -568,14 +568,14 @@ function Castbar:Style(plate, db)
     end
 
     local interruptText = bar.interruptText
-    ns.ApplyFont(interruptText, db.font, db.interruptSize or db.size, db.outline)
+    ns.ApplyFont(interruptText, db.font, db.interruptSize, db.outline)
     ns.ApplyShadow(interruptText, db.shadow)
-    local hit = db.interruptTextColor or { 1, 1, 1, 1 }
+    local hit = db.interruptTextColor
     interruptText:SetTextColor(hit[1], hit[2], hit[3], hit[4])
     interruptText.slPlaceAnchor = nil
     interruptText:ClearAllPoints()
-    local x, y = db.interruptOffsetX or 0, db.interruptOffsetY or 0
-    if (db.interruptPosition or "SPELL") == "SPELL" then
+    local x, y = db.interruptOffsetX, db.interruptOffsetY
+    if db.interruptPosition == "SPELL" then
         interruptText:SetJustifyH(db.textJustify)
         if db.textJustify == "RIGHT" then
             interruptText:SetPoint("RIGHT", bar, "RIGHT", -textRightInset + x, y)
