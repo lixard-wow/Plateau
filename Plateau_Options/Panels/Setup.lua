@@ -4,15 +4,13 @@ local Style = ns.Style
 local C = Style.colors
 local Widgets = ns.Widgets
 
-local WIDTH, HEIGHT = 740, 740
-local PAD = 20
-local TITLE = 48
-local FOOTER = 56
+local WIDTH = 560
+local PAD = 14
+local TITLE = 30
+local FOOTER = 44
 local CONTENT_WIDTH = WIDTH - PAD * 2
-local ROW_WIDTH = CONTENT_WIDTH
-local SPACING = 6
-local COLUMN_GAP = 12
-local HALF_WIDTH = (CONTENT_WIDTH - COLUMN_GAP) / 2
+local LOOK_ROW = 52
+local SAMPLE_WIDTH = 110
 
 local T = Style.T
 local IMPORT_BOX_HEIGHT = 80
@@ -27,27 +25,11 @@ local function OwnProfiles()
     return options
 end
 
-local PAGE = {
+local TEXT = {
     title = "Pick a look",
-    intro = "Each look is a ready-made profile. Choosing one makes it your active and default profile, and new characters start with it too. Fine-tune it any time with /plt.",
+    intro = "You can change any of it later. Nothing here touches your other characters.",
     characterTitle = "Pick a profile for this character",
-    characterIntro = "This character doesn't have a profile yet. Use one you already set up, paste a profile string, or pick a ready-made look. Change it any time with /plt.",
-    controls = function()
-        local list = {}
-        if #OwnProfiles() > 0 then
-            list[#list + 1] = { type = "Header", label = "Use a profile you already have", first = true }
-            list[#list + 1] = { type = "Dropdown", label = "Profile",
-                tooltip = "Makes this your active profile and the default for this character.",
-                options = OwnProfiles,
-                get = function() return Plateau.DB:DefaultProfile() end,
-                set = function(value) Plateau.DB:SetDefaultProfile(value) end }
-        end
-        list[#list + 1] = { type = "Header", label = "Import a profile string", first = #list == 0 }
-        list[#list + 1] = { type = "SetupImport", wide = true }
-        list[#list + 1] = { type = "Header", label = "Or start from a ready-made look" }
-        list[#list + 1] = { type = "LookCards", presets = ns.AllLooks(), width = CONTENT_WIDTH, wide = true, mode = "profile" }
-        return list
-    end,
+    characterIntro = "This character doesn't have a profile yet. Use one you already have, or pick a look.",
 }
 
 function Widgets.SetupImport(parent)
@@ -120,8 +102,8 @@ function Widgets.SetupImport(parent)
 end
 
 local frame = CreateFrame("Frame", "PlateauSetup", UIParent)
-frame:SetSize(WIDTH, HEIGHT)
-frame:SetPoint("TOP", UIParent, "CENTER", 0, HEIGHT / 2)
+frame:SetWidth(WIDTH)
+frame:SetPoint("CENTER")
 frame:SetFrameStrata("DIALOG")
 frame:SetToplevel(true)
 frame:SetMovable(true)
@@ -129,17 +111,17 @@ frame:SetClampedToScreen(true)
 frame:EnableMouse(true)
 frame:Hide()
 Style.Panel(frame, C.window, C.border)
-Style.Card(frame)
 tinsert(UISpecialFrames, "PlateauSetup")
 frame:SetScale(Style.PixelScale())
 frame:HookScript("OnShow", function(self) Style.FitWindow(self) end)
 
 local titleBar = CreateFrame("Frame", nil, frame)
-titleBar:SetPoint("TOPLEFT")
-titleBar:SetPoint("TOPRIGHT")
+titleBar:SetPoint("TOPLEFT", 1, -1)
+titleBar:SetPoint("TOPRIGHT", -1, -1)
 titleBar:SetHeight(TITLE)
 titleBar:EnableMouse(true)
 titleBar:RegisterForDrag("LeftButton")
+Style.Fill(titleBar, C.header)
 local function StopMoving()
     frame:StopMovingOrSizing()
     Style.SnapWindow(frame)
@@ -150,137 +132,150 @@ frame:RegisterForDrag("LeftButton")
 frame:SetScript("OnDragStart", function() frame:StartMoving() end)
 frame:SetScript("OnDragStop", StopMoving)
 
-local logo = titleBar:CreateTexture(nil, "ARTWORK")
-logo:SetSize(32, 32)
-logo:SetPoint("LEFT", PAD, 0)
-logo:SetTexture("Interface\\AddOns\\Plateau\\Art\\icon")
+local heading = Style.Text(titleBar, 17, C.title)
+Style.SetFont(heading, Style.titleFont, 17, "")
+heading:SetPoint("LEFT", PAD, 0)
 
-local heading = Style.Text(titleBar, 16, C.text)
-heading:SetPoint("LEFT", logo, "RIGHT", 10, 0)
+local closeX = Style.IconButton(titleBar, "icon_close", 20, function() frame:Hide() end, "Close")
+closeX:SetPoint("RIGHT", -6, 0)
 
-local line = titleBar:CreateTexture(nil, "ARTWORK")
-Style.Paint(line, C.line)
-Style.PixelHeight(line)
-line:SetPoint("BOTTOMLEFT", 1, 0)
-line:SetPoint("BOTTOMRIGHT", -1, 0)
-
-local intro = Style.Text(frame, 12, C.muted)
-intro:SetPoint("TOPLEFT", PAD, -(TITLE + 16))
+local intro = Style.Text(frame, 11, C.muted)
+intro:SetPoint("TOPLEFT", PAD, -(TITLE + 10))
 intro:SetPoint("RIGHT", -PAD, 0)
 intro:SetWordWrap(true)
 intro:SetJustifyV("TOP")
 
 local body = CreateFrame("Frame", nil, frame)
-body:SetPoint("TOPLEFT", PAD, -(TITLE + 64))
-body:SetPoint("BOTTOMRIGHT", -PAD, FOOTER)
+body:SetPoint("TOPLEFT", PAD, -(TITLE + 32))
+body:SetWidth(CONTENT_WIDTH)
 
-local footerLine = frame:CreateTexture(nil, "ARTWORK")
-footerLine:SetPoint("BOTTOMLEFT", 1, FOOTER)
-footerLine:SetPoint("BOTTOMRIGHT", -1, FOOTER)
-Style.PixelHeight(footerLine)
-Style.Paint(footerLine, C.border, 1)
+local ownRow = Widgets.Dropdown(body, {
+    label = "Use a profile you already have",
+    tooltip = "Makes this your active profile and the default for this character.",
+    options = OwnProfiles,
+    get = function() return Plateau.DB:DefaultProfile() end,
+    set = function(value) Plateau.DB:SetDefaultProfile(value) end,
+})
+ownRow:SetWidth(CONTENT_WIDTH)
+ownRow:SetPoint("TOPLEFT")
 
-local page
+local list = CreateFrame("Frame", nil, body)
+list:SetWidth(CONTENT_WIDTH)
 
-local WHEEL_STEP = 40
+local importView = Widgets.SetupImport(body)
+importView:SetWidth(CONTENT_WIDTH)
+importView:Hide()
 
-local function Scroller(page, height)
-    local scroll = CreateFrame("ScrollFrame", nil, body)
-    scroll:SetAllPoints()
-    page:SetParent(scroll)
-    page:SetSize(CONTENT_WIDTH, math.max(height, 1))
-    scroll:SetScrollChild(page)
-    scroll.controls = page.controls
+local function EntryOf(preset)
+    return Plateau.Builtins.ForPreset(preset)
+end
 
-    local track = scroll:CreateTexture(nil, "ARTWORK")
-    track:SetPoint("TOPLEFT", scroll, "TOPRIGHT", 8, 0)
-    track:SetPoint("BOTTOMLEFT", scroll, "BOTTOMRIGHT", 8, 0)
-    track:SetWidth(3)
-    Style.Paint(track, C.border, 0.6)
-    local thumb = scroll:CreateTexture(nil, "OVERLAY")
-    thumb:SetWidth(3)
-    Style.Paint(thumb, C.accent, 0.9)
-
-    local function Update()
-        local view = scroll:GetHeight()
-        local range = math.max(0, height - view)
-        local shown = range > 0 and view > 0
-        track:SetShown(shown)
-        thumb:SetShown(shown)
-        if not shown then
-            scroll:SetVerticalScroll(0)
-            return
+local looks, rows = {}, {}
+local chosen
+for _, entry in ipairs(Plateau.Builtins.list) do
+    for _, preset in ipairs(ns.AllLooks()) do
+        if EntryOf(preset) == entry then
+            looks[#looks + 1] = preset
         end
-        local offset = math.min(scroll:GetVerticalScroll(), range)
-        scroll:SetVerticalScroll(offset)
-        local size = math.max(24, view * view / height)
-        thumb:SetHeight(size)
-        thumb:ClearAllPoints()
-        thumb:SetPoint("TOP", track, "TOP", 0, -(view - size) * offset / range)
     end
+end
 
-    scroll:EnableMouseWheel(true)
-    scroll:SetScript("OnMouseWheel", function(self, delta)
-        local range = math.max(0, height - self:GetHeight())
-        self:SetVerticalScroll(math.max(0, math.min(range, self:GetVerticalScroll() - delta * WHEEL_STEP)))
-        Update()
+local function PaintRows()
+    for _, row in ipairs(rows) do
+        local on = row.preset == chosen
+        row.edge:SetShown(on)
+        row.fill:SetShown(on)
+    end
+end
+
+for i, preset in ipairs(looks) do
+    local row = CreateFrame("Button", nil, list)
+    row:SetSize(CONTENT_WIDTH, LOOK_ROW)
+    row:SetPoint("TOPLEFT", 0, -(i - 1) * LOOK_ROW)
+    row.fill = Style.Fill(row, C.hover)
+    row.edge = CreateFrame("Frame", nil, row)
+    row.edge:SetAllPoints()
+    Style.Border(row.edge, C.accent)
+
+    local area = CreateFrame("Frame", nil, row)
+    area:SetPoint("LEFT", 10, 0)
+    area:SetSize(SAMPLE_WIDTH, LOOK_ROW - 4)
+    area:SetClipsChildren(true)
+    ns.DrawLookSample(area, preset, SAMPLE_WIDTH - 6)
+
+    local name = Style.Text(row, 13, C.text)
+    name:SetPoint("TOPLEFT", area, "TOPRIGHT", 14, -8)
+    name:SetText(preset.label)
+    local line = Style.Text(row, 11, C.muted)
+    line:SetPoint("TOPLEFT", name, "BOTTOMLEFT", 0, -3)
+    line:SetPoint("RIGHT", -10, 0)
+    line:SetText(preset.summary or "")
+
+    row.preset = preset
+    row:SetScript("OnClick", function()
+        chosen = preset
+        PaintRows()
     end)
-    scroll:SetScript("OnSizeChanged", Update)
-    scroll:SetScript("OnShow", Update)
-    return scroll
+    row:SetScript("OnDoubleClick", function()
+        chosen = preset
+        PaintRows()
+        if frame.Use then frame.Use() end
+    end)
+    Style.Tooltip(row, { label = preset.label, tooltip = preset.tooltip })
+    rows[i] = row
 end
+list:SetHeight(#looks * LOOK_ROW)
 
-local function BuildPage()
-    local page = CreateFrame("Frame", nil, body)
-    page:SetSize(CONTENT_WIDTH, 1)
-    page.controls = {}
+local switch = ns.TextButton(frame, "Paste a profile string instead")
+switch:SetPoint("BOTTOMLEFT", PAD - 4, 12)
+
+local skipButton = Widgets.Button(frame, "Skip", 80, function() frame:Hide() end)
+skipButton:SetPoint("BOTTOMRIGHT", -PAD, 12)
+
+local useButton = Widgets.PrimaryButton(frame, "Use this look", 120, function()
+    local entry = chosen and EntryOf(chosen)
+    if entry then
+        Plateau.DB:UseBuiltin(entry.name)
+        if ns.UpdateProfileLabel then
+            ns.UpdateProfileLabel()
+        end
+        if ns.RefreshAll then
+            ns.RefreshAll()
+        end
+    end
+    frame:Hide()
+end)
+useButton:SetPoint("RIGHT", skipButton, "LEFT", -8, 0)
+frame.Use = function() useButton:Click() end
+
+local importing = false
+
+local function Layout()
+    local character = Plateau.DB.newCharacter and Plateau.DB.saved.global.setupDone
     local y = 0
-    local column, rowTop, rowHeight = 0, 0, 0
-    local function EndRow()
-        if column == 1 then
-            y = rowTop + rowHeight + SPACING
-            column = 0
-        end
+    ownRow:SetShown(character and #OwnProfiles() > 0 and not importing)
+    if ownRow:IsShown() then
+        ownRow:Refresh()
+        y = ownRow:GetHeight() + 10
     end
-    for _, spec in ipairs(PAGE.controls()) do
-        local widget = Widgets[spec.type](page, spec)
-        if spec.half then
-            widget:SetWidth(HALF_WIDTH)
-            if column == 0 then
-                rowTop, rowHeight = y, widget:GetHeight()
-                widget:SetPoint("TOPLEFT", 0, -y)
-                column = 1
-            else
-                widget:SetPoint("TOPLEFT", HALF_WIDTH + COLUMN_GAP, -rowTop)
-                rowHeight = math.max(rowHeight, widget:GetHeight())
-                EndRow()
-            end
-        else
-            EndRow()
-            local wide = spec.type == "Header" or spec.type == "Note" or spec.wide
-            widget:SetWidth(wide and CONTENT_WIDTH or ROW_WIDTH)
-            widget:SetPoint("TOPLEFT", 0, -y)
-            y = y + widget:GetHeight() + SPACING
-        end
-        if widget.Refresh then
-            page.controls[#page.controls + 1] = widget
-        end
-    end
-    EndRow()
-    page.contentHeight = y
-    return Scroller(page, y)
+    list:ClearAllPoints()
+    list:SetPoint("TOPLEFT", 0, -y)
+    list:SetShown(not importing)
+    importView:ClearAllPoints()
+    importView:SetPoint("TOPLEFT", 0, -y)
+    importView:SetShown(importing)
+    local height = y + (importing and importView:GetHeight() or list:GetHeight())
+    body:SetHeight(height)
+    frame:SetHeight(TITLE + 32 + height + 12 + FOOTER)
+    switch.label:SetText(T(importing and "Pick a look instead" or "Paste a profile string instead"))
+    switch:Fit()
+    useButton:SetShown(not importing)
+    skipButton.label:SetText(T(importing and "Close" or "Skip"))
 end
 
-local function Refresh()
-    for _, control in ipairs(page.controls) do
-        control:Refresh()
-    end
-end
-
-ns.OnRefresh(function()
-    if frame:IsShown() and page then
-        Refresh()
-    end
+switch:SetScript("OnClick", function()
+    importing = not importing
+    Layout()
 end)
 
 local openedWith
@@ -289,25 +284,17 @@ local function Finish()
     local DB = Plateau.DB
     DB.saved.global.setupDone = true
     DB.newCharacter = false
-    local chosen = DB:DefaultProfile()
-    if chosen ~= openedWith or not DB:AccountProfile() then
-        DB:SetAccountProfile(chosen)
+    local profile = DB:DefaultProfile()
+    if profile ~= openedWith or not DB:AccountProfile() then
+        DB:SetAccountProfile(profile)
     end
 end
 
-local function Done(openOptions)
-    Finish()
-    frame:Hide()
-    if openOptions and PlateauOptions then
-        PlateauOptions:Show()
+ns.OnRefresh(function()
+    if frame:IsShown() and ownRow:IsShown() then
+        ownRow:Refresh()
     end
-end
-
-local openButton = Widgets.PrimaryButton(frame, "Open settings", 130, function() Done(true) end)
-openButton:SetPoint("BOTTOMRIGHT", -PAD, 14)
-
-local doneButton = Widgets.Button(frame, "Done", 90, function() Done(false) end)
-doneButton:SetPoint("RIGHT", openButton, "LEFT", -8, 0)
+end)
 
 frame:SetScript("OnHide", function(self)
     ns.Widgets.HidePrompts()
@@ -333,12 +320,20 @@ function frame:Open()
     end
     local character = Plateau.DB.newCharacter and Plateau.DB.saved.global.setupDone
     openedWith = Plateau.DB:DefaultProfile()
+    chosen = nil
+    for _, preset in ipairs(looks) do
+        local entry = EntryOf(preset)
+        if entry and entry.name == Plateau.DB.profileName then
+            chosen = preset
+        end
+    end
+    chosen = chosen or looks[1]
+    importing = false
+    heading:SetText(T(character and TEXT.characterTitle or TEXT.title))
+    intro:SetText(T(character and TEXT.characterIntro or TEXT.intro))
+    PaintRows()
+    Layout()
     self:Show()
-    heading:SetText(character and PAGE.characterTitle or PAGE.title)
-    intro:SetText(character and PAGE.characterIntro or PAGE.intro)
-    page = page or BuildPage()
-    page:Show()
-    Refresh()
     Plateau.RefreshDirtyPreviews()
 end
 

@@ -460,7 +460,6 @@ local WIDE = {
     Note = true,
     Actions = true,
     Presets = true,
-    LookCards = true,
     SpellList = true,
     PriorityList = true,
     ProfileStatus = true,

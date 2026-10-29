@@ -454,224 +454,47 @@ function ns.Widgets.Presets(parent, spec)
     return row
 end
 
-local CARD_WIDTH, CARD_GAP, CARD_INSET, CARD_EDGE, CARD_TAG, CARD_BUTTON = 156, 16, 14, 3, 18, 28
-
-function ns.AllLooks()
-    local list = {}
-    for _, group in ipairs({ Plateau.presets.looks, Plateau.presets.styles }) do
-        for _, preset in ipairs(group) do
-            list[#list + 1] = preset
-        end
-    end
-    return list
-end
-local SAMPLE_HEIGHT = 84
-
-local function Same(a, b)
-    if type(a) == "table" and type(b) == "table" then
-        for i = 1, 4 do
-            if math.abs((a[i] or 1) - (b[i] or 1)) > 0.001 then
-                return false
-            end
-        end
-        return true
-    end
-    return a == b
-end
-
-local function Matches(preset)
-    for path, value in pairs(preset.values) do
-        if not Same(value, ns.Get(path)) then
-            return false
-        end
-    end
-    return true
-end
-
-local function CardSample()
-    return {
-        health = 0.72,
-        maxHealth = 72700,
-        name = "Wastelander Phaseblade",
-        levelOffset = 1,
-        classification = "elite",
-        mobType = "caster",
-        raidMarker = 8,
-        auras = { mine = 2, cc = 1, purge = 1 },
-        absorb = 0,
-        alerts = {},
-        cast = {
-            progress = 0.6,
-            name = "Shadow Bolt",
-            icon = "Interface\\Icons\\Spell_Shadow_ShadowBolt",
-            timer = "1.4",
-        },
-    }
-end
-
-local function DrawSample(area, preset, ratio)
-    local look = Plateau.PresetLook(preset)
-    local name = "sample:" .. preset.key
-    Plateau.SetSampleLook(name, look)
-    local holder = CreateFrame("Frame", nil, area)
-    holder:SetSize(1, 1)
-    holder:SetPoint("CENTER", 0, 0)
-    holder:SetScale(math.min(0.62, 118 / look.plate.width) * ratio)
-    local plate = Plateau.CreatePreview(holder, CardSample(), name)
-    plate:SetPoint("CENTER")
-end
-
-function ns.CardMode(spec)
-    if spec and spec.mode then
-        return spec.mode
-    end
-    return Plateau.DB.saved.global.cardMode or "profile"
-end
-
-local function CardProfile(spec, preset)
-    local entry = Plateau.Builtins.ForPreset(preset)
-    if entry and ns.CardMode(spec) == "profile" then
-        return entry.name
-    end
-    return nil
-end
-
-function ns.Widgets.LookCards(parent, spec)
-    local row = CreateFrame("Frame", nil, parent)
-    local count = #spec.presets
-    local columns = count > 4 and math.ceil(count / 2) or count
-    local rows = math.ceil(count / columns)
-    local stripWidth = spec.width or ns.layout.content
-    local cardWidth = math.floor((stripWidth - (columns - 1) * CARD_GAP) / columns)
-    local ratio = (cardWidth - CARD_INSET * 2) / CARD_WIDTH
-    if rows > 1 then
-        ratio = math.min(ratio, 1)
-    end
-    local previewHeight = math.floor(SAMPLE_HEIGHT * ratio)
-    local cardHeight = CARD_EDGE + 14 + 16 + 4 + 10 + 12 + previewHeight + 12 + 42 + 12 + CARD_BUTTON + CARD_INSET
-    local rowStep = CARD_TAG + cardHeight + 8
-    row:SetHeight(rows * rowStep - 2)
-    local cards = {}
-    local strip = CreateFrame("Frame", nil, row)
-    strip:SetSize(stripWidth, rows * rowStep - 8)
-    strip:SetPoint("TOP")
-
-    local function Apply(preset)
-        local profile = CardProfile(spec, preset)
-        if profile then
-            Plateau.DB:UseBuiltin(profile)
-            if ns.UpdateProfileLabel then
-                ns.UpdateProfileLabel()
-            end
-        else
-            ns.Undo.Next(T("Look: %s"):format(T(preset.label)))
-            Plateau.DB:SetMany(preset.values)
-        end
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        end
-    end
-
-    for i, preset in ipairs(spec.presets) do
-        local accent = type(preset.accent) == "table" and preset.accent or Plateau.brand[preset.accent or 1] or C.accent
-        local card = CreateFrame("Frame", nil, strip)
-        card:SetSize(cardWidth, cardHeight)
-        local column, line = (i - 1) % columns, math.floor((i - 1) / columns)
-        card:SetPoint("TOPLEFT", column * (cardWidth + CARD_GAP), -CARD_TAG - line * rowStep)
-        card:EnableMouse(true)
-        Style.Fill(card, C.field)
-        Style.Border(card, C.border)
-        if Style.theme.brackets then
-            Style.Brackets(card, accent, 7, 2)
-        end
-
-        card.tag = Style.Text(strip, 10, accent, "CENTER")
-        card.tag:SetPoint("BOTTOM", card, "TOP", 0, 5)
-        card.tag:SetText("In use")
-
-        card.edge = card:CreateTexture(nil, "ARTWORK")
-        card.edge:SetPoint("TOPLEFT", 1, -1)
-        card.edge:SetPoint("TOPRIGHT", -1, -1)
-        card.edge:SetHeight(CARD_EDGE)
-        Style.Paint(card.edge, accent, 1)
-
-        local title = Style.Text(card, 15, accent, "CENTER")
-        title:SetPoint("TOP", card.edge, "BOTTOM", 0, -14)
-        title:SetText(preset.label)
-
-        local subtitle = Style.Text(card, 9, C.muted, "CENTER")
-        subtitle:SetPoint("TOP", title, "BOTTOM", 0, -4)
-        subtitle:SetText(T(preset.subtitle or ""):upper())
-
-        local area = CreateFrame("Frame", nil, card)
-        area:SetPoint("TOPLEFT", CARD_INSET, -(CARD_EDGE + 14 + 16 + 4 + 10 + 12))
-        area:SetPoint("TOPRIGHT", -CARD_INSET, -(CARD_EDGE + 14 + 16 + 4 + 10 + 12))
-        area:SetHeight(previewHeight)
-        area:SetClipsChildren(true)
-        Style.Fill(area, C.window)
-        Style.Border(area, C.border)
-        DrawSample(area, preset, ratio)
-
-        local summary = Style.Text(card, 11, C.muted, "CENTER")
-        summary:SetPoint("TOPLEFT", area, "BOTTOMLEFT", 0, -12)
-        summary:SetPoint("TOPRIGHT", area, "BOTTOMRIGHT", 0, -12)
-        summary:SetWordWrap(true)
-        summary:SetMaxLines(3)
-        summary:SetJustifyV("TOP")
-        summary:SetText(preset.summary or "")
-
-        local button = ns.Widgets.Button(card, "", cardWidth - CARD_INSET * 2, function(self)
-            if not card.active then
-                Apply(preset)
-            end
-        end)
-        button:SetHeight(CARD_BUTTON)
-        button:SetPoint("BOTTOM", 0, CARD_INSET)
-        Style.SetFont(button.label, Style.font, 12, "")
-        button.tint = Style.Fill(button, C.window, "BORDER")
-        button:HookScript("OnLeave", function()
-            if not card.active then
-                Style.SetBorderColor(button, accent)
-            end
-        end)
-        card.button = button
-
-        card.preset = preset
-        card.accent = accent
-        Style.Tooltip(card, { label = preset.label, tooltip = preset.tooltip })
-        cards[i] = card
-    end
-
-    function row:Refresh()
-        for _, card in ipairs(cards) do
-            local profile = CardProfile(spec, card.preset)
-            if profile then
-                card.active = Plateau.DB.profileName == profile
-            else
-                card.active = Matches(card.preset)
-            end
-            local accent = card.accent
-            card.tag:SetShown(card.active)
-            card.edge:SetAlpha(card.active and 1 or 0.55)
-            Style.SetBorderColor(card, card.active and accent or C.border)
-            local button = card.button
-            if card.active then
-                button.label:SetText("In use")
-                Style.PaintText(button.label, C.muted)
-                Style.Paint(button.tint, C.window, 1)
-                Style.SetBorderColor(button, C.border)
-            else
-                button.label:SetText(profile and "Use this look" or "Apply this look")
-                Style.PaintText(button.label, C.text)
-                Style.Paint(button.tint, accent, 1, 0.22)
-                Style.SetBorderColor(button, accent)
-            end
-            button:SetEnabled(not card.active)
-        end
-    end
-
-    return row
-end
+function ns.AllLooks()
+    local list = {}
+    for _, group in ipairs({ Plateau.presets.looks, Plateau.presets.styles }) do
+        for _, preset in ipairs(group) do
+            list[#list + 1] = preset
+        end
+    end
+    return list
+end
+
+local function LookSample()
+    return {
+        health = 0.72,
+        maxHealth = 72700,
+        name = "Wastelander Phaseblade",
+        levelOffset = 1,
+        classification = "elite",
+        mobType = "caster",
+        auras = {},
+        absorb = 0,
+        alerts = {},
+        cast = {
+            progress = 0.6,
+            name = "Shadow Bolt",
+            icon = "Interface\\Icons\\Spell_Shadow_ShadowBolt",
+            timer = "1.4",
+        },
+    }
+end
+
+function ns.DrawLookSample(area, preset, width)
+    local look = Plateau.PresetLook(preset)
+    local name = "sample:" .. preset.key
+    Plateau.SetSampleLook(name, look)
+    local holder = CreateFrame("Frame", nil, area)
+    holder:SetSize(1, 1)
+    holder:SetPoint("CENTER", 0, 0)
+    holder:SetScale(math.min(0.7, width / look.plate.width))
+    local plate = Plateau.CreatePreview(holder, LookSample(), name)
+    plate:SetPoint("CENTER")
+end
 
 function ns.Widgets.SpellList(parent, spec)
     local row = CreateFrame("Frame", nil, parent)

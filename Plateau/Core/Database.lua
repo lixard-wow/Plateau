@@ -2,7 +2,7 @@ local _, ns = ...
 
 local L = ns.L
 
-local SCHEMA_VERSION = 28
+local SCHEMA_VERSION = 29
 local DEFAULT_PROFILE = "Default"
 local NAME_LIMIT = 32
 
@@ -57,6 +57,9 @@ local function RenameProfile(db, OLD, NEW)
     if db.profiles and db.profiles[OLD] and not db.profiles[NEW] then
         db.profiles[NEW] = db.profiles[OLD]
         db.profiles[OLD] = nil
+        if db.global and db.global.accountProfile == OLD then
+            db.global.accountProfile = NEW
+        end
         if db.global and db.global.builtins and db.global.builtins[OLD] then
             db.global.builtins[OLD] = nil
             db.global.builtins[NEW] = true
@@ -104,6 +107,12 @@ local function ForEachLook(db, fix)
 end
 
 local migrations = {
+    [29] = function(db)
+        RenameProfile(db, "Familiar layout", "Blizzard-like")
+        RenameProfile(db, "Classic unit frames", "Unit frame")
+        RenameProfile(db, "Clean and flat", "Flat")
+        RenameProfile(db, "Bold and crisp", "Heavy")
+    end,
     [28] = function(db)
         local function Clear(look)
             local scaling = type(look) == "table" and look.scaling

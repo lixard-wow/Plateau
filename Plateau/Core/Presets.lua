@@ -11,9 +11,8 @@ ns.presets = {
     looks = {
         {
             key = "familiar",
-            label = "Familiar layout",
-            subtitle = "Name below the bar",
-            summary = "Small flat bars with the name below, a cast bar right under the bar and a glow on your target.",
+            label = "Blizzard-like",
+            summary = "Small flat bar, name below, health value and percent.",
             accent = { 0.98, 0.72, 0.28, 1 },
             tooltip = "Small flat bar with the name below and health value and percent. Glow and corner brackets on your target; other nameplates dim in combat.",
             values = {
@@ -90,8 +89,7 @@ ns.presets = {
         {
             key = "minimal",
             label = "Minimal",
-            subtitle = "Default",
-            summary = "Thin, quiet nameplates: a small name on the bar's edge, a slim cast bar and a glow on your target while the rest fade in combat.",
+            summary = "Thin bar with the name on its edge, and nothing else.",
             accent = { 0.27, 0.82, 0.76, 1 },
             tooltip = "Thin 100 by 12 bar with the name on its top edge and no health text. Slim cast bar; other nameplates fade in combat.",
             values = {
@@ -145,9 +143,8 @@ ns.presets = {
         },
         {
             key = "classic",
-            label = "Classic unit frames",
-            subtitle = "Tooltip borders",
-            summary = "Glossy bars in grey tooltip borders with soft shadowed text, like classic unit frames.",
+            label = "Unit frame",
+            summary = "Glossy bar in a grey tooltip border, health percent in the middle.",
             accent = { 0.9, 0.28, 0.37, 1 },
             tooltip = "Glossy bar in a grey tooltip border with health percent in the middle; glow on your target.",
             values = {
@@ -186,9 +183,8 @@ ns.presets = {
         },
         {
             key = "flat",
-            label = "Clean and flat",
-            subtitle = "Soft target glow",
-            summary = "Flat bars, shadowed text, a tall cast bar and a soft glow on your target.",
+            label = "Flat",
+            summary = "Flat bar, name above, tall cast bar, soft glow on your target.",
             accent = { 0.31, 0.56, 0.97, 1 },
             tooltip = "Flat 156 by 17 bar with the name above and health percent on the right. Tall cast bar; glow on your target.",
             values = {
@@ -249,9 +245,8 @@ ns.presets = {
         },
         {
             key = "bold",
-            label = "Bold and crisp",
-            subtitle = "Outlined and sharp",
-            summary = "Thin shaded bars with a slate border, bold outlined text and arrows on your target.",
+            label = "Heavy",
+            summary = "Shaded bar, bold outlined text, arrows on your target.",
             accent = { 0.66, 0.52, 0.98, 1 },
             tooltip = "Thin shaded bar with bold outlined text and the cast target inside the cast bar. Arrows on your target.",
             values = {
@@ -312,8 +307,7 @@ ns.presets = {
         {
             key = "inside",
             label = "Compact",
-            subtitle = "Name on the bar",
-            summary = "A wide bar with the name and health inside it, so each plate takes up as little height as possible.",
+            summary = "Name and health inside one wide bar, for big pulls.",
             accent = { 0.52, 0.84, 0.35, 1 },
             tooltip = "Wide bar with the name on the left and health on the right, for the shortest nameplates. Slim cast bar without an icon.",
             values = {
@@ -487,12 +481,12 @@ local Builtins = {}
 ns.Builtins = Builtins
 
 Builtins.list = {
-    { name = "Familiar layout", group = "looks", key = "familiar" },
     { name = "Minimal", group = "looks", key = "minimal" },
-    { name = "Classic unit frames", group = "looks", key = "classic" },
+    { name = "Blizzard-like", group = "looks", key = "familiar" },
+    { name = "Unit frame", group = "looks", key = "classic" },
     { name = "Compact", group = "styles", key = "inside" },
-    { name = "Clean and flat", group = "looks", key = "flat" },
-    { name = "Bold and crisp", group = "looks", key = "bold" },
+    { name = "Flat", group = "looks", key = "flat" },
+    { name = "Heavy", group = "looks", key = "bold" },
 }
 
 Builtins.defaultName = "Minimal"

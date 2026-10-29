@@ -86,7 +86,7 @@ assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 local function load(path) local f = assert(loadfile(path)); f("Plateau", ns) end
 load("Plateau/Core/Defaults.lua"); load("Plateau/Core/Database.lua"); load("Plateau/Core/Share.lua"); load("Plateau/Core/AutoProfile.lua")
 load("Plateau/Core/Media.lua"); load("Plateau/Core/Layout.lua"); load("Plateau/Core/Presets.lua")
-ns.Builtins = { list = { { name = "Alpha" } }, Label = function(n) return n end, ByName = function() return nil end, Values = function() return {} end }
+ns.Builtins = { list = { { name = "Alpha" } }, Label = function(n) return n end, ByName = function() return nil end, ForPreset = function() return nil end, Values = function() return {} end }
 PlateauDB = nil
 ns.DB:Init()
 
