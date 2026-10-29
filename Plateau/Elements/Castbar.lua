@@ -768,7 +768,7 @@ local HOLD_BREAKERS = {
     UNIT_SPELLCAST_EMPOWER_START = true,
 }
 
-function Castbar:OnEvent(plate, event, unit, _, _, _, interruptedBy)
+function Castbar:OnEvent(plate, event, unit, _, _, interruptedBy)
     local s = settings[plate.state]
     local bar = plate.castbar
     local recent = bar:IsShown() or (bar.stoppedAt ~= nil and GetTime() - bar.stoppedAt < 0.3)
