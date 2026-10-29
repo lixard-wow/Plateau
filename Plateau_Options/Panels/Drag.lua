@@ -41,7 +41,7 @@ local function Apply(values)
 end
 
 local function Get(path)
-    return Plateau.DB:Get(path)
+    return (Plateau.DB:Get(path))
 end
 
 local function PointXY(frame, point)

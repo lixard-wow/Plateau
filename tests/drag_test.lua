@@ -90,7 +90,7 @@ Plateau = {
     textPositions = coreNs.textPositions,
     DB = {
         saved = { global = {} },
-        Get = function(_, path) return db[path] end,
+        Get = function(_, path) return db[path], true end,
         SetMany = function(_, values)
             saved = values
             for k, v in pairs(values) do db[k] = v end
