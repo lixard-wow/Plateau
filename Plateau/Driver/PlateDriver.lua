@@ -843,13 +843,9 @@ local function RunBuild(job, deadline)
     return true
 end
 
-local function StepBuild(job, deadline)
-    return RunBuild(job, deadline)
-end
-
 local function BuildPlate(state)
     local job = StartBuild(state)
-    StepBuild(job)
+    RunBuild(job)
     return job.plate
 end
 
@@ -1000,7 +996,7 @@ poolWarmer:SetScript("OnUpdate", function(self)
             return
         end
     end
-    if StepBuild(building, started + BUILD_BUDGET_MS) then
+    if RunBuild(building, started + BUILD_BUDGET_MS) then
         local list = pools[building.state]
         list[#list + 1] = building.plate
         building = nil
@@ -1118,10 +1114,6 @@ function OnUnitRemoved(unit)
     ns.Fire("PLATE_REMOVED", unit, plate)
 end
 
-local function PreviewState(state)
-    return state.isFriendly and "friendly" or "enemy"
-end
-
 local function RenderPreview(plate)
     local state = plate.preview
     plate.isTarget, plate.isFocus, plate.isFriendly = state.isTarget, state.isFocus, state.isFriendly
@@ -1171,7 +1163,7 @@ function Driver:CreatePreview(parent, state, sample)
     plate.preview = state
     plate.sample = sample
     AddOverlay(plate)
-    plate.state = sample or PreviewState(state)
+    plate.state = sample or StateFor(state)
     for i = 1, #elements do
         elements[i]:Create(plate)
         plate.built[elements[i]] = true
@@ -1193,7 +1185,7 @@ end
 
 function Driver:SetPreviewState(plate, state)
     plate.preview = state
-    plate.state = plate.sample or PreviewState(state)
+    plate.state = plate.sample or StateFor(state)
     DrawPreview(plate)
 end
 
