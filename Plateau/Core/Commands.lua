@@ -450,6 +450,15 @@ Plateau = {
     Brand = ns.Brand,
     Builtins = ns.Builtins,
     AutoProfile = ns.AutoProfile,
+    WaitingForCombat = function()
+        local list = {}
+        local restyle, clicks = ns.Driver:WaitingForCombat()
+        if ns.CVars:IsPending() then list[#list + 1] = L["Blizzard settings"] end
+        if clicks then list[#list + 1] = L["Click areas"] end
+        if restyle then list[#list + 1] = L["Nameplate look"] end
+        if ns.AutoProfile:Status().pending then list[#list + 1] = L["Profile switch"] end
+        return list
+    end,
     CONTENT_TYPES = ns.CONTENT_TYPES,
     arrowStyles = ns.arrowStyles,
     iconPositions = ns.iconPositions,

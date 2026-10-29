@@ -1214,6 +1214,10 @@ end)
 
 local restyleAfterCombat = false
 
+function Driver:WaitingForCombat()
+    return restyleAfterCombat, hitTestPending
+end
+
 function Driver:RequestRestyle(background)
     if background and InCombatLockdown() then
         restyleAfterCombat = true

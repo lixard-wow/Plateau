@@ -709,6 +709,31 @@ end
 
 ns.RefreshPreviewEditing = UpdateHotspots
 
+local waiting = CreateFrame("Frame", nil, panel)
+waiting:SetFrameLevel(panel:GetFrameLevel() + 240)
+waiting:SetPoint("TOPLEFT", layout.pad, -8)
+waiting:SetHeight(18)
+Style.Fill(waiting, C.hover)
+Style.Border(waiting, C.edge)
+waiting.text = Style.Text(waiting, 11, C.text)
+waiting.text:SetPoint("LEFT", 6, 0)
+waiting:Hide()
+local waitCheck = 0
+waiting.watch = CreateFrame("Frame", nil, panel)
+waiting.watch:SetScript("OnUpdate", function(_, elapsed)
+    waitCheck = waitCheck - elapsed
+    if waitCheck > 0 then return end
+    waitCheck = 0.5
+    local list = Plateau.WaitingForCombat and Plateau.WaitingForCombat() or {}
+    if #list == 0 then
+        waiting:Hide()
+        return
+    end
+    waiting.text:SetText(Style.T("Waiting for combat to end: %s"):format("|cffd07a3c" .. table.concat(list, ", ") .. "|r"))
+    waiting:SetWidth(waiting.text:GetStringWidth() + 12)
+    waiting:Show()
+end)
+
 function ns.SetPreviewFocus(key)
     if key == focus then return end
     focus = key

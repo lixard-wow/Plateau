@@ -66,6 +66,10 @@ local function SetLive(store, name, value)
     end
 end
 
+function CVars:IsPending()
+    return pending
+end
+
 function CVars:Apply()
     if InCombatLockdown() then
         pending = true
