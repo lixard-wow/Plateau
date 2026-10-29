@@ -418,13 +418,9 @@ end
 
 function Castbar:Style(plate, db)
     local bar = plate.castbar
-    local height, gap, size = (db.height and db.height > 0) and db.height or plate.rawHeight or plate:GetHeight(), db.gap, db.borderSize
     local look = ns.DB.views[plate.state]
-    local joined = db.joinBorder and (plate.castShift or 0) == 0 and db.borderStyle == "pixel"
-        and look and look.health.borderStyle == "pixel"
-    if joined then
-        gap = ns.HealthBorderOffset(look)
-    end
+    local height, gap, size = (db.height and db.height > 0) and db.height or plate.rawHeight or plate:GetHeight(), ns.CastbarGap(look, plate.castShift), db.borderSize
+    local joined = ns.CastbarJoined(look, plate.castShift)
     local drop = gap + (plate.castShift or 0)
     local span = db.showIcon and db.iconSpan
     local iconOffset = (db.showIcon and not span) and (height + gap) or 0

@@ -73,6 +73,18 @@ function ns.HealthBorderOffset(look)
     return look.health.borderInside and 0 or look.health.borderSize
 end
 
+function ns.CastbarJoined(look, shift)
+    local cast = look.castbar
+    return cast.joinBorder and (shift or 0) == 0 and cast.borderStyle == "pixel" and look.health.borderStyle == "pixel"
+end
+
+function ns.CastbarGap(look, shift)
+    if ns.CastbarJoined(look, shift) then
+        return ns.HealthBorderOffset(look)
+    end
+    return look.castbar.gap
+end
+
 function Border:SetStyle(style, levelAbove)
     self.style = style
     self.levelAbove = levelAbove

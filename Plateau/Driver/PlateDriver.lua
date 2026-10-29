@@ -253,7 +253,7 @@ local function StackSpace(look, space)
     if space == "cast" or space == "barcast" or space == "all" then
         local cast = look.castbar
         local height = (cast.height and cast.height > 0) and cast.height or look.plate.height
-        below = below + height + cast.gap + cast.borderSize * 2
+        below = below + height + ns.CastbarGap(look) + cast.borderSize * 2
     end
     if space == "all" then
         above = math.max(above, AurasAbove(look))
@@ -320,7 +320,7 @@ local function PlaceClick(plate)
     end
     local cast = look.castbar
     local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
-    local extra = size.clickCastBar and (castHeight + cast.gap + cast.borderSize * 2) or 0
+    local extra = size.clickCastBar and (castHeight + ns.CastbarGap(look) + cast.borderSize * 2) or 0
     local total = (plate:GetHeight() or look.plate.height) + size.clickY * 2 + extra
     click.castShare = (size.clickCastBar and size.clickCastOnly and total > 0) and math.min(0.9, extra / total) or 0
     UpdateReach(plate)
