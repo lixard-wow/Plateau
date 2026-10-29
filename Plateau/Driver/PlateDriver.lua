@@ -290,14 +290,18 @@ end
 
 local AddHandlers
 
+local function Build(plate, element)
+    element:Create(plate)
+    AddHandlers(plate, element, element.events)
+    AddHandlers(plate, element, element.globalEvents)
+    plate.built[element] = true
+end
+
 local function BuildMissing(plate)
     for i = 1, #elements do
         local element = elements[i]
         if element.enabled ~= false and not plate.built[element] then
-            element:Create(plate)
-            AddHandlers(plate, element, element.events)
-            AddHandlers(plate, element, element.globalEvents)
-            plate.built[element] = true
+            Build(plate, element)
         end
     end
 end
@@ -821,10 +825,7 @@ local function RunBuild(job, deadline)
     while job.index <= #elements do
         local element = elements[job.index]
         if element.enabled ~= false then
-            element:Create(plate)
-            AddHandlers(plate, element, element.events)
-            AddHandlers(plate, element, element.globalEvents)
-            plate.built[element] = true
+            Build(plate, element)
         end
         job.index = job.index + 1
         if deadline and debugprofilestop() > deadline then
