@@ -744,7 +744,8 @@ local PAGE_GROUPS = {
     } },
     { pages = {
         { key = "friendly", title = "Friendly", parts = { "friendly" } },
-        { key = "profiles", title = "Profiles", parts = { "profiles", "addon" } },
+        { key = "profiles", title = "Profiles", parts = { "profiles" } },
+        { key = "window", title = "Window", parts = { "addon" } },
         { key = "help", title = "Help", parts = { "help" } },
     } },
 }
