@@ -43,9 +43,7 @@ frame:SetClampedToScreen(true)
 frame:EnableMouse(true)
 frame:Hide()
 frame:SetScale(Style.PixelScale())
-local frameEdge = Style.Rounded(frame, C.border, "BACKGROUND", -2)
-frameEdge:SetAllPoints()
-local frameFill = Style.Rounded(frame, C.window, "BACKGROUND", -1)
+Style.Panel(frame, C.window, C.edge, nil, C.border)
 if Style.theme.innerFrame then
     local ring = CreateFrame("Frame", nil, frame)
     ring:SetPoint("TOPLEFT", 4, -4)
@@ -61,7 +59,6 @@ if Style.theme.innerFrame then
         if edge[4] then line:SetHeight(edge[4]) end
     end
 end
-Style.PixelInset(frameFill, frame)
 tinsert(UISpecialFrames, "PlateauOptions")
 
 local OFFSCREEN_KEEP = 120

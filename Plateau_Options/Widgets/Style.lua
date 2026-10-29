@@ -21,7 +21,7 @@ local CINZEL = FONTS .. "Cinzel-Bold.ttf"
 local SOURCE = FONTS .. "SourceSans3-Regular.ttf"
 local SOURCE_BOLD = FONTS .. "SourceSans3-Bold.ttf"
 
-Style.THEME_ORDER = { "workbench", "ledger", "horde", "alliance", "classic" }
+Style.THEME_ORDER = { "survey" }
 
 local function Mix(color, toward, amount)
     return {
@@ -32,94 +32,72 @@ local function Mix(color, toward, amount)
     }
 end
 
-local function Palette(spec)
-    local accent = Hex(spec.accent)
-    local hover = Hex(spec.hover)
-    local border = Hex(spec.border)
-    local text = Hex(spec.text)
-    local muted = Hex(spec.muted)
-    return {
-        window = Hex(spec.window),
-        rail = Hex(spec.rail),
-        header = Hex(spec.rail),
-        surface = Hex(spec.surface),
-        surfaceBorder = border,
-        field = Hex(spec.field),
-        hover = hover,
-        border = border,
-        line = border,
-        accent = accent,
-        text = text,
-        title = text,
-        heading = text,
-        muted = muted,
-        warn = Hex("#e0913a"),
-        button = hover,
-        buttonBorder = hover,
-        buttonHover = Mix(hover, 1, 0.07),
-        buttonText = text,
-        primary = accent,
-        primaryBorder = accent,
-        primaryHover = Mix(accent, 1, 0.15),
-        primaryText = Hex(spec.onAccent),
-        iconButton = hover,
-        iconButtonBorder = hover,
-        icon = Mix(muted, 1, 0.3),
-        iconHover = { 1, 1, 1, 1 },
-    }
-end
+local STONE = Hex("#141518")
+local STONE_UP = Hex("#1c1e22")
+local TABLE = Hex("#0b0c0e")
+local SLATE = Hex("#2c3036")
+local EDGE = Hex("#000000")
+local BONE = Hex("#e2dccf")
+local MUTED = Hex("#8e8a82")
+local FAINT = Hex("#57554f")
+local OCHRE = Hex("#d07a3c")
+local OCHRE_HI = Hex("#f0a86a")
+local OCHRE_INK = Hex("#1a0f06")
+local DANGER = Hex("#c4553a")
 
 Style.THEMES = {
-    workbench = {
-        name = "Workbench",
-        desc = "Charcoal with a green accent.",
-        colors = Palette({ window = "#111418", rail = "#171a1f", surface = "#1a1e23", field = "#1d2127", hover = "#262b32", border = "#2c323a",
-            text = "#e8ebee", muted = "#9aa3ad", accent = "#4fbf8f", onAccent = "#08140f" }),
-        groups = { look = Hex("#4fbf8f"), casts = Hex("#a98cf0"), highlights = Hex("#e0a03a"), setup = Hex("#6fa8e8") },
-    },
-    ledger = {
-        name = "Artisan Ledger",
-        desc = "Walnut brown with a brass accent.",
-        colors = Palette({ window = "#16110c", rail = "#1d1610", surface = "#221a13", field = "#2a2018", hover = "#33281d", border = "#4a3a28",
-            text = "#f1e6d2", muted = "#bba98b", accent = "#c9a24a", onAccent = "#1a1206" }),
-        groups = { look = Hex("#c9a35a"), casts = Hex("#b9825a"), highlights = Hex("#9fc58a"), setup = Hex("#8fa3b0") },
-    },
-    horde = {
-        name = "Horde",
-        desc = "Dark red with an ember accent.",
-        colors = Palette({ window = "#140c0b", rail = "#1b100f", surface = "#211312", field = "#291816", hover = "#341e1b", border = "#4d2a25",
-            text = "#f3e5e1", muted = "#bea19b", accent = "#e8664c", onAccent = "#1a0703" }),
-        groups = { look = Hex("#e8664c"), casts = Hex("#e0a03a"), highlights = Hex("#c9a35a"), setup = Hex("#a8968f") },
-    },
-    alliance = {
-        name = "Alliance",
-        desc = "Deep blue with a gold accent.",
-        colors = Palette({ window = "#0b1120", rail = "#0f172a", surface = "#121c33", field = "#17233d", hover = "#1e2c4b", border = "#2b3d63",
-            text = "#e7edf8", muted = "#a3b3cf", accent = "#e2bb4d", onAccent = "#1a1404" }),
-        groups = { look = Hex("#e2bb4d"), casts = Hex("#5b9be8"), highlights = Hex("#8fc4d8"), setup = Hex("#a6b3c9") },
-    },
-    classic = {
-        name = "Slate",
-        desc = "Cool grey with a steel blue accent.",
-        colors = Palette({ window = "#101214", rail = "#16191c", surface = "#1a1d21", field = "#202428", hover = "#292e33", border = "#32383e",
-            text = "#e6e8ea", muted = "#a0a7ae", accent = "#8fb3d9", onAccent = "#0a1420" }),
-        groups = { look = Hex("#8fb3d9"), casts = Hex("#b59be0"), highlights = Hex("#d9b46a"), setup = Hex("#8fc4b0") },
+    survey = {
+        name = "Survey",
+        desc = "Stone, a measured table, and mesa ochre on what you can move.",
+        colors = {
+            window = STONE,
+            rail = STONE,
+            header = TABLE,
+            surface = TABLE,
+            surfaceBorder = EDGE,
+            field = TABLE,
+            hover = STONE_UP,
+            border = SLATE,
+            line = SLATE,
+            edge = EDGE,
+            accent = OCHRE,
+            accentHi = OCHRE_HI,
+            text = BONE,
+            title = BONE,
+            heading = MUTED,
+            muted = MUTED,
+            faint = FAINT,
+            warn = DANGER,
+            button = STONE_UP,
+            buttonBorder = EDGE,
+            buttonHover = Mix(STONE_UP, 1, 0.07),
+            buttonText = BONE,
+            primary = OCHRE,
+            primaryBorder = EDGE,
+            primaryHover = OCHRE_HI,
+            primaryText = OCHRE_INK,
+            iconButton = STONE_UP,
+            iconButtonBorder = EDGE,
+            icon = MUTED,
+            iconHover = BONE,
+        },
+        groups = { look = FAINT, casts = FAINT, highlights = FAINT, setup = FAINT },
     },
 }
 
 Style.SHAPE = {
     body = BARLOW,
     heading = BARLOW_COND,
-    radius = 10,
-    buttonRadius = 4,
+    radius = 0,
+    buttonRadius = 0,
     titleFont = { BARLOW_COND, 17 },
     sectionFont = { BARLOW_SEMI, 12 },
     buttonFont = { BARLOW_SEMI, 13 },
     headerHeight = 46,
     iconButton = 28,
     headerFill = true,
-    uppercaseTitle = true,
-    stripe = true,
+    uppercaseTitle = false,
+    stripe = false,
     settingsIcon = "icon_gear",
 }
 
@@ -130,7 +108,7 @@ local function ChosenTheme()
     if Style.THEMES[saved] then
         return saved
     end
-    return Plateau.flavor == "forever" and "ledger" or "workbench"
+    return "survey"
 end
 
 function Style.ThemeKey()
@@ -150,7 +128,7 @@ local function CopyInto(target, source)
 end
 
 local function LoadPalette(key)
-    local theme = Style.THEMES[key] or Style.THEMES.workbench
+    local theme = Style.THEMES[key] or Style.THEMES.survey
     for name, color in pairs(theme.colors) do
         local slot = Style.colors[name]
         if not slot then
@@ -529,9 +507,10 @@ local function ApplyPixel(region, how)
     elseif how == "height" then
         region:SetHeight(unit)
     else
+        local inset = unit * how[2]
         region:ClearAllPoints()
-        region:SetPoint("TOPLEFT", how, "TOPLEFT", unit, -unit)
-        region:SetPoint("BOTTOMRIGHT", how, "BOTTOMRIGHT", -unit, unit)
+        region:SetPoint("TOPLEFT", how[1], "TOPLEFT", inset, -inset)
+        region:SetPoint("BOTTOMRIGHT", how[1], "BOTTOMRIGHT", -inset, inset)
     end
 end
 
@@ -545,9 +524,10 @@ function Style.PixelHeight(region)
     ApplyPixel(region, "height")
 end
 
-function Style.PixelInset(region, parent)
-    pixelSized[region] = parent
-    ApplyPixel(region, parent)
+function Style.PixelInset(region, parent, pixels)
+    local how = { parent, pixels or 1 }
+    pixelSized[region] = how
+    ApplyPixel(region, how)
 end
 
 function Style.OnPixels(region, callback)
@@ -565,11 +545,17 @@ function Style.RefreshPixels()
     end
 end
 
-function Style.Panel(frame, fill, border, radius)
-    local edge = Style.Rounded(frame, border, "BACKGROUND", -2, radius)
+function Style.Panel(frame, fill, border, radius, line)
+    local edge = Style.Rounded(frame, border, "BACKGROUND", -3, radius)
     edge:SetAllPoints()
+    local inset = 1
+    if line then
+        local ring = Style.Rounded(frame, line, "BACKGROUND", -2, radius)
+        Style.PixelInset(ring, frame, 1)
+        inset = 2
+    end
     local inner = Style.Rounded(frame, fill, "BACKGROUND", -1, radius)
-    Style.PixelInset(inner, frame)
+    Style.PixelInset(inner, frame, inset)
     frame.roundEdge = edge
     frame.roundFill = inner
     return inner, edge
