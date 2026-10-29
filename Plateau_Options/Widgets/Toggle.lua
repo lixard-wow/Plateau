@@ -4,22 +4,36 @@ local Style = ns.Style
 local C = Style.colors
 
 local FADED = 0.3
-local BAR_WIDTH, BAR_HEIGHT = 24, 10
+local BOX = 14
+local CHECK = "Interface\\AddOns\\Plateau_Options\\Art\\Icons\\icon_check"
 
 local function MakeToggle(parent, spec)
     local row = CreateFrame("Button", nil, parent)
     local label = Style.RowLabel(row, spec)
     local labelHit = Style.LabelHit(label)
 
-    local track = Style.Bar(row, BAR_WIDTH, BAR_HEIGHT)
+    local track = CreateFrame("Frame", nil, row)
+    track:SetSize(BOX, BOX)
     track:SetPoint("LEFT", Style.CONTROL_X, 0)
+    local fill, edge = Style.Panel(track, C.field, C.edge, nil, C.border)
+    local mark = track:CreateTexture(nil, "ARTWORK")
+    mark:SetTexture(CHECK)
+    mark:SetSize(BOX - 2, BOX - 2)
+    mark:SetPoint("CENTER")
+    Style.PaintVertex(mark, C.primaryText)
+    track.fill, track.mark = fill, mark
 
     local hovered = false
     function row:SetOn(on)
         self.on = on
-        track:SetFraction(on and 1 or 0)
-        Style.PaintVertex(track.back, (hovered and not on) and C.hover or C.field)
-        Style.Paint(track.fill, hovered and C.accentHi or C.accent, 1)
+        mark:SetShown(on)
+        if on then
+            Style.PaintVertex(fill, hovered and C.accentHi or C.accent)
+            Style.PaintVertex(edge, C.edge)
+        else
+            Style.PaintVertex(fill, hovered and C.hover or C.field)
+            Style.PaintVertex(edge, hovered and C.accent or C.edge)
+        end
     end
 
     local function RefreshEverything()
