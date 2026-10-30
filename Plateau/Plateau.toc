@@ -36,6 +36,7 @@ Core\Border.lua
 Core\Layout.lua
 Core\Presets.lua
 Core\CVars.lua
+Core\Zone.lua
 Core\AutoProfile.lua
 Core\Commands.lua
 Core\Minimap.lua

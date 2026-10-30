@@ -18,6 +18,7 @@ local ns = {
         ClearOverride = function(_, name) if overrides[name] then cvars[name] = overrides[name]; overrides[name] = nil end; return true end,
     },
 }
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Features/InstancePets.lua"))("Plateau", ns)
 local P = ns.InstancePets
 local fire = function(event) P.scripts.OnEvent(P, event) end

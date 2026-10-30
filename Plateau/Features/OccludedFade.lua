@@ -36,12 +36,7 @@ function OccludedFade:SetOn(kind, on)
 end
 
 function OccludedFade:Update()
-    if not (ns.DB and ns.DB.saved) then return end
-    if InCombatLockdown() then
-        self.pending = true
-        return
-    end
-    self.pending = false
+    if not (ns.DB and ns.DB.saved) or not ns.Zone.OutOfCombat(self) then return end
     if self:IsOn(self:Kind()) then
         ns.CVars:ClearOverride(CVAR)
     else
@@ -49,14 +44,7 @@ function OccludedFade:Update()
     end
 end
 
-OccludedFade:RegisterEvent("PLAYER_ENTERING_WORLD")
-OccludedFade:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-OccludedFade:RegisterEvent("PLAYER_REGEN_ENABLED")
-OccludedFade:SetScript("OnEvent", function(self, event)
-    if ns.disabled then return end
-    if event == "PLAYER_REGEN_ENABLED" and not self.pending then return end
-    self:Update()
-end)
+ns.Zone.Watch(OccludedFade, OccludedFade.Update)
 
 if Plateau then
     Plateau.OccludedFade = OccludedFade

@@ -11,6 +11,7 @@ local ns = {
         ClearOverride = function() calls[#calls + 1] = "clear" end,
     },
 }
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Features/OccludedFade.lua"))("Plateau", ns)
 local O = ns.OccludedFade
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end

@@ -46,12 +46,7 @@ function InstancePets:InInstance()
 end
 
 function InstancePets:Update()
-    if not (ns.DB and ns.DB.saved) then return end
-    if InCombatLockdown() then
-        self.pending = true
-        return
-    end
-    self.pending = false
+    if not (ns.DB and ns.DB.saved) or not ns.Zone.OutOfCombat(self) then return end
     local hide = self:IsOn() and self:InInstance()
     for _, name in ipairs(CVARS) do
         if hide then
@@ -72,14 +67,7 @@ function ns.CVars:OnOverrideChanged(name, value)
     end
 end
 
-InstancePets:RegisterEvent("PLAYER_ENTERING_WORLD")
-InstancePets:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-InstancePets:RegisterEvent("PLAYER_REGEN_ENABLED")
-InstancePets:SetScript("OnEvent", function(self, event)
-    if ns.disabled then return end
-    if event == "PLAYER_REGEN_ENABLED" and not self.pending then return end
-    self:Update()
-end)
+ns.Zone.Watch(InstancePets, InstancePets.Update)
 
 if Plateau then
     Plateau.InstancePets = InstancePets

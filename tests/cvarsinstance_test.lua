@@ -21,6 +21,7 @@ end
 local ns = { DB = { saved = { global = { hideInstancePets = true } } } }
 assert(loadfile("Plateau/Core/CVars.lua"))("Plateau", ns)
 ns_cvars = ns.CVars
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Features/InstancePets.lua"))("Plateau", ns)
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 
