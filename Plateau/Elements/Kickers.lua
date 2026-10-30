@@ -13,6 +13,7 @@ local CLASS_SHEET = "Interface\\WorldStateFrame\\Icons-Classes"
 local UNITS = { "player", "party1", "party2", "party3", "party4" }
 local MARK_LIFE = 4 * 60 * 60
 local GAP = 2
+local BLACK = { 0, 0, 0, 1 }
 
 local CHAT_EVENTS = {
     "CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER", "CHAT_MSG_INSTANCE_CHAT", "CHAT_MSG_INSTANCE_CHAT_LEADER",
@@ -222,10 +223,7 @@ end
 local function Icon(seg, index)
     local icon = seg.icons[index]
     if icon then return icon end
-    icon = CreateFrame("Frame", nil, seg.content)
-    icon.border = ns.CreateBorder(icon, icon, "OVERLAY", 1)
-    icon.art = icon:CreateTexture(nil, "OVERLAY", nil, 2)
-    icon.art:SetAllPoints()
+    icon = ns.CreateIcon(seg.content)
     local cd = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
     cd:SetAllPoints(icon.art)
     cd:SetDrawEdge(false)
@@ -279,16 +277,14 @@ local function PaintIcon(icon, seg, slot, entry, size, plate)
     Picture(icon.art, entry, look and look.iconStyle)
     icon.plate, icon.kicked = plate, entry.kicked
     Countdown(icon, plate)
-    local borderSize = (look and look.borderSize) or 1
-    icon.border:Layout(borderSize)
-    icon.border:SetShown(borderSize > 0)
-    local color = look and look.borderClassColor ~= false and entry.class and C_ClassColor and C_ClassColor.GetClassColor(entry.class)
-    if color then
-        icon.border:SetColor(color.r, color.g, color.b, 1)
-    else
-        local fixed = look and look.borderColor or { 0, 0, 0, 1 }
-        icon.border:SetColor(fixed[1], fixed[2], fixed[3], fixed[4])
+    local class = look and look.borderClassColor ~= false and entry.class and C_ClassColor and C_ClassColor.GetClassColor(entry.class)
+    icon.classColor = icon.classColor or {}
+    local color = look and look.borderColor or BLACK
+    if class then
+        color = icon.classColor
+        color[1], color[2], color[3], color[4] = class.r, class.g, class.b, 1
     end
+    icon:SetIconBorder((look and look.borderSize) or 1, color)
     icon.guid, icon.sample = entry.guid, entry.sample
     ApplyCooldown(icon)
     icon:Show()

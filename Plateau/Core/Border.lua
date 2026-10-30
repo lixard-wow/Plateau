@@ -51,6 +51,35 @@ local EDGE_STYLES = {
 
 local SHADOW_STEP = 3
 
+function ns.SnapTexture(texture)
+    texture:SetSnapToPixelGrid(true)
+    texture:SetTexelSnappingBias(0)
+    return texture
+end
+
+local function SetIconBorder(icon, size, color)
+    size = size or 0
+    icon.border:Layout(size)
+    icon.border:SetShown(size > 0)
+    if color then
+        icon.border:SetColor(color[1], color[2], color[3], color[4] or 1)
+    end
+end
+
+function ns.DecorateIcon(frame)
+    local art = ns.SnapTexture(frame:CreateTexture(nil, "ARTWORK"))
+    art:SetAllPoints()
+    art:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    frame.art = art
+    frame.border = ns.CreateBorder(frame, frame, "OVERLAY", 1)
+    frame.SetIconBorder = SetIconBorder
+    return frame
+end
+
+function ns.CreateIcon(parent)
+    return ns.DecorateIcon(CreateFrame("Frame", nil, parent))
+end
+
 function ns.CreateBorder(owner, anchor, layer, sublevel)
     local border = setmetatable({ owner = owner, anchor = anchor, edges = {} }, Border)
     for i = 1, 4 do

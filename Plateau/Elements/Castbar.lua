@@ -340,7 +340,7 @@ function Castbar:Create(plate)
     mustStop.fill:SetAlpha(0)
     bar.mustStop = mustStop
 
-    bar.icon = bar:CreateTexture(nil, "ARTWORK")
+    bar.icon = ns.SnapTexture(bar:CreateTexture(nil, "ARTWORK"))
     bar.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
     bar.shieldIcon = textLayer:CreateTexture(nil, "OVERLAY", nil, 3)

@@ -111,13 +111,7 @@ local function StyleButton(button, group, container)
         button:SetHideTooltipInCombat(not config.tooltipsInCombat)
     end
 
-    local borderSize = db.borderSize
-    button.border:Layout(borderSize)
-    button.border:SetShown(borderSize > 0)
-    local borderColor = db.borderColor
-    if borderColor then
-        button.border:SetColor(borderColor[1], borderColor[2], borderColor[3], borderColor[4])
-    end
+    button:SetIconBorder(db.borderSize, db.borderColor)
     ns.ApplyFont(button.timer, config.font, db.timerSize, config.outline)
     ns.ApplyFont(button.stacks, config.font, db.stackSize, config.outline)
     ns.ApplyShadow(button.timer, config.shadow)
@@ -172,10 +166,10 @@ local function Initializer(container, group)
         button.plateauInit = true
         container.buttons[#container.buttons + 1] = button
 
-        local icon = button:CreateTexture(nil, "ARTWORK")
-        icon:SetAllPoints()
-        icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-        button.iconTexture = icon
+        ns.DecorateIcon(button)
+        button.iconTexture = button.art
+        button.border.restricted = true
+        button.border:SetColor(0, 0, 0, 1)
 
         local cooldown = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
         cooldown:SetAllPoints()
@@ -184,10 +178,6 @@ local function Initializer(container, group)
         cooldown:SetHideCountdownNumbers(true)
         cooldown:SetReverse(true)
         button.cooldownFrame = cooldown
-
-        button.border = ns.CreateBorder(button, button, "OVERLAY", 1)
-        button.border.restricted = true
-        button.border:SetColor(0, 0, 0, 1)
 
         button.timer = cooldown:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         button.timer:SetPoint("CENTER", 0, 0)
@@ -863,11 +853,8 @@ local function FakeGroup(plate, key)
     fake:SetSize(1, 1)
     fake.icons = {}
     for i = 1, 6 do
-        local icon = CreateFrame("Frame", nil, fake)
-        icon.texture = icon:CreateTexture(nil, "ARTWORK")
-        icon.texture:SetAllPoints()
-        icon.texture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-        icon.border = ns.CreateBorder(icon, icon, "OVERLAY", 1)
+        local icon = ns.CreateIcon(fake)
+        icon.texture = icon.art
         icon.dispel = ns.CreateBorder(icon, icon, "OVERLAY", 2)
         icon.timer = icon:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         icon.timer:SetPoint("CENTER")
@@ -951,11 +938,7 @@ function Auras:Preview(plate, state)
                     else
                         icon.texture:SetTexture(samples[(i - 1) % #samples + 1])
                     end
-                    local borderSize = db.borderSize or 1
-                    local borderColor = db.borderColor or BLACK
-                    icon.border:Layout(borderSize)
-                    icon.border:SetShown(borderSize > 0)
-                    icon.border:SetColor(borderColor[1], borderColor[2], borderColor[3], borderColor[4])
+                    icon:SetIconBorder(db.borderSize or 1, db.borderColor or BLACK)
                     local dispel = SAMPLE_BORDER[key]
                     icon.dispel:Layout(1)
                     if dispel then

@@ -221,8 +221,7 @@ local function PixelBox(spot)
     if not l then return nil end
     local toPx = scale / PixelFactor()
     ring = math.max(0, math.floor((ring or 0) + 0.5))
-    return math.floor(l * toPx + 0.5) - ring, math.floor(r * toPx + 0.5) + ring,
-        math.floor(t * toPx + 0.5) + ring, math.floor(b * toPx + 0.5) - ring
+    return l * toPx - ring, r * toPx + ring, t * toPx + ring, b * toPx - ring
 end
 
 local function FrameAround(frame, l, r, t, b)
