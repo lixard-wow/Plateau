@@ -249,6 +249,52 @@ function Style.SnapWindow(frame)
     frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", math.floor(left + 0.5), math.floor(top + 0.5))
 end
 
+local windowDrag
+
+local function EndWindowDrag()
+    local drag = windowDrag
+    if not drag then return end
+    drag:Hide()
+    local frame, onStop = drag.frame, drag.onStop
+    drag.frame, drag.onStop = nil, nil
+    if frame and onStop then
+        onStop(frame)
+    end
+end
+
+local function FollowCursor(self)
+    local frame = self.frame
+    if not frame or not IsMouseButtonDown("LeftButton") then
+        EndWindowDrag()
+        return
+    end
+    local x, y = GetCursorPosition()
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.left + (x - self.x) / self.scale, self.top + (y - self.y) / self.scale)
+end
+
+function Style.DragWindow(frame, handles, onStop)
+    local function Start()
+        local left, top = frame:GetLeft(), frame:GetTop()
+        if not left or not top then return end
+        if not windowDrag then
+            windowDrag = CreateFrame("Frame")
+            windowDrag:Hide()
+            windowDrag:SetScript("OnUpdate", FollowCursor)
+        end
+        windowDrag.frame, windowDrag.onStop = frame, onStop
+        windowDrag.left, windowDrag.top = left, top
+        windowDrag.x, windowDrag.y = GetCursorPosition()
+        windowDrag.scale = frame:GetEffectiveScale()
+        windowDrag:Show()
+    end
+    for _, handle in ipairs(handles) do
+        handle:RegisterForDrag("LeftButton")
+        handle:SetScript("OnDragStart", Start)
+        handle:SetScript("OnDragStop", EndWindowDrag)
+    end
+end
+
 function Style.FitWindow(frame)
     local scale = Style.PixelScale()
     if frame:GetScale() ~= scale then

@@ -62,11 +62,6 @@ local function LooseClamp()
     frame:SetClampedToScreen(false)
 end
 
-local function StopDrag()
-    frame:StopMovingOrSizing()
-    KeepOnScreen()
-end
-
 local function Line(parent, layer)
     local line = parent:CreateTexture(nil, layer or "ARTWORK")
     Style.Paint(line, C.edge, 1)
@@ -81,12 +76,7 @@ Style.OnPixels(frame, function(px)
 end)
 titleBar:SetHeight(TITLE - 1)
 titleBar:EnableMouse(true)
-titleBar:RegisterForDrag("LeftButton")
-titleBar:SetScript("OnDragStart", function() frame:StartMoving() end)
-titleBar:SetScript("OnDragStop", StopDrag)
-frame:RegisterForDrag("LeftButton")
-frame:SetScript("OnDragStart", function() frame:StartMoving() end)
-frame:SetScript("OnDragStop", StopDrag)
+Style.DragWindow(frame, { titleBar, frame }, KeepOnScreen)
 Style.Fill(titleBar, C.header)
 
 local titleLine = Line(frame)
