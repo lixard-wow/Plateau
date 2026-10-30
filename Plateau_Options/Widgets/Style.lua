@@ -3,6 +3,7 @@ local addonName, ns = ...
 local Style = {}
 ns.Style = Style
 ns.Widgets = {}
+Plateau.Kit = { Style = Style, Widgets = ns.Widgets }
 
 local function Hex(value)
     return {

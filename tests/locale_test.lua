@@ -22,12 +22,6 @@ check(L["A profile called %s already exists"]:format("Tank") == "A profile calle
 assert(loadstring('local _, ns = ... ns.L["%s of %s"] = "%2$s von %1$s"'))("Plateau", ns)
 check(L["%s of %s"] == "%2$s von %1$s", "translations can reorder placeholders")
 
-ns.SetPseudoLocale(true)
-check(L["Opacity"] == "[[Opacity]]" and L["Icon size"] == "[[Symbolgröße]]", "test mode marks every looked-up string")
-check(T("") == "", "test mode leaves empty text alone")
-ns.SetPseudoLocale(false)
-check(L["Opacity"] == "Opacity", "test mode switches off again")
-
 for _, code in ipairs({ "deDE", "esES", "esMX", "frFR", "itIT", "koKR", "ptBR", "ruRU", "zhCN", "zhTW" }) do
     local path = "Plateau/Locales/" .. code .. ".lua"
     local chunk = loadfile(path)
@@ -35,35 +29,63 @@ for _, code in ipairs({ "deDE", "esES", "esMX", "frFR", "itIT", "koKR", "ptBR", 
     check(chunk ~= nil and second:find('ns.LocaleFile%("' .. code .. '"%)') ~= nil, code .. " file loads through LocaleFile with its own code")
 end
 
-local function Fresh(game)
+local frames = {}
+function CreateFrame()
+    local frame = { scripts = {} }
+    function frame:RegisterEvent() end
+    function frame:UnregisterEvent() end
+    function frame:SetScript(name, fn) self.scripts[name] = fn end
+    frames[#frames + 1] = frame
+    return frame
+end
+
+local function Fresh(game, debugState, withDebug)
     local fresh = {}
     locale = game
+    PlateauDB = { debug = debugState }
     assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", fresh)
+    if withDebug ~= false then
+        assert(loadfile("Plateau/Core/Debug.lua"))("Plateau", fresh)
+    end
     assert(loadstring('local _, ns = ... local L = ns.LocaleFile("deDE") L["Opacity"] = "Deckkraft" L["Blank"] = ""'))("Plateau", fresh)
     assert(loadstring('local _, ns = ... local L = ns.LocaleFile("frFR") L["Opacity"] = "Opacité" L["Icon size"] = "Taille"'))("Plateau", fresh)
+    if withDebug ~= false then
+        local loader = frames[#frames]
+        loader.scripts.OnEvent(loader, "ADDON_LOADED", "Plateau")
+    end
     return fresh
 end
 
-local plain = Fresh("enUS")
-plain.ApplyLocale(nil)
-check(plain.L["Opacity"] == "Opacity" and plain.PreviewLocale() == nil, "with no preview an English client stays English")
-check(plain.LocaleCount("deDE") == 1 and plain.LocaleCount("frFR") == 2, "counts only filled translations per language")
-check(plain.ActiveLocale() == "enUS", "the active language is the game's with no preview")
+local stripped = Fresh("deDE", nil, false)
+check(stripped.L["Opacity"] == "Deckkraft" and stripped.L["Icon size"] == "Icon size", "without the debug file other language files are thrown away")
+check(stripped.Debug == nil and stripped.RunDebug == nil and stripped.DEBUG_BUILD == nil, "without the debug file nothing debug exists")
+check(#frames == 0, "without the debug file no frames are made")
 
-local previewed = Fresh("enUS")
-previewed.ApplyLocale("frFR")
+local plain = Fresh("enUS")
+check(plain.DEBUG_BUILD == true and type(plain.RunDebug) == "function", "the debug file marks a debug build and registers its commands")
+check(plain.L["Opacity"] == "Opacity" and plain.ActiveLocale() == "enUS", "with no preview an English client stays English")
+
+local previewed = Fresh("enUS", { previewLocale = "frFR" })
 check(previewed.L["Opacity"] == "Opacité" and previewed.L["Icon size"] == "Taille", "a preview shows that language on another client")
 check(previewed.ActiveLocale() == "frFR", "the active language follows the preview")
-previewed.ApplyLocale("deDE")
-check(previewed.L["Opacity"] == "Opacité", "the language is fixed once loading finishes")
+check(previewed.LocaleFile("deDE")["x"] == nil, "staging stops once loading finishes")
 
-local german = Fresh("deDE")
-german.ApplyLocale("frFR")
+local german = Fresh("deDE", { previewLocale = "frFR" })
 check(german.L["Opacity"] == "Opacité" and german.L["Blank"] == "Blank", "a preview replaces the game language's strings")
-local back = Fresh("deDE")
-back.ApplyLocale("enUS")
+local back = Fresh("deDE", { previewLocale = "enUS" })
 check(back.L["Opacity"] == "Opacity", "previewing English on a translated client shows English")
-check(back.LocaleCount("deDE") == 1, "the game language's count is kept")
+
+local marked = Fresh("deDE", { pseudoLocale = true })
+check(marked.L["Opacity"] == "[[Deckkraft]]" and marked.L["Icon size"] == "[[Icon size]]", "brackets mark every looked-up string")
+check(marked.T("") == "", "brackets leave empty text alone")
+
+PlateauDB = { global = { previewLocale = "frFR", pseudoLocale = true, setupDone = true } }
+local moved = {}
+assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", moved)
+assert(loadfile("Plateau/Core/Debug.lua"))("Plateau", moved)
+frames[#frames].scripts.OnEvent(frames[#frames], "ADDON_LOADED", "Plateau")
+check(PlateauDB.debug.previewLocale == "frFR" and PlateauDB.debug.pseudoLocale == true and PlateauDB.global.previewLocale == nil
+    and PlateauDB.global.setupDone == true, "old debug choices move out of the real settings into their own key")
 locale = "frFR"
 
 local toc = io.open("Plateau/Plateau.toc"):read("*a")
