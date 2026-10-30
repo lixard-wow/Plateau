@@ -115,6 +115,23 @@ local function Offsets(dx, dy)
     return dx, dy
 end
 
+local function Closest(spots, Offset)
+    local best, bestKey, bestX, bestY
+    for key, spot in pairs(spots) do
+        local x, y = Offset(spot, key)
+        if x then
+            local size = x * x + y * y
+            if not best or size < best then
+                best, bestKey, bestX, bestY = size, key, x, y
+            end
+        end
+    end
+    if not bestKey or math.abs(bestX) > LIMIT + 0.5 or math.abs(bestY) > LIMIT + 0.5 then
+        return nil
+    end
+    return bestKey, spots[bestKey], Clamp(bestX, -LIMIT, LIMIT), Clamp(bestY, -LIMIT, LIMIT)
+end
+
 local function Nearest(candidates)
     local best, bestCandidate, bestX, bestY
     for _, candidate in ipairs(candidates) do
@@ -584,23 +601,14 @@ function Drag.PositionSpec(opts)
         local gap = opts.fixedGap or Get(read .. ".gap") or 0
         local anchor = opts.anchor()
         local width, height = opts.region:GetWidth(), opts.region:GetHeight()
-        local best, bestKey, bestX, bestY
-        for key, position in pairs(positions) do
+        local bestKey, _, x, y = Closest(positions, function(position)
             local rx, ry = PointXY(anchor, position[2])
-            if rx then
-                local fx, fy = FromCenter(position[1], width, height)
-                local x = cx + fx - rx - position[3] * gap
-                local y = cy + fy - ry - position[4] * gap
-                local size = x * x + y * y
-                if not best or size < best then
-                    best, bestKey, bestX, bestY = size, key, x, y
-                end
-            end
-        end
-        if not bestKey or math.abs(bestX) > LIMIT + 0.5 or math.abs(bestY) > LIMIT + 0.5 then
-            return nil
-        end
-        return Extra({ [positionPath] = bestKey, [xPath] = Clamp(bestX, -LIMIT, LIMIT), [yPath] = Clamp(bestY, -LIMIT, LIMIT) })
+            if not rx then return nil end
+            local fx, fy = FromCenter(position[1], width, height)
+            return cx + fx - rx - position[3] * gap, cy + fy - ry - position[4] * gap
+        end)
+        if not bestKey then return nil end
+        return Extra({ [positionPath] = bestKey, [xPath] = x, [yPath] = y })
     end
     function spec.Candidates()
         local _, positionPath, xPath, yPath, read = Resolve()
@@ -703,23 +711,15 @@ function Drag.AuraSpec(plate, key)
         local width, height = group:GetWidth(), group:GetHeight()
         local currentAlign = Get(alignPath)
         local grow = Get(path .. ".grow")
-        local best, bestSpot, bestX, bestY
-        for _, spot in ipairs(AURA_SPOTS) do
+        local _, bestSpot, x, y = Closest(AURA_SPOTS, function(spot)
             local _, relative, _, _, _, point = Plateau.AuraPlacement({ side = spot.side, align = spot.align or currentAlign, grow = grow })
             local rx, ry = PointXY(plate, relative)
-            if rx then
-                local fx, fy = FromCenter(point, width, height)
-                local x, y = cx + fx - rx, cy + fy - ry
-                local size = x * x + y * y
-                if not best or size < best then
-                    best, bestSpot, bestX, bestY = size, spot, x, y
-                end
-            end
-        end
-        if not bestSpot or math.abs(bestX) > LIMIT + 0.5 or math.abs(bestY) > LIMIT + 0.5 then
-            return nil
-        end
-        local values = { [sidePath] = bestSpot.side, [xPath] = Clamp(bestX, -LIMIT, LIMIT), [yPath] = Clamp(bestY, -LIMIT, LIMIT) }
+            if not rx then return nil end
+            local fx, fy = FromCenter(point, width, height)
+            return cx + fx - rx, cy + fy - ry
+        end)
+        if not bestSpot then return nil end
+        local values = { [sidePath] = bestSpot.side, [xPath] = x, [yPath] = y }
         if bestSpot.align then
             values[alignPath] = bestSpot.align
         end
@@ -1038,22 +1038,13 @@ function Drag.EnemyPowerSpec(plate)
     end
     function spec.Place(cx, cy)
         local half = plate.enemyPowerBar:GetHeight() / 2
-        local best, bestSpot, bestX, bestY
-        for _, spot in ipairs(ENEMY_POWER_SPOTS) do
+        local _, bestSpot, x, y = Closest(ENEMY_POWER_SPOTS, function(spot)
             local rx, ry = PointXY(plate.health, spot.relPoint)
-            if rx then
-                local x = cx - rx
-                local y = (spot.point == "TOP" and cy + half or cy - half) - ry
-                local size = x * x + y * y
-                if not best or size < best then
-                    best, bestSpot, bestX, bestY = size, spot, x, y
-                end
-            end
-        end
-        if not bestSpot or math.abs(bestX) > LIMIT + 0.5 or math.abs(bestY) > LIMIT + 0.5 then
-            return nil
-        end
-        return { [positionPath] = bestSpot.position, [xPath] = Clamp(bestX, -LIMIT, LIMIT), [yPath] = Clamp(bestY, -LIMIT, LIMIT) }
+            if not rx then return nil end
+            return cx - rx, (spot.point == "TOP" and cy + half or cy - half) - ry
+        end)
+        if not bestSpot then return nil end
+        return { [positionPath] = bestSpot.position, [xPath] = x, [yPath] = y }
     end
     function spec.Candidates()
         local list = {}
