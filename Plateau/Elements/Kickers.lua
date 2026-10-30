@@ -233,6 +233,7 @@ local function Icon(seg, index)
         if icon.kicked and look and look.keepReady == false then ns.Kicks:Remove(icon.guid, icon.plate) end
     end)
     icon.cd = cd
+    ns.RoundLayout(icon)
     seg.icons[index] = icon
     return icon
 end

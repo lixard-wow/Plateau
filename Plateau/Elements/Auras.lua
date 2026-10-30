@@ -861,6 +861,7 @@ local function FakeGroup(plate, key)
         icon.timer:SetPoint("CENTER")
         icon.stacks = icon:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         icon.stacks:SetPoint("BOTTOMRIGHT", 2, -1)
+        ns.RoundLayout(icon)
         fake.icons[i] = icon
     end
     plate.fakeAuras[key] = fake
