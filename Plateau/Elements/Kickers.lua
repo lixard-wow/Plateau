@@ -205,8 +205,8 @@ local function Segment(plate, index)
     local seg = plate.kickSegs[index]
     if seg then return seg end
     seg = CreateFrame("Frame", nil, plate.kickHolder)
-    seg:SetPoint("TOPLEFT")
-    seg:SetPoint("BOTTOMRIGHT")
+    seg:SetPoint("TOPLEFT", -1, 1)
+    seg:SetPoint("BOTTOMRIGHT", 1, -1)
     seg.open = Gate(seg)
     seg.shut = Gate(seg)
     local clip = CreateFrame("Frame", nil, seg)
@@ -272,7 +272,7 @@ end
 
 local function PaintIcon(icon, seg, slot, entry, size, plate)
     icon:ClearAllPoints()
-    icon:SetPoint("TOPLEFT", seg, "TOPLEFT", (slot - 1) * (size + GAP), 0)
+    icon:SetPoint("TOPLEFT", seg, "TOPLEFT", 1 + (slot - 1) * (size + GAP), -1)
     icon:SetSize(size, size)
     Picture(icon.art, entry, plate.kickLook and plate.kickLook.iconStyle)
     icon.plate, icon.kicked = plate, entry.kicked
