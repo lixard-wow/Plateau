@@ -2184,6 +2184,8 @@ ns.sections = {
           tooltip = "Shows the spell's name on the cast bar." },
         { type = "Dropdown", path = "look.castbar.textJustify", label = "Spell name alignment", options = ALIGN,
           tooltip = "Aligns the spell name on the bar." },
+        { type = "Slider", path = "look.castbar.size", label = "Spell name size", min = 6, max = 24,
+          tooltip = "How big the spell name and the remaining cast time are. The font, outline and shadow are set once for all plate text on the Text page." },
         { type = "Toggle", path = "look.castbar.showTimer", label = "Show remaining cast time",
           tooltip = "Shows the time left on the cast." },
         GateList(On("look.castbar.showTimer"), "Turn on Show remaining cast time to use this.",
@@ -2206,10 +2208,8 @@ ns.sections = {
                   for _, side in ipairs(SIDES) do list[#list + 1] = side end
                   return list
               end)(),
-              tooltip = "Where the cast target's name sits on the bar." }),
-
-        { type = "Header", label = "Text size" }
-    ), List(FontControls("look.castbar")), List(
+              tooltip = "Where the cast target's name sits on the bar." })
+    ), List(
         { type = "Header", label = "Interrupted casts" },
         { type = "ToggleColor", path = "look.castbar.showInterrupter", colorPath = "look.castbar.interruptedColor", label = "Show interrupter name",
           tooltip = "Shows who interrupted the cast, and turns the bar this color." }
