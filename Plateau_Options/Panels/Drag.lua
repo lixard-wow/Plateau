@@ -542,6 +542,9 @@ function Drag.PositionSpec(opts)
         local positions = opts.text and Plateau.textPositions or Plateau.iconPositions
         local gap = opts.fixedGap or Get(read .. ".gap") or 0
         local space = gap == 0 and SPACE or 0
+        if not opts.text then
+            space = SPACE - gap
+        end
         local anchor = opts.anchor()
         local list = {}
         for key, position in pairs(opts.noRing and {} or positions) do
