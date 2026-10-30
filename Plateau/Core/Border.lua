@@ -34,14 +34,6 @@ local function PlaceCorners(self, size, offset)
     end
 end
 
-local function Thickness(edge, horizontal, size)
-    if horizontal then
-        edge:SetHeight(size)
-    else
-        edge:SetWidth(size)
-    end
-end
-
 local TOOLTIP_EDGE = "Interface\\Tooltips\\UI-Tooltip-Border"
 
 local EDGE_STYLES = {
@@ -308,17 +300,13 @@ function Border:Layout(size, offset, inside)
             self.edges[i]:ClearAllPoints()
         end
         top:SetPoint("TOPLEFT", anchor, "TOPLEFT", offset, -offset)
-        top:SetPoint("TOPRIGHT", anchor, "TOPRIGHT", -offset, -offset)
-        Thickness(top, true, size)
-        bottom:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", offset, offset)
+        top:SetPoint("BOTTOMRIGHT", anchor, "TOPRIGHT", -offset, -offset - size)
+        bottom:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", offset, offset + size)
         bottom:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -offset, offset)
-        Thickness(bottom, true, size)
         left:SetPoint("TOPLEFT", anchor, "TOPLEFT", offset, -offset - size)
-        left:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", offset, offset + size)
-        Thickness(left, false, size)
-        right:SetPoint("TOPRIGHT", anchor, "TOPRIGHT", -offset, -offset - size)
+        left:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", offset + size, offset + size)
+        right:SetPoint("TOPLEFT", anchor, "TOPRIGHT", -offset - size, -offset - size)
         right:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -offset, offset + size)
-        Thickness(right, false, size)
         self:SetShown(self.shown ~= false)
         return
     end
@@ -327,21 +315,17 @@ function Border:Layout(size, offset, inside)
         self.edges[i]:ClearAllPoints()
     end
 
-    top:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", -span, offset)
+    top:SetPoint("TOPLEFT", anchor, "TOPLEFT", -span, outer)
     top:SetPoint("BOTTOMRIGHT", anchor, "TOPRIGHT", span, offset)
-    Thickness(top, true, size)
 
     bottom:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -span, -offset)
-    bottom:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", span, -offset)
-    Thickness(bottom, true, size)
+    bottom:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", span, -outer)
 
-    left:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -offset, offset)
+    left:SetPoint("TOPLEFT", anchor, "TOPLEFT", -outer, offset)
     left:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -offset, -offset)
-    Thickness(left, false, size)
 
     right:SetPoint("TOPLEFT", anchor, "TOPRIGHT", offset, offset)
-    right:SetPoint("BOTTOMLEFT", anchor, "BOTTOMRIGHT", offset, -offset)
-    Thickness(right, false, size)
+    right:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", outer, -offset)
 
     self:SetShown(self.shown ~= false)
 end

@@ -25,6 +25,10 @@ function CreateColor(r, g, b, a)
 end
 assert(loadfile("Plateau/Core/Border.lua"))("Plateau", ns)
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
+local function Thick(edge)
+    local a, b = edge.points[1], edge.points[2]
+    return a and b and (a[5] - b[5]) or nil
+end
 
 local glow = ns.CreateBorder(owner, owner, "BACKGROUND", -8)
 glow:Layout(8, 1)
@@ -73,23 +77,22 @@ ns.pixelBorders, ns.pixelPlate, ns.pixelPerfect = true, plate, true
 ring:Layout(1, 2)
 ns.pixelBorders, ns.pixelPlate = false, nil
 check(plate.pixelSet and plate.pixelSet[ring] and plate.pixelSet[ring][1] == 1 and plate.pixelSet[ring][2] == 2, "a border laid out while styling a plate is remembered with its settings")
-check(ring.edges[1].height == 1, "one pixel is one screen pixel at the plate's scale")
+check(Thick(ring.edges[1]) == 1, "one pixel is one screen pixel at the plate's scale")
 scale = 2
 ns.RepixelPlate(plate)
-check(ring.edges[1].height == 0.25, "after the plate is rescaled, its borders are redrawn at one screen pixel again")
-ring.edges[1].height = 99
+check(Thick(ring.edges[1]) == 0.25, "after the plate is rescaled, its borders are redrawn at one screen pixel again")
+local before = ring.edges[1].points
 ns.RepixelPlate(plate)
-check(ring.edges[1].height == 99, "redrawing at an unchanged scale is skipped")
-ring.edges[1].height = 0.25
+check(ring.edges[1].points == before, "redrawing at an unchanged scale is skipped")
 check(ns.pixelBorders == false, "redrawing leaves pixel mode the way it found it")
 ns.pixelPerfect = false
 scale = 1
 ns.RepixelPlate(plate)
-check(ring.edges[1].height == 0.25, "with pixel-perfect borders off, rescaling leaves borders alone")
+check(Thick(ring.edges[1]) == 0.25, "with pixel-perfect borders off, rescaling leaves borders alone")
 scale = 0.05
 ns.pixelPerfect = true
 ns.RepixelPlate(plate)
-check(ring.edges[1].height == 1, "a plate with a tiny scale (just created) keeps interface units instead of huge borders")
+check(Thick(ring.edges[1]) == 1, "a plate with a tiny scale (just created) keeps interface units instead of huge borders")
 
 local guarded = {}
 local auraRing = ns.CreateBorder(plateAnchor, plateAnchor, "BACKGROUND", 0)
@@ -146,7 +149,7 @@ steady:Layout(2, 1)
 check(clears == 0, "laying out a border again with the same settings does no anchor work")
 check(steady.laidOut == laid, "...and reuses its saved layout instead of making a new one")
 steady:Layout(3, 1)
-check(clears == 1 and steady.edges[1].height == 3, "a new size lays the border out again")
+check(clears == 1 and Thick(steady.edges[1]) == 3, "a new size lays the border out again")
 steady:SetAnchor({})
 clears = 0
 steady:Layout(3, 1)
