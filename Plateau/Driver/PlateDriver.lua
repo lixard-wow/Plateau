@@ -1223,6 +1223,11 @@ function Driver:RequestRestyle(background)
     restyleQueue:Show()
 end
 
+local function RestyleActive(plate)
+    StylePlate(plate)
+    ns.RoundLayout(plate)
+end
+
 function Driver:Restyle()
     restyleQueue:Hide()
     views = ns.DB.views
@@ -1286,12 +1291,7 @@ function Driver:Restyle()
     end
 
     styleVersion = styleVersion + 1
-    for _, plate in pairs(platesByUnit) do
-        if plate.active then
-            StylePlate(plate)
-            ns.RoundLayout(plate)
-        end
-    end
+    Driver:ForEachActive(RestyleActive)
     for _, plate in pairs(platesByBase) do
         if not plate.active then
             stale[plate] = true
@@ -1397,17 +1397,22 @@ Driver:RegisterEvent("PLAYER_REGEN_DISABLED")
 Driver:RegisterEvent("CVAR_UPDATE")
 Driver:RegisterEvent("ENCOUNTER_START")
 Driver:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
+local function RefreshAlphaOf(plate)
+    Driver:RefreshAlpha(plate)
+end
+
+local function RehitActive(plate)
+    PlaceClick(plate)
+    ApplyHitTest(plate)
+end
+
 local function CombatChanged(entering)
     inCombat = entering
     if not inCombat then
         poolWarmer:Show()
     end
     if (dimCombatOnly and targetPlate) or hideFriendlyCombat then
-        for _, plate in pairs(platesByUnit) do
-            if plate.active then
-                Driver:RefreshAlpha(plate)
-            end
-        end
+        Driver:ForEachActive(RefreshAlphaOf)
     end
 end
 
@@ -1420,12 +1425,7 @@ local events = {
         CombatChanged(false)
         if hitTestPending then
             hitTestPending = false
-            for _, plate in pairs(platesByUnit) do
-                if plate.active then
-                    PlaceClick(plate)
-                    ApplyHitTest(plate)
-                end
-            end
+            Driver:ForEachActive(RehitActive)
         end
     end,
     PLAYER_REGEN_DISABLED = function()
