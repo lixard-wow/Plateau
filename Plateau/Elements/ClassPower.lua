@@ -270,6 +270,13 @@ end
 local listener = CreateFrame("Frame")
 local armed = false
 
+local function Unlisten()
+    listener:UnregisterEvent("UNIT_POWER_UPDATE")
+    listener:UnregisterEvent("UNIT_MAXPOWER")
+    listener:UnregisterEvent("RUNE_POWER_UPDATE")
+    listener:UnregisterEvent("UNIT_DISPLAYPOWER")
+end
+
 local function Arm()
     local want = ClassPower.enabled == true and resource ~= nil
     if want == armed then return end
@@ -282,10 +289,7 @@ local function Arm()
             listener:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
         end
     else
-        listener:UnregisterEvent("UNIT_POWER_UPDATE")
-        listener:UnregisterEvent("UNIT_MAXPOWER")
-        listener:UnregisterEvent("RUNE_POWER_UPDATE")
-        listener:UnregisterEvent("UNIT_DISPLAYPOWER")
+        Unlisten()
     end
 end
 
@@ -306,10 +310,7 @@ listener:SetScript("OnEvent", function(_, event, unit, powerToken)
     elseif event ~= "RUNE_POWER_UPDATE" and event ~= "UNIT_DISPLAYPOWER" then
         Detect()
         armed = false
-        listener:UnregisterEvent("UNIT_POWER_UPDATE")
-        listener:UnregisterEvent("UNIT_MAXPOWER")
-        listener:UnregisterEvent("RUNE_POWER_UPDATE")
-        listener:UnregisterEvent("UNIT_DISPLAYPOWER")
+        Unlisten()
         Arm()
     end
     local plate = ns.Driver:GetPlate("target")
