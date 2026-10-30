@@ -675,15 +675,20 @@ local function SpecChanged(spec)
     return false
 end
 
-local function Mark(row)
-    local edge = row.widget:CreateTexture(nil, "OVERLAY", nil, 0)
+local function MarkPip(owner, layer, ...)
+    local edge = owner:CreateTexture(nil, layer, nil, 0)
     edge:SetSize(6, 10)
-    edge:SetPoint("TOPRIGHT", row.widget, "TOPLEFT", -3, -6)
+    edge:SetPoint(...)
     Style.Paint(edge, C.edge, 1)
-    local fill = row.widget:CreateTexture(nil, "OVERLAY", nil, 1)
+    local fill = owner:CreateTexture(nil, layer, nil, 1)
     fill:SetSize(4, 8)
     fill:SetPoint("CENTER", edge)
     Style.Paint(fill, C.accent, 1)
+    return edge, fill
+end
+
+local function Mark(row)
+    local edge, fill = MarkPip(row.widget, "OVERLAY", "TOPRIGHT", row.widget, "TOPLEFT", -3, -6)
     row.mark = { edge, fill }
 end
 
@@ -1094,14 +1099,7 @@ local function RailButton(page, y)
     button:SetPoint("TOPLEFT", 0, -y)
     button:SetPoint("TOPRIGHT", 0, -y)
 
-    local markEdge = button:CreateTexture(nil, "ARTWORK", nil, 0)
-    markEdge:SetSize(6, 10)
-    markEdge:SetPoint("LEFT", 4, 0)
-    Style.Paint(markEdge, C.edge, 1)
-    local markFill = button:CreateTexture(nil, "ARTWORK", nil, 1)
-    markFill:SetSize(4, 8)
-    markFill:SetPoint("CENTER", markEdge)
-    Style.Paint(markFill, C.accent, 1)
+    local markEdge, markFill = MarkPip(button, "ARTWORK", "LEFT", 4, 0)
 
     local label = Style.Text(button, 13, C.muted)
     label:SetPoint("LEFT", 14, 0)
