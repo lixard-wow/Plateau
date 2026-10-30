@@ -919,8 +919,7 @@ function Auras:Preview(plate, state)
                 across, lines = lines, across
             end
             fake:SetSize(across * step - spacing, lines * lineStep - spacing)
-            fake:ClearAllPoints()
-            fake:SetPoint(anchor, plate, relative, db.offsetX, db.offsetY)
+            ns.PlaceAt(fake, plate, anchor, relative, db.offsetX, db.offsetY)
             local samples = SAMPLE_ICONS[key]
             local _, onlyText = SpecLists(key)
             local chosen = SpellSet(onlyText)
