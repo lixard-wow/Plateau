@@ -73,7 +73,7 @@ function ns.PlaceAt(region, anchor, point, relative, x, y)
 end
 
 function ns.PlaceIcon(region, anchor, key, gap, x, y)
-    local width, height = region:GetWidth(), region:GetHeight()
+    local width, height = Size(region)
     if region.plPlaceAnchor == anchor and region.plPlaceKey == key and region.plPlaceGap == gap
         and region.plPlaceX == x and region.plPlaceY == y and region.plPlaceW == width and region.plPlaceH == height then
         return
