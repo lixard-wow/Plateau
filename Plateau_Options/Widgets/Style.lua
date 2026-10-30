@@ -705,6 +705,18 @@ function Style.IconButton(parent, icon, size, onClick, tooltip, round)
     return button
 end
 
+function Style.Input(parent, size)
+    local edit = CreateFrame("EditBox", nil, parent)
+    edit:SetAutoFocus(false)
+    Style.SetFont(edit, Style.font, size or 11, "")
+    Style.PaintText(edit, Style.colors.text)
+    edit:SetTextInsets(6, 6, 0, 0)
+    Style.Field(edit, Style.colors.field, Style.colors.border)
+    edit:SetScript("OnEditFocusGained", function(self) Style.SetBorderColor(self, Style.StateColor()) end)
+    edit:SetScript("OnEditFocusLost", function(self) Style.SetBorderColor(self, Style.colors.border) end)
+    return edit
+end
+
 function Style.Dialog(name, width, height)
     local box = CreateFrame("Frame", name, UIParent)
     if height then
