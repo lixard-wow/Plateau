@@ -55,15 +55,30 @@ local function UserValue(store, name)
     return GetCVar(name)
 end
 
+local function WriteIfDifferent(name, value)
+    if not ValuesEqual(GetCVar(name), value) then
+        Write(name, value)
+    end
+end
+
+local function Deliver(store, name, value, restoreValue)
+    if store.override[name] then
+        store.override[name].user = value
+    elseif InCombatLockdown() then
+        store.restore[name] = restoreValue
+        pending = true
+    else
+        Write(name, value)
+    end
+end
+
 local function SetLive(store, name, value)
     local override = store.override[name]
     if override then
         override.user = value
         return
     end
-    if not ValuesEqual(GetCVar(name), value) then
-        Write(name, value)
-    end
+    WriteIfDifferent(name, value)
 end
 
 function CVars:IsPending()
@@ -101,9 +116,7 @@ function CVars:Apply()
         end
     end
     for name, override in pairs(store.override) do
-        if not ValuesEqual(GetCVar(name), override.value) then
-            Write(name, override.value)
-        end
+        WriteIfDifferent(name, override.value)
     end
     for name, value in pairs(store.restore) do
         SetLive(store, name, value)
@@ -138,14 +151,7 @@ function CVars:Set(name, value)
     if reverting then
         store.original[name] = nil
     end
-    if store.override[name] then
-        store.override[name].user = value
-    elseif InCombatLockdown() then
-        store.restore[name] = store.managed[name] == nil and value or nil
-        pending = true
-    else
-        Write(name, value)
-    end
+    Deliver(store, name, value, store.managed[name] == nil and value or nil)
 end
 
 local BITS_PER_BYTE = 6
@@ -194,14 +200,7 @@ function CVars:Release(name)
     store.managed[name] = nil
     store.original[name] = nil
     if original ~= nil then
-        if store.override[name] then
-            store.override[name].user = original
-        elseif InCombatLockdown() then
-            store.restore[name] = original
-            pending = true
-        else
-            Write(name, original)
-        end
+        Deliver(store, name, original, original)
     end
 end
 
@@ -215,9 +214,7 @@ function CVars:Override(name, value)
         store.override[name] = override
     end
     override.value = value
-    if not ValuesEqual(GetCVar(name), value) then
-        Write(name, value)
-    end
+    WriteIfDifferent(name, value)
     return true
 end
 
@@ -227,8 +224,8 @@ function CVars:ClearOverride(name)
     if not override then return true end
     if InCombatLockdown() then return false end
     store.override[name] = nil
-    if override.user ~= nil and not ValuesEqual(GetCVar(name), override.user) then
-        Write(name, override.user)
+    if override.user ~= nil then
+        WriteIfDifferent(name, override.user)
     end
     return true
 end
@@ -302,9 +299,7 @@ local function RestoreOverrides(forget)
         if type(override) ~= "table" or override.user == nil then
             store.override[name] = nil
         else
-            if not ValuesEqual(GetCVar(name), override.user) then
-                Write(name, override.user)
-            end
+            WriteIfDifferent(name, override.user)
             if forget and ValuesEqual(GetCVar(name), override.user) then
                 store.override[name] = nil
             end
