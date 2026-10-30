@@ -830,12 +830,7 @@ end
 
 local pagesByKey, partPage = {}, {}
 
-local function Groups(section)
-    if type(section.group) == "table" then
-        return section.group
-    end
-    return section.group and { section.group } or {}
-end
+local Groups = ns.SectionGroups
 
 local function ResetPart(section)
     if section.reset then

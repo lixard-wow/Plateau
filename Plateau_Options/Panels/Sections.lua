@@ -1351,14 +1351,17 @@ local function AuraTextControls()
     )
 end
 
+function ns.SectionGroups(section)
+    if type(section.group) == "table" then
+        return section.group
+    end
+    return section.group and { section.group } or {}
+end
+
 local function WithCVars(section, cvars)
     section.reset = function()
-        if type(section.group) == "table" then
-            for _, path in ipairs(section.group) do
-                Plateau.DB:Reset(path)
-            end
-        else
-            Plateau.DB:Reset(section.group)
+        for _, path in ipairs(ns.SectionGroups(section)) do
+            Plateau.DB:Reset(path)
         end
         for _, name in ipairs(cvars) do
             CVars:Release(name)
@@ -1369,17 +1372,7 @@ end
 
 local function Page(key, title, paths, cvars, controls)
     local section = Section(key, title, paths, controls)
-    if cvars then
-        section.reset = function()
-            for _, path in ipairs(paths) do
-                Plateau.DB:Reset(path)
-            end
-            for _, name in ipairs(cvars) do
-                CVars:Release(name)
-            end
-        end
-    end
-    return section
+    return cvars and WithCVars(section, cvars) or section
 end
 
 local SIZE_PATHS = {
