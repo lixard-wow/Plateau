@@ -410,19 +410,11 @@ Plateau = {
         ns.DB.saved.global.pseudoLocale = on == true or nil
         ns.SetPseudoLocale(on)
     end,
-    IsPseudoLocale = function()
-        return ns.IsPseudoLocale()
-    end,
+    IsPseudoLocale = ns.IsPseudoLocale,
     LANGUAGES = ns.LANGUAGES,
-    LocaleCount = function(code)
-        return ns.LocaleCount(code)
-    end,
-    PreviewLocale = function()
-        return ns.PreviewLocale()
-    end,
-    ActiveLocale = function()
-        return ns.ActiveLocale()
-    end,
+    LocaleCount = ns.LocaleCount,
+    PreviewLocale = ns.PreviewLocale,
+    ActiveLocale = ns.ActiveLocale,
     DB = ns.DB,
     defaults = ns.defaults,
     version = ns.version,
@@ -447,22 +439,14 @@ Plateau = {
     CONTENT_TYPES = ns.CONTENT_TYPES,
     arrowStyles = ns.arrowStyles,
     iconPositions = ns.iconPositions,
-    HealthBorderOuter = function(health)
-        return ns.HealthBorderOuter(health)
-    end,
-    RepixelPlate = function(plate)
-        if ns.RepixelPlate then
-            ns.RepixelPlate(plate)
-        end
-    end,
+    HealthBorderOuter = ns.HealthBorderOuter,
+    RepixelPlate = ns.RepixelPlate,
     textPositions = ns.textPositions,
     AuraPlacement = function(db)
         return ns.AuraPlacement(db)
     end,
     media = ns.media,
-    PresetLook = function(preset)
-        return ns.PresetLook(preset)
-    end,
+    PresetLook = ns.PresetLook,
     SetSampleLook = function(name, look)
         ns.Driver:SetSampleLook(name, look)
     end,
@@ -475,12 +459,8 @@ Plateau = {
     RefreshDirtyPreviews = function()
         ns.Driver:RefreshDirtyPreviews()
     end,
-    FindConflicts = function()
-        return ns.FindConflicts()
-    end,
-    ResolveConflict = function(entry)
-        ns.ResolveConflict(entry)
-    end,
+    FindConflicts = ns.FindConflicts,
+    ResolveConflict = ns.ResolveConflict,
     DisableSelf = function()
         local character = UnitGUID("player")
         C_AddOns.DisableAddOn("Plateau_Options", character)
@@ -497,9 +477,7 @@ Plateau = {
     OpenSetup = function()
         OpenSetup()
     end,
-    CurrentSpec = function()
-        return ns.CurrentSpec()
-    end,
+    CurrentSpec = ns.CurrentSpec,
     SetClickAreas = function(preview, world)
         ns.Driver:SetClickAreas(preview, world)
     end,
