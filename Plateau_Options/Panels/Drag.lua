@@ -1234,10 +1234,7 @@ function Drag.SetDotParent(frame)
     dotParent:SetAllPoints()
     dotParent:SetFrameLevel(frame:GetFrameLevel() + 220)
 
-    selectionFrame = CreateFrame("Frame", nil, frame)
-    selectionFrame:SetFrameLevel(frame:GetFrameLevel() + 190)
-    Style.OutlineEdges(selectionFrame, Style.PICK_MARK)
-    selectionFrame:Hide()
+    selectionFrame = Style.OutlineFrame(frame, 190, Style.PICK_MARK)
     selectionFrame:SetScript("OnUpdate", function(self)
         if selected and selected.spot then
             ns.OutlineSpot(self, selected.spot, true)

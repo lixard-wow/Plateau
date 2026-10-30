@@ -106,6 +106,7 @@ local ns = { Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture
     Tooltip = function() end,
     Border = function() end,
     ThemedBorder = function() end,
+    OutlineFrame = function(parent) local f = CreateFrame("Frame", nil, parent) f:Hide() return f end,
     StateColor = function() return { 1, 1, 1 } end,
 } }
 local firstFrame = #frames + 1

@@ -403,6 +403,17 @@ function Style.Themed(texture, alpha)
     Style.Paint(texture, color, alpha or 1)
 end
 
+function Style.OutlineFrame(parent, level, color, alpha)
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetFrameLevel(parent:GetFrameLevel() + level)
+    Style.OutlineEdges(frame, color)
+    if alpha then
+        frame:SetAlpha(alpha)
+    end
+    frame:Hide()
+    return frame
+end
+
 function Style.OutlineEdges(frame, color)
     local edges = {}
     for i = 1, 4 do

@@ -51,10 +51,7 @@ hint:SetJustifyH("CENTER")
 hint:SetWordWrap(true)
 hint:SetText(Hint())
 
-local outline = CreateFrame("Frame", nil, panel)
-outline:SetFrameLevel(panel:GetFrameLevel() + 200)
-Style.OutlineEdges(outline, Style.HOVER_MARK)
-outline:Hide()
+local outline = Style.OutlineFrame(panel, 200, Style.HOVER_MARK)
 
 local playerName, playerSurname = UnitName("player")
 local playerClass = UnitClassBase and UnitClassBase("player")
@@ -528,10 +525,7 @@ local TOUCH = 4
 local function EditOutline(index)
     local frame = editOutlines[index]
     if not frame then
-        frame = CreateFrame("Frame", nil, panel)
-        frame:SetFrameLevel(outline:GetFrameLevel() - 1)
-        Style.OutlineEdges(frame)
-        frame:SetAlpha(0.6)
+        frame = Style.OutlineFrame(panel, 199, nil, 0.6)
         editOutlines[index] = frame
     end
     return frame
