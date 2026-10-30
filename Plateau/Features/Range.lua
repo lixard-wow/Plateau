@@ -26,9 +26,11 @@ end
 function Range:Style()
 end
 
+local tickSpell
+
 local function Check(plate)
     local alpha = 1
-    local spellID = InterruptReady:GetSpellID()
+    local spellID = tickSpell or InterruptReady:GetSpellID()
     if spellID and Range.enabledIn[plate.state] and plate.unit then
         if IsSpellInRange(spellID, plate.unit) == false then
             alpha = settings[plate.state].alpha
@@ -58,6 +60,10 @@ function Range:Preview(plate)
     plate.rangeAlpha = 1
 end
 
+local function Clear(plate)
+    Range:Disable(plate)
+end
+
 local ticker = CreateFrame("Frame")
 ticker:Hide()
 local sinceCheck = 0
@@ -66,12 +72,14 @@ ticker:SetScript("OnUpdate", function(_, elapsed)
     sinceCheck = sinceCheck + elapsed
     if sinceCheck < CHECK_INTERVAL then return end
     sinceCheck = 0
-    if InterruptReady:GetSpellID() then
+    tickSpell = InterruptReady:GetSpellID()
+    if tickSpell then
         hadSpellID = true
         ns.Driver:ForEachActive(Check)
+        tickSpell = nil
     elseif hadSpellID then
         hadSpellID = false
-        ns.Driver:ForEachActive(function(plate) Range:Disable(plate) end)
+        ns.Driver:ForEachActive(Clear)
     end
 end)
 
