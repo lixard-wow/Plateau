@@ -173,10 +173,6 @@ function HealthText:UpdateEmphasis(plate)
     ApplyShown(plate)
 end
 
-function HealthText:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
-end
-
 local function Value(s, number)
     return AbbreviateNumbers(number, s.abbreviate)
 end

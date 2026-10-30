@@ -47,10 +47,6 @@ function EnemyTarget:Style(plate, db)
     ns.PlaceText(text, plate.health, db.anchor, 3, db.offsetX, db.offsetY)
 end
 
-function EnemyTarget:Enable(plate, unit)
-    self:Update(plate, unit)
-end
-
 function EnemyTarget:Disable(plate)
     plate.enemyTargetFilled = false
     plate.enemyTarget:Hide()
@@ -63,10 +59,6 @@ end
 
 function EnemyTarget:RefreshShown(plate)
     plate.enemyTarget:SetShown(plate.enemyTargetFilled == true and not Covered(plate))
-end
-
-function EnemyTarget:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
 end
 
 local function BaseColor(s, class)

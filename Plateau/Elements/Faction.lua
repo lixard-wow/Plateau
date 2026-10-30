@@ -66,10 +66,6 @@ function Faction:Disable(plate)
     plate.faction:Hide()
 end
 
-function Faction:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
-end
-
 local Readable = ns.Readable
 
 function Faction:Update(plate, unit)

@@ -189,10 +189,6 @@ function EnemyPower:Disable(plate)
     HideBar(plate)
 end
 
-function EnemyPower:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
-end
-
 function EnemyPower:UpdateEmphasis(plate)
     if plate.unit then
         self:Update(plate, plate.unit)

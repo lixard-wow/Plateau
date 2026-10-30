@@ -37,17 +37,9 @@ function Classification:Style(plate, db)
     ns.StyleIcon(plate.classification, plate, db)
 end
 
-function Classification:Enable(plate, unit)
-    self:Update(plate, unit)
-end
-
 function Classification:Disable(plate)
     plate.classificationAtlas = nil
     plate.classification:Hide()
-end
-
-function Classification:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
 end
 
 function Classification:Update(plate, unit)

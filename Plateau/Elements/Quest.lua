@@ -55,17 +55,9 @@ function Quest:Style(plate, db)
     ns.ApplyFont(plate.questProgress, STANDARD_TEXT_FONT, math.max(8, math.floor(db.size * 0.55)), "OUTLINE")
 end
 
-function Quest:Enable(plate, unit)
-    self:Update(plate, unit)
-end
-
 function Quest:Disable(plate)
     plate.quest:Hide()
     plate.questProgress:Hide()
-end
-
-function Quest:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
 end
 
 function Quest:Update(plate, unit)

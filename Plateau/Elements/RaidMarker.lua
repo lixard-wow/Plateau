@@ -79,10 +79,6 @@ function RaidMarker:Style(plate, db)
     LayoutRing(plate)
 end
 
-function RaidMarker:Enable(plate, unit)
-    self:Update(plate, unit)
-end
-
 function RaidMarker:Disable(plate)
     plate.raidMarker:Hide()
     plate.markerRing:Hide()
@@ -91,10 +87,6 @@ end
 
 function RaidMarker:UpdateEmphasis(plate)
     ShowRing(plate, plate.markerIndex)
-end
-
-function RaidMarker:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
 end
 
 function RaidMarker:Update(plate, unit)

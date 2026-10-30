@@ -209,9 +209,17 @@ local function HideBlizzardPlate(base)
     end
 end
 
+local function UpdateOnEvent(element, plate, _, unit)
+    element:Update(plate, unit)
+end
+
 function Driver:RegisterElement(element)
     elements[#elements + 1] = element
     element.enabledIn = {}
+    if element.Update then
+        element.Enable = element.Enable or element.Update
+        element.OnEvent = element.OnEvent or UpdateOnEvent
+    end
     if element.UpdateEmphasis then
         emphasisElements[#emphasisElements + 1] = element
     end

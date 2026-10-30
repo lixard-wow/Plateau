@@ -284,10 +284,6 @@ function Name:Disable(plate)
     plate.barColorSet = nil
 end
 
-function Name:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
-end
-
 local function FitCutStart(plate)
     local justify = plate.nameCutStart
     if not justify or justify == "RIGHT" then return end

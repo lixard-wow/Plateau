@@ -31,16 +31,8 @@ function Forces:Style(plate, db)
     ns.StyleText(plate.forces, db, plate)
 end
 
-function Forces:Enable(plate, unit)
-    self:Update(plate, unit)
-end
-
 function Forces:Disable(plate)
     plate.forces:Hide()
-end
-
-function Forces:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
 end
 
 function Forces:Update(plate, unit)

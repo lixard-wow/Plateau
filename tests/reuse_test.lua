@@ -1,4 +1,9 @@
-local ns = { Elements = {}, Driver = { RegisterElement = function() end } }
+local ns = { Elements = {}, Driver = { RegisterElement = function(_, element)
+    if element.Update then
+        element.Enable = element.Enable or element.Update
+        element.OnEvent = element.OnEvent or function(self, plate, _, unit) self:Update(plate, unit) end
+    end
+end } }
 assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 function issecretvalue() return false end
 function ns.ApplyFont() end

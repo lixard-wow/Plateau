@@ -64,17 +64,9 @@ function Level:Style(plate, db)
     end
 end
 
-function Level:Enable(plate, unit)
-    self:Update(plate, unit)
-end
-
 function Level:Disable(plate)
     plate.levelValue = nil
     plate.level:Hide()
-end
-
-function Level:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
 end
 
 function Level:Update(plate, unit)

@@ -385,18 +385,10 @@ function Kickers:Style(plate, db)
     ns.PlaceIcon(holder, plate, db.position, db.gap, db.offsetX, db.offsetY)
 end
 
-function Kickers:Enable(plate, unit)
-    self:Update(plate, unit)
-end
-
 function Kickers:Disable(plate)
     if not plate.active then ns.Kicks:Forget(plate) end
     plate.kickVersion = nil
     plate.kickHolder:Hide()
-end
-
-function Kickers:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
 end
 
 function Kickers:PlateChanged(plate)

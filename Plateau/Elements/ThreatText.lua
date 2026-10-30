@@ -27,16 +27,8 @@ function ThreatText:Style(plate, db)
     ns.StyleText(plate.threatText, db, plate)
 end
 
-function ThreatText:Enable(plate, unit)
-    self:Update(plate, unit)
-end
-
 function ThreatText:Disable(plate)
     plate.threatText:Hide()
-end
-
-function ThreatText:OnEvent(plate, _, unit)
-    self:Update(plate, unit)
 end
 
 function ThreatText:Update(plate, unit)
