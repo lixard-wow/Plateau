@@ -300,11 +300,15 @@ local function HasOwnBorder(spot)
     return false
 end
 
-function ns.OutlineSpot(frame, spot)
-    if HasOwnBorder(spot) then return false end
+function ns.OutlineSpot(frame, spot, keep)
+    local own = HasOwnBorder(spot)
+    if own and not keep then return false end
     local l, r, t, b = PixelBox(spot)
     if not l then return false end
     FrameAround(frame, l, r, t, b)
+    for _, edge in ipairs(frame.outlineEdges or {}) do
+        edge:SetShown(not own)
+    end
     return true
 end
 

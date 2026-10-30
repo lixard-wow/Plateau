@@ -1182,7 +1182,7 @@ end
 
 function Drag.Select(spec)
     selected = spec
-    if spec and spec.spot and ns.OutlineSpot(selectionFrame, spec.spot) then
+    if spec and spec.spot and ns.OutlineSpot(selectionFrame, spec.spot, true) then
         selectionFrame:Show()
     else
         selectionFrame:Hide()
@@ -1212,7 +1212,7 @@ function Drag.SetDotParent(frame)
     selectionFrame:Hide()
     selectionFrame:SetScript("OnUpdate", function(self)
         if selected and selected.spot then
-            ns.OutlineSpot(self, selected.spot)
+            ns.OutlineSpot(self, selected.spot, true)
         end
     end)
     BuildReadout(frame)
