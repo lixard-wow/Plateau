@@ -365,9 +365,7 @@ function Highlight:Configure(db, state)
         CVars:Set(SELECTED_SCALE, "1")
     end
     ns.Scaling:RefreshBlizzardScale()
-    local scale = db.useBlizzardScale and 1 or db.scale
-    settings.target.scale = scale
-    ns.Scaling:SetTargetScale(scale)
+    ns.Scaling:SetTargetScale(db.useBlizzardScale and 1 or db.scale)
     Remember(settings.focus, ns.DB.views.enemy.focus)
 end
 

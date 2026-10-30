@@ -171,7 +171,6 @@ local function Layout(plate, db, count)
 end
 
 function ClassPower:Style(plate, db)
-    plate.classPowerDb = db
     if plate.classPower.count then
         Layout(plate, db, plate.classPower.count)
     end

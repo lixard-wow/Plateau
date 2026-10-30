@@ -298,7 +298,6 @@ local function UpdateBorder(plate, unit)
 end
 
 function Health:UpdateColor(plate, unit)
-    local bar = plate.health
     plate.threatSeen = nil
     ApplyTexture(plate)
     UpdateBorder(plate, unit)
