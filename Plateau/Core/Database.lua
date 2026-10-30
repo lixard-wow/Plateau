@@ -53,6 +53,16 @@ local function MigrateLayering(look)
     scaling.layerByType, scaling.layerOrder = nil, nil
 end
 
+local function ForEachAssignment(db, fn)
+    for character, byCharacter in pairs(db.assignments or {}) do
+        for kind, byKey in pairs(byCharacter) do
+            for key, name in pairs(byKey) do
+                fn(byKey, key, name, character, kind)
+            end
+        end
+    end
+end
+
 local function RenameProfile(db, OLD, NEW)
     if db.profiles and db.profiles[OLD] and not db.profiles[NEW] then
         db.profiles[NEW] = db.profiles[OLD]
@@ -69,15 +79,11 @@ local function RenameProfile(db, OLD, NEW)
                 db.profileKeys[character] = NEW
             end
         end
-        for _, byCharacter in pairs(db.assignments or {}) do
-            for _, byKey in pairs(byCharacter) do
-                for key, name in pairs(byKey) do
-                    if name == OLD then
-                        byKey[key] = NEW
-                    end
-                end
+        ForEachAssignment(db, function(byKey, key, name)
+            if name == OLD then
+                byKey[key] = NEW
             end
-        end
+        end)
     end
 end
 
@@ -1024,15 +1030,11 @@ function DB:RenameProfile(old, new)
             self.saved.profileKeys[character] = new
         end
     end
-    for _, assignments in pairs(self.saved.assignments or {}) do
-        for _, byKey in pairs(assignments) do
-            for key, profile in pairs(byKey) do
-                if profile == old then
-                    byKey[key] = new
-                end
-            end
+    ForEachAssignment(self.saved, function(byKey, key, profile)
+        if profile == old then
+            byKey[key] = new
         end
-    end
+    end)
     if self.profileName == old then
         self.profileName = new
     end
@@ -1047,15 +1049,11 @@ function DB:ProfileReferences(name)
         end
     end
     table.sort(refs.defaultFor)
-    for character, assignments in pairs(self.saved.assignments or {}) do
-        for kind, byKey in pairs(assignments) do
-            for key, profile in pairs(byKey) do
-                if profile == name then
-                    refs.assignments[#refs.assignments + 1] = { character = character, kind = kind, key = key }
-                end
-            end
+    ForEachAssignment(self.saved, function(_, key, profile, character, kind)
+        if profile == name then
+            refs.assignments[#refs.assignments + 1] = { character = character, kind = kind, key = key }
         end
-    end
+    end)
     table.sort(refs.assignments, function(a, b)
         if a.character ~= b.character then return a.character < b.character end
         if a.kind ~= b.kind then return a.kind < b.kind end
@@ -1443,15 +1441,11 @@ function DB:DeleteProfile(name)
             self.saved.profileKeys[character] = character == self.charKey and self.profileName or replacement
         end
     end
-    for _, assignments in pairs(self.saved.assignments or {}) do
-        for _, byKey in pairs(assignments) do
-            for key, profile in pairs(byKey) do
-                if profile == name then
-                    byKey[key] = nil
-                end
-            end
+    ForEachAssignment(self.saved, function(byKey, key, profile)
+        if profile == name then
+            byKey[key] = nil
         end
-    end
+    end)
     return true
 end
 
