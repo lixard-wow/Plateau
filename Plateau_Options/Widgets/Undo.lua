@@ -62,7 +62,6 @@ end
 local DESCRIBE = {
     Set = function(path) return T(Label(path) or "A setting") end,
     SetMany = function(values)
-        if nextLabel then return nextLabel end
         if not labels then
             BuildLabels()
         end
@@ -129,9 +128,7 @@ function Undo.Remember(kind, ...)
     local recent = now - lastAt < GROUP_SECONDS
     lastAt = now
     if recent and #stack > 0 then return end
-    nextLabel = pending
-    local label = DESCRIBE[kind] and DESCRIBE[kind](...) or T("A change")
-    nextLabel = nil
+    local label = (kind == "SetMany" and pending) or (DESCRIBE[kind] and DESCRIBE[kind](...)) or T("A change")
     stack[#stack + 1] = Capture(label)
     if #stack > LIMIT then
         table.remove(stack, 1)

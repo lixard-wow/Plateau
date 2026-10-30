@@ -46,7 +46,6 @@ ns.helpTopics = {
 }
 
 local Style = ns.Style
-local C = Style.colors
 
 local controls = {
     { type = "Note", label = "Hover any setting to see what it does. On this page, search finds help topics only.", height = 24 },
