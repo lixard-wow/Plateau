@@ -227,11 +227,14 @@ function ns.Widgets.PriorityList(parent, spec)
         local _, cursorY = GetCursorPosition()
         local offset = top - cursorY / row:GetEffectiveScale()
         drag.to = ns.PriorityOrder.SlotAt(offset, ROW, #lines)
-        for position, original in ipairs(ns.PriorityOrder.Display(#lines, drag.from, drag.to)) do
-            if original ~= drag.from then
-                local line = lines[original]
-                line:ClearAllPoints()
-                line:SetPoint("TOP", holder, "TOP", 0, -(position - 1) * ROW)
+        if drag.placed ~= drag.to then
+            drag.placed = drag.to
+            for position, original in ipairs(ns.PriorityOrder.Display(#lines, drag.from, drag.to)) do
+                if original ~= drag.from then
+                    local line = lines[original]
+                    line:ClearAllPoints()
+                    line:SetPoint("TOP", holder, "TOP", 0, -(position - 1) * ROW)
+                end
             end
         end
         local held = lines[drag.from]
