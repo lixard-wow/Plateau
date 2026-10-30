@@ -130,15 +130,7 @@ local migrations = {
             local entry = ns.Builtins and ns.Builtins.ByName(name)
             if entry and seeded[name] and type(profile) == "table" and ns.SharedLookValues then
                 for path, value in pairs(ns.SharedLookValues({ key = entry.key })) do
-                    local node, parent, key = profile, nil, nil
-                    for part in path:gmatch("[^%.]+") do
-                        if parent then
-                            if type(parent[key]) ~= "table" then parent[key] = {} end
-                            node = parent[key]
-                        end
-                        parent, key = node, part
-                    end
-                    parent[key] = value
+                    ns.SetPath(profile, path, value)
                 end
             end
         end
@@ -944,18 +936,7 @@ function DB:ColorPaths()
 end
 
 local function StoreIn(profile, path, value)
-    local node = profile
-    local parts = {}
-    for part in path:gmatch("[^%.]+") do
-        parts[#parts + 1] = part
-    end
-    for i = 1, #parts - 1 do
-        if type(node[parts[i]]) ~= "table" then
-            node[parts[i]] = {}
-        end
-        node = node[parts[i]]
-    end
-    node[parts[#parts]] = type(value) == "table" and DeepCopy(value) or value
+    ns.SetPath(profile, path, type(value) == "table" and DeepCopy(value) or value)
 end
 
 function DB:CopyColors(target)
@@ -1478,6 +1459,27 @@ local function Segments(path)
         segmentCache[path] = segments
     end
     return segments
+end
+
+function ns.GetPath(root, path)
+    local segments = Segments(path)
+    for i = 1, #segments do
+        if type(root) ~= "table" then return nil end
+        root = root[segments[i]]
+    end
+    return root
+end
+
+function ns.SetPath(root, path, value)
+    local segments = Segments(path)
+    for i = 1, #segments - 1 do
+        local part = segments[i]
+        if type(root[part]) ~= "table" then
+            root[part] = {}
+        end
+        root = root[part]
+    end
+    root[segments[#segments]] = value
 end
 
 local function Walk(path)

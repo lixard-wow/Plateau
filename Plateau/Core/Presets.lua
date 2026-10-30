@@ -399,10 +399,7 @@ ns.presets = {
 }
 
 local function Default(path)
-    local node = ns.defaults
-    for part in path:gmatch("[^%.]+") do
-        node = node and node[part]
-    end
+    local node = ns.GetPath(ns.defaults, path)
     if type(node) == "table" then
         return { node[1], node[2], node[3], node[4] }
     end
@@ -542,12 +539,7 @@ local OWN = {
 }
 
 local function SharedDefault(path)
-    local node = ns.defaults
-    for part in path:gmatch("[^%.]+") do
-        if type(node) ~= "table" then return nil end
-        node = node[part]
-    end
-    return node
+    return ns.GetPath(ns.defaults, path)
 end
 
 function ns.SharedLookValues(preset)
