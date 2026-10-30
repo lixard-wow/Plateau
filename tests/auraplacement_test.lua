@@ -9,6 +9,7 @@ setmetatable(_G, { __index = function(t, k) local child = Stub(); rawset(t, k, c
 AnchorUtil = { FlowDirection = { Right = "right", Left = "left", Down = "down", Up = "up" }, FlowLayoutAxis = { Horizontal = "horizontal", Vertical = "vertical" } }
 local ns = { Driver = { RegisterElement = function() end }, Elements = {} }
 ns.NewSecondsFormatter = function() return {} end
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Elements/Auras.lua"))("Plateau", ns)
 local Placement = ns.AuraPlacement
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end

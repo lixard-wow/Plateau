@@ -54,20 +54,12 @@ local DURATION_TEXT_OPTIONS = { textFormatter = timerFormatter }
 
 local configs = {}
 local signatureCache = {}
-local dirtyContainers = {}
-local queuedContainers = {}
-local dirtyOrder = {}
-local FLUSH_BATCH = 8
 
 local Auras = {
     key = "auras",
 }
 ns.Elements = ns.Elements or {}
 ns.Elements.Auras = Auras
-
-local function Restricted()
-    return InCombatLockdown() or (ShouldAurasBeSecret and ShouldAurasBeSecret())
-end
 
 local CORNER_OFFSETS = {
     CENTER = { 0, 0 }, TOP = { 0, 1 }, BOTTOM = { 0, -1 },
@@ -133,30 +125,7 @@ local function StyleContainerButtons(container)
     end
 end
 
-local function MarkDirty(container)
-    dirtyContainers[container] = true
-    if not queuedContainers[container] then
-        queuedContainers[container] = true
-        dirtyOrder[#dirtyOrder + 1] = container
-    end
-end
-
-local function FlushDirtyButtons()
-    if Restricted() then return end
-    local processed = 0
-    while #dirtyOrder > 0 and processed < FLUSH_BATCH do
-        local container = table.remove(dirtyOrder)
-        queuedContainers[container] = nil
-        if dirtyContainers[container] and container.plate and container.plate.active then
-            dirtyContainers[container] = nil
-            StyleContainerButtons(container)
-        end
-        processed = processed + 1
-    end
-    if #dirtyOrder > 0 then
-        C_Timer.After(0, FlushDirtyButtons)
-    end
-end
+local restyle = ns.Zone.RestyleQueue(StyleContainerButtons, function(container) return container.plate and container.plate.active end, function() return configs.enemy end)
 
 local function Initializer(container, group)
     return function(button)
@@ -646,16 +615,8 @@ local function StyleSet(set, state, db)
             end
         end
     end
-    if Restricted() then
-        for _, group in ipairs(GROUPS) do
-            MarkDirty(containers[group.key])
-        end
-    else
-        for _, group in ipairs(GROUPS) do
-            local container = containers[group.key]
-            dirtyContainers[container] = nil
-            StyleContainerButtons(container)
-        end
+    for _, group in ipairs(GROUPS) do
+        restyle:Restyle(containers[group.key])
     end
     set.styledState = state
     set.version = auraVersion
@@ -695,9 +656,9 @@ local function RepixelSet(plate)
     if type(scale) ~= "number" or issecretvalue(scale) or set.pixelScale == scale then return end
     set.pixelScale = scale
     for _, container in pairs(set.containers) do
-        MarkDirty(container)
+        restyle:Mark(container)
     end
-    FlushDirtyButtons()
+    restyle:Flush()
 end
 if ns.OnRepixel then
     ns.OnRepixel(RepixelSet)
@@ -793,14 +754,7 @@ function Auras:Enable(plate, unit)
             container:SetUnit(unit)
         end
         SetOn(container, configs[plate.state][group.key].enabled == true)
-        if dirtyContainers[container] then
-            if Restricted() then
-                MarkDirty(container)
-            else
-                dirtyContainers[container] = nil
-                StyleContainerButtons(container)
-            end
-        end
+        restyle:Settle(container)
     end
     if plate.fakeAuras then
         for _, fake in pairs(plate.fakeAuras) do
@@ -996,18 +950,6 @@ dispelWatcher:SetScript("OnEvent", function()
     if ns.disabled then return end
     if DetectDispels() and configs.enemy then
         ns.Driver:RequestRestyle(true)
-    end
-end)
-
-local watcher = CreateFrame("Frame")
-watcher:RegisterEvent("PLAYER_REGEN_ENABLED")
-if C_EventUtils.IsEventValid("ADDON_RESTRICTION_STATE_CHANGED") then
-    watcher:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
-end
-watcher:SetScript("OnEvent", function()
-    if ns.disabled then return end
-    if #dirtyOrder > 0 and configs.enemy then
-        FlushDirtyButtons()
     end
 end)
 

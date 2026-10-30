@@ -11,6 +11,7 @@ local ns = {
         ClearOverride = function() calls[#calls + 1] = "clear" end,
     },
 }
+C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
 assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Features/OccludedFade.lua"))("Plateau", ns)
 local O = ns.OccludedFade

@@ -90,10 +90,6 @@ local function Priority(config)
 end
 
 local configs = {}
-local dirtySlots = {}
-local queuedSlots = {}
-local dirtyOrder = {}
-local FLUSH_BATCH = 8
 
 local Shield = {
     key = "shield",
@@ -102,10 +98,6 @@ local Shield = {
 }
 ns.Elements = ns.Elements or {}
 ns.Elements.Shield = Shield
-
-local function Restricted()
-    return InCombatLockdown() or (ShouldAurasBeSecret and ShouldAurasBeSecret())
-end
 
 local SLOT_COLORS = { enrage = "enrageColor", magic = "magicColor", defensive = "defensiveColor" }
 
@@ -133,30 +125,7 @@ local function StyleSlot(button)
     end
 end
 
-local function MarkSlotDirty(button)
-    dirtySlots[button] = true
-    if not queuedSlots[button] then
-        queuedSlots[button] = true
-        dirtyOrder[#dirtyOrder + 1] = button
-    end
-end
-
-local function FlushDirtySlots()
-    if Restricted() then return end
-    local processed = 0
-    while #dirtyOrder > 0 and processed < FLUSH_BATCH do
-        local button = table.remove(dirtyOrder)
-        queuedSlots[button] = nil
-        if dirtySlots[button] and button.plate.active then
-            dirtySlots[button] = nil
-            StyleSlot(button)
-        end
-        processed = processed + 1
-    end
-    if #dirtyOrder > 0 then
-        C_Timer.After(0, FlushDirtySlots)
-    end
-end
+local slots = ns.Zone.RestyleQueue(StyleSlot, function(button) return button.plate.active end, function() return configs.enemy end)
 
 local function SlotInitializer(plate, slotKey)
     return function(button)
@@ -294,16 +263,8 @@ function Shield:Style(plate, db)
     local a = db.alertColor
     plate.shieldPreview:SetColor(a[1], a[2], a[3], a[4])
     plate.shieldPreviewFill.wanted = SetAlertFill(plate.shieldPreviewFill, db, a)
-    if Restricted() then
-        for i = 1, #plate.shieldSlots do
-            MarkSlotDirty(plate.shieldSlots[i])
-        end
-    else
-        for i = 1, #plate.shieldSlots do
-            local button = plate.shieldSlots[i]
-            dirtySlots[button] = nil
-            StyleSlot(button)
-        end
+    for i = 1, #plate.shieldSlots do
+        slots:Restyle(plate.shieldSlots[i])
     end
 end
 
@@ -325,15 +286,7 @@ function Shield:Enable(plate, unit)
         container:SetEnabled(on)
     end
     for i = 1, #plate.shieldSlots do
-        local button = plate.shieldSlots[i]
-        if dirtySlots[button] then
-            if Restricted() then
-                MarkSlotDirty(button)
-            else
-                dirtySlots[button] = nil
-                StyleSlot(button)
-            end
-        end
+        slots:Settle(plate.shieldSlots[i])
     end
 end
 
@@ -419,17 +372,5 @@ function Shield:Preview(plate, state)
     plate.shieldPreview:Show()
     plate.shieldPreviewFill:SetShown(SetAlertFill(plate.shieldPreviewFill, config, c))
 end
-
-local watcher = CreateFrame("Frame")
-watcher:RegisterEvent("PLAYER_REGEN_ENABLED")
-if C_EventUtils.IsEventValid("ADDON_RESTRICTION_STATE_CHANGED") then
-    watcher:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
-end
-watcher:SetScript("OnEvent", function()
-    if ns.disabled then return end
-    if #dirtyOrder > 0 and configs.enemy then
-        FlushDirtySlots()
-    end
-end)
 
 ns.Driver:RegisterElement(Shield)
