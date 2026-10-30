@@ -177,27 +177,47 @@ local function Value(s, number)
     return AbbreviateNumbers(number, s.abbreviate)
 end
 
+local function Write(text, s, from, source)
+    local mode = s.mode
+    if mode == "value" then
+        text:SetText(Value(s, from.Health(source)))
+    elseif mode == "both" then
+        text:SetFormattedText(s.bothFormat, Value(s, from.Health(source)), from.Percent(source))
+    elseif mode == "paren" then
+        text:SetFormattedText(s.parenFormat, Value(s, from.Health(source)), from.Percent(source))
+    elseif mode == "percentFirst" then
+        text:SetFormattedText(s.percentFirstFormat, from.Percent(source), Value(s, from.Health(source)))
+    elseif mode == "valueMax" then
+        text:SetFormattedText("%s / %s", Value(s, from.Health(source)), Value(s, from.Max(source)))
+    elseif mode == "missing" then
+        text:SetFormattedText("-%s", Value(s, from.Missing(source)))
+    elseif mode == "missingPercent" and from.MissingPercent then
+        text:SetFormattedText(s.missingPercentFormat, from.MissingPercent(source))
+    else
+        text:SetFormattedText(s.percentFormat, from.Percent(source))
+    end
+end
+
+local LIVE = {
+    Health = function(unit) return UnitHealth(unit) end,
+    Max = function(unit) return UnitHealthMax(unit) end,
+    Missing = function(unit) return UnitHealthMissing(unit, false) end,
+    Percent = function(unit) return UnitHealthPercent(unit, false, ScaleTo100) end,
+    MissingPercent = missingCurve and function(unit) return UnitHealthPercent(unit, false, missingCurve) end,
+}
+
+local SAMPLE = {
+    Health = function(state) return state.health * state.maxHealth end,
+    Max = function(state) return state.maxHealth end,
+    Missing = function(state) return state.maxHealth - state.health * state.maxHealth end,
+    Percent = function(state) return state.health * 100 end,
+    MissingPercent = function(state) return 100 - state.health * 100 end,
+}
+
 function HealthText:Update(plate, unit)
     local text = plate.healthText
     local s = settings[plate.state]
-    local mode = s.mode
-    if mode == "value" then
-        text:SetText(Value(s, UnitHealth(unit)))
-    elseif mode == "both" then
-        text:SetFormattedText(s.bothFormat, Value(s, UnitHealth(unit)), UnitHealthPercent(unit, false, ScaleTo100))
-    elseif mode == "paren" then
-        text:SetFormattedText(s.parenFormat, Value(s, UnitHealth(unit)), UnitHealthPercent(unit, false, ScaleTo100))
-    elseif mode == "percentFirst" then
-        text:SetFormattedText(s.percentFirstFormat, UnitHealthPercent(unit, false, ScaleTo100), Value(s, UnitHealth(unit)))
-    elseif mode == "valueMax" then
-        text:SetFormattedText("%s / %s", Value(s, UnitHealth(unit)), Value(s, UnitHealthMax(unit)))
-    elseif mode == "missing" then
-        text:SetFormattedText("-%s", Value(s, UnitHealthMissing(unit, false)))
-    elseif mode == "missingPercent" and missingCurve then
-        text:SetFormattedText(s.missingPercentFormat, UnitHealthPercent(unit, false, missingCurve))
-    else
-        text:SetFormattedText(s.percentFormat, UnitHealthPercent(unit, false, ScaleTo100))
-    end
+    Write(text, s, LIVE, unit)
     if s.hideFull then
         text:SetAlpha(UnitHealthPercent(unit, false, fullCurve))
     else
@@ -212,27 +232,8 @@ end
 function HealthText:Preview(plate, state)
     local text = plate.healthText
     local health = state.health
-    local percent = health * 100
-    local value = health * state.maxHealth
     local s = settings[plate.state]
-    local mode = s.mode
-    if mode == "value" then
-        text:SetText(Value(s, value))
-    elseif mode == "both" then
-        text:SetFormattedText(s.bothFormat, Value(s, value), percent)
-    elseif mode == "paren" then
-        text:SetFormattedText(s.parenFormat, Value(s, value), percent)
-    elseif mode == "percentFirst" then
-        text:SetFormattedText(s.percentFirstFormat, percent, Value(s, value))
-    elseif mode == "valueMax" then
-        text:SetFormattedText("%s / %s", Value(s, value), Value(s, state.maxHealth))
-    elseif mode == "missing" then
-        text:SetFormattedText("-%s", Value(s, state.maxHealth - value))
-    elseif mode == "missingPercent" then
-        text:SetFormattedText(s.missingPercentFormat, 100 - percent)
-    else
-        text:SetFormattedText(s.percentFormat, percent)
-    end
+    Write(text, s, SAMPLE, state)
     text:SetAlpha((s.hideFull and health >= 0.9999) and 0 or 1)
     if s.curve then
         local color = ColorAt(s, health)
