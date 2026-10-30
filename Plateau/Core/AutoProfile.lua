@@ -65,10 +65,6 @@ function AutoProfile:ResolveSource(content, spec, fallback, profiles)
     return fallback
 end
 
-function AutoProfile:Resolve(content, spec, fallback, profiles)
-    return (self:ResolveSource(content, spec, fallback, profiles))
-end
-
 local CONTENT_RULES = {
     world = { label = "Open world override" },
     dungeon = { label = "Dungeon override" },
@@ -93,7 +89,7 @@ end
 function AutoProfile:Status()
     local db = ns.DB
     local default = db:DefaultProfile()
-    local target, kind, key = self:ResolveSource(self:CurrentContent(), self:CurrentSpec(), default, db.saved.profiles)
+    local target, kind, key = self:ResolveSource(self:CurrentContent(), self:CurrentSpecIndex(), default, db.saved.profiles)
     local status = {
         default = default,
         active = db.profileName,
@@ -114,7 +110,7 @@ function AutoProfile:CurrentContent()
     return INSTANCE_CONTENT[instanceType or "none"] or "world"
 end
 
-function AutoProfile:CurrentSpec()
+function AutoProfile:CurrentSpecIndex()
     local index = C_SpecializationInfo.GetSpecialization()
     return (index and index > 0) and index or nil
 end
@@ -129,7 +125,7 @@ function AutoProfile:Apply(force)
     pending = false
     force = force or pendingForce
     pendingForce = false
-    local content, spec = self:CurrentContent(), self:CurrentSpec()
+    local content, spec = self:CurrentContent(), self:CurrentSpecIndex()
     if not force and content == lastContent and spec == lastSpec then
         Notify()
         return
@@ -137,7 +133,7 @@ function AutoProfile:Apply(force)
     lastContent, lastSpec = content, spec
     local db = ns.DB
     local chosen = db:DefaultProfile()
-    local target = self:Resolve(content, spec, chosen, db.saved.profiles)
+    local target = self:ResolveSource(content, spec, chosen, db.saved.profiles)
     if target ~= db.profileName and db.saved.profiles[target] then
         db:SwitchProfile(target, true)
     end
