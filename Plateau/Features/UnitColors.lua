@@ -13,6 +13,8 @@ local UnitReaction = UnitReaction
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitThreatSituation = UnitThreatSituation
 local issecretvalue = issecretvalue
+local UnitGroupRolesAssigned, GetPartyAssignment = UnitGroupRolesAssigned, GetPartyAssignment
+local UnitInParty, UnitInRaid, pcall = UnitInParty, UnitInRaid, pcall
 
 local MANA = Enum.PowerType.Mana
 
