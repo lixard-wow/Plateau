@@ -104,19 +104,6 @@ function Logic.RailProblems(groups, sections)
     return problems
 end
 
-function Logic.ClampBar(left, top, screenWidth, screenHeight, barWidth, barHeight)
-    left = math.max(0, math.min(left, screenWidth - barWidth))
-    top = math.max(barHeight, math.min(top, screenHeight))
-    return left, top
-end
-
-function Logic.IsClick(downX, downY, upX, upY, threshold)
-    if not downX or not downY or not upX or not upY then
-        return true
-    end
-    return math.abs(upX - downX) <= threshold and math.abs(upY - downY) <= threshold
-end
-
 function Logic.ForcedTree(tree, path, value)
     local node = tree
     local segments = {}
