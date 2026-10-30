@@ -164,7 +164,7 @@ end
 local function Line(plate, index)
     local line = plate.phaseLines[index]
     if not line then
-        line = ns.MarkerLayer(plate):CreateTexture(nil, "OVERLAY", nil, 2)
+        line = ns.SnapTexture(ns.MarkerLayer(plate):CreateTexture(nil, "OVERLAY", nil, 2))
         line:Hide()
         plate.phaseLines[index] = line
     end
@@ -190,18 +190,12 @@ local function Draw(plate)
         return
     end
     local reverse = ns.DB.views[plate.state].health.fillDirection == "right"
-    local side = reverse and "RIGHT" or "LEFT"
-    local direction = reverse and -1 or 1
     local color = s.color
     for i = 1, MAX_LINES do
         local line = plate.phaseLines[i]
         if i <= count then
             line = line or Line(plate, i)
-            local x = direction * width * scratch[i] / 100
-            line:ClearAllPoints()
-            line:SetPoint("TOP", plate.health, "TOP" .. side, x, 0)
-            line:SetPoint("BOTTOM", plate.health, "BOTTOM" .. side, x, 0)
-            line:SetWidth(s.lineWidth or 2)
+            ns.PlaceBarLine(line, plate.health, reverse, width * scratch[i] / 100, s.lineWidth or 2)
             line:SetColorTexture(color[1], color[2], color[3], color[4])
             line:Show()
         elseif line then

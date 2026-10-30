@@ -183,6 +183,24 @@ function ns.PixelUnit(region)
     return PixelSize(region) or 1
 end
 
+function ns.PlaceBarLine(line, bar, reverse, offset, width)
+    local side = reverse and "RIGHT" or "LEFT"
+    local direction = reverse and -1 or 1
+    local pixel = ns.pixelPerfect ~= false and PixelSize(bar) or nil
+    local thick = width or 1
+    if pixel then
+        thick = math.max(1, math.floor(thick + 0.5)) * pixel
+        offset = math.floor(offset / pixel + 0.5) * pixel
+    end
+    local left = direction * offset - thick / 2
+    if pixel then
+        left = math.floor(left / pixel + 0.5) * pixel
+    end
+    line:ClearAllPoints()
+    line:SetPoint("TOPLEFT", bar, "TOP" .. side, left, 0)
+    line:SetPoint("BOTTOMRIGHT", bar, "BOTTOM" .. side, left + thick, 0)
+end
+
 function ns.CastbarGap(look, shift)
     if ns.CastbarJoined(look, shift) then
         return ns.HealthBorderOffset(look)

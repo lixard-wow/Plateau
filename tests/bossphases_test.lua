@@ -14,6 +14,7 @@ end
 Plateau = {}
 Plateau.T = Plateau.T or (function() local l = {} assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", l) return l.T end)()
 
+assert(loadfile("Plateau/Core/Border.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Elements/BossPhases.lua"))("Plateau", ns)
 local BossPhases = ns.Elements.BossPhases
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
@@ -25,6 +26,8 @@ local function Texture()
     function t:ClearAllPoints() self.points = {} end
     function t:SetPoint(point, _, _, x) self.points[#self.points + 1] = { point = point, x = x } end
     function t:SetWidth() end
+    function t:SetSnapToPixelGrid() end
+    function t:SetTexelSnappingBias() end
     function t:SetColorTexture() end
     return t
 end
@@ -40,7 +43,7 @@ end
 local function Shown(plate)
     local xs = {}
     for _, line in ipairs(plate.phaseLines) do
-        if line.shown then xs[#xs + 1] = line.points[1].x end
+        if line.shown then xs[#xs + 1] = (line.points[1].x + line.points[2].x) / 2 end
     end
     return xs
 end

@@ -33,7 +33,7 @@ function Execute:Create(plate)
 
     plate.thresholdLines = {}
     for i = 1, 2 do
-        local line = ns.MarkerLayer(plate):CreateTexture(nil, "OVERLAY", nil, 1)
+        local line = ns.SnapTexture(ns.MarkerLayer(plate):CreateTexture(nil, "OVERLAY", nil, 1))
         line:Hide()
         plate.thresholdLines[i] = line
     end
@@ -58,17 +58,12 @@ function Execute:Style(plate, db)
 
     local width = plate:GetWidth()
     local reverse = ns.DB.views[plate.state].health.fillDirection == "right"
-    local side = reverse and "RIGHT" or "LEFT"
-    local direction = reverse and -1 or 1
     local lines = plate.thresholdLines
     for i = 1, 2 do
         local percent = i == 1 and db.line1 or db.line2
         local line = lines[i]
-        line:ClearAllPoints()
         line:SetColorTexture(db.lineColor[1], db.lineColor[2], db.lineColor[3], db.lineColor[4])
-        line:SetWidth(db.lineWidth)
-        line:SetPoint("TOP", plate.health, "TOP" .. side, direction * width * percent / 100, 0)
-        line:SetPoint("BOTTOM", plate.health, "BOTTOM" .. side, direction * width * percent / 100, 0)
+        ns.PlaceBarLine(line, plate.health, reverse, width * percent / 100, db.lineWidth)
         line.wanted = db.lines and percent > 0 and percent < 100
         line:SetShown(line.wanted)
     end
