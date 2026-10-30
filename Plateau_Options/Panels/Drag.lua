@@ -219,6 +219,14 @@ local function Inside(box, other)
         and box[3] <= other[3] + 0.5 and box[4] >= other[4] - 0.5
 end
 
+local function Opacity(region)
+    if region.GetEffectiveAlpha then
+        return region:GetEffectiveAlpha()
+    end
+    local parent = region:GetParent()
+    return region:GetAlpha() * (parent and parent:GetEffectiveAlpha() or 1)
+end
+
 local function Targets(spec, mover)
     local list = {}
     if not targetSource then return list end
@@ -230,7 +238,7 @@ local function Targets(spec, mover)
                 skip = true
             end
         end
-        if not skip and target:IsVisible() and target:GetEffectiveAlpha() > 0 and target:GetLeft() and target:GetWidth() > 0 and target:GetHeight() > 0 then
+        if not skip and target:IsVisible() and Opacity(target) > 0 and target:GetLeft() and target:GetWidth() > 0 and target:GetHeight() > 0 then
             list[#list + 1] = target
         end
     end
