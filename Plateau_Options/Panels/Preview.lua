@@ -704,9 +704,7 @@ Style.Tooltip(undoButton, { label = "Undo", tooltip = "Undoes your last change. 
 redoButton:HookScript("OnEnter", function(self)
     local label = ns.Undo.NextRedo()
     if not label then return end
-    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-    local accent = Style.StateColor()
-    GameTooltip:SetText(Style.T("Redo"), accent[1], accent[2], accent[3])
+    Style.TipTitle(self, "ANCHOR_BOTTOM", Style.T("Redo"))
     GameTooltip:AddLine(Style.T("Puts back: %s"):format(Style.T(label)), 1, 1, 1, true)
     GameTooltip:Show()
 end)

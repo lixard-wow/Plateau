@@ -832,14 +832,18 @@ local function ChangeHint(spec, explain)
     return "Right-click to reset to Plateau's default."
 end
 
+function Style.TipTitle(owner, anchor, text)
+    GameTooltip:SetOwner(owner, anchor)
+    local accent = Style.StateColor()
+    GameTooltip:SetText(text, accent[1], accent[2], accent[3])
+end
+
 function Style.Tooltip(owner, spec)
     owner:HookScript("OnEnter", function(self)
         local explain = spec.tooltip and Plateau.DB.saved.global.tooltipsEnabled ~= false
         local hint = ChangeHint(spec, explain)
         if not explain and not hint and not spec.limited then return end
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        local accent = Style.StateColor()
-        GameTooltip:SetText(T(spec.label) or "", accent[1], accent[2], accent[3])
+        Style.TipTitle(self, "ANCHOR_RIGHT", T(spec.label) or "")
         if explain then
             GameTooltip:AddLine(T(spec.tooltip), 1, 1, 1, true)
             if spec.gameSetting then
