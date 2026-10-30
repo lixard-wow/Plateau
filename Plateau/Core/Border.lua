@@ -65,8 +65,25 @@ function ns.CreateRing(owner, sublevel)
     return setmetatable({ owner = owner, texture = texture, shown = true }, Ring)
 end
 
+local function OwningPlate(frame)
+    for _ = 1, 10 do
+        if not frame then return nil end
+        if type(frame.built) == "table" and frame.health then return frame end
+        frame = frame:GetParent()
+    end
+end
+
 function Ring:Layout(size)
     local owner, texture = self.owner, self.texture
+    if not self.restricted then
+        local plate = ns.pixelPlate or OwningPlate(owner)
+        if plate then
+            plate.pixelSet = plate.pixelSet or {}
+            local args = plate.pixelSet[self] or {}
+            args[1] = size
+            plate.pixelSet[self] = args
+        end
+    end
     local scale = owner:GetEffectiveScale()
     local pixel = PixelUtil and PixelUtil.GetPixelToUIUnitFactor and scale and scale > 0
         and PixelUtil.GetPixelToUIUnitFactor() / scale or 1
