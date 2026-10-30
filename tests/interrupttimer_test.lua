@@ -27,6 +27,7 @@ local ns = {
     InterruptReady = Any(),
     Driver = { RegisterElement = function(_, element) Castbar = element end },
 }
+ns.NewSecondsFormatter = function() return C_StringUtil.CreateSecondsFormatter() end
 assert(loadfile("Plateau/Core/Border.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Elements/Castbar.lua"))("Plateau", ns)
 

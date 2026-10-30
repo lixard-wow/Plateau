@@ -114,6 +114,19 @@ function ns.StepCurve(...)
     return curve
 end
 
+function ns.NewSecondsFormatter(millisecondsThreshold)
+    local formatter = C_StringUtil.CreateSecondsFormatter()
+    formatter:SetDefaultAbbreviation(Enum.SecondsFormatterAbbreviation.OneLetter)
+    formatter:SetStripIntervalWhitespace(Enum.SecondsFormatterIntervalWhitespace.Strip)
+    formatter:SetMinInterval(Enum.SecondsFormatterInterval.Seconds)
+    formatter:SetMaxInterval(Enum.SecondsFormatterInterval.Minutes)
+    formatter:SetDesiredUnitCount(1)
+    if millisecondsThreshold then
+        formatter:SetMillisecondsThreshold(millisecondsThreshold)
+    end
+    return formatter
+end
+
 function ns.CreateText(parent)
     local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     text:SetWordWrap(false)

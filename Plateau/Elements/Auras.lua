@@ -49,13 +49,7 @@ local GROUPS = {
 local NAMEPLATE_ONLY = "|INCLUDE_NAME_PLATE_ONLY"
 local OTHERS_SAMPLE = "Interface\\Icons\\Spell_Shadow_CurseOfTounges"
 
-local timerFormatter = C_StringUtil.CreateSecondsFormatter()
-timerFormatter:SetDefaultAbbreviation(Enum.SecondsFormatterAbbreviation.OneLetter)
-timerFormatter:SetStripIntervalWhitespace(Enum.SecondsFormatterIntervalWhitespace.Strip)
-timerFormatter:SetMinInterval(Enum.SecondsFormatterInterval.Seconds)
-timerFormatter:SetMaxInterval(Enum.SecondsFormatterInterval.Minutes)
-timerFormatter:SetDesiredUnitCount(1)
-timerFormatter:SetMillisecondsThreshold(0)
+local timerFormatter = ns.NewSecondsFormatter(0)
 local DURATION_TEXT_OPTIONS = { textFormatter = timerFormatter }
 
 local configs = {}

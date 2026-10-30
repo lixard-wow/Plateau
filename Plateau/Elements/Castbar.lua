@@ -28,16 +28,6 @@ local READY_TICK = 0.1
 
 local settings = {}
 
-local function NewFormatter()
-    local formatter = C_StringUtil.CreateSecondsFormatter()
-    formatter:SetDefaultAbbreviation(Enum.SecondsFormatterAbbreviation.OneLetter)
-    formatter:SetStripIntervalWhitespace(Enum.SecondsFormatterIntervalWhitespace.Strip)
-    formatter:SetMinInterval(Enum.SecondsFormatterInterval.Seconds)
-    formatter:SetMaxInterval(Enum.SecondsFormatterInterval.Minutes)
-    formatter:SetDesiredUnitCount(1)
-    return formatter
-end
-
 local ELAPSED = Enum.StatusBarTimerDirection.ElapsedTime
 local REMAINING = Enum.StatusBarTimerDirection.RemainingTime
 
@@ -374,7 +364,7 @@ function Castbar:Create(plate)
 end
 
 function Castbar:Configure(db, state)
-    local s = settings[state] or { formatter = NewFormatter() }
+    local s = settings[state] or { formatter = ns.NewSecondsFormatter() }
     settings[state] = s
     s.formatter:SetMillisecondsThreshold(db.timerDecimalsBelow)
     s.showSpark = db.showSpark
