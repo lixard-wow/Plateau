@@ -11,6 +11,14 @@ local issecretvalue = issecretvalue
 local settings = {}
 
 local NAME_SCALES = { 0.8, 1, 1.25, 1.4, 1.6 }
+local blizzardNameScale
+
+local function BlizzardNameScale()
+    if not blizzardNameScale then
+        blizzardNameScale = NAME_SCALES[tonumber(C_CVar.GetCVar("nameplateSize"))] or 1
+    end
+    return blizzardNameScale
+end
 
 local FRIENDLY_REALM_CVAR = "nameplateShowFriendlyRealmName"
 local friendlyRealmNames = false
@@ -198,7 +206,7 @@ function Name:ApplySize(plate, isPlayer)
     local size = s.size
     if plate.state == "friendly" and not isPlayer then
         local npc = NAME_SCALES[ns.DB.views.enemy.friendly.npcNameScale]
-        local blizzard = NAME_SCALES[tonumber(C_CVar.GetCVar("nameplateSize"))] or 1
+        local blizzard = BlizzardNameScale()
         if npc then
             size = size * npc / blizzard
         end
@@ -357,6 +365,11 @@ cvarWatcher:RegisterEvent("CVAR_UPDATE")
 cvarWatcher:RegisterEvent("PLAYER_LOGIN")
 cvarWatcher:SetScript("OnEvent", function(_, event, name)
     if ns.disabled then return end
+    if event == "CVAR_UPDATE" and name == "nameplateSize" then
+        blizzardNameScale = nil
+        ns.Driver:RequestRestyle(false)
+        return
+    end
     if event == "CVAR_UPDATE" and name ~= FRIENDLY_CLASS_CVAR and name ~= FRIENDLY_REALM_CVAR then return end
     local value = C_CVar.GetCVarBool(FRIENDLY_CLASS_CVAR) ~= false
     local realms = C_CVar.GetCVarBool(FRIENDLY_REALM_CVAR) == true
