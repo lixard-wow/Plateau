@@ -65,7 +65,7 @@ function Quest:Disable(plate)
 end
 
 function Quest:OnEvent(plate, _, unit)
-    self:Update(plate, plate.unit or unit)
+    self:Update(plate, unit)
 end
 
 function Quest:Update(plate, unit)

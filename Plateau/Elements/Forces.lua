@@ -40,7 +40,7 @@ function Forces:Disable(plate)
 end
 
 function Forces:OnEvent(plate, _, unit)
-    self:Update(plate, plate.unit or unit)
+    self:Update(plate, unit)
 end
 
 function Forces:Update(plate, unit)

@@ -189,7 +189,7 @@ end
 function Health:OnOtherEvent(plate, event, unit)
     if event == "QUEST_LOG_UPDATE" then
         if not ns.DB.views[plate.state].colors.quest then return end
-        self:UpdateColor(plate, plate.unit or unit)
+        self:UpdateColor(plate, unit)
         return
     end
     if event == "UNIT_CLASSIFICATION_CHANGED" or event == "UNIT_DISPLAYPOWER" or event == "INSTANCE_ENCOUNTER_ENGAGE_UNIT" then
@@ -197,15 +197,15 @@ function Health:OnOtherEvent(plate, event, unit)
         ns.Scaling:Apply(plate)
         local quest = ns.Elements.Quest
         if quest and ns.Runs(quest, plate) then
-            quest:Update(plate, plate.unit or unit)
+            quest:Update(plate, unit)
         end
     end
     if (event == "UNIT_THREAT_LIST_UPDATE" or event == "UNIT_THREAT_SITUATION_UPDATE") and not plate.isFriendly then
-        local status = UnitThreatSituation("player", plate.unit or unit)
+        local status = UnitThreatSituation("player", unit)
         if not issecretvalue(status) then
             local seen = status == nil and false or status
             if plate.threatSeen == seen then return end
-            self:UpdateColor(plate, plate.unit or unit)
+            self:UpdateColor(plate, unit)
             plate.threatSeen = seen
             return
         end
@@ -213,7 +213,7 @@ function Health:OnOtherEvent(plate, event, unit)
     if event == "UNIT_FLAGS" and ns.Scaling:UsesCombat(plate.state) then
         ns.Scaling:Apply(plate)
     end
-    self:UpdateColor(plate, plate.unit or unit)
+    self:UpdateColor(plate, unit)
 end
 
 function Health:Update(plate, unit, snap)
@@ -242,7 +242,7 @@ function Health:OnEvent(plate, event, unit)
         self:Update(plate, unit)
         local curve = plate.healthGradient and plate.fadeCurve
         if curve then
-            local color = UnitHealthPercent(plate.unit or unit, false, curve)
+            local color = UnitHealthPercent(unit, false, curve)
             Paint(plate, color.r, color.g, color.b, color.a)
         end
         return

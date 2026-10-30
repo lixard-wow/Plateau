@@ -36,7 +36,7 @@ function ThreatText:Disable(plate)
 end
 
 function ThreatText:OnEvent(plate, _, unit)
-    self:Update(plate, plate.unit or unit)
+    self:Update(plate, unit)
 end
 
 function ThreatText:Update(plate, unit)

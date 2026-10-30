@@ -190,7 +190,7 @@ function EnemyPower:Disable(plate)
 end
 
 function EnemyPower:OnEvent(plate, _, unit)
-    self:Update(plate, plate.unit or unit)
+    self:Update(plate, unit)
 end
 
 function EnemyPower:UpdateEmphasis(plate)
