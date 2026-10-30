@@ -6,6 +6,24 @@ local C = Style.colors
 local BAR_HEIGHT = 12
 local BOX_WIDTH = 44
 
+local dragging
+local driver = CreateFrame("Frame")
+driver:Hide()
+driver:SetScript("OnUpdate", function(self)
+    local drag = dragging
+    if not drag then
+        self:Hide()
+        return
+    end
+    if not IsMouseButtonDown("LeftButton") then
+        dragging = nil
+        self:Hide()
+        drag.flush()
+        return
+    end
+    drag.queue(drag.valueAt())
+end)
+
 function ns.Widgets.Slider(parent, spec)
     local min, max, step = spec.min, spec.max, spec.step or 1
     local pattern = step < 0.01 and "%.3f" or step < 1 and "%.2f" or "%d"
@@ -93,6 +111,7 @@ function ns.Widgets.Slider(parent, spec)
     end
     local function QueueChange(value)
         value = Clean(value)
+        if value == pending or (pending == nil and value == currentValue) then return end
         pending = value
         SetDisplay(value)
         if spec.applyOnRelease then return end
@@ -110,25 +129,20 @@ function ns.Widgets.Slider(parent, spec)
         return min + fraction * (max - min)
     end
 
-    local driver = CreateFrame("Frame")
-    driver:Hide()
-    driver:SetScript("OnUpdate", function()
-        if not IsMouseButtonDown("LeftButton") then
-            driver:Hide()
-            Flush()
-            return
-        end
-        QueueChange(ValueAtCursor())
-    end)
+    local drag = { flush = Flush, queue = QueueChange, valueAt = ValueAtCursor }
 
     track:SetScript("OnMouseDown", function(_, button)
         if button ~= "LeftButton" then return end
         QueueChange(ValueAtCursor())
+        dragging = drag
         driver:Show()
     end)
     track:SetScript("OnMouseUp", function(_, button)
         if button ~= "LeftButton" then return end
-        driver:Hide()
+        if dragging == drag then
+            dragging = nil
+            driver:Hide()
+        end
         Flush()
     end)
 
