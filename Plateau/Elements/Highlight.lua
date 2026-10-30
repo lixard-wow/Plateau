@@ -2,7 +2,6 @@ local _, ns = ...
 
 local GetAtlasInfo = C_Texture.GetAtlasInfo
 
-local BRIGHTEN_TEXTURE = "Interface\\TargetingFrame\\UI-TargetingFrame-BarFill"
 local BRIGHTEN_ALPHA = 0.25
 
 local ARROWS = ns.arrowStyles
@@ -236,11 +235,7 @@ local function Point(texture, style, direction, size)
 end
 
 local function StyleSet(set, plate, db, borderSize)
-    set.ring:Layout(db.ringSize, borderSize)
-    set.ring:SetColor(db.ringColor[1], db.ringColor[2], db.ringColor[3], db.ringColor[4])
-
-    set.glow:Layout(db.glowSize, borderSize)
-    set.glow:SetFade(db.glowColor[1], db.glowColor[2], db.glowColor[3], db.glowColor[4])
+    ns.StyleRingGlow(set.ring, set.glow, db, borderSize)
 
     if db.arrows then
         EnsureArrows(set, plate)
@@ -338,12 +333,8 @@ function Highlight:Create(plate)
         FocusSet(plate)
     end
 
-    local wash = plate.health:CreateTexture(nil, "ARTWORK", nil, 7)
-    wash:SetTexture(BRIGHTEN_TEXTURE)
-    wash:SetBlendMode("ADD")
-    wash:SetAlpha(BRIGHTEN_ALPHA)
-    wash:Hide()
-    plate.targetWash = wash
+    plate.targetWash = ns.CreateWash(plate, 7)
+    plate.targetWash:SetAlpha(BRIGHTEN_ALPHA)
 end
 
 local function Remember(config, db)
@@ -410,8 +401,7 @@ function Highlight:Style(plate)
     if plate.focusSet then
         StyleSet(plate.focusSet, plate, ns.DB.views.enemy.focus, borderSize)
     end
-    plate.targetWash:ClearAllPoints()
-    plate.targetWash:SetAllPoints(plate.health:GetStatusBarTexture())
+    ns.FitWash(plate.targetWash, plate.health)
 end
 
 function Highlight:RefreshCast(plate)

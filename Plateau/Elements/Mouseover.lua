@@ -1,7 +1,5 @@
 local _, ns = ...
 
-local BRIGHTEN_TEXTURE = "Interface\\TargetingFrame\\UI-TargetingFrame-BarFill"
-
 local settings = {}
 
 local Mouseover = {
@@ -16,11 +14,7 @@ function Mouseover:Create(plate)
     plate.hoverRing:Hide()
     plate.hoverGlow = ns.CreateBorder(plate, plate, "BACKGROUND", -7)
     plate.hoverGlow:Hide()
-    local wash = plate.health:CreateTexture(nil, "ARTWORK", nil, 6)
-    wash:SetTexture(BRIGHTEN_TEXTURE)
-    wash:SetBlendMode("ADD")
-    wash:Hide()
-    plate.hoverWash = wash
+    plate.hoverWash = ns.CreateWash(plate, 6)
 end
 
 function Mouseover:Configure(db, state)
@@ -33,13 +27,8 @@ function Mouseover:Configure(db, state)
 end
 
 function Mouseover:Style(plate, db)
-    local look = ns.DB.views[plate.state]
-    plate.hoverRing:Layout(db.ringSize, ns.HealthBorderOffset(look))
-    plate.hoverRing:SetColor(db.ringColor[1], db.ringColor[2], db.ringColor[3], db.ringColor[4])
-    plate.hoverGlow:Layout(db.glowSize, ns.HealthBorderOffset(look))
-    plate.hoverGlow:SetFade(db.glowColor[1], db.glowColor[2], db.glowColor[3], db.glowColor[4])
-    plate.hoverWash:ClearAllPoints()
-    plate.hoverWash:SetAllPoints(plate.health:GetStatusBarTexture())
+    ns.StyleRingGlow(plate.hoverRing, plate.hoverGlow, db, ns.HealthBorderOffset(ns.DB.views[plate.state]))
+    ns.FitWash(plate.hoverWash, plate.health)
     plate.hoverWash:SetAlpha(db.brightenAmount)
 end
 

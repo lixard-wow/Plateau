@@ -710,3 +710,25 @@ KeepHighlight("SetColor")
 KeepHighlight("SetSpriteCell")
 KeepHighlight("SetFade")
 KeepHighlight("Layout")
+
+local BRIGHTEN_TEXTURE = "Interface\\TargetingFrame\\UI-TargetingFrame-BarFill"
+
+function ns.CreateWash(plate, sublevel)
+    local wash = plate.health:CreateTexture(nil, "ARTWORK", nil, sublevel)
+    wash:SetTexture(BRIGHTEN_TEXTURE)
+    wash:SetBlendMode("ADD")
+    wash:Hide()
+    return wash
+end
+
+function ns.FitWash(wash, health)
+    wash:ClearAllPoints()
+    wash:SetAllPoints(health:GetStatusBarTexture())
+end
+
+function ns.StyleRingGlow(ring, glow, db, offset)
+    ring:Layout(db.ringSize, offset)
+    ring:SetColor(db.ringColor[1], db.ringColor[2], db.ringColor[3], db.ringColor[4])
+    glow:Layout(db.glowSize, offset)
+    glow:SetFade(db.glowColor[1], db.glowColor[2], db.glowColor[3], db.glowColor[4])
+end
