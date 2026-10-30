@@ -726,9 +726,22 @@ function DB:AccountProfile()
     end
 end
 
+local function Missing(db, name)
+    if not db.saved.profiles[name] then
+        return L["Profile %s not found."]:format(tostring(name))
+    end
+end
+
+local function TrimmedName(name)
+    if type(name) == "string" and name:find("%S") then
+        return (name:match("^%s*(.-)%s*$"))
+    end
+end
+
 function DB:SetAccountProfile(name)
-    if not self.saved.profiles[name] then
-        return false, L["Profile %s not found."]:format(tostring(name))
+    local missing = Missing(self, name)
+    if missing then
+        return false, missing
     end
     self.saved.global.accountProfile = name
     return true
@@ -875,8 +888,9 @@ function DB:ListProfiles()
 end
 
 function DB:SwitchProfile(name, temporary)
-    if not self.saved.profiles[name] then
-        return false, L["Profile %s not found."]:format(tostring(name))
+    local missing = Missing(self, name)
+    if missing then
+        return false, missing
     end
     self:UseProfile(name, temporary)
     ns.Driver:RequestRestyle(false)
@@ -884,10 +898,10 @@ function DB:SwitchProfile(name, temporary)
 end
 
 function DB:CreateProfile(name, copyFrom)
-    if type(name) ~= "string" or not name:find("%S") then
+    name = TrimmedName(name)
+    if not name then
         return false, L["Enter a profile name."]
     end
-    name = name:match("^%s*(.-)%s*$")
     if self.saved.profiles[name] then
         return false, L["A profile named %s already exists."]:format(name)
     end
@@ -979,8 +993,9 @@ function DB:CopyProfile(from)
 end
 
 function DB:SetDefaultProfile(name)
-    if not self.saved.profiles[name] then
-        return false, L["Profile %s not found."]:format(tostring(name))
+    local missing = Missing(self, name)
+    if missing then
+        return false, missing
     end
     if not self.charKey then
         return self:SwitchProfile(name, true)
@@ -994,8 +1009,9 @@ function DB:SetDefaultProfile(name)
 end
 
 function DB:ActivateProfile(name)
-    if not self.saved.profiles[name] then
-        return false, L["Profile %s not found."]:format(tostring(name))
+    local missing = Missing(self, name)
+    if missing then
+        return false, missing
     end
     if self.charKey and InCombatLockdown and InCombatLockdown() and ns.AutoProfile and ns.AutoProfile.Apply then
         self.saved.profileKeys[self.charKey] = name
@@ -1007,13 +1023,14 @@ end
 
 function DB:RenameProfile(old, new)
     local profiles = self.saved.profiles
-    if not profiles[old] then
-        return false, L["Profile %s not found."]:format(tostring(old))
+    local missing = Missing(self, old)
+    if missing then
+        return false, missing
     end
-    if type(new) ~= "string" or not new:find("%S") then
+    new = TrimmedName(new)
+    if not new then
         return false, L["Enter a profile name."]
     end
-    new = new:match("^%s*(.-)%s*$")
     if new == old then
         return false, L["That is already its name."]
     end
@@ -1428,8 +1445,9 @@ function DB:DeleteProfile(name)
     if name == self.profileName then
         return false, L["You can't delete the active profile."]
     end
-    if not self.saved.profiles[name] then
-        return false, L["Profile %s not found."]:format(tostring(name))
+    local missing = Missing(self, name)
+    if missing then
+        return false, missing
     end
     self.saved.profiles[name] = nil
     if self.saved.global.accountProfile == name then
