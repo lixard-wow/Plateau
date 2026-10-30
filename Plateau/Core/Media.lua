@@ -1,5 +1,6 @@
 local addonName, ns = ...
 
+local issecretvalue = issecretvalue
 local ATLAS_PREFIX = "atlas:"
 local FLAT = "Interface\\Buttons\\WHITE8X8"
 local BARS = "Interface\\AddOns\\" .. addonName .. "\\Art\\Bars\\"

@@ -1,5 +1,6 @@
 local addonName, ns = ...
 
+local issecretvalue = issecretvalue
 local Border = {}
 Border.__index = Border
 

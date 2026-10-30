@@ -1,5 +1,6 @@
 local _, ns = ...
 
+local issecretvalue = issecretvalue
 ns.iconPositions = {
     TOP = { "BOTTOM", "TOP", 0, 1 },
     BOTTOM = { "TOP", "BOTTOM", 0, -1 },
