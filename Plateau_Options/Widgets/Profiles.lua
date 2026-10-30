@@ -141,16 +141,7 @@ end
 
 function ns.Widgets.NamePrompt()
     if namePrompt then return namePrompt end
-    local box = CreateFrame("Frame", nil, UIParent)
-    box:SetSize(400, 190)
-    box:SetPoint("CENTER")
-    box:SetFrameStrata("FULLSCREEN_DIALOG")
-    box:HookScript("OnShow", function(self) Style.FitWindow(self) end)
-    box:SetToplevel(true)
-    box:EnableMouse(true)
-    box:Hide()
-    Style.Panel(box, C.window, C.border)
-    Style.Card(box)
+    local box = Style.Dialog(nil, 400, 190)
 
     local title = Style.Text(box, 15, C.heading)
     title:SetPoint("TOPLEFT", 20, -16)
@@ -220,16 +211,7 @@ end
 
 function ns.Widgets.ConfirmPrompt()
     if confirmPrompt then return confirmPrompt end
-    local box = CreateFrame("Frame", nil, UIParent)
-    box:SetWidth(440)
-    box:SetPoint("CENTER")
-    box:SetFrameStrata("FULLSCREEN_DIALOG")
-    box:HookScript("OnShow", function(self) Style.FitWindow(self) end)
-    box:SetToplevel(true)
-    box:EnableMouse(true)
-    box:Hide()
-    Style.Panel(box, C.window, C.border)
-    Style.Card(box)
+    local box = Style.Dialog(nil, 440)
 
     local title = Style.Text(box, 15, C.heading)
     title:SetPoint("TOPLEFT", 20, -16)

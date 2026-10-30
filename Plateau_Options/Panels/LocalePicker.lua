@@ -24,19 +24,10 @@ local NAMES = {
     zhTW = "Chinese (Traditional)",
 }
 
-local frame = CreateFrame("Frame", "PlateauLocalePicker", UIParent)
-frame:SetWidth(WIDTH)
-frame:SetPoint("CENTER")
-frame:SetFrameStrata("FULLSCREEN_DIALOG")
-frame:SetToplevel(true)
+local frame = Style.Dialog("PlateauLocalePicker", WIDTH)
 frame:SetMovable(true)
 frame:SetClampedToScreen(true)
-frame:EnableMouse(true)
 Style.DragWindow(frame, { frame }, Style.SnapWindow)
-frame:HookScript("OnShow", function(self) Style.FitWindow(self) end)
-frame:Hide()
-Style.Panel(frame, C.window, C.border)
-Style.Card(frame)
 tinsert(UISpecialFrames, "PlateauLocalePicker")
 
 local logo = frame:CreateTexture(nil, "ARTWORK")

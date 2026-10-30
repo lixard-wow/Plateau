@@ -729,6 +729,24 @@ function Style.Brackets(frame, color, size, thickness)
     end
 end
 
+function Style.Dialog(name, width, height)
+    local box = CreateFrame("Frame", name, UIParent)
+    if height then
+        box:SetSize(width, height)
+    else
+        box:SetWidth(width)
+    end
+    box:SetPoint("CENTER")
+    box:SetFrameStrata("FULLSCREEN_DIALOG")
+    box:HookScript("OnShow", function(self) Style.FitWindow(self) end)
+    box:SetToplevel(true)
+    box:EnableMouse(true)
+    box:Hide()
+    Style.Panel(box, Style.colors.window, Style.colors.border)
+    Style.Card(box)
+    return box
+end
+
 function Style.Card(frame, size)
     local C = Style.colors
     if Style.theme.brackets then

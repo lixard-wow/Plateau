@@ -644,16 +644,9 @@ local reloadPrompt
 
 local function EnsureReloadPrompt()
     if reloadPrompt then return reloadPrompt end
-    local prompt = CreateFrame("Frame", "PlateauReloadPrompt", UIParent)
-    prompt:SetSize(360, 110)
+    local prompt = Style.Dialog("PlateauReloadPrompt", 360, 110)
+    prompt:ClearAllPoints()
     prompt:SetPoint("TOP", UIParent, "TOP", 0, -220)
-    prompt:SetFrameStrata("FULLSCREEN_DIALOG")
-    prompt:HookScript("OnShow", function(self) Style.FitWindow(self) end)
-    prompt:SetToplevel(true)
-    prompt:EnableMouse(true)
-    Style.Panel(prompt, Style.colors.window, Style.colors.border)
-    Style.Card(prompt)
-    prompt:Hide()
     tinsert(UISpecialFrames, "PlateauReloadPrompt")
 
     local text = Style.Text(prompt, 13, Style.colors.text)

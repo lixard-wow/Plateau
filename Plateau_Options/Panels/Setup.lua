@@ -326,16 +326,7 @@ function frame:Open()
     Plateau.RefreshDirtyPreviews()
 end
 
-local conflicts = CreateFrame("Frame", "PlateauConflicts", UIParent)
-conflicts:SetSize(520, 200)
-conflicts:SetPoint("CENTER")
-conflicts:SetFrameStrata("FULLSCREEN_DIALOG")
-conflicts:HookScript("OnShow", function(self) Style.FitWindow(self) end)
-conflicts:SetToplevel(true)
-conflicts:EnableMouse(true)
-conflicts:Hide()
-Style.Panel(conflicts, C.window, C.border)
-Style.Card(conflicts)
+local conflicts = Style.Dialog("PlateauConflicts", 520, 200)
 
 local conflictLogo = conflicts:CreateTexture(nil, "ARTWORK")
 conflictLogo:SetSize(22, 22)
