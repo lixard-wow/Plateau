@@ -408,17 +408,23 @@ function Kickers:PlateChanged(plate)
     Refresh(plate)
 end
 
-function Kickers:CooldownChanged(guid)
-    if not guid then return end
-    ns.Driver:ForEachActive(function(plate)
-        if plate.kickHolder and plate.kickHolder:IsShown() then
-            for _, seg in ipairs(plate.kickSegs) do
-                for _, icon in ipairs(seg.icons) do
-                    if icon.guid == guid and icon:IsShown() then ApplyCooldown(icon) end
-                end
+local changedGuid
+
+local function CooldownOn(plate)
+    if plate.kickHolder and plate.kickHolder:IsShown() then
+        for _, seg in ipairs(plate.kickSegs) do
+            for _, icon in ipairs(seg.icons) do
+                if icon.guid == changedGuid and icon:IsShown() then ApplyCooldown(icon) end
             end
         end
-    end)
+    end
+end
+
+function Kickers:CooldownChanged(guid)
+    if not guid then return end
+    changedGuid = guid
+    ns.Driver:ForEachActive(CooldownOn)
+    changedGuid = nil
 end
 
 function Kickers:Update(plate, unit)

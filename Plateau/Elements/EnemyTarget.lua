@@ -143,12 +143,14 @@ function EnemyTarget:Preview(plate, state)
     self:RefreshShown(plate)
 end
 
+local function RefreshOne(plate)
+    if ns.Runs(EnemyTarget, plate) and plate.unit then
+        EnemyTarget:Update(plate, plate.unit)
+    end
+end
+
 local function RefreshAll()
-    ns.Driver:ForEachActive(function(plate)
-        if ns.Runs(EnemyTarget, plate) and plate.unit then
-            EnemyTarget:Update(plate, plate.unit)
-        end
-    end)
+    ns.Driver:ForEachActive(RefreshOne)
 end
 
 local refresher = CreateFrame("Frame")

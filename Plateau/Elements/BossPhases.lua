@@ -257,12 +257,14 @@ function BossPhases:Preview(plate, state)
     end
 end
 
+local function RefreshOne(plate)
+    if ns.Runs(BossPhases, plate) then
+        BossPhases:Update(plate)
+    end
+end
+
 local function RefreshAll()
-    ns.Driver:ForEachActive(function(plate)
-        if ns.Runs(BossPhases, plate) then
-            BossPhases:Update(plate)
-        end
-    end)
+    ns.Driver:ForEachActive(RefreshOne)
 end
 
 local watcher = CreateFrame("Frame")

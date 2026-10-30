@@ -146,6 +146,12 @@ function Level:Render(plate, level, classification)
     text:Show()
 end
 
+local function RefreshOne(plate)
+    if ns.Runs(Level, plate) then
+        Level:Update(plate, plate.unit)
+    end
+end
+
 local zoneWatcher = CreateFrame("Frame")
 zoneWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
 zoneWatcher:SetScript("OnEvent", function()
@@ -153,11 +159,7 @@ zoneWatcher:SetScript("OnEvent", function()
     local now = IsInInstance() == true
     if now ~= inInstance then
         inInstance = now
-        ns.Driver:ForEachActive(function(plate)
-            if ns.Runs(Level, plate) then
-                Level:Update(plate, plate.unit)
-            end
-        end)
+        ns.Driver:ForEachActive(RefreshOne)
     end
 end)
 
