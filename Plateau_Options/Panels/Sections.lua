@@ -2759,50 +2759,26 @@ for _, section in ipairs(ns.sections) do
         end
     end
 end
-for path, range in pairs({
-    ["look.auras.cc.offsetX"] = { -200, 200 },
-    ["look.auras.cc.offsetY"] = { -200, 200 },
-    ["look.auras.important.offsetX"] = { -200, 200 },
-    ["look.auras.important.offsetY"] = { -200, 200 },
-    ["look.auras.mine.offsetX"] = { -200, 200 },
-    ["look.auras.mine.offsetY"] = { -200, 200 },
-    ["look.auras.purge.offsetX"] = { -200, 200 },
-    ["look.auras.purge.offsetY"] = { -200, 200 },
-    ["look.castbar.targetOffsetX"] = { -200, 200 },
-    ["look.castbar.targetOffsetY"] = { -200, 200 },
-    ["look.castbar.timerOffsetX"] = { -200, 200 },
-    ["look.castbar.timerOffsetY"] = { -200, 200 },
-    ["look.classPower.offsetX"] = { -200, 200 },
-    ["look.classPower.offsetY"] = { -200, 200 },
-    ["look.classification.offsetX"] = { -200, 200 },
-    ["look.classification.offsetY"] = { -200, 200 },
-    ["look.enemyPower.offsetX"] = { -200, 200 },
-    ["look.enemyPower.offsetY"] = { -200, 200 },
-    ["look.enemyTarget.offsetX"] = { -200, 200 },
-    ["look.enemyTarget.offsetY"] = { -200, 200 },
-    ["look.faction.offsetX"] = { -200, 200 },
-    ["look.faction.offsetY"] = { -200, 200 },
-    ["look.forces.offsetX"] = { -200, 200 },
-    ["look.forces.offsetY"] = { -200, 200 },
-    ["look.friendly.raidMarker.offsetX"] = { -200, 200 },
-    ["look.friendly.raidMarker.offsetY"] = { -200, 200 },
-    ["look.healthText.offsetX"] = { -200, 200 },
-    ["look.healthText.offsetY"] = { -200, 200 },
-    ["look.kickers.offsetX"] = { -200, 200 },
-    ["look.kickers.offsetY"] = { -200, 200 },
-    ["look.level.offsetX"] = { -200, 200 },
-    ["look.level.offsetY"] = { -200, 200 },
-    ["look.name.offsetX"] = { -200, 200 },
-    ["look.quest.offsetX"] = { -200, 200 },
-    ["look.quest.offsetY"] = { -200, 200 },
-    ["look.quest.progress.offsetX"] = { -200, 200 },
-    ["look.quest.progress.offsetY"] = { -200, 200 },
-    ["look.raidMarker.offsetX"] = { -200, 200 },
-    ["look.raidMarker.offsetY"] = { -200, 200 },
-    ["look.threatText.offsetX"] = { -200, 200 },
-    ["look.threatText.offsetY"] = { -200, 200 },
-}) do
-    sliderRanges[path] = sliderRanges[path] or range
+local OFFSET_GROUPS = {
+    "look.auras.cc", "look.auras.important", "look.auras.mine", "look.auras.purge",
+    "look.classPower", "look.classification", "look.enemyPower", "look.enemyTarget",
+    "look.faction", "look.forces", "look.friendly.raidMarker", "look.healthText",
+    "look.kickers", "look.level", "look.quest", "look.quest.progress",
+    "look.raidMarker", "look.threatText",
+}
+local OFFSET_PATHS = {
+    "look.castbar.targetOffsetX",
+    "look.castbar.targetOffsetY",
+    "look.castbar.timerOffsetX",
+    "look.castbar.timerOffsetY",
+    "look.name.offsetX",
+}
+for _, group in ipairs(OFFSET_GROUPS) do
+    OFFSET_PATHS[#OFFSET_PATHS + 1] = group .. ".offsetX"
+    OFFSET_PATHS[#OFFSET_PATHS + 1] = group .. ".offsetY"
+end
+for _, path in ipairs(OFFSET_PATHS) do
+    sliderRanges[path] = sliderRanges[path] or { -200, 200 }
 end
 ns.sliderRanges = sliderRanges
 if Plateau.SetImportRanges then
