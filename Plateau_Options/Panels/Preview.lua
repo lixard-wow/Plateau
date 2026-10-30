@@ -402,6 +402,12 @@ local function AtHealth(plate)
     return function() return plate.health end
 end
 
+local function PartSpot(plate, region, section, label, level, pad, spec)
+    spec.region = region
+    spec.anchor = spec.anchor or AtPlate(plate)
+    return Hotspot(plate, region, section, label, level, pad, ns.Drag.PositionSpec(spec))
+end
+
 local function AddHotspots(plate)
     local Drag = ns.Drag
     local castbarDrag = Drag.CastbarSpec(plate)
@@ -413,17 +419,16 @@ local function AddHotspots(plate)
     Hotspot(plate, plate.health, function() return here.healthColors and "healthColors" or "health" end,
         function() return here.healthColors and "Colors" or "Health bar" end, 20, 0)
     Hotspot(plate, plate.castbar, "castbar", "Cast bar", 60, 0, castbarDrag)
-    Hotspot(plate, plate.healthText, "healthText", "Health text", 80, 3,
-        Drag.PositionSpec({ path = "look.healthText", positionKey = "anchor", text = true, fixedGap = 3, region = plate.healthText, anchor = AtHealth(plate) })).setting = "Show health text"
-    Hotspot(plate, plate.enemyTarget, "name", "Enemy target name", 80, 3,
-        Drag.PositionSpec({ path = "look.enemyTarget", positionKey = "anchor", text = true, fixedGap = 3, region = plate.enemyTarget, anchor = AtHealth(plate) })).setting = "Show enemy target name"
-    Hotspot(plate, plate.level, "level", "Level", 80, 3,
-        Drag.PositionSpec({ path = "look.level", positionKey = "anchor", text = true, fixedGap = 3, region = plate.level, anchor = AtHealth(plate) }))
+    PartSpot(plate, plate.healthText, "healthText", "Health text", 80, 3,
+        { path = "look.healthText", positionKey = "anchor", text = true, fixedGap = 3, anchor = AtHealth(plate) }).setting = "Show health text"
+    PartSpot(plate, plate.enemyTarget, "name", "Enemy target name", 80, 3,
+        { path = "look.enemyTarget", positionKey = "anchor", text = true, fixedGap = 3, anchor = AtHealth(plate) }).setting = "Show enemy target name"
+    PartSpot(plate, plate.level, "level", "Level", 80, 3,
+        { path = "look.level", positionKey = "anchor", text = true, fixedGap = 3, anchor = AtHealth(plate) })
     local nameSpot = Hotspot(plate, plate.name, function() return here.friendly and "friendly" or "name" end, "Name", 70, 1, Drag.NameSpec(plate))
     nameSpot.fitText = true
     nameSpot.friendlyHere = true
-    Hotspot(plate, plate.raidMarker, "raidMarker", "Raid target icon", 80, 0,
-        Drag.PositionSpec({
+    PartSpot(plate, plate.raidMarker, "raidMarker", "Raid target icon", 80, 0, {
             path = function() return here.friendly and "look.friendly.raidMarker" or "look.raidMarker" end,
             readPath = function()
                 if here.friendly and Plateau.DB:Get("look.friendly.raidMarker.own") then
@@ -438,28 +443,18 @@ local function AddHotspots(plate)
                 local own = Plateau.DB:Get("look.friendly.raidMarker.own")
                 return { ["look.friendly.raidMarker.own"] = true, ["look.friendly.raidMarker.gap"] = Plateau.DB:Get(own and "look.friendly.raidMarker.gap" or "look.raidMarker.gap") }
             end,
-            region = plate.raidMarker,
-            anchor = AtPlate(plate),
-        })).ring = 0
-    Hotspot(plate, plate.classification, "classification", "Elite icon", 80, 1,
-        Drag.PositionSpec({ path = "look.classification", region = plate.classification, anchor = AtPlate(plate) })).ring = 0
-    Hotspot(plate, plate.quest, "quest", "Quest icon", 80, 1,
-        Drag.PositionSpec({ path = "look.quest", region = plate.quest, anchor = AtPlate(plate) })).ring = 0
-    Hotspot(plate, plate.questProgress, "quest", "Quest progress", 81, 2,
-        Drag.PositionSpec({ path = "look.quest.progress", text = true, region = plate.questProgress, anchor = AtPlate(plate) })).fitText = true
+        }).ring = 0
+    PartSpot(plate, plate.classification, "classification", "Elite icon", 80, 1, { path = "look.classification" }).ring = 0
+    PartSpot(plate, plate.quest, "quest", "Quest icon", 80, 1, { path = "look.quest" }).ring = 0
+    PartSpot(plate, plate.questProgress, "quest", "Quest progress", 81, 2, { path = "look.quest.progress", text = true }).fitText = true
     Hotspot(plate, plate.enemyPowerBar, "enemyPower", "Enemy power bar", 85, 1, Drag.EnemyPowerSpec(plate))
-    Hotspot(plate, plate.classPower, "classPower", "Class resource", 80, 2,
-        Drag.PositionSpec({ path = "look.classPower", region = plate.classPower, anchor = AtPlate(plate), noRing = true }))
-    Hotspot(plate, plate.forces, "forces", "Mythic+ enemy forces", 80, 3,
-        Drag.PositionSpec({ path = "look.forces", region = plate.forces, anchor = AtPlate(plate) }))
-    local threatSpot = Hotspot(plate, plate.threatText, "threatText", "Threat percent", 80, 3,
-        Drag.PositionSpec({ path = "look.threatText", region = plate.threatText, anchor = AtPlate(plate) }))
+    PartSpot(plate, plate.classPower, "classPower", "Class resource", 80, 2, { path = "look.classPower", noRing = true })
+    PartSpot(plate, plate.forces, "forces", "Mythic+ enemy forces", 80, 3, { path = "look.forces" })
+    local threatSpot = PartSpot(plate, plate.threatText, "threatText", "Threat percent", 80, 3, { path = "look.threatText" })
     threatSpot.fitText = true
     threatSpot.setting = "Show threat percent"
-    Hotspot(plate, plate.faction, "faction", "Faction icon", 80, 1,
-        Drag.PositionSpec({ path = "look.faction", region = plate.faction, anchor = AtPlate(plate) })).ring = 0
-    Hotspot(plate, plate.kickHolder, "kickers", "Kicker icons", 80, 1,
-        Drag.PositionSpec({ path = "look.kickers", region = plate.kickHolder, anchor = AtPlate(plate) })).ring = function()
+    PartSpot(plate, plate.faction, "faction", "Faction icon", 80, 1, { path = "look.faction" }).ring = 0
+    PartSpot(plate, plate.kickHolder, "kickers", "Kicker icons", 80, 1, { path = "look.kickers" }).ring = function()
             return Plateau.DB:Get("look.kickers.borderSize") or 1
         end
     Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true
@@ -475,16 +470,17 @@ local function AddHotspots(plate)
             borderSize = Plateau.DB:Get("look.castbar.borderSize"),
         })
     end
-    local castTarget = Hotspot(plate, plate.castbar.target, "castbar", "Cast target", 65, 2,
-        Drag.PositionSpec({ path = "look.castbar", positionKey = "targetPosition", xKey = "targetOffsetX", yKey = "targetOffsetY", fixedGap = 2, region = plate.castbar.target, anchor = function() return plate.castbar end }))
+    local castbarAnchor = function() return plate.castbar end
+    local castTarget = PartSpot(plate, plate.castbar.target, "castbar", "Cast target", 65, 2,
+        { path = "look.castbar", positionKey = "targetPosition", xKey = "targetOffsetX", yKey = "targetOffsetY", fixedGap = 2, anchor = castbarAnchor })
     castTarget.fitText = true
     castTarget.setting = "Show cast target"
     local castName = Hotspot(plate, plate.castbar.text, "castbar",
         function() return picks.cast == "interrupted" and "Interrupted text" or "Spell name" end, 65, 1, Drag.SpellNameSpec(plate))
     castName.fitText = true
     castName.setting = "Text"
-    local castTimer = Hotspot(plate, plate.castbar.timer, "castbar", "Cast time", 65, 1,
-        Drag.PositionSpec({ path = "look.castbar", positionKey = "timerPosition", xKey = "timerOffsetX", yKey = "timerOffsetY", fixedGap = 3, region = plate.castbar.timer, anchor = function() return plate.castbar end }))
+    local castTimer = PartSpot(plate, plate.castbar.timer, "castbar", "Cast time", 65, 1,
+        { path = "look.castbar", positionKey = "timerPosition", xKey = "timerOffsetX", yKey = "timerOffsetY", fixedGap = 3, anchor = castbarAnchor })
     castTimer.fitText = true
     castTimer.setting = "Show remaining cast time"
     local absorb = Hotspot(plate, plate.absorb, "health", "Absorbs", 30, 0)
