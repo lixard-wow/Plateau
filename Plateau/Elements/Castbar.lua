@@ -419,14 +419,18 @@ end
 function Castbar:Style(plate, db)
     local bar = plate.castbar
     local look = ns.DB.views[plate.state]
-    local height, gap, size = (db.height and db.height > 0) and db.height or plate.rawHeight or plate:GetHeight(), ns.CastbarGap(look, plate.castShift), db.borderSize
+    local height, gap, size = (db.height and db.height > 0) and db.height or plate.sizedHeight or plate.rawHeight or plate:GetHeight(), ns.CastbarGap(look, plate.castShift), db.borderSize
     local joined = ns.CastbarJoined(look, plate.castShift)
+    plate.castJoined = joined
+    if joined and ns.pixelPerfect then
+        gap = math.floor(gap + 0.5) * ns.PixelUnit(plate)
+    end
     local drop = gap + (plate.castShift or 0)
     local span = db.showIcon and db.iconSpan
     local iconOffset = (db.showIcon and not span) and (height + gap) or 0
 
     local iconRight = db.iconSide == "RIGHT"
-    local total = (db.width and db.width > 0) and db.width or plate.rawWidth or plate:GetWidth()
+    local total = (db.width and db.width > 0) and db.width or plate.sizedWidth or plate.rawWidth or plate:GetWidth()
     local barWidth = math.max(10, total - iconOffset)
     bar:ClearAllPoints()
     if db.width and db.width > 0 then
@@ -437,7 +441,7 @@ function Castbar:Style(plate, db)
         bar:SetPoint("TOPRIGHT", plate, "BOTTOMRIGHT", iconRight and -iconOffset or 0, -drop)
     end
     bar:SetHeight(height)
-    local plateWidth = plate.rawWidth or plate:GetWidth()
+    local plateWidth = plate.sizedWidth or plate.rawWidth or plate:GetWidth()
     plate.castDrop = drop + height
     plate.castSide = (db.width and db.width > 0) and math.max(0, (db.width - plateWidth) / 2) or 0
     if ns.Elements.Highlight and ns.Elements.Highlight.RefreshCast then
@@ -524,7 +528,11 @@ function Castbar:Style(plate, db)
     bar.text:SetJustifyH(db.textJustify)
     bar.text:ClearAllPoints()
     local textRightInset = db.showTimer and TIMER_WIDTH or 3
-    if db.textJustify == "RIGHT" then
+    if db.targetPosition ~= "AFTERNAME" then
+        bar.text:SetWordWrap(false)
+        bar.text:SetPoint("LEFT", 3, 0)
+        bar.text:SetPoint("RIGHT", -textRightInset, 0)
+    elseif db.textJustify == "RIGHT" then
         bar.text:SetPoint("RIGHT", -textRightInset, 0)
     elseif db.textJustify == "CENTER" then
         bar.text:SetPoint("CENTER", (3 - textRightInset) / 2, 0)
@@ -999,6 +1007,17 @@ function Castbar:Preview(plate, state)
 
     bar:Show()
     TargetShownChanged(plate)
+end
+
+if ns.OnRepixel then
+    ns.OnRepixel(function(plate)
+        if plate.castJoined and plate.built and plate.built[Castbar] then
+            local look = ns.DB.views[plate.state]
+            if look then
+                Castbar:Style(plate, look.castbar)
+            end
+        end
+    end)
 end
 
 ns.Driver:RegisterElement(Castbar)

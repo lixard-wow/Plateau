@@ -23,14 +23,17 @@ local function CornersShown(self, shown)
     end
 end
 
+local OPPOSITE = { BOTTOMRIGHT = "TOPLEFT", BOTTOMLEFT = "TOPRIGHT", TOPRIGHT = "BOTTOMLEFT", TOPLEFT = "BOTTOMRIGHT" }
+
 local function PlaceCorners(self, size, offset)
     local corners = self.corners
     if not corners then return end
+    local outer = offset + size
     for i, info in ipairs(CORNERS) do
         local corner = corners[i]
         corner:ClearAllPoints()
         corner:SetPoint(info.point, self.anchor, info.relative, info.x * offset, info.y * offset)
-        corner:SetSize(size, size)
+        corner:SetPoint(OPPOSITE[info.point], self.anchor, info.relative, info.x * outer, info.y * outer)
     end
 end
 
@@ -174,6 +177,10 @@ end
 function ns.CastbarJoined(look, shift)
     local cast = look.castbar
     return cast.joinBorder and (shift or 0) == 0 and cast.borderStyle == "pixel" and look.health.borderStyle == "pixel"
+end
+
+function ns.PixelUnit(region)
+    return PixelSize(region) or 1
 end
 
 function ns.CastbarGap(look, shift)

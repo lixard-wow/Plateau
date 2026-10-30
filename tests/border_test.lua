@@ -35,7 +35,7 @@ glow:Layout(8, 1)
 glow:SetFade(0, 0.5, 1, 0.75)
 glow:Show()
 check(glow.corners and #glow.corners == 4, "a soft glow gets four rounded corners")
-check(glow.corners[1].shown and glow.corners[1].width == 8 and glow.corners[1].texture:find("glow%-corner"), "corners show at the glow size")
+check(glow.corners[1].shown and math.abs(glow.corners[1].points[2][4] - glow.corners[1].points[1][4]) == 8 and glow.corners[1].texture:find("glow%-corner"), "corners show at the glow size")
 local top = glow.edges[1].points
 check(top[1][4] == -1 and top[2][4] == 1, "the top strip stops at the corners instead of running past them")
 check(glow.corners[2].color[4] == 0.75, "corners take the glow color")
