@@ -556,11 +556,16 @@ DB.CleanSpecSpells = CleanSpecSpells
 
 function ns.CurrentSpec()
     local info = C_SpecializationInfo
-    local index = info and info.GetSpecialization and info.GetSpecialization()
-    if not index or index == 0 then
+    local getSpec = (info and info.GetSpecialization) or GetSpecialization
+    local getInfo = (info and info.GetSpecializationInfo) or GetSpecializationInfo
+    local index = getSpec and getInfo and getSpec()
+    if not index or index <= 0 then
         return 0, nil
     end
-    local id, name = info.GetSpecializationInfo(index)
+    local id, name = getInfo(index)
+    if issecretvalue and issecretvalue(id) then
+        return 0, nil
+    end
     return id or 0, name
 end
 

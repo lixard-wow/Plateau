@@ -50,18 +50,6 @@ local ONLY_SPECS = {
 
 local NEEDS_CAT_FORM = { DRUID = true }
 
-local function CurrentSpecID()
-    local info = C_SpecializationInfo
-    local getSpec = (info and info.GetSpecialization) or GetSpecialization
-    local getInfo = (info and info.GetSpecializationInfo) or GetSpecializationInfo
-    if not (getSpec and getInfo) then return nil end
-    local index = getSpec()
-    if not index or index <= 0 then return nil end
-    local id = getInfo(index)
-    if issecretvalue(id) then return nil end
-    return id
-end
-
 local resource, resourceMax, displayMod, needsCat
 
 local ClassPower = {
@@ -77,8 +65,8 @@ local function Detect()
     needsCat = class and NEEDS_CAT_FORM[class] or false
     local only = class and ONLY_SPECS[class]
     if resource and only then
-        local spec = CurrentSpecID()
-        if spec and not only[spec] then
+        local spec = ns.CurrentSpec()
+        if spec ~= 0 and not only[spec] then
             resource = nil
         end
     end
