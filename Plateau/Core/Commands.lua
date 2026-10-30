@@ -2,73 +2,7 @@ local _, ns = ...
 
 local L = ns.L
 
-local function Say(message)
-    print(ns.Brand:Text("Plateau") .. " " .. message)
-end
-
-local RESTRICTIONS = { "Combat", "Encounter", "ChallengeMode", "PvPMatch", "Map" }
-
-local function Debug()
-    local total, claimed = ns.Driver:CountActive()
-    Say(L["%s (%s), profile %s"]:format(ns.version, ns.flavor, ns.DB.profileName))
-    local active = {}
-    local states = C_RestrictedActions and C_RestrictedActions.GetAddOnRestrictionState
-    if states then
-        for _, name in ipairs(RESTRICTIONS) do
-            local kind = Enum.AddOnRestrictionType[name]
-            if kind and states(kind) == Enum.AddOnRestrictionState.Active then
-                active[#active + 1] = name
-            end
-        end
-    end
-    print("  " .. L["Restrictions active: %s"]:format(#active > 0 and table.concat(active, ", ") or L["none"]))
-    print("  " .. L["Plates: %d showing, %d drawn by Plateau"]:format(total, claimed))
-    if ns.realmPurgeFailed then
-        print("  " .. L["Realm marker cleanup failed. Blizzard's friendly nameplates may show errors."])
-    end
-    local failures = ns.DB.migrationFailures
-    if ns.recovered or (failures and #failures > 0) then
-        print("  " .. L["Saved settings: %s"]:format(ns.recovered and L["recovered from damage (%s)"]:format(tostring(ns.recovered)) or L["upgrade problems: %s"]:format(table.concat(failures, "; "))))
-    end
-    if ns.BossPhaseStatus then
-        local encounter, problem = ns.BossPhaseStatus()
-        if problem then
-            print("  " .. L["Boss phase lines: encounter %s, last problem: %s"]:format(tostring(encounter or L["none"]), tostring(problem)))
-        else
-            print("  " .. L["Boss phase lines: encounter %s"]:format(tostring(encounter or L["none"])))
-        end
-    end
-    local kickID = ns.InterruptReady:GetSpellID()
-    print("  " .. L["Interrupt: %s"]:format(kickID and (C_Spell.GetSpellName(kickID) or kickID) or L["none found"]))
-    for _, unit in ipairs({ "target", "focus" }) do
-        local shown = ns.Driver:GetPlate(unit)
-        if shown then
-            local look = ns.DB.views.enemy
-            local override = (shown.isTarget and look.target.colorBar and L["Target page: Use custom target color"])
-                or (shown.isFocus and look.focus.colorBar and L["Focus page: Use custom focus color"])
-            local r, g, b = shown.health:GetStatusBarColor()
-            local current = (not issecretvalue(r) and r) and ("%.2f %.2f %.2f"):format(r, g, b) or L["hidden"]
-            print("  " .. (unit == "target" and L["Target color: %s  [bar now %s]"] or L["Focus color: %s  [bar now %s]"]):format(
-                override or ns.UnitColors:Explain(shown, unit), current))
-        end
-    end
-    local plate = ns.Driver:GetPlate("target")
-    if plate then
-        local function Show(value)
-            if issecretvalue(value) then return L["hidden"] end
-            return tostring(value)
-        end
-        print("  " .. L["Target: state %s, enemy type %s, boss %s, classification %s, level %s"]:format(
-            plate.state, tostring(plate.mobType), Show(UnitIsBossMob("target")), Show(UnitClassification("target")),
-            Show(UnitEffectiveLevel("target"))))
-        local family = plate.name:GetFontObject()
-        print("  " .. L["Name font: %s, font family %s, font families allowed %s, problem %s"]:format(
-            tostring((plate.name:GetFont())), tostring(family and family:GetName()), tostring(CreateFontFamily ~= nil),
-            tostring(ns.fontFamilyProblem or L["none"])))
-    else
-        print("  " .. L["Target: none"])
-    end
-end
+local Say = ns.Say
 
 local CONFLICTS = {
     { name = "Platynator", title = "Platynator" },
@@ -154,14 +88,6 @@ local function OpenSetup()
     WithOptions("PlateauSetup", "Open", L["Couldn't open setup: %s"])
 end
 
-local function OpenLocalePicker()
-    if InCombatLockdown() then
-        Say(L["The translation check opens out of combat."])
-        return
-    end
-    WithOptions("PlateauLocalePicker", "Open", L["Couldn't open the translation check: %s"])
-end
-
 local function OpenWhatsNew()
     WithOptions("PlateauOptions", "OpenSection", L["Couldn't open settings: %s"], nil, "help")
 end
@@ -214,13 +140,15 @@ end)
 
 local function Help()
     Say(L["Commands:"])
-    print("  " .. L["/plt - open the settings"])
-    print("  " .. L["/plt setup - pick a ready-made look"])
-    print("  " .. L["/plt whatsnew - open the changes on the Help page"])
-    print("  " .. L["/plt minimap - show or hide the minimap button"])
-    print("  " .. L["/plt debug - version, profile and target details for bug reports"])
-    print("  " .. L["/plt reset - reset the active profile"])
-    print("  " .. L["/plt cvars restore - undo every game nameplate setting Plateau changed"])
+    Say(L["/plt - open the settings"], true)
+    Say(L["/plt setup - pick a ready-made look"], true)
+    Say(L["/plt whatsnew - open the changes on the Help page"], true)
+    Say(L["/plt minimap - show or hide the minimap button"], true)
+    if ns.DebugListed and ns.DebugListed() then
+        Say(L["/plt debug - version, profile and target details for bug reports"], true)
+    end
+    Say(L["/plt reset - reset the active profile"], true)
+    Say(L["/plt cvars restore - undo every game nameplate setting Plateau changed"], true)
 end
 
 local function OpenOptions()
@@ -376,7 +304,7 @@ SlashCmdList.PLATEAU = function(input)
     for word in input:gmatch("%S+") do
         words[#words + 1] = word
     end
-    local command, path = words[1], words[2]
+    local command, path = words[1] and words[1]:lower(), words[2]
 
     if not command then
         OpenOptions()
@@ -388,16 +316,14 @@ SlashCmdList.PLATEAU = function(input)
         local shown = not ns.Minimap:IsShown()
         ns.Minimap:SetShown(shown)
         Say(shown and L["Minimap button shown."] or L["Minimap button hidden. Type /plt minimap to show it."])
-    elseif command == "debug" and path == "locale" then
-        OpenLocalePicker()
-    elseif command == "debug" then
-        Debug()
-    elseif command == "cvars" and path == "restore" then
+    elseif command == "debug" and ns.RunDebug then
+        ns.RunDebug(path and path:lower())
+    elseif command == "cvars" and path and path:lower() == "restore" then
         ns.CVars:ReleaseAll()
         Say(L["Blizzard nameplate settings restored."])
     elseif command == "reset" then
         local ok, reason = ns.DB:Reset(path)
-        Say(ok and (path and L["%s reset to default."]:format(path) or L["All settings reset to default."]) or (path .. ": " .. reason))
+        Say(ok and (path and L["%s reset to default."]:format(path) or L["All settings reset to default."]) or ((path or "") .. ": " .. tostring(reason)))
     else
         Help()
     end
@@ -406,15 +332,9 @@ end
 Plateau = {
     L = ns.L,
     T = ns.T,
-    SetPseudoLocale = function(on)
-        ns.DB.saved.global.pseudoLocale = on == true or nil
-        ns.SetPseudoLocale(on)
-    end,
-    IsPseudoLocale = ns.IsPseudoLocale,
-    LANGUAGES = ns.LANGUAGES,
-    LocaleCount = ns.LocaleCount,
-    PreviewLocale = ns.PreviewLocale,
     ActiveLocale = ns.ActiveLocale,
+    DEBUG_BUILD = ns.DEBUG_BUILD == true,
+    Debug = ns.Debug,
     DB = ns.DB,
     defaults = ns.defaults,
     version = ns.version,

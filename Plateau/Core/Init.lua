@@ -41,8 +41,19 @@ local function StartDatabase()
     return false
 end
 
+function ns.Say(message, continued)
+    if continued then
+        print("  " .. message)
+    else
+        print(ns.Brand:Text("Plateau") .. " " .. message)
+    end
+end
+
+ns.Debug = ns.Debug or function() end
+
 function ns.ReportDisabled()
-    print("|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled)
+    local message = "|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled
+    ns.Say(message, true)
 end
 
 local function ReportStartup()
@@ -50,13 +61,13 @@ local function ReportStartup()
     if ns.disabled then
         ns.ReportDisabled()
     elseif ns.recovered then
-        print("|cffffd200Plateau:|r " .. ns.L["Saved settings were damaged and have been reset to default. The old data is kept under 'recovered'. Error: %s"]:format(ns.recovered))
+        ns.Say(ns.L["Saved settings were damaged and have been reset to default. The old data is kept under 'recovered'. Error: %s"]:format(ns.recovered))
     elseif ns.DB.newerSchema then
-        print("|cffffd200Plateau:|r " .. ns.L["Your settings are from a newer Plateau. They are kept for when you update; defaults are used until then."])
+        ns.Say(ns.L["Your settings are from a newer Plateau. They are kept for when you update; defaults are used until then."])
     elseif ns.DB.restoredNewer then
-        print("|cffffd200Plateau:|r " .. ns.L["Restored the settings you had before using an older version of Plateau."])
+        ns.Say(ns.L["Restored the settings you had before using an older version of Plateau."])
     elseif failures and #failures > 0 then
-        print("|cffffd200Plateau:|r " .. ns.L["Some saved settings couldn't be updated: %s"]:format(table.concat(failures, "; ")))
+        ns.Say(ns.L["Some saved settings couldn't be updated: %s"]:format(table.concat(failures, "; ")))
     end
 end
 
@@ -90,8 +101,6 @@ loader:SetScript("OnEvent", function(self, event, name)
             ns.Driver:UnregisterAllEvents()
             return
         end
-        ns.ApplyLocale(ns.DB.saved.global.previewLocale)
-        ns.SetPseudoLocale(ns.DB.saved.global.pseudoLocale == true)
         ns.ApplyRealmMarker()
         ns.Driver:Restyle()
     end
