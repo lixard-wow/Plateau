@@ -25,7 +25,6 @@ local InterruptReady = ns.InterruptReady
 
 local TIMER_WIDTH = 30
 local READY_TICK = 0.1
-local MIN_PIXEL_SCALE = 0.2
 
 local settings = {}
 
@@ -198,14 +197,7 @@ local function PointMarker(bar, channel)
 end
 
 local function SizeKickLine(bar)
-    local width = bar.kickWidth or 1
-    if PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
-        local scale = bar:GetEffectiveScale()
-        if not issecretvalue(scale) and scale >= MIN_PIXEL_SCALE then
-            local pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
-            width = math.max(1, math.floor(width / pixel + 0.5)) * pixel
-        end
-    end
+    local width = ns.SnapPixels(bar, bar.kickWidth or 1, 1)
     if bar.kickLineWidth ~= width then
         bar.kickLineWidth = width
         bar.kickLine:SetWidth(width)

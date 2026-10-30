@@ -212,10 +212,19 @@ function ns.PixelUnit(region)
     return PixelSize(region) or 1
 end
 
-function ns.WholePixels(region, value, least)
-    local pixel = ns.pixelPerfect and PixelSize(region)
+function ns.Snap(value, pixel, least)
+    return math.max(least or -math.huge, math.floor(value / pixel + 0.5)) * pixel
+end
+
+function ns.SnapPixels(region, value, least)
+    local pixel = PixelSize(region)
     if not pixel or type(value) ~= "number" then return value end
-    return math.max(least or 0, math.floor(value / pixel + 0.5)) * pixel
+    return ns.Snap(value, pixel, least)
+end
+
+function ns.WholePixels(region, value, least)
+    if not ns.pixelPerfect then return value end
+    return ns.SnapPixels(region, value, least or 0)
 end
 
 function ns.PlaceBarLine(line, bar, reverse, offset, width)
@@ -224,12 +233,12 @@ function ns.PlaceBarLine(line, bar, reverse, offset, width)
     local pixel = ns.pixelPerfect ~= false and PixelSize(bar) or nil
     local thick = width or 1
     if pixel then
-        thick = math.max(1, math.floor(thick + 0.5)) * pixel
-        offset = math.floor(offset / pixel + 0.5) * pixel
+        thick = ns.Snap(thick, 1, 1) * pixel
+        offset = ns.Snap(offset, pixel)
     end
     local left = direction * offset - thick / 2
     if pixel then
-        left = math.floor(left / pixel + 0.5) * pixel
+        left = ns.Snap(left, pixel)
     end
     line:ClearAllPoints()
     line:SetPoint("TOPLEFT", bar, "TOP" .. side, left, 0)
@@ -397,13 +406,9 @@ end
 function ns.SnapPlateSize(plate)
     local width, height = plate.rawWidth, plate.rawHeight
     if not width then return end
-    if ns.pixelPerfect and PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
-        local scale = plate:GetEffectiveScale()
-        if not issecretvalue(scale) and scale >= MIN_PIXEL_SCALE then
-            local pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
-            width = math.max(1, math.floor(width / pixel + 0.5)) * pixel
-            height = math.max(1, math.floor(height / pixel + 0.5)) * pixel
-        end
+    local pixel = ns.pixelPerfect and PixelSize(plate)
+    if pixel then
+        width, height = ns.Snap(width, pixel, 1), ns.Snap(height, pixel, 1)
     end
     if plate.sizedWidth ~= width or plate.sizedHeight ~= height then
         plate.sizedWidth, plate.sizedHeight = width, height

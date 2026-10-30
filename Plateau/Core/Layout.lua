@@ -65,12 +65,9 @@ function ns.PlaceAt(region, anchor, point, relative, x, y)
         return
     end
     local pixel = ns.PixelUnit(region)
-    local function Whole(value)
-        return math.floor(value / pixel + 0.5) * pixel
-    end
     local baseX, baseY = Across(relative, anchorWidth), Down(relative, anchorHeight)
-    local left = Whole(baseX + x - Across(point, width)) - baseX
-    local top = Whole(baseY + y - Down(point, height)) - baseY
+    local left = ns.Snap(baseX + x - Across(point, width), pixel) - baseX
+    local top = ns.Snap(baseY + y - Down(point, height), pixel) - baseY
     region:SetPoint("TOPLEFT", anchor, relative, left, top)
 end
 
