@@ -569,7 +569,7 @@ local function UpdateEditing()
     local function Collect(only)
         for _, spot in ipairs(spots) do
             local key = Resolve(spot.sectionKey)
-            if spot:IsShown() and here[key] and (not only or only == key) then
+            if spot:IsShown() and here[key] and (not only or only == key) and not HasOwnBorder(spot) then
                 local l, r, t, b = PixelBox(spot)
                 if l then
                     boxes[#boxes + 1] = { l, r, t, b }
