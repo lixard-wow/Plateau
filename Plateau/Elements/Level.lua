@@ -1,5 +1,6 @@
 local _, ns = ...
 
+local issecretvalue = issecretvalue
 local L = ns.L
 
 local UnitEffectiveLevel = UnitEffectiveLevel

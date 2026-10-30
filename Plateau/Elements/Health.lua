@@ -1,5 +1,6 @@
 local _, ns = ...
 
+local issecretvalue = issecretvalue
 local CreateFrame = CreateFrame
 local UnitHealthPercent = UnitHealthPercent
 local UnitSelectionColor = UnitSelectionColor

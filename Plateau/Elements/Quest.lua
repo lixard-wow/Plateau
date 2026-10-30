@@ -1,5 +1,6 @@
 local _, ns = ...
 
+local issecretvalue = issecretvalue
 local UnitIsRelatedToActiveQuest = C_QuestLog and C_QuestLog.UnitIsRelatedToActiveQuest
 
 local GetTooltipUnit = C_TooltipInfo and C_TooltipInfo.GetUnit
