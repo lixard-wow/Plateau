@@ -1,3 +1,4 @@
+function wipe(t) for k in pairs(t) do t[k] = nil end return t end
 local known = {}
 local remaining = {}
 local now = 1

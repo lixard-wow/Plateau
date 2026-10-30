@@ -67,6 +67,7 @@ local curves = {}
 local cooldownAt, cooldown
 local colorAt, colors = {}, {}
 local busy = {}
+local EMPTY = {}
 
 local function Busy(id)
     local info = GetSpellCooldown(id)
@@ -85,7 +86,7 @@ end
 function InterruptReady:Refresh()
     spellID, activeID = nil, nil
     cooldownAt = nil
-    busy = {}
+    wipe(busy)
     for i = #extraIDs, 1, -1 do
         extraIDs[i] = nil
     end
@@ -100,7 +101,7 @@ function InterruptReady:Refresh()
             break
         end
     end
-    for _, id in ipairs(extras[class] or {}) do
+    for _, id in ipairs(extras[class] or EMPTY) do
         local known = ns.FindKnownSpell(id, PLAYER_BANK)
         if known and known ~= spellID then
             extraIDs[#extraIDs + 1] = known
