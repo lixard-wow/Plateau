@@ -35,46 +35,34 @@ local function FirstChar(word)
     return word:match("^[%z\1-\127\194-\244][\128-\191]*") or word:sub(1, 1)
 end
 
+local function Words(name)
+    local words = {}
+    for word in name:gmatch("%S+") do
+        words[#words + 1] = word
+    end
+    return words
+end
+
 local function Shorten(name, mode)
     if mode == "lastWord" then
         return name:match("(%S+)%s*$") or name
     elseif mode == "firstWord" then
         return name:match("^(%S+)") or name
-    elseif mode == "abbreviate" then
-        local words = {}
-        for word in name:gmatch("%S+") do
-            words[#words + 1] = word
-        end
-        if #words < 2 then
-            return name
-        end
-        for i = 1, #words - 1 do
-            words[i] = FirstChar(words[i]) .. "."
-        end
-        return table.concat(words, " ")
-    elseif mode == "lastInitial" then
-        local words = {}
-        for word in name:gmatch("%S+") do
-            words[#words + 1] = word
-        end
-        if #words < 2 then
-            return name
-        end
-        return words[1] .. " " .. FirstChar(words[#words]) .. "."
-    elseif mode == "initials" then
-        local words = {}
-        for word in name:gmatch("%S+") do
-            words[#words + 1] = word
-        end
-        if #words < 2 then
-            return name
-        end
-        for i = 1, #words do
-            words[i] = FirstChar(words[i]) .. "."
-        end
-        return table.concat(words)
+    elseif mode ~= "abbreviate" and mode ~= "lastInitial" and mode ~= "initials" then
+        return name
     end
-    return name
+    local words = Words(name)
+    if #words < 2 then
+        return name
+    end
+    if mode == "lastInitial" then
+        return words[1] .. " " .. FirstChar(words[#words]) .. "."
+    end
+    local last = mode == "initials" and #words or #words - 1
+    for i = 1, last do
+        words[i] = FirstChar(words[i]) .. "."
+    end
+    return table.concat(words, mode == "initials" and "" or " ")
 end
 ns.ShortenName = Shorten
 
