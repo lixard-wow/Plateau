@@ -107,6 +107,12 @@ local function Restricted()
     return InCombatLockdown() or (ShouldAurasBeSecret and ShouldAurasBeSecret())
 end
 
+local SLOT_COLORS = { enrage = "enrageColor", magic = "magicColor", defensive = "defensiveColor" }
+
+local function SlotColor(config, key)
+    return config[SLOT_COLORS[key] or "alertColor"] or config.alertColor
+end
+
 local function StyleSlot(button)
     local plate = button.plate
     local config = configs[plate.state]
@@ -116,8 +122,7 @@ local function StyleSlot(button)
     button:EnableMouseMotion(false)
     button.glow:Layout(config.alertSize, ns.HealthBorderOffset(ns.DB.views[plate.state]))
     local key = button.slotKey
-    local c = (key == "enrage" and config.enrageColor) or (key == "magic" and config.magicColor)
-        or (key == "defensive" and config.defensiveColor) or config.alertColor
+    local c = SlotColor(config, key)
     button.glow:SetColor(c[1], c[2], c[3], c[4])
     local wanted = Shield:SlotWanted(config, key)
     button.fill:SetShown(SetAlertFill(button.fill, config, c) and wanted)
@@ -409,8 +414,7 @@ function Shield:Preview(plate, state)
         plate.shieldPreviewFill:Hide()
         return
     end
-    local c = (key == "enrage" and config.enrageColor) or (key == "magic" and config.magicColor)
-        or (key == "defensive" and config.defensiveColor) or config.alertColor
+    local c = SlotColor(config, key)
     plate.shieldPreview:SetColor(c[1], c[2], c[3], c[4])
     plate.shieldPreview:Show()
     plate.shieldPreviewFill:SetShown(SetAlertFill(plate.shieldPreviewFill, config, c))
