@@ -576,6 +576,9 @@ local RefreshTray
 
 local function UpdateHotspots()
     if not panel:IsVisible() then return end
+    if ns.PinPreview then
+        ns.PinPreview()
+    end
     for _, spot in ipairs(spots) do
         local region = spot.region
         local visible = region:IsVisible() and region:GetAlpha() > 0
@@ -593,12 +596,26 @@ holder:SetScale(PLATE_SCALE)
 holder:SetPoint("CENTER", 0, 0)
 
 local plate = Plateau.CreatePreview(holder, sample)
+local holderX = 0
+
+function ns.PinPreview()
+    holder:ClearAllPoints()
+    holder:SetPoint("CENTER", holderX, 0)
+    local left, top = plate:GetLeft(), plate:GetTop()
+    if type(left) ~= "number" or type(top) ~= "number" then return end
+    local toPx = plate:GetEffectiveScale() / PixelFactor()
+    local back = PixelFactor() / holder:GetEffectiveScale()
+    local dx = math.floor(left * toPx + 0.5) - left * toPx
+    local dy = math.floor(top * toPx + 0.5) - top * toPx
+    holder:SetPoint("CENTER", holderX + dx * back, dy * back)
+end
 
 function ns.OnWindowScale()
     plate.pixelScale = nil
     if Plateau.RepixelPlate then
         Plateau.RepixelPlate(plate)
     end
+    ns.PinPreview()
     UpdateEditing()
 end
 plate:SetPoint("CENTER")
@@ -886,6 +903,7 @@ crossWatch:SetScript("OnUpdate", function()
     if (spec ~= nil) ~= dragging or left ~= panelLeft or top ~= panelTop then
         dragging = spec ~= nil
         panelLeft, panelTop = left, top
+        ns.PinPreview()
         UpdateEditing()
     end
     local x, y
@@ -1107,8 +1125,8 @@ end
 
 local function CenterPlate()
     local shift = tray:IsShown() and math.floor((TRAY_WIDTH + 8) / 2) or 0
-    holder:ClearAllPoints()
-    holder:SetPoint("CENTER", -shift / PLATE_SCALE, 0)
+    holderX = -shift / PLATE_SCALE
+    ns.PinPreview()
     layout.SetCenterShift(shift)
 end
 
