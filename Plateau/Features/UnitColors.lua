@@ -53,51 +53,33 @@ end
 
 local UnitEffectiveLevel = UnitEffectiveLevel
 
-local function IsBossByLevel(unit, classification)
-    if classification ~= "elite" and classification ~= "rareelite" then return false end
-    if not inInstance then return false end
+local function Levels(unit)
     local level = UnitEffectiveLevel(unit)
-    if issecretvalue(level) or not level then return false end
-    if level <= 0 then return true end
-    if inRaid then return false end
+    if issecretvalue(level) or not level then
+        return false, false, false
+    end
+    if level <= 0 then
+        return true, true, false
+    end
     local mine = UnitEffectiveLevel("player")
-    return not issecretvalue(mine) and mine ~= nil and level >= mine + 2
-end
-
-local function IsHigherElite(unit, classification)
-    if classification ~= "elite" and classification ~= "rareelite" then return false end
-    local level = UnitEffectiveLevel(unit)
-    if issecretvalue(level) or not level then return false end
-    if level <= 0 then return true end
-    local mine = UnitEffectiveLevel("player")
-    return not issecretvalue(mine) and mine ~= nil and level > mine
-end
-
-local function IsTwoLevelsAbove(unit, classification)
-    if classification ~= "elite" and classification ~= "rareelite" then return false end
-    local level = UnitEffectiveLevel(unit)
-    if issecretvalue(level) or not level or level <= 0 then return false end
-    local mine = UnitEffectiveLevel("player")
-    return not issecretvalue(mine) and mine ~= nil and level >= mine + 2
-end
-
-local function IsAbovePlayerLevel(unit)
-    local level = UnitEffectiveLevel(unit)
-    if issecretvalue(level) or not level then return false end
-    if level <= 0 then return true end
-    local mine = UnitEffectiveLevel("player")
-    return not issecretvalue(mine) and mine ~= nil and level > mine
+    if issecretvalue(mine) or mine == nil then
+        return false, false, false
+    end
+    return false, level > mine, level >= mine + 2
 end
 
 function UnitColors:MobType(unit, flags)
     local classification = UnitClassification(unit)
     local powerType = UnitPowerType(unit)
-    flags.boss = UnitIsBossMob(unit) == true or classification == "worldboss" or IsBossByLevel(unit, classification) or IsBossUnit(unit)
-    flags.lieutenant = (UnitIsLieutenant and UnitIsLieutenant(unit) == true and IsAbovePlayerLevel(unit)) or IsTwoLevelsAbove(unit, classification)
-    flags.higher = IsHigherElite(unit, classification)
+    local elite = classification == "elite" or classification == "rareelite"
+    local skull, above, twoAbove = Levels(unit)
+    local bossByLevel = elite and inInstance and (skull or (not inRaid and twoAbove))
+    flags.boss = UnitIsBossMob(unit) == true or classification == "worldboss" or bossByLevel or IsBossUnit(unit)
+    flags.lieutenant = (UnitIsLieutenant and UnitIsLieutenant(unit) == true and above) or (elite and twoAbove)
+    flags.higher = elite and above
     flags.trivial = classification == "minus" or classification == "trivial"
     flags.caster = not issecretvalue(powerType) and powerType == MANA
-    flags.elite = classification == "elite" or classification == "rareelite"
+    flags.elite = elite
     for i = 1, #ORDER do
         if flags[ORDER[i]] then
             return ORDER[i]
