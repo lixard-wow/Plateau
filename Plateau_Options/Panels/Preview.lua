@@ -410,7 +410,7 @@ local function AddHotspots(plate)
     local auraNames = { mine = "Your debuffs", cc = "Crowd control", purge = "Enemy buffs", important = "Important auras" }
     for key, fake in pairs(plate.fakeAuras or {}) do
         local auraDrag = Drag.AuraSpec(plate, key)
-        Hotspot(plate, fake, auraSections[key], auraNames[key], 75, 0, auraDrag).snapTarget = fake
+        Hotspot(plate, fake, auraSections[key], auraNames[key], 75, 1, auraDrag).snapTarget = fake
     end
 end
 
