@@ -1692,31 +1692,16 @@ local SHORTCUTS = {
     Y = function() ns.Undo.Redo() end,
     F = function() C_Timer.After(0, function() box:SetFocus() end) end,
 }
-local shortcuts = CreateFrame("Frame", nil, frame)
-shortcuts:EnableKeyboard(false)
-shortcuts:SetScript("OnKeyDown", function(self, key)
-    if InCombatLockdown() then return end
+local shortcuts = Style.KeyCatcher(frame, function(key)
     local action = IsControlKeyDown() and SHORTCUTS[key]
-    self:SetPropagateKeyboardInput(not action)
     if action then
         action()
+        return true
     end
-end)
+end, function() return frame:IsShown() end)
 local function ArmShortcuts(on)
-    if InCombatLockdown() then return end
-    shortcuts:SetPropagateKeyboardInput(true)
-    shortcuts:EnableKeyboard(on)
+    shortcuts:Arm(on)
 end
-shortcuts:RegisterEvent("PLAYER_REGEN_DISABLED")
-shortcuts:RegisterEvent("PLAYER_REGEN_ENABLED")
-shortcuts:SetScript("OnEvent", function(_, event)
-    if event == "PLAYER_REGEN_DISABLED" then
-        shortcuts:SetPropagateKeyboardInput(true)
-        shortcuts:EnableKeyboard(false)
-    else
-        ArmShortcuts(frame:IsShown())
-    end
-end)
 frame:SetScript("OnShow", function()
     OpenWindow()
     RestoreScroll()

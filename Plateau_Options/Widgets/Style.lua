@@ -717,6 +717,37 @@ function Style.Input(parent, size)
     return edit
 end
 
+function Style.KeyCatcher(parent, onKey, wanted, onCombat)
+    local catcher = CreateFrame("Frame", nil, parent)
+    catcher:EnableKeyboard(false)
+    if not InCombatLockdown() then
+        catcher:SetPropagateKeyboardInput(true)
+    end
+    function catcher:Arm(on)
+        if InCombatLockdown() then return end
+        self:SetPropagateKeyboardInput(true)
+        self:EnableKeyboard(on)
+    end
+    catcher:SetScript("OnKeyDown", function(self, key)
+        if InCombatLockdown() then return end
+        self:SetPropagateKeyboardInput(onKey(key) ~= true)
+    end)
+    catcher:RegisterEvent("PLAYER_REGEN_DISABLED")
+    catcher:RegisterEvent("PLAYER_REGEN_ENABLED")
+    catcher:SetScript("OnEvent", function(self, event)
+        if event == "PLAYER_REGEN_DISABLED" then
+            self:SetPropagateKeyboardInput(true)
+            self:EnableKeyboard(false)
+            if onCombat then
+                onCombat()
+            end
+        else
+            self:Arm(wanted())
+        end
+    end)
+    return catcher
+end
+
 function Style.Dialog(name, width, height)
     local box = CreateFrame("Frame", name, UIParent)
     if height then

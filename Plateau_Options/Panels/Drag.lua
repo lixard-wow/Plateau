@@ -1212,7 +1212,7 @@ function Drag.Select(spec)
         selectionFrame:Hide()
     end
     if not InCombatLockdown() then
-        keys:EnableKeyboard(spec ~= nil)
+        keys:Arm(spec ~= nil)
     end
     UpdateReadout()
 end
@@ -1238,44 +1238,16 @@ function Drag.SetDotParent(frame)
     end)
     BuildReadout(frame)
 
-    keys = CreateFrame("Frame", nil, frame)
-    keys:EnableKeyboard(false)
-    local propagatePending = false
-    local function ApplyPropagate()
-        if InCombatLockdown() then
-            propagatePending = true
-            return
-        end
-        propagatePending = false
-        keys:SetPropagateKeyboardInput(true)
-    end
-    ApplyPropagate()
-    keys:SetScript("OnKeyDown", function(self, key)
-        if InCombatLockdown() then return end
+    keys = Style.KeyCatcher(frame, function(key)
         local arrow = ARROWS[key]
-        if not arrow or not selected then
-            self:SetPropagateKeyboardInput(true)
-            return
-        end
-        self:SetPropagateKeyboardInput(false)
+        if not arrow or not selected then return false end
         local step = IsShiftKeyDown() and 10 or 1
         Nudge(arrow[1] * step, arrow[2] * step)
-    end)
-    keys:RegisterEvent("PLAYER_REGEN_DISABLED")
-    keys:RegisterEvent("PLAYER_REGEN_ENABLED")
-    keys:SetScript("OnEvent", function(_, event)
-        if event == "PLAYER_REGEN_ENABLED" then
-            if propagatePending then
-                ApplyPropagate()
-            end
-            return
-        end
+        return true
+    end, function() return selected ~= nil end, function()
         selected = nil
         selectionFrame:Hide()
         UpdateReadout()
-        propagatePending = false
-        keys:SetPropagateKeyboardInput(true)
-        keys:EnableKeyboard(false)
     end)
     frame:HookScript("OnHide", function()
         Drag.Select(nil)
