@@ -8,8 +8,13 @@ local function ROW_WIDTH() return ns.layout.content end
 local ROW_STEP = 36
 local NAME_LIMIT = 32
 
-local function ProfileOptions(exclude)
-    local options = {}
+local function Status(fontString, text, isError)
+    Style.PaintText(fontString, isError and C.warn or C.muted)
+    fontString:SetText(text or "")
+end
+
+local function ProfileOptions(exclude, first)
+    local options = { first }
     for _, name in ipairs(Plateau.DB:ListProfiles()) do
         if name ~= exclude then
             options[#options + 1] = { value = name, label = Plateau.Builtins.Label(name) }
@@ -251,9 +256,7 @@ function ns.Widgets.ProfileStatus(parent)
     notice:SetWordWrap(true)
 
     local function Say(text, isError)
-        local color = isError and C.warn or C.muted
-        Style.PaintText(notice, color)
-        notice:SetText(text or "")
+        Status(notice, text, isError)
     end
 
     local picker = ns.Widgets.Dropdown(frame, {
@@ -361,9 +364,7 @@ function ns.Widgets.ProfileActions(parent)
     message:SetWordWrap(true)
 
     local function Say(text, isError)
-        local color = isError and C.warn or C.muted
-        Style.PaintText(message, color)
-        message:SetText(text or "")
+        Status(message, text, isError)
     end
 
     local renameChoice, copyChoice, deleteChoice, restoreChoice
@@ -494,13 +495,7 @@ function ns.Widgets.ProfileActions(parent)
     local colorsChoice
     local colorsButton = PickerRow(colorsY, {
         label = "Copy colors to",
-        options = function()
-            local options = { { value = "*", label = "Every other profile" } }
-            for _, option in ipairs(ProfileOptions(Active())) do
-                options[#options + 1] = option
-            end
-            return options
-        end,
+        options = function() return ProfileOptions(Active(), { value = "*", label = "Every other profile" }) end,
         unknown = "Pick a profile",
         get = function() return colorsChoice end,
         set = function(value) colorsChoice = value end,
@@ -584,11 +579,7 @@ function ns.Widgets.AutoProfiles(parent)
     local HEADING = 24
 
     local function Options()
-        local options = { { value = "", label = "No override" } }
-        for _, option in ipairs(ProfileOptions()) do
-            options[#options + 1] = option
-        end
-        return options
+        return ProfileOptions(nil, { value = "", label = "No override" })
     end
 
     local function Heading(text, x)
