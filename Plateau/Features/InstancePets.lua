@@ -12,23 +12,25 @@ local INSTANCES = { party = true, raid = true }
 local InstancePets = CreateFrame("Frame")
 ns.InstancePets = InstancePets
 
-function InstancePets:PlatesShown()
+local function HiddenPlates(turnOn)
+    local hidden = false
     for _, name in ipairs(PLATE_CVARS) do
         local value = ns.CVars:UserValue(name)
         if value ~= nil and value ~= "1" then
-            return false
-        end
-    end
-    return true
-end
-
-function InstancePets:ShowPlates()
-    for _, name in ipairs(PLATE_CVARS) do
-        local value = ns.CVars:UserValue(name)
-        if value ~= nil and value ~= "1" then
+            hidden = true
+            if not turnOn then break end
             ns.CVars:Set(name, "1")
         end
     end
+    return hidden
+end
+
+function InstancePets:PlatesShown()
+    return not HiddenPlates(false)
+end
+
+function InstancePets:ShowPlates()
+    HiddenPlates(true)
 end
 
 function InstancePets:IsOn()
