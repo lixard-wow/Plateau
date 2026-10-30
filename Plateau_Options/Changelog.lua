@@ -25,6 +25,7 @@ ns.changelog = {
             {
                 title = "Fixed",
                 items = {
+                    "No more \"attempt to compare a secret number\" error from the cast bar timer after combat.",
                     "The interrupt ready marker could disappear when its thickness was set to 1.",
                     "A newer interrupt message could be hidden early by an older interrupt's timer.",
                     "The settings window jumped away from the cursor when you started dragging it.",
