@@ -1,5 +1,7 @@
 local _, ns = ...
 
+local issecretvalue = issecretvalue
+local min, abs = math.min, math.abs
 local UnitAffectingCombat = UnitAffectingCombat
 
 local settings = {}
@@ -58,7 +60,7 @@ local animating = {}
 local animator = CreateFrame("Frame")
 animator:Hide()
 animator:SetScript("OnUpdate", function(self, elapsed)
-    local step = math.min(1, elapsed * 12)
+    local step = min(1, elapsed * 12)
     local any = false
     for plate in pairs(animating) do
         local goal = plate.appliedScale
@@ -67,7 +69,7 @@ animator:SetScript("OnUpdate", function(self, elapsed)
         else
             local current = plate.shownScale or goal
             current = current + (goal - current) * step
-            local done = math.abs(goal - current) < 0.002 or not plate.active
+            local done = abs(goal - current) < 0.002 or not plate.active
             if done then
                 current = goal
                 animating[plate] = nil
