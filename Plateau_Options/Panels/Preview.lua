@@ -268,18 +268,41 @@ local function FrameAround(frame, l, r, t, b)
     end
 end
 
-local function BorderIcons(spot)
-    local icons = spot.region and spot.region.icons
-    if not icons then return nil end
-    for _, icon in ipairs(icons) do
-        if icon:IsVisible() and icon.border and not icon.border.empty then
-            return icons
+local function OwnBorders(spot, list)
+    local region = spot.region
+    if not region then return list end
+    if spot.borders then
+        for _, border in ipairs(spot.borders()) do
+            list[#list + 1] = border
+        end
+    elseif region.icons then
+        for _, icon in ipairs(region.icons) do
+            if icon.border then
+                list[#list + 1] = icon.border
+            end
+            if icon.dispel and icon.dispel.SetHighlight then
+                list[#list + 1] = icon.dispel
+            end
+        end
+    elseif type(region.border) == "table" and region.border.SetHighlight then
+        list[#list + 1] = region.border
+    end
+    return list
+end
+
+local function HasOwnBorder(spot)
+    if not spot.region then return false end
+    for _, border in ipairs(OwnBorders(spot, {})) do
+        local owner = border.owner
+        if border:IsDrawn() and (not owner or owner:IsVisible()) then
+            return true
         end
     end
+    return false
 end
 
 function ns.OutlineSpot(frame, spot)
-    if BorderIcons(spot) then return false end
+    if HasOwnBorder(spot) then return false end
     local l, r, t, b = PixelBox(spot)
     if not l then return false end
     FrameAround(frame, l, r, t, b)
@@ -470,6 +493,9 @@ local function AddHotspots(plate)
     Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true
     local castIcon = Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 62, 0, Drag.CastIconSpec(plate))
     castIcon.setting = "Show spell icon"
+    castIcon.borders = function()
+        return { plate.castbar.iconBorder }
+    end
     castIcon.ring = function()
         return Plateau.HealthBorderOuter({
             borderStyle = Plateau.DB:Get("look.castbar.borderStyle"),
@@ -912,24 +938,21 @@ local function Tint(color)
     return { color[1], color[2], color[3], 1 }
 end
 
-local iconMarks = CreateFrame("Frame", nil, panel)
-iconMarks:SetScript("OnUpdate", function()
+local marks = CreateFrame("Frame", nil, panel)
+local markBorders = {}
+marks:SetScript("OnUpdate", function()
     local chosen = ns.Drag.GetSelected()
     chosen = chosen and chosen.spot
     for _, spot in ipairs(spots) do
-        local icons = spot.region and spot.region.icons
-        if icons then
-            local key = (spot == chosen and "accent") or (spot == hovered and "text") or nil
-            local color = key and C[key]
-            if spot.markKey ~= key or spot.markColor ~= color then
-                spot.markKey, spot.markColor = key, color
-                spot.markTint = color and Tint(color) or nil
-            end
-            for _, icon in ipairs(icons) do
-                if icon.border and icon.border.highlight ~= spot.markTint then
-                    Plateau.HighlightIcon(icon, spot.markTint)
-                end
-            end
+        local key = (spot == chosen and "accent") or (spot == hovered and "text") or nil
+        local color = key and C[key]
+        if spot.markKey ~= key or spot.markColor ~= color then
+            spot.markKey, spot.markColor = key, color
+            spot.markTint = color and Tint(color) or nil
+        end
+        wipe(markBorders)
+        for _, border in ipairs(OwnBorders(spot, markBorders)) do
+            border:SetHighlight(spot.markTint)
         end
     end
 end)

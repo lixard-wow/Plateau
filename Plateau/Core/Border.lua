@@ -111,6 +111,7 @@ function Ring:SetColor(r, g, b, a)
 end
 
 function Ring:SetHighlight(color)
+    if self.highlight == color then return end
     self.highlight = color
     local use = color or self.base
     if use then
@@ -140,11 +141,8 @@ function ns.SetIconBorder(icon, size, color)
     end
 end
 
-function ns.HighlightIcon(icon, color)
-    icon.border:SetHighlight(color)
-    if icon.dispel and icon.dispel.SetHighlight then
-        icon.dispel:SetHighlight(color)
-    end
+function Ring:IsDrawn()
+    return self.shown ~= false and not self.empty
 end
 
 function ns.DecorateIcon(frame)
@@ -462,6 +460,7 @@ function ns.RepixelPlate(plate)
 end
 
 function Border:SetColor(r, g, b, a)
+    self.sprite = nil
     local color = self.color
     if color and color[1] == r and color[2] == g and color[3] == b and color[4] == a and self.colorStyle == self.style then
         return
@@ -630,3 +629,68 @@ function Border:GetAlpha()
     end
     return self.edges[1]:GetAlpha()
 end
+
+local function PaintBorder(self, color)
+    if self.edgeFrame and EdgeInfo(self.style) then
+        local use = color or self.color
+        if use then
+            self.edgeFrame:SetBackdropBorderColor(use[1], use[2], use[3], use[4] or 1)
+        end
+        return
+    end
+    if self.style == "shadow" and self.fadeColor then
+        local use = color or self.fadeColor
+        ApplyFade(self, use[1], use[2], use[3], use[4] or 1)
+        return
+    end
+    if not color and self.sprite then
+        local sprite = self.sprite
+        for i = 1, 4 do
+            local edge = self.edges[i]
+            edge:SetTexture(sprite[1], nil, nil, "NEAREST")
+            edge:SetVertexColor(1, 1, 1, 1)
+            edge:SetSpriteSheetCell(sprite[2], sprite[3], sprite[4])
+        end
+        return
+    end
+    local use = color or self.color
+    if use then
+        for i = 1, 4 do
+            self.edges[i]:SetColorTexture(use[1], use[2], use[3], use[4] or 1)
+            self.edges[i]:SetVertexColor(1, 1, 1, 1)
+        end
+    end
+end
+
+function Border:SetHighlight(color)
+    if self.highlight == color then return end
+    self.highlight = color
+    PaintBorder(self, color)
+end
+
+function Border:IsDrawn()
+    return self.shown ~= false and not self.empty
+end
+
+local function KeepHighlight(method)
+    local original = Border[method]
+    Border[method] = function(self, ...)
+        original(self, ...)
+        if self.highlight then
+            PaintBorder(self, self.highlight)
+        end
+    end
+end
+
+local SpriteCell = Border.SetSpriteCell
+function Border:SetSpriteCell(path, index, rows, columns)
+    local sprite = self.sprite or {}
+    sprite[1], sprite[2], sprite[3], sprite[4] = path, index, rows, columns
+    self.sprite = sprite
+    SpriteCell(self, path, index, rows, columns)
+end
+
+KeepHighlight("SetColor")
+KeepHighlight("SetSpriteCell")
+KeepHighlight("SetFade")
+KeepHighlight("Layout")
