@@ -213,7 +213,7 @@ local function DrawnBounds(region)
     end
     local l, r, t, b
     for _, icon in ipairs(region.icons) do
-        if icon:IsShown() and icon:GetLeft() then
+        if icon:IsVisible() and icon:GetLeft() then
             l = math.min(l or icon:GetLeft(), icon:GetLeft())
             r = math.max(r or icon:GetRight(), icon:GetRight())
             t = math.max(t or icon:GetTop(), icon:GetTop())

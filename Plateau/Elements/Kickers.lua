@@ -216,6 +216,7 @@ local function Segment(plate, index)
     content:SetAllPoints(seg)
     seg.content = content
     seg.icons = {}
+    ns.RoundLayout(seg)
     plate.kickSegs[index] = seg
     return seg
 end
@@ -235,6 +236,8 @@ local function Icon(seg, index)
     icon.cd = cd
     ns.RoundLayout(icon)
     seg.icons[index] = icon
+    local all = seg:GetParent().icons
+    all[#all + 1] = icon
     return icon
 end
 
@@ -356,6 +359,8 @@ function Kickers:Create(plate)
     holder:SetFrameLevel(plate.overlay:GetFrameLevel() + 5)
     holder:SetSize(1, 1)
     holder:Hide()
+    holder.icons = {}
+    ns.RoundLayout(holder)
     plate.kickHolder = holder
     plate.kickSegs = {}
 end

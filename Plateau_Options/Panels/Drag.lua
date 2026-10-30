@@ -178,7 +178,26 @@ local function Within(region, frame)
     return false
 end
 
+local function IconBounds(region)
+    local left, right, top, bottom
+    for _, icon in ipairs(region.icons) do
+        if icon:IsVisible() and icon:GetLeft() then
+            left = math.min(left or icon:GetLeft(), icon:GetLeft())
+            right = math.max(right or icon:GetRight(), icon:GetRight())
+            top = math.max(top or icon:GetTop(), icon:GetTop())
+            bottom = math.min(bottom or icon:GetBottom(), icon:GetBottom())
+        end
+    end
+    return left, right, top, bottom
+end
+
 local function Box(region)
+    if region.icons then
+        local left, right, top, bottom = IconBounds(region)
+        if left then
+            return left, right, top, bottom
+        end
+    end
     local left, right, top, bottom = region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
     if left and region.GetStringWidth then
         local width = region:GetStringWidth()
@@ -268,13 +287,14 @@ local function TargetCandidates(spec, list)
                 local mx, my = PointXY(mover, edge.point)
                 if tx and mx then
                     local fx, fy = FromCenter(edge.point, width, height)
-                    local bx = BoxPoint(box, edge.relPoint)
+                    local bx, by = BoxPoint(box, edge.relPoint)
                     local ox, dotOx = edge.ox + bx - tx, nil
+                    local oy = edge.oy + by - ty
                     if lockX then
                         ox, dotOx = mx - tx, bx - tx
                     end
                     local function Resolve(dx, dy)
-                        return spec.Place(tx + ox + dx - fx, ty + edge.oy + dy - fy)
+                        return spec.Place(tx + ox + dx - fx, ty + oy + dy - fy)
                     end
                     if Resolve(0, 0) then
                         list[#list + 1] = {
@@ -283,7 +303,7 @@ local function TargetCandidates(spec, list)
                             anchor = target,
                             relPoint = edge.relPoint,
                             ox = ox,
-                            oy = edge.oy,
+                            oy = oy,
                             dotOx = dotOx,
                             mx = mx,
                             my = my,
@@ -651,16 +671,7 @@ function Drag.AuraSpec(plate, key)
         return Group()
     end
     local function Bounds()
-        local left, right, top, bottom
-        for _, icon in ipairs(Group().icons) do
-            if icon:IsShown() and icon:GetLeft() then
-                left = math.min(left or icon:GetLeft(), icon:GetLeft())
-                right = math.max(right or icon:GetRight(), icon:GetRight())
-                top = math.max(top or icon:GetTop(), icon:GetTop())
-                bottom = math.min(bottom or icon:GetBottom(), icon:GetBottom())
-            end
-        end
-        return left, right, top, bottom
+        return IconBounds(Group())
     end
     function spec.Place(cx, cy)
         local group = Group()
