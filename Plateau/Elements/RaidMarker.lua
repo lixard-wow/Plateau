@@ -13,7 +13,6 @@ local tint = {}
 
 local RaidMarker = {
     key = "raidMarker",
-    events = {},
     globalEvents = { "RAID_TARGET_UPDATE" },
     nameOnly = true,
 }

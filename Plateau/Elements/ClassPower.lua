@@ -241,9 +241,6 @@ function ClassPower:Disable(plate)
     plate.classPower:Hide()
 end
 
-function ClassPower:OnEvent()
-end
-
 function ClassPower:UpdateEmphasis(plate)
     self:Update(plate)
 end

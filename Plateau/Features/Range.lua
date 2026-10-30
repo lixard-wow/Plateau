@@ -9,7 +9,6 @@ local settings = {}
 
 local Range = {
     key = "range",
-    events = {},
 }
 
 function Range:Create(plate)
@@ -50,9 +49,6 @@ function Range:Disable(plate)
         plate.rangeAlpha = 1
         ns.Driver:RefreshAlpha(plate)
     end
-end
-
-function Range:OnEvent()
 end
 
 function Range:Preview(plate)

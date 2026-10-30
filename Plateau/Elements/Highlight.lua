@@ -31,7 +31,6 @@ local settings = { target = {}, focus = {} }
 
 local Highlight = {
     key = "target",
-    events = {},
 }
 ns.Elements = ns.Elements or {}
 ns.Elements.Highlight = Highlight
@@ -422,9 +421,6 @@ end
 
 function Highlight:Disable(plate)
     Clear(plate)
-end
-
-function Highlight:OnEvent()
 end
 
 function Highlight:UpdateEmphasis(plate)

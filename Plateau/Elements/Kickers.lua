@@ -39,7 +39,6 @@ local version = 0
 
 local Kickers = {
     key = "kickers",
-    events = {},
     globalEvents = { "RAID_TARGET_UPDATE" },
 }
 ns.Elements = ns.Elements or {}

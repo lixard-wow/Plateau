@@ -4,7 +4,6 @@ local settings = {}
 
 local Mouseover = {
     key = "mouseover",
-    events = {},
 }
 ns.Elements = ns.Elements or {}
 ns.Elements.Mouseover = Mouseover
@@ -40,9 +39,6 @@ function Mouseover:Disable(plate)
     plate.hoverRing:Hide()
     plate.hoverWash:Hide()
     plate.hoverGlow:Hide()
-end
-
-function Mouseover:OnEvent()
 end
 
 function Mouseover:SetMouseover(plate, hovered)

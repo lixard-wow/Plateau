@@ -38,7 +38,6 @@ end
 local Scaling = {
     key = "scaling",
     nameOnly = true,
-    events = {},
 }
 ns.Scaling = Scaling
 
@@ -208,9 +207,6 @@ end
 
 function Scaling:Disable(plate)
     self:Apply(plate)
-end
-
-function Scaling:OnEvent()
 end
 
 function Scaling:Preview(plate)

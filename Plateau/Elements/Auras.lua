@@ -61,7 +61,6 @@ local FLUSH_BATCH = 8
 
 local Auras = {
     key = "auras",
-    events = {},
 }
 ns.Elements = ns.Elements or {}
 ns.Elements.Auras = Auras
@@ -817,9 +816,6 @@ function Auras:Disable(plate)
             fake:Hide()
         end
     end
-end
-
-function Auras:OnEvent()
 end
 
 local SAMPLE_ICONS = {
