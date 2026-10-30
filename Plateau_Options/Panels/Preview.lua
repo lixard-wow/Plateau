@@ -461,7 +461,7 @@ local function UpdateEditing()
             end
         end
     end
-    if sectionKey then
+    if sectionKey and not ns.Drag.Active() then
         Collect(focus)
         if focus and #boxes == 0 then
             Collect(nil)
@@ -799,8 +799,13 @@ local function SetTag(tag, value)
 end
 
 local crossWatch = CreateFrame("Frame", nil, panel)
+local dragging = false
 crossWatch:SetScript("OnUpdate", function()
     local spec = ns.Drag.Active()
+    if (spec ~= nil) ~= dragging then
+        dragging = spec ~= nil
+        UpdateEditing()
+    end
     local x, y
     if spec then
         x, y = MoverCenter(spec)
