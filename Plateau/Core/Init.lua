@@ -41,10 +41,14 @@ local function StartDatabase()
     return false
 end
 
+function ns.ReportDisabled()
+    print("|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled)
+end
+
 local function ReportStartup()
     local failures = ns.DB.migrationFailures
     if ns.disabled then
-        print("|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled)
+        ns.ReportDisabled()
     elseif ns.recovered then
         print("|cffffd200Plateau:|r " .. ns.L["Saved settings were damaged and have been reset to default. The old data is kept under 'recovered'. Error: %s"]:format(ns.recovered))
     elseif ns.DB.newerSchema then

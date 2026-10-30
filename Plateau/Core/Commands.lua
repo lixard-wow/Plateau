@@ -369,7 +369,7 @@ SLASH_PLATEAU1 = "/plateau"
 SLASH_PLATEAU2 = "/plt"
 SlashCmdList.PLATEAU = function(input)
     if ns.disabled then
-        print("|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled)
+        ns.ReportDisabled()
         return
     end
     local words = {}
