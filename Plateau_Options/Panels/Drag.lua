@@ -11,7 +11,6 @@ local Drag = {}
 ns.Drag = Drag
 
 local dotParent
-local snapCandidates = {}
 local active
 local pressed
 local selected
@@ -411,12 +410,11 @@ local function OnUpdate()
             mover:SetPoint(candidate.point, candidate.anchor, candidate.relPoint, (candidate.ox or 0) + sx, (candidate.oy or 0) + sy)
         end
     end
-    snapCandidates = candidates
 end
 
 function Drag.SnapSpots()
     local list = {}
-    for _, candidate in ipairs(snapCandidates) do
+    for _, candidate in ipairs(active and active.cached or {}) do
         local ax, ay = PointXY(candidate.anchor, candidate.relPoint)
         if ax then
             list[#list + 1] = {
@@ -484,7 +482,6 @@ function Stop(spec)
     active = nil
     pressed = nil
     driver:Hide()
-    snapCandidates = {}
     spec.cached = nil
 
     local off = Drag.TrayDrop(spec)
@@ -529,7 +526,6 @@ function Drag.Cancel()
     local spec = active
     active = nil
     driver:Hide()
-    snapCandidates = {}
     spec.cached = nil
     Apply({})
     Settle(spec)
