@@ -207,12 +207,31 @@ local function PixelFactor()
     return PixelUtil and PixelUtil.GetPixelToUIUnitFactor and PixelUtil.GetPixelToUIUnitFactor() or 1
 end
 
+local function DrawnBounds(region)
+    if not region.icons then
+        return region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
+    end
+    local l, r, t, b
+    for _, icon in ipairs(region.icons) do
+        if icon:IsShown() and icon:GetLeft() then
+            l = math.min(l or icon:GetLeft(), icon:GetLeft())
+            r = math.max(r or icon:GetRight(), icon:GetRight())
+            t = math.max(t or icon:GetTop(), icon:GetTop())
+            b = math.min(b or icon:GetBottom(), icon:GetBottom())
+        end
+    end
+    if not l then
+        return region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
+    end
+    return l, r, t, b
+end
+
 local function PixelBox(spot)
     local ring = spot.ring and Resolve(spot.ring)
     local l, r, t, b, scale
     if ring then
         local region = spot.region
-        l, r, t, b = region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
+        l, r, t, b = DrawnBounds(region)
         scale = region:GetEffectiveScale()
     else
         l, r, t, b = Bounds(spot)
