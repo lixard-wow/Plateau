@@ -115,6 +115,46 @@ restyler:SetScript("OnEvent", function()
     end
 end)
 
+local PARTY = { "player", "party1", "party2", "party3", "party4" }
+local Roster = { members = {}, byGuid = {} }
+ns.Roster = Roster
+local listeners = {}
+
+function Roster.OnChange(listener)
+    listeners[#listeners + 1] = listener
+end
+
+function Roster.Has(guid)
+    return guid ~= nil and Roster.byGuid[guid] ~= nil
+end
+
+function Roster.Update()
+    local Readable = ns.Readable
+    local members, byGuid = {}, {}
+    for _, unit in ipairs(PARTY) do
+        if UnitExists(unit) then
+            local guid = Readable(UnitGUID(unit))
+            if guid then
+                local member = { unit = unit, guid = guid, class = Readable(UnitClassBase(unit)), isPlayer = unit == "player" }
+                members[#members + 1] = member
+                byGuid[guid] = member
+            end
+        end
+    end
+    Roster.members, Roster.byGuid = members, byGuid
+    for i = 1, #listeners do
+        listeners[i](members)
+    end
+end
+
+local rosterWatcher = CreateFrame("Frame")
+rosterWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+rosterWatcher:RegisterEvent("GROUP_ROSTER_UPDATE")
+rosterWatcher:SetScript("OnEvent", function()
+    if ns.disabled then return end
+    Roster.Update()
+end)
+
 local watcher = CreateFrame("Frame")
 watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
 watcher:RegisterEvent("ZONE_CHANGED_NEW_AREA")

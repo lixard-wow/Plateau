@@ -40,6 +40,8 @@ local ns = {
 }
 ns.Readable = function(value) if issecretvalue(value) then return nil end return value end
 ns.AtlasExists = function(atlas) return C_Texture ~= nil and C_Texture.GetAtlasInfo ~= nil and C_Texture.GetAtlasInfo(atlas) ~= nil end
+C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Features/Kicks.lua"))("Plateau", ns)
 local Kicks = ns.Kicks
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
@@ -47,7 +49,7 @@ local function cast(id) handler(nil, "UNIT_SPELLCAST_SUCCEEDED", "player", "cast
 local function stop(unit, by) handler(nil, "UNIT_SPELLCAST_INTERRUPTED", unit, "cast", 5, by) end
 local function meter() handler(nil, "DAMAGE_METER_COMBAT_SESSION_UPDATED", 5, 1) flush() end
 local function on(plate, guid) local list = Kicks:On(plates[plate]) return list and list[guid] ~= nil end
-handler(nil, "GROUP_ROSTER_UPDATE")
+ns.Roster.Update()
 meter()
 
 cast(1766)

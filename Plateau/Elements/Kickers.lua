@@ -1,8 +1,6 @@
 local _, ns = ...
 
 local GetRaidTargetIndex = GetRaidTargetIndex
-local UnitGUID = UnitGUID
-local UnitExists = UnitExists
 local UnitClassBase = UnitClassBase
 local UnitName = UnitName
 local issecretvalue = issecretvalue
@@ -10,7 +8,6 @@ local type, pairs, ipairs, time, next = type, pairs, ipairs, time, next
 
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 local CLASS_SHEET = "Interface\\WorldStateFrame\\Icons-Classes"
-local UNITS = { "player", "party1", "party2", "party3", "party4" }
 local MARK_LIFE = 4 * 60 * 60
 local GAP = 2
 local BLACK = { 0, 0, 0, 1 }
@@ -122,17 +119,15 @@ local function Rebuild()
     inDungeon = ns.Zone.Read().type == "party"
     local byMarker = {}
     local wantSelf = includeSelf.enemy ~= false
-    for _, unit in ipairs(UNITS) do
-        if UnitExists(unit) then
-            local guid = Readable(UnitGUID(unit))
-            if guid then classes[guid] = Readable(UnitClassBase(unit)) end
-            local marker = guid and marks[guid] and marks[guid].marker
-            if unit == "player" then marker = OwnMarker() or marker end
-            if marker and (unit ~= "player" or wantSelf) then
-                byMarker[marker] = byMarker[marker] or {}
-                local owned = byMarker[marker]
-                owned[#owned + 1] = { guid = guid, class = classes[guid], name = Readable(UnitName(unit)) }
-            end
+    for _, member in ipairs(ns.Roster.members) do
+        local unit, guid = member.unit, member.guid
+        classes[guid] = member.class
+        local marker = marks[guid] and marks[guid].marker
+        if member.isPlayer then marker = OwnMarker() or marker end
+        if marker and (not member.isPlayer or wantSelf) then
+            byMarker[marker] = byMarker[marker] or {}
+            local owned = byMarker[marker]
+            owned[#owned + 1] = { guid = guid, class = classes[guid], name = Readable(UnitName(unit)) }
         end
     end
     segments = Segments(byMarker)
@@ -158,15 +153,9 @@ local function ParseMarker(text)
 end
 Kickers.ParseMarker = ParseMarker
 
-local function InGroup(guid)
-    for _, unit in ipairs(UNITS) do
-        if UnitExists(unit) and Readable(UnitGUID(unit)) == guid then return true end
-    end
-end
-
 local function OnChat(text, guid)
     text, guid = Readable(text), Readable(guid)
-    if type(text) ~= "string" or type(guid) ~= "string" or not InGroup(guid) then return end
+    if type(text) ~= "string" or type(guid) ~= "string" or not ns.Roster.Has(guid) then return end
     local marker = ParseMarker(text)
     if not marker then return end
     Marks()[guid] = { marker = marker, at = time() }
@@ -175,17 +164,13 @@ end
 
 local watcher = CreateFrame("Frame")
 for _, event in ipairs(CHAT_EVENTS) do watcher:RegisterEvent(event) end
-watcher:RegisterEvent("GROUP_ROSTER_UPDATE")
-watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
-watcher:SetScript("OnEvent", function(_, event, text, ...)
+watcher:SetScript("OnEvent", function(_, _, text, ...)
     if ns.disabled then return end
-    if event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
-        Rebuild()
-        return
-    end
     local guid = select(11, ...)
     pcall(OnChat, text, guid)
 end)
+
+ns.Roster.OnChange(Rebuild)
 
 local function Gate(parent)
     local bar = CreateFrame("StatusBar", nil, parent)

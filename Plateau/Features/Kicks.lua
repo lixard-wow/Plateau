@@ -3,7 +3,6 @@ local _, ns = ...
 local GetTime = GetTime
 local UnitGUID = UnitGUID
 local UnitExists = UnitExists
-local UnitClassBase = UnitClassBase
 local issecretvalue = issecretvalue
 local type, pairs, ipairs, next, pcall = type, pairs, ipairs, next, pcall
 
@@ -13,7 +12,6 @@ local PAIR_WINDOW = 0.4
 local READY_SLACK = 1.5
 local DEFAULT_CD = 15
 
-local PARTY = { "party1", "party2", "party3", "party4" }
 local PETS = { party1 = "partypet1", party2 = "partypet2", party3 = "partypet3", party4 = "partypet4" }
 
 local CLASS_KICK = {
@@ -183,21 +181,19 @@ local InspectNext
 local function Roster()
     local old = members
     members = {}
-    for _, unit in ipairs(PARTY) do
-        if UnitExists(unit) then
-            local guid = Readable(UnitGUID(unit))
-            if guid then
-                local member = old[guid] or { guid = guid, readyAt = 0, start = 0, count = 0 }
-                member.unit = unit
-                member.class = Readable(UnitClassBase(unit))
-                member.pet = Readable(UnitGUID(PETS[unit]))
-                if not member.spec and GetInspectSpecialization then
-                    local spec = Readable(GetInspectSpecialization(unit))
-                    if spec and spec > 0 then member.spec = spec end
-                end
-                SetKick(member)
-                members[guid] = member
+    for _, entry in ipairs(ns.Roster.members) do
+        if not entry.isPlayer then
+            local unit, guid = entry.unit, entry.guid
+            local member = old[guid] or { guid = guid, readyAt = 0, start = 0, count = 0 }
+            member.unit = unit
+            member.class = entry.class
+            member.pet = Readable(UnitGUID(PETS[unit]))
+            if not member.spec and GetInspectSpecialization then
+                local spec = Readable(GetInspectSpecialization(unit))
+                if spec and spec > 0 then member.spec = spec end
             end
+            SetKick(member)
+            members[guid] = member
         end
     end
     Me()
@@ -399,8 +395,6 @@ Kicks:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 Kicks:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 Kicks:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP")
 Kicks:RegisterEvent("SPELL_UPDATE_COOLDOWN")
-Kicks:RegisterEvent("PLAYER_ENTERING_WORLD")
-Kicks:RegisterEvent("GROUP_ROSTER_UPDATE")
 Kicks:RegisterEvent("UNIT_PET")
 Kicks:RegisterEvent("INSPECT_READY")
 Kicks:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -422,7 +416,7 @@ Kicks:SetScript("OnEvent", function(_, event, unit, ...)
         InspectNext()
     elseif event == "UNIT_PET" and unit ~= "player" and not PETS[unit] then
         return
-    elseif event == "PLAYER_ENTERING_WORLD" or event == "GROUP_ROSTER_UPDATE" or event == "UNIT_PET" then
+    elseif event == "UNIT_PET" then
         Roster()
         Refresh()
     elseif event == "UNIT_SPELLCAST_EMPOWER_STOP" then
@@ -432,4 +426,9 @@ Kicks:SetScript("OnEvent", function(_, event, unit, ...)
         local _, _, interruptedBy = ...
         OnStop(unit, interruptedBy)
     end
+end)
+
+ns.Roster.OnChange(function()
+    Roster()
+    Refresh()
 end)

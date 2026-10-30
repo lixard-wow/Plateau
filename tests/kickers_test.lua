@@ -27,6 +27,7 @@ C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
 assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Elements/Kickers.lua"))("Plateau", ns)
 local Kickers = ns.Elements.Kickers
+ns.Roster.Update()
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 
 local Parse = Kickers.ParseMarker
@@ -50,10 +51,10 @@ check(global.kickMarks["Player-1-C"].marker == 6, "a typed announce counts too")
 chat("kick {star}", "Player-1-C")
 check(global.kickMarks["Player-1-C"].marker == 1, "a newer announce replaces the old marker")
 global.kickMarks["Player-1-B"].at = 0
-handler(nil, "GROUP_ROSTER_UPDATE")
+ns.Roster.Update()
 check(global.kickMarks["Player-1-B"] == nil, "old announces expire")
 FocusControlDB = { marker = 7 }
-handler(nil, "GROUP_ROSTER_UPDATE")
+ns.Roster.Update()
 check(true, "own FocusControl marker rebuild runs")
 
 local function Shape(list)

@@ -48,3 +48,22 @@ local z = Zone.Read()
 check(z.inInstance == false and z.type == "none" and z.content == "world", "a missing answer reads as the open world")
 C_PartyInfo = nil
 check(Zone.Read().inDelve == false, "no delve API reads as not in a delve")
+
+local group = { player = { "Player-1", "ROGUE" }, party1 = { "Player-2", "MAGE" }, party3 = { "SECRET", "PRIEST" } }
+function issecretvalue(v) return v == "SECRET" end
+ns.Readable = function(v) if issecretvalue(v) then return nil end return v end
+function UnitExists(unit) return group[unit] ~= nil end
+function UnitGUID(unit) return group[unit] and group[unit][1] end
+function UnitClassBase(unit) return group[unit] and group[unit][2] end
+local heard = {}
+ns.Roster.OnChange(function(members) heard[#heard + 1] = #members end)
+ns.Roster.OnChange(function() heard[#heard + 1] = "second" end)
+ns.Roster.Update()
+local members = ns.Roster.members
+check(#members == 2 and members[1].unit == "player" and members[1].isPlayer and members[2].unit == "party1" and not members[2].isPlayer, "the roster lists you first, then party members with a readable GUID")
+check(members[2].class == "MAGE" and ns.Roster.byGuid["Player-2"] == members[2], "each member keeps unit, GUID and class")
+check(ns.Roster.Has("Player-2") and not ns.Roster.Has("Player-9") and not ns.Roster.Has(nil), "Has answers by GUID")
+check(heard[1] == 2 and heard[2] == "second", "every listener hears one roster change, in order")
+group.party1 = nil
+ns.Roster.Update()
+check(#ns.Roster.members == 1 and not ns.Roster.Has("Player-2"), "a member who left is gone after the next change")
