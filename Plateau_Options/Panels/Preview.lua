@@ -53,8 +53,7 @@ hint:SetText(Hint())
 
 local outline = CreateFrame("Frame", nil, panel)
 outline:SetFrameLevel(panel:GetFrameLevel() + 200)
-Style.OutlineEdges(outline, C.text)
-outline:SetAlpha(0.55)
+Style.OutlineEdges(outline, Style.HOVER_MARK)
 outline:Hide()
 
 local playerName, playerSurname = UnitName("player")
@@ -934,25 +933,16 @@ local function SetTag(tag, value)
     tag:SetWidth(math.max(18, tag.text:GetStringWidth() + 6))
 end
 
-local function Tint(color)
-    return { color[1], color[2], color[3], 1 }
-end
-
 local marks = CreateFrame("Frame", nil, panel)
 local markBorders = {}
 marks:SetScript("OnUpdate", function()
     local chosen = ns.Drag.GetSelected()
     chosen = chosen and chosen.spot
     for _, spot in ipairs(spots) do
-        local key = (spot == chosen and "accent") or (spot == hovered and "text") or nil
-        local color = key and C[key]
-        if spot.markKey ~= key or spot.markColor ~= color then
-            spot.markKey, spot.markColor = key, color
-            spot.markTint = color and Tint(color) or nil
-        end
+        local tint = (spot == chosen and Style.PICK_MARK) or (spot == hovered and Style.HOVER_MARK) or nil
         wipe(markBorders)
         for _, border in ipairs(OwnBorders(spot, markBorders)) do
-            border:SetHighlight(spot.markTint)
+            border:SetHighlight(tint)
         end
     end
 end)

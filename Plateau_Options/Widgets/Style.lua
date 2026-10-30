@@ -519,6 +519,8 @@ local function Snap(texture)
     return texture
 end
 Style.Snap = Snap
+Style.HOVER_MARK = { 1, 1, 1, 1 }
+Style.PICK_MARK = { 0.25, 1, 0.35, 1 }
 
 function Style.Fill(frame, color, layer)
     local texture = Snap(frame:CreateTexture(nil, layer or "BACKGROUND"))

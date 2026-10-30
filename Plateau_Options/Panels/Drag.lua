@@ -1208,7 +1208,7 @@ function Drag.SetDotParent(frame)
 
     selectionFrame = CreateFrame("Frame", nil, frame)
     selectionFrame:SetFrameLevel(frame:GetFrameLevel() + 190)
-    Style.OutlineEdges(selectionFrame)
+    Style.OutlineEdges(selectionFrame, Style.PICK_MARK)
     selectionFrame:Hide()
     selectionFrame:SetScript("OnUpdate", function(self)
         if selected and selected.spot then
