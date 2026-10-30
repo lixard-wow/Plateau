@@ -453,10 +453,9 @@ local function UpdateRole()
 end
 
 local function ReadInstance()
-    local instance, instanceType = IsInInstance()
-    inInstance = (instance == true and instanceType ~= "pvp" and instanceType ~= "arena")
-        or (C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress() == true) or false
-    inRaid = instance == true and instanceType == "raid"
+    local zone = ns.Zone.Read()
+    inInstance = (zone.inInstance and zone.type ~= "pvp" and zone.type ~= "arena") or zone.inDelve
+    inRaid = zone.inInstance and zone.type == "raid"
 end
 
 local function Refresh()

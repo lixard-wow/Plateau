@@ -53,6 +53,8 @@ C_SpecializationInfo = {
 local ns = { Driver = { Restyle = function() end, RequestRestyle = function() end } }
 assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 local function load(path) local f = assert(loadfile(path)); f("Plateau", ns) end
+C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 load("Plateau/Core/Defaults.lua"); load("Plateau/Core/Database.lua"); load("Plateau/Core/Share.lua"); load("Plateau/Core/AutoProfile.lua")
 ns.Builtins = { list = { { name = "Alpha" } }, Label = function(n) return n end, ByName = function(n) return n == "Alpha" and {} or nil end, Values = function() return {} end }
 local DB, Auto = ns.DB, ns.AutoProfile

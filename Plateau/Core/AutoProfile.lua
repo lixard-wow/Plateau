@@ -14,16 +14,6 @@ ns.CONTENT_TYPES = {
     { key = "battleground", label = "Battlegrounds" },
 }
 
-local INSTANCE_CONTENT = {
-    none = "world",
-    party = "dungeon",
-    raid = "raid",
-    scenario = "delve",
-    delve = "delve",
-    arena = "arena",
-    pvp = "battleground",
-}
-
 local pending = false
 local pendingForce = false
 local lastContent, lastSpec
@@ -106,8 +96,7 @@ function AutoProfile:Status()
 end
 
 function AutoProfile:CurrentContent()
-    local _, instanceType = IsInInstance()
-    return INSTANCE_CONTENT[instanceType or "none"] or "world"
+    return ns.Zone.Read().content
 end
 
 function AutoProfile:CurrentSpecIndex()

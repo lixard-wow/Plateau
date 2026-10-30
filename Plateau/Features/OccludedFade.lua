@@ -1,17 +1,17 @@
 local _, ns = ...
 
 local CVAR = "nameplateOccludedAlphaMult"
-local KINDS = { party = "dungeon", raid = "raid", scenario = "delve", delve = "delve", pvp = "pvp", arena = "pvp" }
+local KINDS = { dungeon = "dungeon", raid = "raid", delve = "delve", battleground = "pvp", arena = "pvp" }
 
 local OccludedFade = CreateFrame("Frame")
 ns.OccludedFade = OccludedFade
 
 function OccludedFade:Kind()
-    local inInstance, instanceType = IsInInstance()
-    if not inInstance then
+    local zone = ns.Zone.Read()
+    if not zone.inInstance then
         return "world"
     end
-    return KINDS[instanceType] or "world"
+    return KINDS[zone.content] or "world"
 end
 
 function OccludedFade:IsOn(kind)

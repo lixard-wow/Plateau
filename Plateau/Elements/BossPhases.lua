@@ -3,7 +3,6 @@ local _, ns = ...
 local L = ns.L
 
 local issecretvalue = issecretvalue
-local IsInInstance = IsInInstance
 local MAX_LINES = 4
 
 local BOSSES = {
@@ -289,7 +288,7 @@ watcher:SetScript("OnEvent", function(_, event, id, name)
             encounterID = nil
         else
             encounterID = nil
-            inInstance = IsInInstance() == true
+            inInstance = ns.Zone.Read().inInstance
         end
         RefreshAll()
     end)

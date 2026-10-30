@@ -7,7 +7,7 @@ local CVARS = { "UnitNameFriendlyMinionName", "UnitNameFriendlyPetName", "UnitNa
 for _, name in ipairs(PLATE_CVARS) do
     CVARS[#CVARS + 1] = name
 end
-local INSTANCES = { party = true, raid = true }
+local INSTANCES = { dungeon = true, raid = true }
 
 local InstancePets = CreateFrame("Frame")
 ns.InstancePets = InstancePets
@@ -43,8 +43,8 @@ function InstancePets:SetOn(on)
 end
 
 function InstancePets:InInstance()
-    local inInstance, instanceType = IsInInstance()
-    return inInstance == true and INSTANCES[instanceType] == true
+    local zone = ns.Zone.Read()
+    return zone.inInstance and INSTANCES[zone.content] == true
 end
 
 function InstancePets:Update()

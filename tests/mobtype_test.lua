@@ -29,6 +29,8 @@ local function MobTypeWith(classification, powerType)
     function UnitPowerType() return powerType end
     local ns = {}
     assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
+    C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
+    assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
     assert(loadfile("Plateau/Features/UnitColors.lua"))("Plateau", ns)
     local flags = {}
     local result = ns.UnitColors:MobType("target", flags)

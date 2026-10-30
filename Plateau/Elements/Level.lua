@@ -145,7 +145,7 @@ local zoneWatcher = CreateFrame("Frame")
 zoneWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
 zoneWatcher:SetScript("OnEvent", function()
     if ns.disabled then return end
-    local now = IsInInstance() == true
+    local now = ns.Zone.Read().inInstance
     if now ~= inInstance then
         inInstance = now
         ns.Driver:ForEachActive(RefreshOne)

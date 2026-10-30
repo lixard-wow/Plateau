@@ -8,6 +8,8 @@ C_SpecializationInfo = { GetSpecialization = function() return spec end }
 function InCombatLockdown() return combat end
 function CreateFrame() return { RegisterEvent = function() end, RegisterUnitEvent = function() end, SetScript = function() end } end
 local function load(path) assert(loadfile("Plateau/" .. path))("Plateau", ns) end
+C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 load("Core/Defaults.lua"); load("Core/Database.lua"); load("Core/AutoProfile.lua")
 local DB, Auto = ns.DB, ns.AutoProfile
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end

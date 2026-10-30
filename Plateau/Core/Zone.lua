@@ -2,11 +2,25 @@ local _, ns = ...
 
 local IsInInstance = IsInInstance
 
-local Zone = { inInstance = false }
+local CONTENT = {
+    party = "dungeon",
+    raid = "raid",
+    scenario = "delve",
+    delve = "delve",
+    arena = "arena",
+    pvp = "battleground",
+}
+
+local Zone = { inInstance = false, type = "none", content = "world", inDelve = false }
 ns.Zone = Zone
 
-local function Read()
-    Zone.inInstance = IsInInstance() == true
+function Zone.Read()
+    local inside, kind = IsInInstance()
+    Zone.inInstance = inside == true
+    Zone.type = kind or "none"
+    Zone.content = CONTENT[Zone.type] or "world"
+    Zone.inDelve = C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress() == true or false
+    return Zone
 end
 
 function Zone.OutOfCombat(owner)
@@ -104,4 +118,4 @@ end)
 local watcher = CreateFrame("Frame")
 watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
 watcher:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-watcher:SetScript("OnEvent", Read)
+watcher:SetScript("OnEvent", Zone.Read)

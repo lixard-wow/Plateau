@@ -15,6 +15,8 @@ Plateau = {}
 Plateau.T = Plateau.T or (function() local l = {} assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", l) return l.T end)()
 
 assert(loadfile("Plateau/Core/Border.lua"))("Plateau", ns)
+C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Elements/BossPhases.lua"))("Plateau", ns)
 local BossPhases = ns.Elements.BossPhases
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end

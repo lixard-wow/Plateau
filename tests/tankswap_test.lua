@@ -40,6 +40,8 @@ local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 
 local ns = { Driver = { RequestRestyle = function() end } }
 assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
+C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Features/UnitColors.lua"))("Plateau", ns)
 local cfg = {
     threat = true, threatDisplay = "bar", showThreatGood = true, showThreatWarning = true, showOffTank = true,

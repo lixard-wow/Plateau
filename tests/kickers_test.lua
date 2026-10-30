@@ -23,6 +23,8 @@ RAID_TARGET_8 = "Skull"
 
 ns.Readable = function(value) if issecretvalue(value) then return nil end return value end
 ns.AtlasExists = function(atlas) return C_Texture ~= nil and C_Texture.GetAtlasInfo ~= nil and C_Texture.GetAtlasInfo(atlas) ~= nil end
+C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
+assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
 assert(loadfile("Plateau/Elements/Kickers.lua"))("Plateau", ns)
 local Kickers = ns.Elements.Kickers
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end

@@ -119,8 +119,7 @@ local function Rebuild()
     for guid, mark in pairs(marks) do
         if type(mark) ~= "table" or now - (mark.at or 0) > MARK_LIFE then marks[guid] = nil end
     end
-    local _, kind = IsInInstance()
-    inDungeon = kind == "party"
+    inDungeon = ns.Zone.Read().type == "party"
     local byMarker = {}
     local wantSelf = includeSelf.enemy ~= false
     for _, unit in ipairs(UNITS) do
