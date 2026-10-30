@@ -117,10 +117,7 @@ function Name:UpdateSubtitle(plate, unit, isPlayer)
     end
     local s = settings[plate.state]
     local size = friendly.subtitleSize * (plate.nameSize or s.size) / s.size
-    if sub.size ~= size or sub.font ~= s.font or sub.outline ~= s.outline then
-        sub.size, sub.font, sub.outline = size, s.font, s.outline
-        ns.ApplyFont(sub, s.font, size, s.outline)
-    end
+    ns.ApplyFont(sub, s.font, size, s.outline)
     sub:SetTextColor(color[1], color[2], color[3], color[4])
     sub:SetText(text)
     sub:Show()
@@ -448,7 +445,6 @@ function Name:Preview(plate, state)
     if sample then
         local s = settings[plate.state]
         ns.ApplyFont(plate.subtitle, s.font, friendly.subtitleSize, s.outline)
-        plate.subtitle.size = nil
         local color = state.isPlayer and friendly.guildColor or friendly.npcTitleColor
         plate.subtitle:SetTextColor(color[1], color[2], color[3], color[4])
         plate.subtitle:SetText(sample)
