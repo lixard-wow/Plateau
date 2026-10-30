@@ -962,7 +962,7 @@ function Auras:Preview(plate, state)
                     end
                     ns.SetIconBorder(icon, db.borderSize or 1, db.borderColor or BLACK)
                     local dispel = SAMPLE_BORDER[key]
-                    icon.dispel:Layout(1)
+                    icon.dispel:Layout(db.borderSize or 1)
                     if dispel then
                         icon.dispel:SetColor(dispel[1], dispel[2], dispel[3], dispel[4])
                     end
