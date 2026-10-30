@@ -360,7 +360,7 @@ local function Sanitize(data, defaults, parent, prefix)
     local clean = {}
     for key, value in pairs(data) do
         local default = defaults[key]
-        if type(default) == "table" and default[1] == nil then
+        if ns.DB.IsGroup(default) then
             if type(value) == "table" then
                 clean[key] = Sanitize(value, default, key, prefix .. "." .. tostring(key))
             end

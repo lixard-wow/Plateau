@@ -12,6 +12,7 @@ ns.DB = DB
 local function IsGroup(value)
     return type(value) == "table" and value[1] == nil
 end
+DB.IsGroup = IsGroup
 
 local function RepairArrays(saved, defaults)
     for key, default in pairs(defaults) do
@@ -1091,7 +1092,7 @@ local function FullLook(defaults, saved)
         if type(saved) == "table" then
             value = rawget(saved, key)
         end
-        if type(default) == "table" and default[1] == nil then
+        if IsGroup(default) then
             full[key] = FullLook(default, value)
         elseif type(value) == "table" then
             full[key] = DeepCopy(value)
@@ -1536,7 +1537,7 @@ local function Assign(path, value)
     end
     local default = parentDefault[key]
     if type(default) == "table" then
-        if default[1] == nil then
+        if IsGroup(default) then
             return false, L["that is a group, pick a setting inside it"]
         end
         if type(value) ~= "table" or #value < 3 or #value > #default then
