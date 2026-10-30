@@ -69,3 +69,22 @@ queue:Restyle(a)
 combat = false
 queue:Settle(a)
 check(#styled == 1, "settle restyles a waiting item once restrictions lift")
+
+local locked = { name = "locked", active = true, tries = 0 }
+local lockedQueue
+lockedQueue = ns.Zone.RestyleQueue(function(item)
+    item.tries = item.tries + 1
+    if item.stillLocked then lockedQueue:Mark(item) end
+end, function(item) return item.active end, function() return true end)
+locked.stillLocked = true
+timers = {}
+lockedQueue:Mark(locked)
+lockedQueue:Flush()
+check(locked.tries == 1 and #lockedQueue.order == 1 and #timers == 0, "an item that re-queues itself while locked waits for the next event instead of retrying every frame")
+locked.stillLocked = false
+restyler.handler(restyler, "ADDON_RESTRICTION_STATE_CHANGED")
+check(locked.tries == 2 and #lockedQueue.order == 0, "the locked item is styled once the restriction changes")
+
+check(ns.Zone.Locked({ IsForbidden = function() return true end }) == true, "without the access check a forbidden frame counts as locked")
+check(ns.Zone.Locked({ CanBeAccessedInContext = function() return false end }) == true, "a frame the game denies access to counts as locked")
+check(ns.Zone.Locked({ CanBeAccessedInContext = function() return true end }) == false, "an accessible frame is not locked")

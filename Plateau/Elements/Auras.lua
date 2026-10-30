@@ -125,7 +125,7 @@ local function StyleContainerButtons(container)
     local locked = false
     for i = 1, #container.buttons do
         local button = container.buttons[i]
-        if button:IsForbidden() then
+        if ns.Zone.Locked(button) then
             locked = true
         else
             StyleButton(button, container.group, container)

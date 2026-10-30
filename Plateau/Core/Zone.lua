@@ -43,6 +43,14 @@ function Zone.Watch(frame, update)
     end)
 end
 
+function Zone.Locked(frame)
+    if not frame.CanBeAccessedInContext then
+        return frame:IsForbidden()
+    end
+    local allowed = frame:CanBeAccessedInContext()
+    return (issecretvalue and issecretvalue(allowed)) or not allowed
+end
+
 function Zone.Restricted()
     return InCombatLockdown() or (ShouldAurasBeSecret and ShouldAurasBeSecret())
 end
@@ -79,6 +87,7 @@ end
 function Queue:Flush()
     if Zone.Restricted() then return end
     local order = self.order
+    self.order = {}
     local processed = 0
     while #order > 0 and processed < FLUSH_BATCH do
         local item = table.remove(order)
@@ -90,6 +99,9 @@ function Queue:Flush()
         processed = processed + 1
     end
     if #order > 0 then
+        for i = 1, #order do
+            self.order[#self.order + 1] = order[i]
+        end
         C_Timer.After(0, self.flush)
     end
 end

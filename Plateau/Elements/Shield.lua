@@ -108,7 +108,7 @@ end
 local slots
 
 local function StyleSlot(button)
-    if button:IsForbidden() then
+    if ns.Zone.Locked(button) then
         slots:Mark(button)
         return
     end
