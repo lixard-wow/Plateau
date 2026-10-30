@@ -274,9 +274,9 @@ end
 
 local function PaintIcon(icon, seg, slot, entry, size, plate)
     local look = plate.kickLook
-    local margin = Margin(look)
+    local margin = ns.WholePixels(seg, Margin(look))
     icon:ClearAllPoints()
-    icon:SetPoint("TOPLEFT", seg, "TOPLEFT", margin + (slot - 1) * (size + GAP), -margin)
+    icon:SetPoint("TOPLEFT", seg, "TOPLEFT", margin + (slot - 1) * (size + ns.WholePixels(seg, GAP)), -margin)
     icon:SetSize(size, size)
     Picture(icon.art, entry, look and look.iconStyle)
     icon.plate, icon.kicked = plate, entry.kicked
@@ -314,8 +314,8 @@ local function Entries(seg, kicked)
 end
 
 local function Sync(plate, specs, kicked)
-    local size = plate.kickSize or 18
-    local margin = Margin(plate.kickLook)
+    local size = ns.WholePixels(plate.kickHolder, plate.kickSize or 18, 1)
+    local margin = ns.WholePixels(plate.kickHolder, Margin(plate.kickLook))
     local widest = 0
     for index, spec in ipairs(specs) do
         local seg = Segment(plate, index)
@@ -341,7 +341,7 @@ local function Sync(plate, specs, kicked)
     for index = #specs + 1, #plate.kickSegs do
         plate.kickSegs[index]:Hide()
     end
-    plate.kickHolder:SetSize(math.max(widest * size + (widest - 1) * GAP, 1), size)
+    plate.kickHolder:SetSize(math.max(widest * size + (widest - 1) * ns.WholePixels(plate.kickHolder, GAP), 1), size)
     return widest > 0
 end
 

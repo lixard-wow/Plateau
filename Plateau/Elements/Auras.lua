@@ -100,7 +100,7 @@ local function StyleButton(button, group, container)
     local db = config[group.key]
     local size = db.size * ns.Scaling:AuraFactor()
     local height, top, bottom = Shape(db)
-    button:SetSize(size, size * height)
+    button:SetSize(ns.WholePixels(button, size, 1), ns.WholePixels(button, size * height, 1))
     button.iconTexture:SetTexCoord(0.08, 0.92, top, bottom)
     button.cooldownFrame:SetDrawSwipe(db.swipe ~= false)
     PlaceText(button.timer, button, db.timerPosition)
@@ -908,15 +908,17 @@ function Auras:Preview(plate, state)
             local point, relative, horizontal, vertical, axis, anchor = Placement(db)
             local perRow = math.max(1, db.perRow)
             local height, top, bottom = Shape(db)
-            local iconHeight = db.size * height
-            local step = db.size + db.spacing
-            local lineStep = iconHeight + db.spacing
+            local size = ns.WholePixels(fake, db.size, 1)
+            local iconHeight = ns.WholePixels(fake, db.size * height, 1)
+            local spacing = ns.WholePixels(fake, db.spacing)
+            local step = size + spacing
+            local lineStep = iconHeight + spacing
             local across = math.min(count, perRow)
             local lines = math.ceil(count / perRow)
             if axis == VERTICAL then
                 across, lines = lines, across
             end
-            fake:SetSize(across * step - db.spacing, lines * lineStep - db.spacing)
+            fake:SetSize(across * step - spacing, lines * lineStep - spacing)
             fake:ClearAllPoints()
             fake:SetPoint(anchor, plate, relative, db.offsetX, db.offsetY)
             local samples = SAMPLE_ICONS[key]
@@ -951,7 +953,7 @@ function Auras:Preview(plate, state)
                     if axis == VERTICAL then
                         column, row = row, column
                     end
-                    icon:SetSize(db.size, iconHeight)
+                    icon:SetSize(size, iconHeight)
                     icon.texture:SetTexCoord(0.08, 0.92, top, bottom)
                     icon:ClearAllPoints()
                     icon:SetPoint(point, fake, point, column * step * horizontal, row * lineStep * vertical)

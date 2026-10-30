@@ -183,6 +183,12 @@ function ns.PixelUnit(region)
     return PixelSize(region) or 1
 end
 
+function ns.WholePixels(region, value, least)
+    local pixel = ns.pixelPerfect and PixelSize(region)
+    if not pixel or type(value) ~= "number" then return value end
+    return math.max(least or 0, math.floor(value / pixel + 0.5)) * pixel
+end
+
 function ns.PlaceBarLine(line, bar, reverse, offset, width)
     local side = reverse and "RIGHT" or "LEFT"
     local direction = reverse and -1 or 1
