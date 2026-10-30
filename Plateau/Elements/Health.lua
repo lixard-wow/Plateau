@@ -34,6 +34,14 @@ local function FadeCurve(fade, r, g, b, a)
     fade.curves[key] = curve
     return curve
 end
+local function PlateCurve(plate, fade, r, g, b, a)
+    if plate.fadeCurve and plate.fadeFor == fade and plate.fadeR == r and plate.fadeG == g and plate.fadeB == b and plate.fadeA == a then
+        return plate.fadeCurve
+    end
+    plate.fadeFor, plate.fadeR, plate.fadeG, plate.fadeB, plate.fadeA = fade, r, g, b, a
+    return FadeCurve(fade, r, g, b, a)
+end
+
 local SMOOTH = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.ExponentialEaseOut
 
 local function SparkCurve()
@@ -262,7 +270,7 @@ local function Finish(plate, unit, r, g, b, a)
     local fade = fades[plate.state]
     a = a or 1
     if fade and not plate.isFriendly and not issecretvalue(r) and not issecretvalue(g) and not issecretvalue(b) and not issecretvalue(a) then
-        local curve = FadeCurve(fade, r, g, b, a)
+        local curve = PlateCurve(plate, fade, r, g, b, a)
         local color = UnitHealthPercent(unit, false, curve)
         plate.healthGradient, plate.fadeCurve = true, curve
         Paint(plate, color.r, color.g, color.b, color.a)
