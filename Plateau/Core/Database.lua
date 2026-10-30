@@ -843,6 +843,7 @@ local function DeepCopy(source)
     end
     return copy
 end
+ns.DeepCopy = DeepCopy
 
 function DB:Snapshot()
     return { profile = self.profileName, data = DeepCopy(self.saved.profiles[self.profileName]) }
@@ -1152,6 +1153,7 @@ local function Copy(source)
     end
     return copy
 end
+ns.ShallowCopy = Copy
 
 local EXPORT_CVARS = {
     "ShowQuestUnitCircles", "SoftTargetIconEnemy", "SoftTargetIconFriend", "SoftTargetIconInteract",

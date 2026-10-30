@@ -446,13 +446,7 @@ local function Complete(list)
     end
 end
 
-local function Copy(source)
-    local copy = {}
-    for key, value in pairs(source) do
-        copy[key] = type(value) == "table" and Copy(value) or value
-    end
-    return copy
-end
+local Copy = ns.DeepCopy
 
 function ns.PresetLook(preset)
     if preset.look then
