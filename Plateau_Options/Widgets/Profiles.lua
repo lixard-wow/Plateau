@@ -678,9 +678,8 @@ local function NameTaken(reason)
     return reason:find("^" .. pattern .. "$") ~= nil
 end
 
-local function ShareBox(frame)
-    local box = CreateFrame("ScrollFrame", nil, frame)
-    box:SetSize(ROW_WIDTH(), SHARE_BOX_HEIGHT)
+function ns.Widgets.TextArea(parent, editWidth)
+    local box = CreateFrame("ScrollFrame", nil, parent)
     Style.Field(box, C.field, C.border)
     local edit = CreateFrame("EditBox", nil, box)
     edit:SetMultiLine(true)
@@ -689,7 +688,7 @@ local function ShareBox(frame)
     edit:SetAutoFocus(false)
     Style.SetFont(edit, Style.font, 10, "")
     Style.PaintText(edit, C.text)
-    edit:SetWidth(ROW_WIDTH() - 12)
+    edit:SetWidth(editWidth)
     edit:SetTextInsets(6, 6, 6, 6)
     edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
     box:SetScrollChild(edit)
@@ -700,6 +699,12 @@ local function ShareBox(frame)
         self:SetVerticalScroll(math.max(0, math.min(range, offset - delta * 30)))
     end)
     box:SetScript("OnMouseDown", function() edit:SetFocus() end)
+    return edit, box
+end
+
+local function ShareBox(frame)
+    local edit, box = ns.Widgets.TextArea(frame, ROW_WIDTH() - 12)
+    box:SetSize(ROW_WIDTH(), SHARE_BOX_HEIGHT)
     return edit, box
 end
 
