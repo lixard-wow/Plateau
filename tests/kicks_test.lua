@@ -38,6 +38,8 @@ local ns = {
     InterruptReady = { IsKick = function(_, id) return id == 1766 end, GetCooldown = function() return "DURATION" end },
     Elements = { Kickers = { PlateChanged = function() end, CooldownChanged = function() end } },
 }
+ns.Readable = function(value) if issecretvalue(value) then return nil end return value end
+ns.AtlasExists = function(atlas) return C_Texture ~= nil and C_Texture.GetAtlasInfo ~= nil and C_Texture.GetAtlasInfo(atlas) ~= nil end
 assert(loadfile("Plateau/Features/Kicks.lua"))("Plateau", ns)
 local Kicks = ns.Kicks
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end

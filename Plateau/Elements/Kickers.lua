@@ -45,10 +45,7 @@ local Kickers = {
 ns.Elements = ns.Elements or {}
 ns.Elements.Kickers = Kickers
 
-local function Readable(value)
-    if issecretvalue(value) then return nil end
-    return value
-end
+local Readable = ns.Readable
 
 local function Marks()
     local global = ns.DB and ns.DB.saved and ns.DB.saved.global
@@ -59,7 +56,7 @@ end
 
 local function ClassIcon(texture, class)
     local atlas = class and "classicon-" .. class:lower()
-    if atlas and C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas) then
+    if atlas and ns.AtlasExists(atlas) then
         texture:SetAtlas(atlas)
         return
     end

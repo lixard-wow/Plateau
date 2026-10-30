@@ -127,6 +127,22 @@ function ns.NewSecondsFormatter(millisecondsThreshold)
     return formatter
 end
 
+function ns.Readable(value)
+    if issecretvalue(value) then return nil end
+    return value
+end
+
+local atlasExists = {}
+
+function ns.AtlasExists(atlas)
+    local exists = atlasExists[atlas]
+    if exists == nil then
+        exists = C_Texture ~= nil and C_Texture.GetAtlasInfo ~= nil and C_Texture.GetAtlasInfo(atlas) ~= nil
+        atlasExists[atlas] = exists
+    end
+    return exists
+end
+
 function ns.CreateText(parent)
     local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     text:SetWordWrap(false)

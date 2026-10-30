@@ -8,16 +8,6 @@ local OBJECTIVE = Enum.TooltipDataLineType and Enum.TooltipDataLineType.QuestObj
 
 local alphas = {}
 local progress = {}
-local atlasValid = {}
-
-local function AtlasValid(atlas)
-    local valid = atlasValid[atlas]
-    if valid == nil then
-        valid = C_Texture.GetAtlasInfo(atlas) ~= nil
-        atlasValid[atlas] = valid
-    end
-    return valid
-end
 
 local Quest = {
     key = "quest",
@@ -57,7 +47,7 @@ end
 
 function Quest:Style(plate, db)
     local icon = plate.quest
-    icon.art:SetAtlas(AtlasValid(db.style) and db.style or "QuestNormal")
+    icon.art:SetAtlas(ns.AtlasExists(db.style) and db.style or "QuestNormal")
     ns.SizeIcon(icon, db.size)
     ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
     local place = db.progress

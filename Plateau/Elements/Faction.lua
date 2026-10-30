@@ -70,10 +70,7 @@ function Faction:OnEvent(plate, _, unit)
     self:Update(plate, unit)
 end
 
-local function Readable(value)
-    if issecretvalue(value) then return nil end
-    return value
-end
+local Readable = ns.Readable
 
 function Faction:Update(plate, unit)
     if not plate.isPlayer then

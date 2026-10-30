@@ -51,10 +51,7 @@ local lastSession
 local inspecting, inspectQueued
 local cdCache = {}
 
-local function Readable(value)
-    if issecretvalue(value) then return nil end
-    return value
-end
+local Readable = ns.Readable
 
 local function Me()
     local guid = Readable(UnitGUID("player"))

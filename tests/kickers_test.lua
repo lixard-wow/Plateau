@@ -21,6 +21,8 @@ function UnitName(unit) return group[unit] and group[unit].name end
 function GetRaidTargetIndex() return nil end
 RAID_TARGET_8 = "Skull"
 
+ns.Readable = function(value) if issecretvalue(value) then return nil end return value end
+ns.AtlasExists = function(atlas) return C_Texture ~= nil and C_Texture.GetAtlasInfo ~= nil and C_Texture.GetAtlasInfo(atlas) ~= nil end
 assert(loadfile("Plateau/Elements/Kickers.lua"))("Plateau", ns)
 local Kickers = ns.Elements.Kickers
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
