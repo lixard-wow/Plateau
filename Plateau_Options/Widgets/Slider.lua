@@ -54,7 +54,7 @@ function ns.Widgets.Slider(parent, spec)
     local function SetDisplay(value)
         currentValue = value
         PositionThumb(value)
-        local text = pattern:format(value)
+        local text = pattern:format(step >= 1 and math.floor(value + 0.5) or value)
         box:SetText(text)
         measure:SetText(text)
         local width = measure:GetStringWidth()

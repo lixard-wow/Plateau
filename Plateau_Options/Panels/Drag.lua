@@ -62,7 +62,7 @@ local function PointXY(frame, point)
 end
 
 local function Clamp(value, low, high)
-    value = math.floor(value + 0.5)
+    value = math.floor(value * 100 + 0.5) / 100
     if value > high then
         return high
     elseif value < low then
