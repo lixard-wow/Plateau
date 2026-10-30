@@ -72,6 +72,18 @@ local function OwningPlate(frame)
     end
 end
 
+local function Remember(object, owner, a, b, c)
+    local plate = ns.pixelPlate or OwningPlate(owner)
+    if plate and not object.restricted then
+        local set = plate.pixelSet or {}
+        plate.pixelSet = set
+        local args = set[object] or {}
+        set[object] = args
+        args[1], args[2], args[3] = a, b, c
+    end
+    return plate
+end
+
 local function PixelSize(region)
     if not (PixelUtil and PixelUtil.GetPixelToUIUnitFactor) then return nil end
     local scale = region:GetEffectiveScale()
@@ -84,13 +96,7 @@ end
 function Ring:Layout(size)
     local owner, texture = self.owner, self.texture
     if not self.restricted then
-        local plate = ns.pixelPlate or OwningPlate(owner)
-        if plate then
-            plate.pixelSet = plate.pixelSet or {}
-            local args = plate.pixelSet[self] or {}
-            args[1] = size
-            plate.pixelSet[self] = args
-        end
+        Remember(self, owner, size)
     end
     local pixel = ns.pixelPerfect ~= false and PixelSize(owner) or 1
     local reach = math.max(0, math.floor((size or 0) + 0.5)) * pixel
@@ -297,20 +303,7 @@ end
 function Border:Layout(size, offset, inside)
     local anchor = self.anchor
     local info = EdgeInfo(self.style)
-    local plate = ns.pixelPlate or OwningPlate(self.owner)
-    if plate and not self.restricted then
-        local set = plate.pixelSet
-        if not set then
-            set = {}
-            plate.pixelSet = set
-        end
-        local args = set[self]
-        if not args then
-            args = {}
-            set[self] = args
-        end
-        args[1], args[2], args[3] = size, offset, inside
-    end
+    local plate = Remember(self, self.owner, size, offset, inside)
     self.empty = size <= 0 or self.style == "none"
     local laid = self.laidOut
     if not laid then
