@@ -389,21 +389,10 @@ layer:SetScript("OnMouseUp", function(_, button)
     ns.Drag.Select(drag)
     local key = Resolve(spot.sectionKey)
     ns.SelectSection(key)
-    local opened
-    if spot.setting then
-        for _, section in ipairs(ns.sections) do
-            if section.key == key then
-                for i, control in ipairs(section.controls) do
-                    if control.label == spot.setting then
-                        ns.OpenSetting(key, i)
-                        opened = true
-                        break
-                    end
-                end
-            end
-        end
-    end
-    if not opened then
+    local index = spot.setting and ns.FindSetting(key, spot.setting)
+    if index then
+        ns.OpenSetting(key, index)
+    else
         ns.FlashTitle()
     end
 end)

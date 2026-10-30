@@ -829,6 +829,11 @@ for _, section in ipairs(ns.sections) do
     sectionsByKey[section.key] = section
 end
 
+function ns.FindSetting(key, label)
+    local section = sectionsByKey[key]
+    return section and Logic.FindControl(section, label) or nil
+end
+
 local pagesByKey, partPage = {}, {}
 
 local Groups = ns.SectionGroups
@@ -1439,21 +1444,18 @@ end
 
 function ns.OpenLink(target)
     if not target then return end
-    for _, section in ipairs(ns.sections) do
-        if section.key == target.section then
-            local found
-            if target.key then
-                found = Logic.FindKeyed(section, target.key)
-            else
-                found = Logic.FindControl(section, target.label, true)
-            end
-            if found then
-                ns.OpenSetting(section.key, found)
-            else
-                ns.SelectSection(section.key)
-            end
-            return
-        end
+    local section = sectionsByKey[target.section]
+    if not section then return end
+    local found
+    if target.key then
+        found = Logic.FindKeyed(section, target.key)
+    else
+        found = Logic.FindControl(section, target.label, true)
+    end
+    if found then
+        ns.OpenSetting(section.key, found)
+    else
+        ns.SelectSection(section.key)
     end
 end
 
