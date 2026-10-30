@@ -537,13 +537,15 @@ end
 
 local CVars = Plateau.CVars
 
+local CVAR_RESET = "Right-click to reset to what it was before Plateau changed it."
+
 local function CVarSpec(kind, name, label, extra)
     local spec = extra or {}
     spec.type = kind
     spec.label = label
     spec.path = "cvar." .. name
     spec.reset = function() CVars:Release(name) end
-    spec.resetLabel = "Right-click to reset to what it was before Plateau changed it."
+    spec.resetLabel = CVAR_RESET
     spec.gameSetting = true
     if kind == "Toggle" then
         spec.get = function() return CVars:Get(name) == "1" end
@@ -603,7 +605,7 @@ local function NpcNames()
                 CVars:Release(name)
             end
         end,
-        resetLabel = "Right-click to reset to what it was before Plateau changed it.",
+        resetLabel = CVAR_RESET,
     }
 end
 
@@ -615,7 +617,7 @@ local function CVarBitToggle(name, index, label, tooltip)
         path = "cvar." .. name .. "." .. tostring(index),
         gameSetting = true,
         reset = function() CVars:Release(name) end,
-        resetLabel = "Right-click to reset to what it was before Plateau changed it.",
+        resetLabel = CVAR_RESET,
         get = function()
             return index ~= nil and C_CVar.GetCVar(name) ~= nil and CVars.HasBit(CVars:Get(name), index)
         end,
@@ -716,14 +718,8 @@ local function BlizzardDrawn(friendly)
             if NameplatesOverrides and NameplatesOverrides.ShowClassicStyleOption and NameplatesOverrides.ShowClassicStyleOption() then
                 table.insert(options, 1, { value = style.Classic, label = "Classic" })
             end
-            Add({ type = "Dropdown", label = "Nameplate style", options = options,
-              get = function() return tonumber(CVars:Get("nameplateStyle")) end,
-              set = function(value) CVars:Set("nameplateStyle", value) end,
-              reset = function() CVars:Release("nameplateStyle") end,
-              resetLabel = "Right-click to reset to what it was before Plateau changed it.",
-              path = "cvar.nameplateStyle",
-              gameSetting = true,
-              tooltip = "The look of the nameplates the game draws." })
+            Add(CVarSpec("Dropdown", "nameplateStyle", "Nameplate style",
+                { options = options, tooltip = "The look of the nameplates the game draws." }))
         end
     end
     Toggle("nameplateForceShowUnitName", "Always show names on Blizzard nameplates", "Nameplates the game draws itself always show the unit's name.")
@@ -1383,14 +1379,8 @@ local function OffScreen()
         { type = "Header", label = "Off-screen nameplates", collapsible = true, collapsed = true },
         CVarToggle("nameplateShowOffscreen", "Keep enemies in combat on screen",
             "Pins nameplates of enemies in combat with your group to the screen edge while they are off screen."),
-        { type = "Dropdown", label = "Pin off-screen nameplates", options = RADIAL,
-          get = function() return tonumber(CVars:Get("nameplateTargetRadialPosition")) or 0 end,
-          set = function(value) CVars:Set("nameplateTargetRadialPosition", value) end,
-          reset = function() CVars:Release("nameplateTargetRadialPosition") end,
-          resetLabel = "Right-click to reset to what it was before Plateau changed it.",
-          path = "cvar.nameplateTargetRadialPosition",
-          gameSetting = true,
-          tooltip = "Pins your target, or every enemy you are fighting, around the screen edge while off screen." },
+        CVarSpec("Dropdown", "nameplateTargetRadialPosition", "Pin off-screen nameplates",
+            { options = RADIAL, tooltip = "Pins your target, or every enemy you are fighting, around the screen edge while off screen." }),
         CVarSlider("nameplateTopInset", "Top screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the top of the screen. 0.10 is 10% of the screen height."),
         CVarSlider("nameplateBottomInset", "Bottom screen margin", 0, 0.3, 0.01, "Keeps nameplates out of the bottom of the screen. 0.10 is 10% of the screen height.")
     )
