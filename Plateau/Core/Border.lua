@@ -459,12 +459,12 @@ function ns.RepixelPlate(plate)
     if plate.pixelScale == scale then return end
     plate.pixelScale = scale
     ns.SnapPlateSize(plate)
-    local previous = ns.pixelBorders
-    ns.pixelBorders = true
+    local previous, previousPlate = ns.pixelBorders, ns.pixelPlate
+    ns.pixelBorders, ns.pixelPlate = true, plate
     for border, args in pairs(set) do
         border:Layout(args[1], args[2], args[3])
     end
-    ns.pixelBorders = previous
+    ns.pixelBorders, ns.pixelPlate = previous, previousPlate
     for i = 1, #repixelHooks do
         repixelHooks[i](plate)
     end
