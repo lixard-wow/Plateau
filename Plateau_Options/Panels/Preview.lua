@@ -174,20 +174,7 @@ end
 local function Bounds(spot)
     local left, right, top, bottom = spot:GetLeft(), spot:GetRight(), spot:GetTop(), spot:GetBottom()
     if left and spot.fitText then
-        local text = spot.region
-        local width = text:GetStringWidth()
-        if width and width > 0 and width + 2 < right - left then
-            width = width + 2
-            local justify = text:GetJustifyH()
-            if justify == "LEFT" then
-                right = left + width
-            elseif justify == "RIGHT" then
-                left = right - width
-            else
-                local middle = (left + right) / 2
-                left, right = middle - width / 2, middle + width / 2
-            end
-        end
+        left, right = ns.Drag.FitText(spot.region, left, right, 2)
     end
     if left and spot.clipTo then
         local clip = spot.clipTo
@@ -207,22 +194,13 @@ local function PixelFactor()
 end
 
 local function DrawnBounds(region)
-    if not region.icons then
-        return region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
-    end
-    local l, r, t, b
-    for _, icon in ipairs(region.icons) do
-        if icon:IsVisible() and icon:GetLeft() then
-            l = math.min(l or icon:GetLeft(), icon:GetLeft())
-            r = math.max(r or icon:GetRight(), icon:GetRight())
-            t = math.max(t or icon:GetTop(), icon:GetTop())
-            b = math.min(b or icon:GetBottom(), icon:GetBottom())
+    if region.icons then
+        local l, r, t, b = ns.Drag.IconBounds(region)
+        if l then
+            return l, r, t, b
         end
     end
-    if not l then
-        return region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
-    end
-    return l, r, t, b
+    return region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
 end
 
 local function Whole(v)

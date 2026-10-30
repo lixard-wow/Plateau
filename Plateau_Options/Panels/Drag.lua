@@ -191,6 +191,25 @@ local function IconBounds(region)
     return left, right, top, bottom
 end
 
+Drag.IconBounds = IconBounds
+
+local function FitText(text, left, right, pad)
+    local width = text:GetStringWidth()
+    if width and width > 0 and width + pad < right - left then
+        width = width + pad
+        local justify = text:GetJustifyH()
+        if justify == "LEFT" then
+            return left, left + width
+        elseif justify == "RIGHT" then
+            return right - width, right
+        end
+        local middle = (left + right) / 2
+        return middle - width / 2, middle + width / 2
+    end
+    return left, right
+end
+Drag.FitText = FitText
+
 local function Box(region)
     if region.icons then
         local left, right, top, bottom = IconBounds(region)
@@ -200,18 +219,7 @@ local function Box(region)
     end
     local left, right, top, bottom = region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
     if left and region.GetStringWidth then
-        local width = region:GetStringWidth()
-        if width and width > 0 and width < right - left then
-            local justify = region:GetJustifyH()
-            if justify == "LEFT" then
-                right = left + width
-            elseif justify == "RIGHT" then
-                left = right - width
-            else
-                local middle = (left + right) / 2
-                left, right = middle - width / 2, middle + width / 2
-            end
-        end
+        left, right = FitText(region, left, right, 0)
     end
     return left, right, top, bottom
 end
