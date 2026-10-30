@@ -148,16 +148,20 @@ end
 
 LoadPalette(ChosenTheme())
 
-local function ApplyPaint(region, entry)
-    local color, scale = entry.color, entry.scale or 1
-    local r, g, b, a = color[1] * scale, color[2] * scale, color[3] * scale, entry.alpha or color[4] or 1
-    if entry.kind == "texture" then
+local function ApplyColor(region, kind, color, alpha, scale)
+    scale = scale or 1
+    local r, g, b, a = color[1] * scale, color[2] * scale, color[3] * scale, alpha or color[4] or 1
+    if kind == "texture" then
         region:SetColorTexture(r, g, b, a)
-    elseif entry.kind == "vertex" then
+    elseif kind == "vertex" then
         region:SetVertexColor(r, g, b, a)
     else
         region:SetTextColor(r, g, b, a)
     end
+end
+
+local function ApplyPaint(region, entry)
+    ApplyColor(region, entry.kind, entry.color, entry.alpha, entry.scale)
 end
 
 local function Paint(region, kind, color, alpha, scale)
@@ -172,7 +176,7 @@ local function Paint(region, kind, color, alpha, scale)
         return
     end
     painted[region] = nil
-    ApplyPaint(region, { kind = kind, color = color, alpha = alpha, scale = scale })
+    ApplyColor(region, kind, color, alpha, scale)
 end
 
 function Style.Paint(texture, color, alpha, scale)
