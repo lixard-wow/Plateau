@@ -316,6 +316,7 @@ local function SpotAt()
 end
 
 local hovered
+local marksDirty = true
 
 local function PlaceOutline(spot)
     local selected = ns.Drag.GetSelected()
@@ -352,7 +353,7 @@ layer:SetFrameLevel(panel:GetFrameLevel() + 180)
 layer:EnableMouse(true)
 local pressedSpot
 
-layer:SetScript("OnUpdate", function(self)
+local function HoverTick(self)
     if ns.Drag.IsDragging() then
         if hovered then
             PlaceOutline(hovered)
@@ -360,7 +361,7 @@ layer:SetScript("OnUpdate", function(self)
         return
     end
     SetHovered(self:IsMouseOver() and SpotAt() or nil)
-end)
+end
 layer:SetScript("OnLeave", function()
     if not ns.Drag.IsDragging() then
         SetHovered(nil)
@@ -617,6 +618,7 @@ local RefreshTray
 
 local function UpdateHotspots()
     if not panel:IsVisible() then return end
+    marksDirty = true
     if ns.PinPreview then
         ns.PinPreview()
     end
@@ -935,11 +937,14 @@ local function SetTag(tag, value)
     tag:SetWidth(math.max(18, tag.text:GetStringWidth() + 6))
 end
 
-local marks = CreateFrame("Frame", nil, panel)
 local markBorders = {}
-marks:SetScript("OnUpdate", function()
+local markedHover, markedPick
+
+local function MarksTick()
     local chosen = ns.Drag.GetSelected()
     chosen = chosen and chosen.spot
+    if not marksDirty and chosen == markedPick and hovered == markedHover then return end
+    marksDirty, markedPick, markedHover = false, chosen, hovered
     for _, spot in ipairs(spots) do
         local tint = (spot == chosen and Style.PICK_MARK) or (spot == hovered and Style.HOVER_MARK) or nil
         wipe(markBorders)
@@ -947,12 +952,12 @@ marks:SetScript("OnUpdate", function()
             border:SetHighlight(tint)
         end
     end
-end)
+end
 
-local crossWatch = CreateFrame("Frame", nil, panel)
 local dragging = false
 local panelLeft, panelTop
-crossWatch:SetScript("OnUpdate", function()
+
+local function CrossTick()
     local spec = ns.Drag.Active()
     local left, top = panel:GetLeft(), panel:GetTop()
     if (spec ~= nil) ~= dragging or left ~= panelLeft or top ~= panelTop then
@@ -982,7 +987,7 @@ crossWatch:SetScript("OnUpdate", function()
     tagY:ClearAllPoints()
     tagY:SetPoint("CENTER", rulerLeft, "TOPLEFT", rulerLeft:GetWidth() / 2, -y)
     cross:Show()
-end)
+end
 
 local TRAY_WIDTH, TILE_HEIGHT, TILE_GAP, TRAY_PAD, TRAY_HEAD = 164, 18, 3, 6, 16
 local SKULL = { 0.75, 1, 0.25, 0.5 }
@@ -1157,20 +1162,6 @@ local function MakeTile(item)
             ns.SelectSection(item.section)
         end
     end)
-    tile:SetScript("OnUpdate", function()
-        local press = pressedTile
-        if not press or press.item ~= item then return end
-        if not IsMouseButtonDown("LeftButton") then
-            pressedTile = nil
-            return
-        end
-        local x, y = GetCursorPosition()
-        if math.abs(x - press.x) + math.abs(y - press.y) >= 4 * UIParent:GetEffectiveScale() then
-            pressedTile = nil
-            GameTooltip:Hide()
-            GrabFromTray(item)
-        end
-    end)
     return tile
 end
 
@@ -1222,13 +1213,37 @@ function RefreshTray()
     end
 end
 
-tray:SetScript("OnUpdate", function()
+local function TileTick()
+    local press = pressedTile
+    if not press then return end
+    if not IsMouseButtonDown("LeftButton") then
+        pressedTile = nil
+        return
+    end
+    local x, y = GetCursorPosition()
+    if math.abs(x - press.x) + math.abs(y - press.y) >= 4 * UIParent:GetEffectiveScale() then
+        pressedTile = nil
+        GameTooltip:Hide()
+        GrabFromTray(press.item)
+    end
+end
+
+local function TrayTick()
+    if not tray:IsShown() then return end
     local over = ns.Drag.OverTray(ns.Drag.Active())
     if over ~= tray.over then
         tray.over = over
         Style.Paint(trayFill, over and C.hover or C.window, 0.85)
         Style.SetBorderColor(trayBorder, over and C.accent or C.edge)
     end
+end
+
+layer:SetScript("OnUpdate", function(self)
+    HoverTick(self)
+    MarksTick()
+    CrossTick()
+    TileTick()
+    TrayTick()
 end)
 tray:SetScript("OnSizeChanged", function() RefreshTray() end)
 RefreshTray()
