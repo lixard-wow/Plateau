@@ -364,7 +364,11 @@ local function Offset(scroller)
     return offset
 end
 
-local function Scrollbar(scroller, parent, gap)
+local function ThumbSize(view, range)
+    return math.max(24, view * view / (view + range))
+end
+
+local function Scrollbar(scroller, parent, gap, step)
     local track = CreateFrame("Frame", nil, parent)
     track:SetPoint("TOPLEFT", scroller, "TOPRIGHT", gap, 0)
     track:SetPoint("BOTTOMLEFT", scroller, "BOTTOMRIGHT", gap, 0)
@@ -396,7 +400,7 @@ local function Scrollbar(scroller, parent, gap)
         self:SetScript("OnUpdate", function()
             local range = Range(scroller)
             local view = scroller:GetHeight()
-            local size = math.max(24, view * view / (view + range))
+            local size = ThumbSize(view, range)
             local travel = view - size
             if travel <= 0 or issecretvalue(range) or issecretvalue(view) then return end
             local _, y = GetCursorPosition()
@@ -425,7 +429,7 @@ local function Scrollbar(scroller, parent, gap)
         local top = self:GetTop()
         if issecretvalue(top) then return end
         local clickY = (top - cursorY / self:GetEffectiveScale())
-        local size = math.max(24, view * view / (view + range))
+        local size = ThumbSize(view, range)
         local travel = math.max(1, view - size)
         local target = (clickY - size / 2) / travel * range
         scroller:SetVerticalScroll(math.max(0, math.min(range, target)))
@@ -440,24 +444,22 @@ local function Scrollbar(scroller, parent, gap)
             track:Hide()
             return
         end
-        local size = math.max(24, view * view / (view + range))
+        local size = ThumbSize(view, range)
         thumb:SetHeight(size)
         thumb:ClearAllPoints()
         thumb:SetPoint("TOP", track, "TOP", 0, -(view - size) * math.min(Offset(scroller), range) / range)
         thumb:Show()
         track:Show()
     end
+    scroller:SetScript("OnMouseWheel", function(self, delta)
+        self:SetVerticalScroll(math.max(0, math.min(Range(self), Offset(self) - delta * step)))
+        Update()
+    end)
+    scroller:SetScript("OnScrollRangeChanged", function() Update() end)
     return Update, track, thumb
 end
 
-local UpdateThumb = Scrollbar(scroll, frame, 4)
-
-scroll:SetScript("OnMouseWheel", function(self, delta)
-    local target = Offset(self) - delta * 44
-    self:SetVerticalScroll(math.max(0, math.min(Range(self), target)))
-    UpdateThumb()
-end)
-scroll:SetScript("OnScrollRangeChanged", UpdateThumb)
+local UpdateThumb = Scrollbar(scroll, frame, 4, 44)
 
 local Select, UpdateChrome
 
@@ -1085,13 +1087,7 @@ railScroll:SetScrollChild(railContent)
 local railBar = CreateFrame("Frame", nil, rail)
 railBar:SetAllPoints()
 railBar:SetFrameLevel(rail:GetFrameLevel() + 10)
-local UpdateRailThumb = Scrollbar(railScroll, railBar, -9)
-railScroll:SetScript("OnMouseWheel", function(self, delta)
-    local target = Offset(self) - delta * RAIL_ROW * 2
-    self:SetVerticalScroll(math.max(0, math.min(Range(self), target)))
-    UpdateRailThumb()
-end)
-railScroll:SetScript("OnScrollRangeChanged", UpdateRailThumb)
+local UpdateRailThumb = Scrollbar(railScroll, railBar, -9, RAIL_ROW * 2)
 
 local function RailButton(page, y)
     local button = CreateFrame("Button", nil, railContent)
