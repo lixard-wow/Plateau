@@ -84,7 +84,6 @@ local function Place(guid, plate)
     plates[plate][guid] = GetTime()
     Changed(plate)
 end
-Kicks.Place = Place
 
 function Kicks:On(plate)
     return plates[plate]
@@ -121,10 +120,6 @@ function Kicks:Info(guid)
     end
     local member = members[guid]
     if member then return member.kick, member.spec end
-end
-
-function Kicks:Members()
-    return members
 end
 
 function Kicks:Cooldown(guid)
@@ -185,7 +180,6 @@ local function Start(member, at)
     member.start, member.readyAt = at, at + member.cd
     CooldownChanged(member.guid)
 end
-Kicks.Start = Start
 
 local InspectNext
 
@@ -212,7 +206,6 @@ local function Roster()
     Me()
     InspectNext()
 end
-Kicks.Roster = Roster
 
 function InspectNext()
     if inspecting or inspectQueued or InCombatLockdown() then return end

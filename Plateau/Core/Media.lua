@@ -379,10 +379,6 @@ function Brand:Color()
     return OCHRE[1], OCHRE[2], OCHRE[3]
 end
 
-function Brand:Hex()
-    return "ffd07a3c"
-end
-
 function Brand:Text(text)
     return "|cffd07a3c" .. text .. "|r"
 end

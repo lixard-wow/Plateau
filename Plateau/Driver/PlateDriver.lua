@@ -1358,10 +1358,6 @@ function Driver:SetClickAreas(preview, world)
     end
 end
 
-function Driver:IsClaimable(unit)
-    return Claimable(unit)
-end
-
 function Driver:GetPlate(unit)
     local plate = platesByUnit[unit]
     if plate and plate.active then
