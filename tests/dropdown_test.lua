@@ -78,6 +78,7 @@ local ns = {
         DropArrow = function() end,
         Text = function() return setmetatable({}, Frame) end,
         OverrideLabel = function() end,
+        AfterChange = function(target) if type(target) == "function" then target() elseif target then target:Refresh() end end,
         RightClickReset = function(frame, spec, refresh) resetTargets[#resetTargets + 1] = { frame = frame, refresh = refresh } end,
         Tooltip = function(frame, spec) tooltips[#tooltips + 1] = { frame = frame, spec = spec } end,
     },

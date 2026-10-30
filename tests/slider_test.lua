@@ -91,6 +91,7 @@ local ns = {
         Themed = function() end,
         OverrideLabel = function() end,
         Tooltip = function(frame, spec) tooltips[#tooltips + 1] = { frame = frame, spec = spec } end,
+        AfterChange = function(target) if type(target) == "function" then target() elseif target then target:Refresh() end end,
         RightClickReset = function(frame) resetTargets[#resetTargets + 1] = frame end,
     },
 }

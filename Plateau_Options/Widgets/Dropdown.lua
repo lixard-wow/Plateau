@@ -351,11 +351,7 @@ function ns.Widgets.Dropdown(parent, spec)
     end
 
     local function RefreshEverything()
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        else
-            row:Refresh()
-        end
+        Style.AfterChange(row)
     end
 
     button:SetScript("OnClick", function(self)

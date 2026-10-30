@@ -80,12 +80,7 @@ function ns.Widgets.Slider(parent, spec)
         SetDisplay(value)
         Style.OverrideLabel(label, spec)
     end
-    Style.RightClickReset(labelHit, spec, function()
-        row:Refresh()
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        end
-    end)
+    Style.RightClickReset(labelHit, spec, row)
 
     local pending, scheduled
     local function Flush()

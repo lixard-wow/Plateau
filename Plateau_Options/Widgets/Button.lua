@@ -443,9 +443,7 @@ function ns.Widgets.Presets(parent, spec)
                 ns.Undo.Next(T("Look: %s"):format(T(preset.label)))
                 Plateau.DB:SetMany(preset.values)
             end
-            if ns.RefreshAll then
-                ns.RefreshAll()
-            end
+            Style.AfterChange()
             row:Refresh()
         end)
         Style.Tooltip(button, { label = preset.label, tooltip = preset.tooltip })

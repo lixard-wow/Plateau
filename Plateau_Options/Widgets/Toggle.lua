@@ -37,11 +37,7 @@ local function MakeToggle(parent, spec)
     end
 
     local function RefreshEverything()
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        else
-            row:Refresh()
-        end
+        Style.AfterChange(row)
     end
 
     local function DoToggle()
@@ -112,11 +108,7 @@ function ns.Widgets.ToggleColor(parent, spec)
         Style.OverrideLabel(self.label, spec)
     end
     local function RefreshEverything()
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        else
-            row:Refresh()
-        end
+        Style.AfterChange(row)
     end
     swatch.onChange = RefreshEverything
     Style.Tooltip(swatch, { label = spec.swatchLabel or spec.label, tooltip = spec.swatchTooltip or spec.tooltip, limited = spec.limited })

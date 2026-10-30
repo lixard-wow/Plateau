@@ -101,9 +101,7 @@ function ns.Widgets.MakeSwatch(parent, path, setter)
                 if changed then
                     changed = false
                     Plateau.DB:Restore(before)
-                    if ns.RefreshAll then
-                        ns.RefreshAll()
-                    end
+                    Style.AfterChange()
                     swatch:Refresh()
                     if swatch.onChange then
                         swatch.onChange()
@@ -136,11 +134,7 @@ function ns.Widgets.Color(parent, spec)
         Style.OverrideLabel(label, spec)
     end
     local function RefreshEverything()
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        else
-            row:Refresh()
-        end
+        Style.AfterChange(row)
     end
     swatch.onChange = RefreshEverything
     Style.RightClickReset(labelHit, spec, RefreshEverything)

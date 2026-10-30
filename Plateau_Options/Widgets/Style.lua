@@ -490,11 +490,13 @@ function Style.OverrideLabel(label, spec)
     Style.PaintText(label, Style.colors.text)
 end
 
-local function AfterChange(refresh)
+function Style.AfterChange(target)
     if ns.RefreshAll then
         ns.RefreshAll()
-    else
-        refresh()
+    elseif type(target) == "function" then
+        target()
+    elseif target then
+        target:Refresh()
     end
 end
 
@@ -503,13 +505,13 @@ function Style.RightClickReset(frame, spec, refresh)
         if button ~= "RightButton" then return end
         if spec.reset and not spec.paths then
             spec.reset()
-            refresh()
+            Style.AfterChange(refresh)
             return
         end
         local paths = ns.SpecPaths(spec)
         if #paths == 0 then return end
         Plateau.DB:ResetEverywhere(paths)
-        AfterChange(refresh)
+        Style.AfterChange(refresh)
     end)
 end
 

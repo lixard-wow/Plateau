@@ -65,9 +65,7 @@ local function Exists(name)
 end
 
 local function Refreshed()
-    if ns.RefreshAll then
-        ns.RefreshAll()
-    end
+    Style.AfterChange()
     if ns.UpdateProfileLabel then
         ns.UpdateProfileLabel()
     end
@@ -732,10 +730,7 @@ function ns.Widgets.ShareProfile(parent)
         exported = false
         exportEdit:SetText("")
         exportEdit:ClearFocus()
-        frame:Layout()
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        end
+        Style.AfterChange(frame)
     end
     exportEdit:SetScript("OnKeyDown", function(_, key)
         if key == "C" and IsControlKeyDown() and exported then
@@ -756,10 +751,7 @@ function ns.Widgets.ShareProfile(parent)
         exportEdit:SetText(Plateau.DB:ExportProfile())
         exported = true
         copied = false
-        frame:Layout()
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        end
+        Style.AfterChange(frame)
         exportEdit:SetFocus()
         exportEdit:HighlightText()
     end)
@@ -823,10 +815,7 @@ function ns.Widgets.ShareProfile(parent)
             Style.PaintText(importMessage, C.warn)
             importMessage:SetText(reason)
         end
-        frame:Layout()
-        if ns.RefreshAll then
-            ns.RefreshAll()
-        end
+        Style.AfterChange(frame)
     end)
     Style.Tooltip(import, { label = "Import profile", tooltip = "Saves the pasted string as a new profile. Nothing changes if the string is invalid." })
 
