@@ -467,6 +467,10 @@ function Widgets.Conflicts(parent)
     local row = CreateFrame("Frame", nil, parent)
     row:SetHeight(40)
     local lines = {}
+    local none = Style.Text(row, 12, C.muted)
+    none:SetPoint("TOPLEFT", 0, -6)
+    none:SetText("No other nameplate addons detected.")
+    none:Hide()
     row.selfButton = Widgets.Button(row, "Disable Plateau and reload", 250, function()
         Plateau.DisableSelf()
         ReloadUI()
@@ -478,13 +482,8 @@ function Widgets.Conflicts(parent)
         end
         row.selfButton:Hide()
         local list = Plateau.FindConflicts()
+        none:SetShown(#list == 0)
         if #list == 0 then
-            local entryRow = lines[1] or Style.Text(row, 12, C.muted)
-            lines[1] = entryRow
-            entryRow:ClearAllPoints()
-            entryRow:SetPoint("TOPLEFT", 0, -6)
-            entryRow:SetText("No other nameplate addons detected.")
-            entryRow:Show()
             row:SetHeight(28)
             return
         end
