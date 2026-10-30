@@ -264,7 +264,7 @@ function UnitColors:SecretClassColor(unit)
     return nil
 end
 
-function UnitColors:ClassColor(cfg, unit)
+function UnitColors:ClassColor(cfg, unit, soft)
     if not cfg.classColors or not RAID_CLASS_COLORS then return nil end
     local class = self:PlayerClass(unit)
     if not class then
@@ -276,7 +276,7 @@ function UnitColors:ClassColor(cfg, unit)
     end
     local color = RAID_CLASS_COLORS[class]
     if color then
-        return color.r, color.g, color.b, 1
+        return color.r, color.g, color.b, 1, soft
     end
 end
 
@@ -318,19 +318,9 @@ function UnitColors:Resolve(plate, unit)
     end
 
     if UnitIsPlayer(unit) then
-        if cfg.classColors and RAID_CLASS_COLORS then
-            local class = self:PlayerClass(unit)
-            if class then
-                local color = RAID_CLASS_COLORS[class]
-                if color then
-                    return color.r, color.g, color.b, 1, true
-                end
-            else
-                local r, g, b, ok = self:SecretClassColor(unit)
-                if ok then
-                    return r, g, b, 1, nil, true
-                end
-            end
+        local r, g, b, a, soft, hidden = self:ClassColor(cfg, unit, true)
+        if hidden or r then
+            return r, g, b, a, soft, hidden
         end
     else
         local color = MobTypeColor(cfg, plate.mobFlags)
@@ -345,7 +335,6 @@ function UnitColors:Resolve(plate, unit)
     end
 end
 
-local MOB_ORDER = { "boss", "lieutenant", "higher", "trivial", "caster", "elite" }
 local MOB_LABELS = {
     boss = { label = "Bosses" },
     lieutenant = { label = "Lieutenants" },
@@ -392,8 +381,8 @@ function UnitColors:Explain(plate, unit)
         return Reaction()
     end
     if cfg.mobTypes and not (cfg.mobTypesInstancesOnly and not inInstance) then
-        for i = 1, #MOB_ORDER do
-            local mobType = MOB_ORDER[i]
+        for i = 1, #ORDER do
+            local mobType = ORDER[i]
             if plate.mobFlags and plate.mobFlags[mobType] and cfg[mobType] then
                 local label = L[MOB_LABELS[mobType].label]
                 return L["enemy type %s (Colors: %s)"]:format(label, label)
