@@ -28,14 +28,21 @@ end
 
 local CONFIRM_SECONDS = 5
 
-function ns.Widgets.Confirm(button, text, action)
+local function PlainLabel(button)
+    Style.PaintText(button.label, C.text)
+end
+
+function ns.Widgets.Confirm(button, text, action, opts)
+    opts = opts or {}
+    local armedText = opts.armedText or "Click again to confirm"
+    local restore = opts.restore or PlainLabel
     local armed = false
     local token = 0
     local function Disarm()
         armed = false
         token = token + 1
         button.label:SetText(text)
-        Style.PaintText(button.label, C.text)
+        restore(button)
     end
     local function Expire()
         token = token + 1
@@ -47,13 +54,13 @@ function ns.Widgets.Confirm(button, text, action)
         end)
     end
     button:SetScript("OnClick", function(self)
-        if armed then
+        if armed or opts.instant then
             Disarm()
             action()
             return
         end
         armed = true
-        self.label:SetText("Click again to confirm")
+        self.label:SetText(armedText)
         Style.PaintText(self.label, C.warn)
         Expire()
     end)
@@ -410,36 +417,7 @@ function ns.Widgets.Presets(parent, spec)
         button.activeBar = bar
         buttons[#buttons + 1] = button
         x = x + width + 6
-        local armed = false
-        local token = 0
-        local function Expire()
-            token = token + 1
-            local mine = token
-            C_Timer.After(5, function()
-                if armed and mine == token and not button:IsMouseOver() then
-                    armed = false
-                    button.label:SetText(preset.label)
-                    LabelColor(button)
-                end
-            end)
-        end
-        button:HookScript("OnLeave", function()
-            if armed then
-                Expire()
-            end
-        end)
-        button:SetScript("OnClick", function(self)
-            if not armed and not spec.instant then
-                armed = true
-                self.label:SetText("Click to apply")
-                Style.PaintText(self.label, C.warn)
-                Expire()
-                return
-            end
-            armed = false
-            token = token + 1
-            self.label:SetText(preset.label)
-            LabelColor(self)
+        ns.Widgets.Confirm(button, preset.label, function()
             if preset.apply then
                 preset.apply()
             else
@@ -448,7 +426,7 @@ function ns.Widgets.Presets(parent, spec)
             end
             Style.AfterChange()
             row:Refresh()
-        end)
+        end, { armedText = "Click to apply", restore = LabelColor, instant = spec.instant })
         Style.Tooltip(button, { label = preset.label, tooltip = preset.tooltip })
     end
     row:Refresh()
