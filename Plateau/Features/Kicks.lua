@@ -430,6 +430,8 @@ Kicks:SetScript("OnEvent", function(_, event, unit, ...)
         OnInspect(unit)
     elseif event == "PLAYER_REGEN_ENABLED" then
         InspectNext()
+    elseif event == "UNIT_PET" and unit ~= "player" and not PETS[unit] then
+        return
     elseif event == "PLAYER_ENTERING_WORLD" or event == "GROUP_ROSTER_UPDATE" or event == "UNIT_PET" then
         Roster()
         Refresh()
