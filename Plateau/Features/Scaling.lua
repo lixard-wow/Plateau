@@ -109,6 +109,7 @@ function Scaling:Apply(plate)
     if s and s.combatEnabled and not plate.isFriendly and not plate.isPlayer and plate.unit then
         scale = scale * (UnitAffectingCombat(plate.unit) and s.combatScale or s.idleScale)
     end
+    local steady = scale
     local blizzard = 1
     if plate.isTarget then
         blizzard = selectedScale > 0 and selectedScale or 1
@@ -126,20 +127,23 @@ function Scaling:Apply(plate)
     if s and plate.isMouseover and s.mouseoverGrow and not plate.isFriendly and s.mouseoverScale > scale then
         scale = s.mouseoverScale
     end
+    local size = 1
     if follow or plate.isFriendly then
-        scale = scale * sizeFactor
+        size = sizeFactor
     end
     if s and plate.isFriendly then
-        scale = scale * (s.friendlyScale or 1)
+        size = size * (s.friendlyScale or 1)
     end
+    scale = scale * size
     local net = plate.preview and 1 or scale / blizzard
+    local stack = steady * size / blizzard
     if plate.appliedScale ~= net then
         plate.appliedScale = net
         SetPlateScale(plate, net)
     end
-    if not plate.preview and plate.appliedStack ~= net then
-        plate.appliedStack = net
-        plate.stackRegion:SetScale(net)
+    if not plate.preview and plate.appliedStack ~= stack then
+        plate.appliedStack = stack
+        plate.stackRegion:SetScale(stack)
     end
 
     if plate.preview or not plate.base then

@@ -140,7 +140,7 @@ check(near(enemyTarget.scale, 1), "an enemy target adds nothing on top of the ga
 local friendlyTarget = Plate({ isTarget = true, isFriendly = true })
 Scaling:Apply(friendlyTarget)
 check(near(friendlyTarget.scale, 1 / 1.2), "a friendly target cancels the game's selected scale, so it stays normal size")
-check(near(enemyTarget.stackRegion.scale, 1), "an enemy target's stacking bounds are not grown twice, since the game already grows the nameplate")
+check(near(enemyTarget.stackRegion.scale, 1 / 1.2), "an enemy target's stacking bounds cancel the game's growth, so targeting doesn't reshuffle the stack")
 check(near(friendlyTarget.stackRegion.scale, 1 / 1.2), "a friendly target's stacking bounds cancel the game's growth, matching the plate")
 
 Configure()
@@ -249,3 +249,14 @@ Scaling:Apply(orphan)
 orphan.appliedScale = nil
 ok = pcall(animator.scripts.OnUpdate, animator, 0.016)
 check(ok, "the size animation skips a plate that lost its target size")
+
+Configure({ trivial = 0.8, focusGrow = true, focusScale = 1.3, castPop = true, castScale = 1.4, mouseoverGrow = true, mouseoverScale = 1.2 })
+mockCVar = "1"
+Scaling:RefreshBlizzardScale()
+Scaling:SetTargetScale(1.3)
+for _, fields in ipairs({ { isTarget = true }, { isFocus = true }, { casting = true }, { isMouseover = true } }) do
+    local grown = Plate(fields)
+    Scaling:Apply(grown)
+    local which = next(fields)
+    check(grown.scale > 0.8 and near(grown.stackRegion.scale, 0.8), which .. " grows the plate but keeps its stacking bounds at the normal size")
+end
