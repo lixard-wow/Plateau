@@ -571,19 +571,34 @@ end
 local function UpdateEditing()
     local boxes = {}
     local function Collect(only)
+        local found, bordered, plain = 0, {}, {}
         for _, spot in ipairs(spots) do
             local key = Resolve(spot.sectionKey)
-            if spot:IsShown() and here[key] and (not only or only == key) and not HasOwnBorder(spot) then
+            if spot:IsShown() and here[key] and (not only or only == key) then
+                found = found + 1
                 local l, r, t, b = PixelBox(spot)
                 if l then
-                    boxes[#boxes + 1] = { l, r, t, b }
+                    local list = HasOwnBorder(spot) and bordered or plain
+                    list[#list + 1] = { l, r, t, b }
                 end
             end
         end
+        for _, box in ipairs(plain) do
+            local inside = false
+            for _, cover in ipairs(bordered) do
+                if box[1] >= cover[1] - 1 and box[2] <= cover[2] + 1 and box[3] <= cover[3] + 1 and box[4] >= cover[4] - 1 then
+                    inside = true
+                    break
+                end
+            end
+            if not inside then
+                boxes[#boxes + 1] = box
+            end
+        end
+        return found
     end
     if sectionKey and not ns.Drag.Active() then
-        Collect(focus)
-        if focus and #boxes == 0 then
+        if Collect(focus) == 0 and focus then
             Collect(nil)
         end
     end
