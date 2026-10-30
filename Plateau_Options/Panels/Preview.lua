@@ -225,6 +225,10 @@ local function DrawnBounds(region)
     return l, r, t, b
 end
 
+local function Whole(v)
+    return math.floor(v + 0.5)
+end
+
 local function PixelBox(spot)
     local ring = spot.ring and Resolve(spot.ring)
     local l, r, t, b, scale
@@ -239,9 +243,6 @@ local function PixelBox(spot)
     if not l then return nil end
     local toPx = scale / PixelFactor()
     ring = math.max(0, math.floor((ring or 0) + 0.5))
-    local function Whole(v)
-        return math.floor(v + 0.5)
-    end
     return Whole(l * toPx) - ring, Whole(r * toPx) + ring, Whole(t * toPx) + ring, Whole(b * toPx) - ring
 end
 
@@ -289,9 +290,12 @@ local function OwnBorders(spot, list)
     return list
 end
 
+local ownScratch = {}
+
 local function HasOwnBorder(spot)
     if not spot.region then return false end
-    for _, border in ipairs(OwnBorders(spot, {})) do
+    wipe(ownScratch)
+    for _, border in ipairs(OwnBorders(spot, ownScratch)) do
         local owner = border.owner
         if border:IsDrawn() and (not owner or owner:IsVisible()) then
             return true
@@ -314,13 +318,13 @@ end
 
 local function SpotAt()
     local best, bestArea
+    local cursorX, cursorY = GetCursorPosition()
     for _, spot in ipairs(spots) do
         if spot:IsShown() then
             local left, right, top, bottom = Bounds(spot)
             if left then
-                local x, y = GetCursorPosition()
                 local scale = spot:GetEffectiveScale()
-                x, y = x / scale, y / scale
+                local x, y = cursorX / scale, cursorY / scale
                 if x >= left and x <= right and y >= bottom and y <= top then
                     local area = (right - left) * (top - bottom)
                     if not best or spot.level > best.level or (spot.level == best.level and area < bestArea) then
@@ -496,8 +500,9 @@ local function AddHotspots(plate)
     Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true
     local castIcon = Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 62, 0, Drag.CastIconSpec(plate))
     castIcon.setting = "Show spell icon"
+    local castIconBorders = { plate.castbar.iconBorder }
     castIcon.borders = function()
-        return { plate.castbar.iconBorder }
+        return castIconBorders
     end
     castIcon.ring = function()
         return Plateau.HealthBorderOuter({
