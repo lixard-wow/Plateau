@@ -93,6 +93,15 @@ local function Snapping()
     return Drag.SnapEnabled() and not IsShiftKeyDown()
 end
 
+local function Clearance()
+    local outer = Plateau.HealthBorderOuter and Plateau.HealthBorderOuter({
+        borderStyle = Get("look.health.borderStyle"),
+        borderSize = Get("look.health.borderSize"),
+        borderInside = Get("look.health.borderInside"),
+    }) or 0
+    return SPACE + outer
+end
+
 local function Offsets(dx, dy)
     dx, dy = Clamp(dx, -LIMIT, LIMIT), Clamp(dy, -LIMIT, LIMIT)
     if not freePlacement then
@@ -542,27 +551,32 @@ function Drag.PositionSpec(opts)
         local positions = opts.text and Plateau.textPositions or Plateau.iconPositions
         local gap = opts.fixedGap or Get(read .. ".gap") or 0
         local space = gap == 0 and SPACE or 0
-        if not opts.text then
-            space = SPACE - gap
-        end
+        local clear = Clearance()
         local anchor = opts.anchor()
         local list = {}
+        local tall = not opts.text and opts.region:GetHeight() > anchor:GetHeight() + 0.5
         for key, position in pairs(opts.noRing and {} or positions) do
-            local mx, my = PointXY(opts.region, position[1])
-            list[#list + 1] = {
-                id = key,
-                point = position[1],
-                anchor = anchor,
-                relPoint = position[2],
-                ox = position[3] * (gap + space),
-                oy = position[4] * (gap + space),
-                mx = mx,
-                my = my,
-                Values = function(dx, dy)
-                    dx, dy = Offsets(dx, dy)
-                    return Extra({ [positionPath] = key, [xPath] = dx + position[3] * space, [yPath] = dy + position[4] * space })
-                end,
-            }
+            local room = space
+            if not opts.text then
+                room = (position[1] == position[2] and SPACE or clear) - gap
+            end
+            if not (tall and (key == "LEFT" or key == "RIGHT")) then
+                local mx, my = PointXY(opts.region, position[1])
+                list[#list + 1] = {
+                    id = key,
+                    point = position[1],
+                    anchor = anchor,
+                    relPoint = position[2],
+                    ox = position[3] * (gap + room),
+                    oy = position[4] * (gap + room),
+                    mx = mx,
+                    my = my,
+                    Values = function(dx, dy)
+                        dx, dy = Offsets(dx, dy)
+                        return Extra({ [positionPath] = key, [xPath] = dx + position[3] * room, [yPath] = dy + position[4] * room })
+                    end,
+                }
+            end
         end
         for _, target in ipairs(opts.attach and opts.attach() or {}) do
             if target:IsVisible() and target:GetLeft() then
@@ -670,12 +684,13 @@ function Drag.AuraSpec(plate, key)
         if not left then return list end
         local currentAlign = Get(alignPath)
         local grow = Get(path .. ".grow")
+        local clear = Clearance()
         for i, spot in ipairs(AURA_SPOTS) do
             local _, relative, _, _, _, point = Plateau.AuraPlacement({ side = spot.side, align = spot.align or currentAlign, grow = grow })
             local mx = point:find("LEFT") and left or point:find("RIGHT") and right or (left + right) / 2
             local my = point:find("TOP") and top or point:find("BOTTOM") and bottom or (top + bottom) / 2
-            local sx = spot.side == "LEFT" and -SPACE or spot.side == "RIGHT" and SPACE or 0
-            local sy = spot.side == "TOP" and SPACE or spot.side == "BOTTOM" and -SPACE or 0
+            local sx = spot.side == "LEFT" and -clear or spot.side == "RIGHT" and clear or 0
+            local sy = spot.side == "TOP" and clear or spot.side == "BOTTOM" and -clear or 0
             list[#list + 1] = {
                 id = i,
                 point = point,

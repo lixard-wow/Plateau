@@ -461,6 +461,9 @@ Plateau = {
     CONTENT_TYPES = ns.CONTENT_TYPES,
     arrowStyles = ns.arrowStyles,
     iconPositions = ns.iconPositions,
+    HealthBorderOuter = function(health)
+        return ns.HealthBorderOuter(health)
+    end,
     textPositions = ns.textPositions,
     AuraPlacement = function(db)
         return ns.AuraPlacement(db)

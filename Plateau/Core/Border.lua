@@ -73,6 +73,21 @@ function ns.HealthBorderOffset(look)
     return look.health.borderInside and 0 or look.health.borderSize
 end
 
+function ns.HealthBorderOuter(health)
+    if health.borderStyle == "none" or health.borderInside then
+        return 0
+    end
+    local size = health.borderSize or 0
+    local info = EDGE_STYLES[health.borderStyle]
+    if info then
+        return math.floor((info.base + info.step * size) / 3 + 0.5)
+    end
+    if health.borderStyle == "shadow" then
+        return size * SHADOW_STEP
+    end
+    return size
+end
+
 function ns.CastbarJoined(look, shift)
     local cast = look.castbar
     return cast.joinBorder and (shift or 0) == 0 and cast.borderStyle == "pixel" and look.health.borderStyle == "pixel"
