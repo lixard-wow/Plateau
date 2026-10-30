@@ -464,6 +464,9 @@ Plateau = {
     HealthBorderOuter = function(health)
         return ns.HealthBorderOuter(health)
     end,
+    HighlightIcon = function(icon, color)
+        ns.HighlightIcon(icon, color)
+    end,
     RepixelPlate = function(plate)
         if ns.RepixelPlate then
             ns.RepixelPlate(plate)

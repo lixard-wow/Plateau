@@ -102,7 +102,20 @@ function Ring:Layout(size)
 end
 
 function Ring:SetColor(r, g, b, a)
-    self.texture:SetColorTexture(r, g, b, a or 1)
+    local base = self.base or {}
+    base[1], base[2], base[3], base[4] = r, g, b, a or 1
+    self.base = base
+    if not self.highlight then
+        self.texture:SetColorTexture(r, g, b, a or 1)
+    end
+end
+
+function Ring:SetHighlight(color)
+    self.highlight = color
+    local use = color or self.base
+    if use then
+        self.texture:SetColorTexture(use[1], use[2], use[3], use[4] or 1)
+    end
 end
 
 function Ring:SetShown(shown)
@@ -124,6 +137,13 @@ function ns.SetIconBorder(icon, size, color)
     icon.border:SetShown(size > 0)
     if color then
         icon.border:SetColor(color[1], color[2], color[3], color[4] or 1)
+    end
+end
+
+function ns.HighlightIcon(icon, color)
+    icon.border:SetHighlight(color)
+    if icon.dispel and icon.dispel.SetHighlight then
+        icon.dispel:SetHighlight(color)
     end
 end
 

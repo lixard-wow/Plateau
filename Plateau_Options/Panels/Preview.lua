@@ -240,7 +240,10 @@ local function PixelBox(spot)
     if not l then return nil end
     local toPx = scale / PixelFactor()
     ring = math.max(0, math.floor((ring or 0) + 0.5))
-    return l * toPx - ring, r * toPx + ring, t * toPx + ring, b * toPx - ring
+    local function Whole(v)
+        return math.floor(v + 0.5)
+    end
+    return Whole(l * toPx) - ring, Whole(r * toPx) + ring, Whole(t * toPx) + ring, Whole(b * toPx) - ring
 end
 
 local function Put(texture, back, x1, y1, x2, y2)
@@ -265,7 +268,18 @@ local function FrameAround(frame, l, r, t, b)
     end
 end
 
+local function BorderIcons(spot)
+    local icons = spot.region and spot.region.icons
+    if not icons then return nil end
+    for _, icon in ipairs(icons) do
+        if icon:IsVisible() and icon.border and not icon.border.empty then
+            return icons
+        end
+    end
+end
+
 function ns.OutlineSpot(frame, spot)
+    if BorderIcons(spot) then return false end
     local l, r, t, b = PixelBox(spot)
     if not l then return false end
     FrameAround(frame, l, r, t, b)
@@ -893,6 +907,32 @@ local function SetTag(tag, value)
     tag.text:SetText(math.floor(value + 0.5))
     tag:SetWidth(math.max(18, tag.text:GetStringWidth() + 6))
 end
+
+local function Tint(color)
+    return { color[1], color[2], color[3], 1 }
+end
+
+local iconMarks = CreateFrame("Frame", nil, panel)
+iconMarks:SetScript("OnUpdate", function()
+    local chosen = ns.Drag.GetSelected()
+    chosen = chosen and chosen.spot
+    for _, spot in ipairs(spots) do
+        local icons = spot.region and spot.region.icons
+        if icons then
+            local key = (spot == chosen and "accent") or (spot == hovered and "text") or nil
+            local color = key and C[key]
+            if spot.markKey ~= key or spot.markColor ~= color then
+                spot.markKey, spot.markColor = key, color
+                spot.markTint = color and Tint(color) or nil
+            end
+            for _, icon in ipairs(icons) do
+                if icon.border and icon.border.highlight ~= spot.markTint then
+                    Plateau.HighlightIcon(icon, spot.markTint)
+                end
+            end
+        end
+    end
+end)
 
 local crossWatch = CreateFrame("Frame", nil, panel)
 local dragging = false
