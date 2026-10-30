@@ -90,12 +90,6 @@ Style.SHAPE = {
     titleFont = { ALEGREYA, 17 },
     sectionFont = { ALEGREYA, 14 },
     buttonFont = { PLEX_SEMI, 12 },
-    headerHeight = 46,
-    iconButton = 28,
-    headerFill = true,
-    uppercaseTitle = false,
-    stripe = false,
-    settingsIcon = "icon_gear",
 }
 
 local NON_LATIN = { ruRU = true, koKR = true, zhCN = true, zhTW = true }
@@ -330,8 +324,6 @@ Style.sectionFont = ChosenFont(Style.theme.sectionFont[1])
 Style.SECTION_SIZE = Style.theme.sectionFont[2]
 Style.buttonFont = ChosenFont(Style.theme.buttonFont[1])
 Style.BUTTON_SIZE = Style.theme.buttonFont[2]
-Style.HEADER_HEIGHT = Style.theme.headerHeight
-Style.ICON_BUTTON = Style.theme.iconButton
 Style.HEADING_SIZE = 14
 
 local FONT_RETRY_DELAY = 0.1
@@ -702,37 +694,6 @@ function Style.IconButton(parent, icon, size, onClick, tooltip, round)
     return button
 end
 
-function Style.SetIcon(button, icon)
-    button.icon:SetTexture(ICONS .. icon)
-end
-
-function Style.SquareCorners(frame, color, corners, layer, sublevel)
-    if Style.RADIUS <= 0 then return end
-    for _, point in ipairs(corners) do
-        local texture = frame:CreateTexture(nil, layer or "BACKGROUND", nil, sublevel or 0)
-        Style.Paint(texture, color)
-        texture:SetSize(Style.RADIUS, Style.RADIUS)
-        texture:SetPoint(point)
-    end
-end
-
-function Style.Brackets(frame, color, size, thickness)
-    size, thickness = size or 10, thickness or 2
-    color = color or Style.colors.accent
-    for _, point in ipairs({ "TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT" }) do
-        local x = point:find("LEFT") and -1 or 1
-        local y = point:find("TOP") and 1 or -1
-        local across = frame:CreateTexture(nil, "OVERLAY")
-        Style.Paint(across, color)
-        across:SetSize(size, thickness)
-        across:SetPoint(point, frame, point, x, y)
-        local down = frame:CreateTexture(nil, "OVERLAY")
-        Style.Paint(down, color)
-        down:SetSize(thickness, size)
-        down:SetPoint(point, frame, point, x, y)
-    end
-end
-
 function Style.Dialog(name, width, height)
     local box = CreateFrame("Frame", name, UIParent)
     if height then
@@ -747,21 +708,7 @@ function Style.Dialog(name, width, height)
     box:EnableMouse(true)
     box:Hide()
     Style.Panel(box, Style.colors.window, Style.colors.border)
-    Style.Card(box)
     return box
-end
-
-function Style.Card(frame, size)
-    local C = Style.colors
-    if Style.theme.brackets then
-        Style.Brackets(frame, C.accent, size or 10, 2)
-    elseif Style.theme.stripe then
-        local stripe = frame:CreateTexture(nil, "ARTWORK")
-        Style.Paint(stripe, C.accent, 1)
-        stripe:SetHeight(3)
-        stripe:SetPoint("TOPLEFT", 10, -1)
-        stripe:SetPoint("TOPRIGHT", -10, -1)
-    end
 end
 
 function Style.Border(frame, color)
@@ -778,36 +725,9 @@ function Style.Border(frame, color)
 end
 
 function Style.Field(frame, fill, border)
-    if Style.theme.roundFields and Style.BUTTON_RADIUS > 0 then
-        return Style.Panel(frame, fill, border, Style.BUTTON_RADIUS)
-    end
     local texture = Style.Fill(frame, fill)
     Style.Border(frame, border)
     return texture
-end
-
-function Style.GradientLine(parent, colors, height)
-    local line = CreateFrame("Frame", nil, parent)
-    line:SetHeight(height or 2)
-    local pieces = #colors - 1
-    local segments = {}
-    for i = 1, pieces do
-        local segment = line:CreateTexture(nil, "ARTWORK")
-        segment:SetColorTexture(1, 1, 1, 1)
-        local a, b = colors[i], colors[i + 1]
-        segment:SetGradient("HORIZONTAL", CreateColor(a[1], a[2], a[3], a[4] or 1), CreateColor(b[1], b[2], b[3], b[4] or 1))
-        segments[i] = segment
-    end
-    line:SetScript("OnSizeChanged", function(self, width)
-        local each = width / pieces
-        for i, segment in ipairs(segments) do
-            segment:ClearAllPoints()
-            segment:SetPoint("TOPLEFT", self, "TOPLEFT", (i - 1) * each, 0)
-            segment:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", (i - 1) * each, 0)
-            segment:SetWidth(each)
-        end
-    end)
-    return line
 end
 
 function Style.SetBorderColor(frame, color)
