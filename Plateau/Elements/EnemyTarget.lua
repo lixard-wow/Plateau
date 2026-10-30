@@ -82,10 +82,7 @@ local function Paint(text, s, class, isMe)
     local r, g, b, a = BaseColor(s, class)
     if s.meColor and (issecretvalue(isMe) or isMe ~= nil) then
         local me = s.meColorValue
-        r = EvaluateColorValueFromBoolean(isMe, me[1], r)
-        g = EvaluateColorValueFromBoolean(isMe, me[2], g)
-        b = EvaluateColorValueFromBoolean(isMe, me[3], b)
-        a = EvaluateColorValueFromBoolean(isMe, me[4], a)
+        r, g, b, a = ns.PickColor(isMe, me[1], me[2], me[3], me[4], r, g, b, a)
     end
     text:SetTextColor(r, g, b, a)
 end

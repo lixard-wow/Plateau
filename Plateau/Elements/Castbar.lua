@@ -128,11 +128,7 @@ local function ApplyFill(bar)
             local plain = s.importantReady
             ir, ig, ib, ia = plain[1], plain[2], plain[3], plain[4] or 1
         end
-        texture:SetVertexColor(
-            EvaluateColorValueFromBoolean(flag, ir, nr),
-            EvaluateColorValueFromBoolean(flag, ig, ng),
-            EvaluateColorValueFromBoolean(flag, ib, nb),
-            EvaluateColorValueFromBoolean(flag, ia, na))
+        texture:SetVertexColor(ns.PickColor(flag, ir, ig, ib, ia, nr, ng, nb, na))
     end
 
     if not issecretvalue(flag) then

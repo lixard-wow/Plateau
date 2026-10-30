@@ -149,6 +149,12 @@ function ns.StyleIcon(icon, plate, db)
     ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
 end
 
+local Evaluate = C_CurveUtil and C_CurveUtil.EvaluateColorValueFromBoolean
+
+function ns.PickColor(flag, r1, g1, b1, a1, r2, g2, b2, a2)
+    return Evaluate(flag, r1, r2), Evaluate(flag, g1, g2), Evaluate(flag, b1, b2), Evaluate(flag, a1, a2)
+end
+
 function ns.CreateText(parent)
     local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     text:SetWordWrap(false)

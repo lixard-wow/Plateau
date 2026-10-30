@@ -9,7 +9,6 @@ local UnitThreatSituation = UnitThreatSituation
 local ZeroToOne = CurveConstants.ZeroToOne
 local UnitColors = ns.UnitColors
 local UnitIsRelatedToActiveQuest = C_QuestLog and C_QuestLog.UnitIsRelatedToActiveQuest
-local EvaluateColorValueFromBoolean = C_CurveUtil.EvaluateColorValueFromBoolean
 
 local targetColor, focusColor
 local targetTexture, focusTexture
@@ -304,9 +303,7 @@ function Health:UpdateColor(plate, unit)
         if not hidden and soft and colors.quest and UnitIsRelatedToActiveQuest and not (colors.questExcludeBoss and plate.mobType == "boss") then
             local isQuest = UnitIsRelatedToActiveQuest(unit)
             local quest = colors.questColor
-            r = EvaluateColorValueFromBoolean(isQuest, quest[1], r)
-            g = EvaluateColorValueFromBoolean(isQuest, quest[2], g)
-            b = EvaluateColorValueFromBoolean(isQuest, quest[3], b)
+            r, g, b = ns.PickColor(isQuest, quest[1], quest[2], quest[3], a, r, g, b, a)
         end
         Finish(plate, unit, r, g, b, a)
     else
