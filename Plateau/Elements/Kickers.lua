@@ -284,7 +284,7 @@ local function PaintIcon(icon, seg, slot, entry, size, plate)
         color = icon.classColor
         color[1], color[2], color[3], color[4] = class.r, class.g, class.b, 1
     end
-    icon:SetIconBorder((look and look.borderSize) or 1, color)
+    ns.SetIconBorder(icon, (look and look.borderSize) or 1, color)
     icon.guid, icon.sample = entry.guid, entry.sample
     ApplyCooldown(icon)
     icon:Show()

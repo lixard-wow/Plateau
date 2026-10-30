@@ -111,7 +111,7 @@ local function StyleButton(button, group, container)
         button:SetHideTooltipInCombat(not config.tooltipsInCombat)
     end
 
-    button:SetIconBorder(db.borderSize, db.borderColor)
+    ns.SetIconBorder(button, db.borderSize, db.borderColor)
     ns.ApplyFont(button.timer, config.font, db.timerSize, config.outline)
     ns.ApplyFont(button.stacks, config.font, db.stackSize, config.outline)
     ns.ApplyShadow(button.timer, config.shadow)
@@ -938,7 +938,7 @@ function Auras:Preview(plate, state)
                     else
                         icon.texture:SetTexture(samples[(i - 1) % #samples + 1])
                     end
-                    icon:SetIconBorder(db.borderSize or 1, db.borderColor or BLACK)
+                    ns.SetIconBorder(icon, db.borderSize or 1, db.borderColor or BLACK)
                     local dispel = SAMPLE_BORDER[key]
                     icon.dispel:Layout(1)
                     if dispel then

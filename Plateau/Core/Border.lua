@@ -57,7 +57,7 @@ function ns.SnapTexture(texture)
     return texture
 end
 
-local function SetIconBorder(icon, size, color)
+function ns.SetIconBorder(icon, size, color)
     size = size or 0
     icon.border:Layout(size)
     icon.border:SetShown(size > 0)
@@ -72,7 +72,6 @@ function ns.DecorateIcon(frame)
     art:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     frame.art = art
     frame.border = ns.CreateBorder(frame, frame, "OVERLAY", 1)
-    frame.SetIconBorder = SetIconBorder
     return frame
 end
 
