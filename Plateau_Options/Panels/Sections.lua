@@ -1981,7 +1981,13 @@ ns.sections = {
         { type = "Header", label = "Blizzard's friendly nameplates" },
         { type = "Note", label = "Change the friendly nameplates the game draws, such as in dungeons, raids and arenas.", height = 24 },
         CVarToggle("nameplateShowOnlyNameForFriendlyPlayerUnits", "Only show friendly player names",
-            "Shows only names on friendly players' nameplates the game draws, such as in dungeons and raids. Follower dungeon companions keep their bars.")
+            "Shows only names on friendly players' nameplates the game draws, such as in dungeons and raids. Follower dungeon companions keep their bars."),
+        { type = "Toggle", path = "look.friendly.blizzardSize", label = "Set their size",
+          tooltip = "Sets the width and height of every nameplate the game draws, like Plater and other addons do. Plateau's own nameplates keep their look. Applies out of combat." },
+        Gate({ type = "Slider", path = "look.friendly.blizzardWidth", label = "Width", min = 40, max = 250,
+          tooltip = "Width of the nameplates the game draws, which is also their clickable width." }, On("look.friendly.blizzardSize"), "Turn on Set their size to use this."),
+        Gate({ type = "Slider", path = "look.friendly.blizzardHeight", label = "Height", min = 10, max = 80,
+          tooltip = "Height of the clickable area of the nameplates the game draws." }, On("look.friendly.blizzardSize"), "Turn on Set their size to use this.")
     ), BlizzardDrawn(true), BlizzardDrawn())),
 
     Section("healthText", "Health text", "look.healthText", Join(List(

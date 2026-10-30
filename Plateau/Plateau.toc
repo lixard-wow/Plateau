@@ -48,6 +48,7 @@ Features\Idle.lua
 Features\Range.lua
 Features\OccludedFade.lua
 Features\InstancePets.lua
+Features\BlizzardSize.lua
 Features\Kicks.lua
 Elements\Health.lua
 Elements\HealthText.lua
