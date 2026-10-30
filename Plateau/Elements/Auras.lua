@@ -852,6 +852,7 @@ local function KnownIcons(list)
     return icons
 end
 
+local BLACK = { 0, 0, 0, 1 }
 local SAMPLE_BORDER = { mine = nil, cc = { 0.8, 0.2, 0.8, 1 }, purge = { 0.2, 0.6, 1, 1 }, important = { 1, 0.8, 0.2, 1 } }
 
 local function FakeGroup(plate, key)
@@ -950,8 +951,11 @@ function Auras:Preview(plate, state)
                     else
                         icon.texture:SetTexture(samples[(i - 1) % #samples + 1])
                     end
-                    icon.border:Layout(1)
-                    icon.border:SetColor(0, 0, 0, 1)
+                    local borderSize = db.borderSize or 1
+                    local borderColor = db.borderColor or BLACK
+                    icon.border:Layout(borderSize)
+                    icon.border:SetShown(borderSize > 0)
+                    icon.border:SetColor(borderColor[1], borderColor[2], borderColor[3], borderColor[4])
                     local dispel = SAMPLE_BORDER[key]
                     icon.dispel:Layout(1)
                     if dispel then

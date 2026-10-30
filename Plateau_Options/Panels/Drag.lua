@@ -1159,10 +1159,7 @@ end
 
 function Drag.Select(spec)
     selected = spec
-    if spec and spec.spot then
-        selectionFrame:ClearAllPoints()
-        selectionFrame:SetPoint("TOPLEFT", spec.spot, "TOPLEFT", -2, 2)
-        selectionFrame:SetPoint("BOTTOMRIGHT", spec.spot, "BOTTOMRIGHT", 2, -2)
+    if spec and spec.spot and ns.OutlineSpot(selectionFrame, spec.spot) then
         selectionFrame:Show()
     else
         selectionFrame:Hide()
@@ -1191,6 +1188,11 @@ function Drag.SetDotParent(frame)
     Style.Border(selectionFrame, C.accent)
     Style.ThemedBorder(selectionFrame)
     selectionFrame:Hide()
+    selectionFrame:SetScript("OnUpdate", function(self)
+        if selected and selected.spot then
+            ns.OutlineSpot(self, selected.spot)
+        end
+    end)
     BuildReadout(frame)
 
     keys = CreateFrame("Frame", nil, frame)

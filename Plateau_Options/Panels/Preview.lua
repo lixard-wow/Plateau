@@ -53,8 +53,8 @@ hint:SetText(Hint())
 
 local outline = CreateFrame("Frame", nil, panel)
 outline:SetFrameLevel(panel:GetFrameLevel() + 200)
-Style.Border(outline, C.accent)
-Style.ThemedBorder(outline)
+Style.Border(outline, C.text)
+outline:SetAlpha(0.55)
 outline:Hide()
 
 local playerName, playerSurname = UnitName("player")
@@ -201,6 +201,45 @@ local function Bounds(spot)
     return left, right, top, bottom
 end
 
+local OUTLINE_GAP = 2
+
+local function PixelFactor()
+    return PixelUtil and PixelUtil.GetPixelToUIUnitFactor and PixelUtil.GetPixelToUIUnitFactor() or 1
+end
+
+local function PixelBox(spot)
+    local ring = spot.ring and Resolve(spot.ring)
+    local l, r, t, b, scale
+    if ring then
+        local region = spot.region
+        l, r, t, b = region:GetLeft(), region:GetRight(), region:GetTop(), region:GetBottom()
+        scale = region:GetEffectiveScale()
+    else
+        l, r, t, b = Bounds(spot)
+        scale = spot:GetEffectiveScale()
+    end
+    if not l then return nil end
+    local toPx = scale / PixelFactor()
+    ring = math.max(0, math.floor((ring or 0) + 0.5))
+    return math.floor(l * toPx + 0.5) - ring, math.floor(r * toPx + 0.5) + ring,
+        math.floor(t * toPx + 0.5) + ring, math.floor(b * toPx + 0.5) - ring
+end
+
+local function FrameAround(frame, l, r, t, b)
+    local grow = OUTLINE_GAP + 1
+    local back = PixelFactor() / frame:GetEffectiveScale()
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", (l - grow) * back, (t + grow) * back)
+    frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", (r + grow) * back, (b - grow) * back)
+end
+
+function ns.OutlineSpot(frame, spot)
+    local l, r, t, b = PixelBox(spot)
+    if not l then return false end
+    FrameAround(frame, l, r, t, b)
+    return true
+end
+
 local function SpotAt()
     local best, bestArea
     for _, spot in ipairs(spots) do
@@ -225,21 +264,17 @@ end
 local hovered
 
 local function PlaceOutline(spot)
-    outline:ClearAllPoints()
-    local left, right, top, bottom = Bounds(spot)
-    if (spot.fitText or spot.clipTo) and left then
-        local ratio = spot:GetEffectiveScale() / outline:GetParent():GetEffectiveScale()
-        outline:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left * ratio, top * ratio)
-        outline:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", right * ratio, bottom * ratio)
-    else
-        outline:SetPoint("TOPLEFT", spot, "TOPLEFT")
-        outline:SetPoint("BOTTOMRIGHT", spot, "BOTTOMRIGHT")
+    local selected = ns.Drag.GetSelected()
+    if (selected and selected.spot == spot) or not ns.OutlineSpot(outline, spot) then
+        outline:Hide()
+        return
     end
+    outline:Show()
 end
 
 local function SetHovered(spot)
     if spot == hovered then
-        if spot and (spot.fitText or spot.clipTo) then
+        if spot then
             PlaceOutline(spot)
         end
         return
@@ -247,7 +282,6 @@ local function SetHovered(spot)
     hovered = spot
     if spot then
         PlaceOutline(spot)
-        outline:Show()
         hint:SetFormattedText(DragOf(spot) and "%s  -  click to edit, drag to move, arrow keys to nudge" or "%s  -  click to edit", Style.T(Resolve(spot.label)))
         local tint = Style.StateColor()
         Style.PaintText(hint, tint)
@@ -266,7 +300,7 @@ local pressedSpot
 
 layer:SetScript("OnUpdate", function(self)
     if ns.Drag.IsDragging() then
-        if hovered and (hovered.fitText or hovered.clipTo) then
+        if hovered then
             PlaceOutline(hovered)
         end
         return
@@ -365,11 +399,11 @@ local function AddHotspots(plate)
             end,
             region = plate.raidMarker,
             anchor = AtPlate(plate),
-        }))
+        })).ring = 0
     Hotspot(plate, plate.classification, "classification", "Elite icon", 80, 1,
-        Drag.PositionSpec({ path = "look.classification", region = plate.classification, anchor = AtPlate(plate) }))
+        Drag.PositionSpec({ path = "look.classification", region = plate.classification, anchor = AtPlate(plate) })).ring = 0
     Hotspot(plate, plate.quest, "quest", "Quest icon", 80, 1,
-        Drag.PositionSpec({ path = "look.quest", region = plate.quest, anchor = AtPlate(plate) }))
+        Drag.PositionSpec({ path = "look.quest", region = plate.quest, anchor = AtPlate(plate) })).ring = 0
     Hotspot(plate, plate.questProgress, "quest", "Quest progress", 81, 2,
         Drag.PositionSpec({ path = "look.quest.progress", text = true, region = plate.questProgress, anchor = AtPlate(plate) })).fitText = true
     Hotspot(plate, plate.enemyPowerBar, "enemyPower", "Enemy power bar", 85, 1, Drag.EnemyPowerSpec(plate))
@@ -382,11 +416,20 @@ local function AddHotspots(plate)
     threatSpot.fitText = true
     threatSpot.setting = "Show threat percent"
     Hotspot(plate, plate.faction, "faction", "Faction icon", 80, 1,
-        Drag.PositionSpec({ path = "look.faction", region = plate.faction, anchor = AtPlate(plate) }))
+        Drag.PositionSpec({ path = "look.faction", region = plate.faction, anchor = AtPlate(plate) })).ring = 0
     Hotspot(plate, plate.kickHolder, "kickers", "Kicker icons", 80, 1,
-        Drag.PositionSpec({ path = "look.kickers", region = plate.kickHolder, anchor = AtPlate(plate) }))
+        Drag.PositionSpec({ path = "look.kickers", region = plate.kickHolder, anchor = AtPlate(plate) })).ring = function()
+            return Plateau.DB:Get("look.kickers.borderSize") or 1
+        end
     Hotspot(plate, plate.subtitle, "friendly", "Guild and title line", 75, 2).fitText = true
-    Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 62, 0, Drag.CastIconSpec(plate)).setting = "Show spell icon"
+    local castIcon = Hotspot(plate, plate.castbar.icon, "castbar", "Spell icon", 62, 0, Drag.CastIconSpec(plate))
+    castIcon.setting = "Show spell icon"
+    castIcon.ring = function()
+        return Plateau.HealthBorderOuter({
+            borderStyle = Plateau.DB:Get("look.castbar.borderStyle"),
+            borderSize = Plateau.DB:Get("look.castbar.borderSize"),
+        })
+    end
     local castTarget = Hotspot(plate, plate.castbar.target, "castbar", "Cast target", 65, 2,
         Drag.PositionSpec({ path = "look.castbar", positionKey = "targetPosition", xKey = "targetOffsetX", yKey = "targetOffsetY", fixedGap = 2, region = plate.castbar.target, anchor = function() return plate.castbar end }))
     castTarget.fitText = true
@@ -410,7 +453,11 @@ local function AddHotspots(plate)
     local auraNames = { mine = "Your debuffs", cc = "Crowd control", purge = "Enemy buffs", important = "Important auras" }
     for key, fake in pairs(plate.fakeAuras or {}) do
         local auraDrag = Drag.AuraSpec(plate, key)
-        Hotspot(plate, fake, auraSections[key], auraNames[key], 75, 1, auraDrag).snapTarget = fake
+        local auraSpot = Hotspot(plate, fake, auraSections[key], auraNames[key], 75, 1, auraDrag)
+        auraSpot.snapTarget = fake
+        auraSpot.ring = function()
+            return Plateau.DB:Get("look.auras." .. key .. ".borderSize") or 1
+        end
     end
 end
 
@@ -448,14 +495,13 @@ local function Touching(a, b)
 end
 
 local function UpdateEditing()
-    local boxes, scale = {}, nil
+    local boxes = {}
     local function Collect(only)
         for _, spot in ipairs(spots) do
             local key = Resolve(spot.sectionKey)
             if spot:IsShown() and here[key] and (not only or only == key) then
-                local l, r, t, b = Bounds(spot)
+                local l, r, t, b = PixelBox(spot)
                 if l then
-                    scale = spot:GetEffectiveScale()
                     boxes[#boxes + 1] = { l, r, t, b }
                 end
             end
@@ -483,18 +529,12 @@ local function UpdateEditing()
             end
         end
     end
-    local panelLeft, panelBottom = panel:GetLeft(), panel:GetBottom()
     local count = 0
-    if scale and panelLeft and panelBottom then
-        local ratio = scale / panel:GetEffectiveScale()
-        for i, box in ipairs(boxes) do
-            local frame = EditOutline(i)
-            frame:ClearAllPoints()
-            frame:SetPoint("TOPLEFT", panel, "BOTTOMLEFT", (box[1] - 2) * ratio - panelLeft, (box[3] + 2) * ratio - panelBottom)
-            frame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMLEFT", (box[2] + 2) * ratio - panelLeft, (box[4] - 2) * ratio - panelBottom)
-            frame:Show()
-            count = i
-        end
+    for i, box in ipairs(boxes) do
+        local frame = EditOutline(i)
+        FrameAround(frame, box[1], box[2], box[3], box[4])
+        frame:Show()
+        count = i
     end
     for i = count + 1, #editOutlines do
         editOutlines[i]:Hide()

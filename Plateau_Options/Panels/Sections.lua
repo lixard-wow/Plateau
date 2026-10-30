@@ -2696,6 +2696,12 @@ ns.sections = {
           tooltip = "Size of the countdown numbers." },
         { type = "Slider", path = "look.kickers.size", label = "Icon size", min = 10, max = 40,
           tooltip = "Size of each kicker icon." },
+        { type = "Slider", path = "look.kickers.borderSize", label = "Icon border thickness", min = 0, max = 3,
+          tooltip = "How thick the border around each icon is. 0 removes it." },
+        Gate({ type = "Toggle", path = "look.kickers.borderClassColor", label = "Class color border",
+          tooltip = "Colors each icon's border by the kicker's class." }, function() return (ns.Get("look.kickers.borderSize") or 0) > 0 end, "Raise Icon border thickness above 0 to use this."),
+        Gate({ type = "Color", path = "look.kickers.borderColor", label = "Icon border color",
+          tooltip = "The color of the border around each icon." }, function() return (ns.Get("look.kickers.borderSize") or 0) > 0 and not ns.Get("look.kickers.borderClassColor") end, "Raise Icon border thickness above 0 and turn off Class color border to use this."),
         Placement("look.kickers")
     ))),
 

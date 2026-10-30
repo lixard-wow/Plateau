@@ -205,8 +205,6 @@ local function Segment(plate, index)
     local seg = plate.kickSegs[index]
     if seg then return seg end
     seg = CreateFrame("Frame", nil, plate.kickHolder)
-    seg:SetPoint("TOPLEFT", -1, 1)
-    seg:SetPoint("BOTTOMRIGHT", 1, -1)
     seg.open = Gate(seg)
     seg.shut = Gate(seg)
     local clip = CreateFrame("Frame", nil, seg)
@@ -225,9 +223,7 @@ local function Icon(seg, index)
     local icon = seg.icons[index]
     if icon then return icon end
     icon = CreateFrame("Frame", nil, seg.content)
-    icon.edge = icon:CreateTexture(nil, "OVERLAY", nil, 1)
-    icon.edge:SetPoint("TOPLEFT", -1, 1)
-    icon.edge:SetPoint("BOTTOMRIGHT", 1, -1)
+    icon.border = ns.CreateBorder(icon, icon, "OVERLAY", 1)
     icon.art = icon:CreateTexture(nil, "OVERLAY", nil, 2)
     icon.art:SetAllPoints()
     local cd = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
@@ -270,18 +266,28 @@ local function Countdown(icon, plate)
     end
 end
 
+local function Margin(look)
+    return ((look and look.borderSize) or 1) + 1
+end
+
 local function PaintIcon(icon, seg, slot, entry, size, plate)
+    local look = plate.kickLook
+    local margin = Margin(look)
     icon:ClearAllPoints()
-    icon:SetPoint("TOPLEFT", seg, "TOPLEFT", 1 + (slot - 1) * (size + GAP), -1)
+    icon:SetPoint("TOPLEFT", seg, "TOPLEFT", margin + (slot - 1) * (size + GAP), -margin)
     icon:SetSize(size, size)
-    Picture(icon.art, entry, plate.kickLook and plate.kickLook.iconStyle)
+    Picture(icon.art, entry, look and look.iconStyle)
     icon.plate, icon.kicked = plate, entry.kicked
     Countdown(icon, plate)
-    local color = entry.class and C_ClassColor and C_ClassColor.GetClassColor(entry.class)
+    local borderSize = (look and look.borderSize) or 1
+    icon.border:Layout(borderSize)
+    icon.border:SetShown(borderSize > 0)
+    local color = look and look.borderClassColor ~= false and entry.class and C_ClassColor and C_ClassColor.GetClassColor(entry.class)
     if color then
-        icon.edge:SetColorTexture(color.r, color.g, color.b, 1)
+        icon.border:SetColor(color.r, color.g, color.b, 1)
     else
-        icon.edge:SetColorTexture(0, 0, 0, 1)
+        local fixed = look and look.borderColor or { 0, 0, 0, 1 }
+        icon.border:SetColor(fixed[1], fixed[2], fixed[3], fixed[4])
     end
     icon.guid, icon.sample = entry.guid, entry.sample
     ApplyCooldown(icon)
@@ -309,9 +315,13 @@ end
 
 local function Sync(plate, specs, kicked)
     local size = plate.kickSize or 18
+    local margin = Margin(plate.kickLook)
     local widest = 0
     for index, spec in ipairs(specs) do
         local seg = Segment(plate, index)
+        seg:ClearAllPoints()
+        seg:SetPoint("TOPLEFT", -margin, margin)
+        seg:SetPoint("BOTTOMRIGHT", margin, -margin)
         local entries = Entries(spec, kicked)
         if #entries > 0 then
             seg.open:SetMinMaxValues(spec.low - 1, spec.low)
