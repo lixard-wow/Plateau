@@ -167,7 +167,8 @@ local function Initializer(container, group)
         container.buttons[#container.buttons + 1] = button
 
         ns.DecorateIcon(button)
-        button.iconTexture = button.art
+        local icon = button.art
+        button.iconTexture = icon
         button.border.restricted = true
         button.border:SetColor(0, 0, 0, 1)
 
