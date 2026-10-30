@@ -85,6 +85,8 @@ local ns = {
 }
 function ns.Get(path) return db[path] end
 function ns.Set(path, value) db[path] = value end
+function ns.SpecGet(spec) if spec.get then return spec.get() end return ns.Get(spec.path) end
+function ns.SpecSet(spec, value) if spec.set then return spec.set(value) end return ns.Set(spec.path, value) end
 assert(loadfile("Plateau_Options/Widgets/Dropdown.lua"))("Plateau_Options", ns)
 
 local function IsTarget(list, frame)

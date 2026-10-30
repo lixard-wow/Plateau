@@ -321,18 +321,11 @@ function ns.Widgets.Dropdown(parent, spec)
     end
 
     local function Get()
-        if spec.get then
-            return spec.get()
-        end
-        return ns.Get(spec.path)
+        return ns.SpecGet(spec)
     end
 
     local function Set(value)
-        if spec.set then
-            spec.set(value)
-        else
-            ns.Set(spec.path, value)
-        end
+        ns.SpecSet(spec, value)
     end
 
     function row:Refresh()
