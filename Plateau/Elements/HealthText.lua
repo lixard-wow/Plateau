@@ -32,10 +32,7 @@ if C_CurveUtil and C_CurveUtil.CreateCurve then
     missingCurve:SetType(Enum.LuaCurveType.Linear)
     missingCurve:AddPoint(0, 100)
     missingCurve:AddPoint(1, 0)
-    fullCurve = C_CurveUtil.CreateCurve()
-    fullCurve:SetType(Enum.LuaCurveType.Step)
-    fullCurve:AddPoint(0, 1)
-    fullCurve:AddPoint(0.9999, 0)
+    fullCurve = ns.StepCurve(0, 1, 0.9999, 0)
 end
 
 local settings = {}

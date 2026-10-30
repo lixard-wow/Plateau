@@ -15,11 +15,7 @@ ns.Elements = ns.Elements or {}
 ns.Elements.Execute = Execute
 
 local function StepCurve(threshold)
-    local curve = C_CurveUtil.CreateCurve()
-    curve:SetType(Enum.LuaCurveType.Step)
-    curve:AddPoint(0, 1)
-    curve:AddPoint(threshold / 100, 0)
-    return curve
+    return ns.StepCurve(0, 1, threshold / 100, 0)
 end
 
 function Execute:Create(plate)

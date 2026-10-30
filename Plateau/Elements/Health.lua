@@ -44,15 +44,7 @@ end
 
 local SMOOTH = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.ExponentialEaseOut
 
-local function SparkCurve()
-    local curve = C_CurveUtil.CreateCurve()
-    curve:SetType(Enum.LuaCurveType.Step)
-    curve:AddPoint(0, 0)
-    curve:AddPoint(0.005, 1)
-    curve:AddPoint(0.995, 0)
-    return curve
-end
-local sparkCurve = SparkCurve()
+local sparkCurve = ns.StepCurve(0, 0, 0.005, 1, 0.995, 0)
 
 local Health = {
     key = "health",

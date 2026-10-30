@@ -105,6 +105,15 @@ function ns.CleanName(name)
     return name
 end
 
+function ns.StepCurve(...)
+    local curve = C_CurveUtil.CreateCurve()
+    curve:SetType(Enum.LuaCurveType.Step)
+    for i = 1, select("#", ...), 2 do
+        curve:AddPoint(select(i, ...), (select(i + 1, ...)))
+    end
+    return curve
+end
+
 function ns.CreateText(parent)
     local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     text:SetWordWrap(false)

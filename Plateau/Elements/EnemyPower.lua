@@ -33,11 +33,7 @@ local fullCurves = {}
 
 local function FullCurve(alpha)
     if not (C_CurveUtil and C_CurveUtil.CreateCurve) then return nil end
-    local curve = C_CurveUtil.CreateCurve()
-    curve:SetType(Enum.LuaCurveType.Step)
-    curve:AddPoint(0, alpha)
-    curve:AddPoint(0.9999, 0)
-    return curve
+    return ns.StepCurve(0, alpha, 0.9999, 0)
 end
 
 local EnemyPower = {
