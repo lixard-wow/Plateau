@@ -557,6 +557,16 @@ local function CVarSpec(kind, name, label, extra)
     return spec
 end
 
+local function HasOccludedFade()
+    return Plateau.OccludedFade ~= nil
+end
+
+local function FadeIn(where, label, tooltip)
+    return { type = "Toggle", label = label, tooltip = tooltip, visibleIf = HasOccludedFade,
+        get = function() return HasOccludedFade() and Plateau.OccludedFade:IsOn(where) end,
+        set = function(value) Plateau.OccludedFade:SetOn(where, value == true) end }
+end
+
 local function CVarToggle(name, label, tooltip)
     return CVarSpec("Toggle", name, label, { tooltip = tooltip })
 end
@@ -1492,26 +1502,11 @@ ns.sections = {
         { type = "Header", label = "Behind walls" },
         CVarSlider("nameplateOccludedAlphaMult", "Behind-wall opacity", 0, 1, 0.05, "Opacity of nameplates for units behind walls or terrain."),
         { type = "Note", label = "Choose where nameplates behind walls fade.", height = 24 },
-        { type = "Toggle", label = "Fade in the open world", visibleIf = function() return Plateau.OccludedFade ~= nil end,
-          get = function() return Plateau.OccludedFade ~= nil and Plateau.OccludedFade:IsOn("world") end,
-          set = function(value) Plateau.OccludedFade:SetOn("world", value == true) end,
-          tooltip = "Fades nameplates behind walls in the open world." },
-        { type = "Toggle", label = "Fade in dungeons", visibleIf = function() return Plateau.OccludedFade ~= nil end,
-          get = function() return Plateau.OccludedFade ~= nil and Plateau.OccludedFade:IsOn("dungeon") end,
-          set = function(value) Plateau.OccludedFade:SetOn("dungeon", value == true) end,
-          tooltip = "Fades nameplates behind walls in dungeons, including Mythic+." },
-        { type = "Toggle", label = "Fade in raids", visibleIf = function() return Plateau.OccludedFade ~= nil end,
-          get = function() return Plateau.OccludedFade ~= nil and Plateau.OccludedFade:IsOn("raid") end,
-          set = function(value) Plateau.OccludedFade:SetOn("raid", value == true) end,
-          tooltip = "Fades nameplates behind walls in raids." },
-        { type = "Toggle", label = "Fade in delves and scenarios", visibleIf = function() return Plateau.OccludedFade ~= nil end,
-          get = function() return Plateau.OccludedFade ~= nil and Plateau.OccludedFade:IsOn("delve") end,
-          set = function(value) Plateau.OccludedFade:SetOn("delve", value == true) end,
-          tooltip = "Fades nameplates behind walls in delves and scenarios." },
-        { type = "Toggle", label = "Fade in battlegrounds and arenas", visibleIf = function() return Plateau.OccludedFade ~= nil end,
-          get = function() return Plateau.OccludedFade ~= nil and Plateau.OccludedFade:IsOn("pvp") end,
-          set = function(value) Plateau.OccludedFade:SetOn("pvp", value == true) end,
-          tooltip = "Fades nameplates behind walls in battlegrounds and arenas." },
+        FadeIn("world", "Fade in the open world", "Fades nameplates behind walls in the open world."),
+        FadeIn("dungeon", "Fade in dungeons", "Fades nameplates behind walls in dungeons, including Mythic+."),
+        FadeIn("raid", "Fade in raids", "Fades nameplates behind walls in raids."),
+        FadeIn("delve", "Fade in delves and scenarios", "Fades nameplates behind walls in delves and scenarios."),
+        FadeIn("pvp", "Fade in battlegrounds and arenas", "Fades nameplates behind walls in battlegrounds and arenas."),
 
         { type = "Header", label = "By distance" },
         CVarSlider("nameplateMinAlpha", "Distant nameplate opacity", 0, 1, 0.05, "Opacity of nameplates at the maximum nameplate distance."),
