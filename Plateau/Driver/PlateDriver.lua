@@ -355,7 +355,7 @@ local function StylePlate(plate)
     click.border:Layout(1)
     click.border:SetColor(0.27, 0.82, 0.76, 0.9)
     UpdateClickArea(plate)
-    local pixel = ns.pixelPerfect and not plate.preview
+    local pixel = ns.pixelPerfect
     local wasPixel = ns.pixelBorders
     if pixel then
         ns.pixelBorders, ns.pixelPlate = true, plate
@@ -425,13 +425,14 @@ function Driver:ResizeNow(plate)
     for i = 1, #elements do
         local element = elements[i]
         if element.sizeDependent and plate.built[element] and element.enabledIn[plate.state] then
-            local pixel = ns.pixelPerfect and not plate.preview
+            local pixel = ns.pixelPerfect
+            local wasPixel, wasPlate = ns.pixelBorders, ns.pixelPlate
             if pixel then
                 ns.pixelBorders, ns.pixelPlate = true, plate
             end
             element:Style(plate, look[element.key])
             if pixel then
-                ns.pixelBorders, ns.pixelPlate = false, nil
+                ns.pixelBorders, ns.pixelPlate = wasPixel, wasPlate
             end
         end
     end

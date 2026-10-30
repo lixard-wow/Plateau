@@ -112,6 +112,10 @@ local function StyleButton(button, group, container)
     end
 
     ns.SetIconBorder(button, db.borderSize, db.borderColor)
+    local reach = button.border.reach or 1
+    button.dispel:ClearAllPoints()
+    button.dispel:SetPoint("TOPLEFT", button, "TOPLEFT", -reach, reach)
+    button.dispel:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", reach, -reach)
     ns.ApplyFont(button.timer, config.font, db.timerSize, config.outline)
     ns.ApplyFont(button.stacks, config.font, db.stackSize, config.outline)
     ns.ApplyShadow(button.timer, config.shadow)
@@ -690,6 +694,21 @@ local function SetOn(container, on)
     end
 end
 
+local function RepixelSet(plate)
+    local set = plate.auraSet
+    if not set then return end
+    local scale = plate:GetEffectiveScale()
+    if type(scale) ~= "number" or issecretvalue(scale) or set.pixelScale == scale then return end
+    set.pixelScale = scale
+    for _, container in pairs(set.containers) do
+        MarkDirty(container)
+    end
+    FlushDirtyButtons()
+end
+if ns.OnRepixel then
+    ns.OnRepixel(RepixelSet)
+end
+
 local function Attach(plate)
     local set = table.remove(spareSets) or NewSet(plate.state)
     set.plate = plate
@@ -707,6 +726,7 @@ local function Attach(plate)
         StyleSet(set, plate.state, db)
     end
     Anchor(plate, db)
+    RepixelSet(plate)
     if not InCombatLockdown() and ns.Driver.WarmPools then
         ns.Driver:WarmPools()
     end

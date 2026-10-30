@@ -49,6 +49,8 @@ function ns.SnapTexture(texture)
     return texture
 end
 
+local MIN_PIXEL_SCALE = 0.2
+
 local Ring = {}
 Ring.__index = Ring
 
@@ -59,10 +61,20 @@ end
 
 local function OwningPlate(frame)
     for _ = 1, 10 do
-        if not frame then return nil end
+        if type(frame) ~= "table" then return nil end
         if type(frame.built) == "table" and frame.health then return frame end
+        if not frame.GetParent then return nil end
         frame = frame:GetParent()
     end
+end
+
+local function PixelSize(region)
+    if not (PixelUtil and PixelUtil.GetPixelToUIUnitFactor) then return nil end
+    local scale = region:GetEffectiveScale()
+    if type(scale) ~= "number" or (issecretvalue and issecretvalue(scale)) or scale < MIN_PIXEL_SCALE then
+        return nil
+    end
+    return PixelUtil.GetPixelToUIUnitFactor() / scale
 end
 
 function Ring:Layout(size)
@@ -76,10 +88,9 @@ function Ring:Layout(size)
             plate.pixelSet[self] = args
         end
     end
-    local scale = owner:GetEffectiveScale()
-    local pixel = PixelUtil and PixelUtil.GetPixelToUIUnitFactor and scale and scale > 0
-        and PixelUtil.GetPixelToUIUnitFactor() / scale or 1
+    local pixel = ns.pixelPerfect ~= false and PixelSize(owner) or 1
     local reach = math.max(0, math.floor((size or 0) + 0.5)) * pixel
+    self.reach = reach
     self.empty = reach <= 0
     texture:ClearAllPoints()
     texture:SetPoint("TOPLEFT", owner, "TOPLEFT", -reach, reach)
@@ -142,10 +153,7 @@ function Border:SetAnchor(anchor)
 end
 
 function ns.HealthBorderOffset(look)
-    if look.health.borderStyle == "none" then
-        return 0
-    end
-    return look.health.borderInside and 0 or look.health.borderSize
+    return ns.HealthBorderOuter(look.health)
 end
 
 function ns.HealthBorderOuter(health)
@@ -215,12 +223,11 @@ function Border:LayoutEdge(info, size, inside)
     end
 end
 
-local MIN_PIXEL_SCALE = 0.2
 
 function Border:Layout(size, offset, inside)
     local anchor = self.anchor
     local info = EdgeInfo(self.style)
-    local plate = ns.pixelPlate
+    local plate = ns.pixelPlate or OwningPlate(self.owner)
     if plate and not self.restricted then
         local set = plate.pixelSet
         if not set then
@@ -266,11 +273,8 @@ function Border:Layout(size, offset, inside)
     end
     offset = offset or 0
     local pixel = false
-    if ns.pixelBorders and PixelUtil and PixelUtil.GetPixelToUIUnitFactor then
-        local scale = anchor:GetEffectiveScale()
-        if scale >= MIN_PIXEL_SCALE then
-            pixel = PixelUtil.GetPixelToUIUnitFactor() / scale
-        end
+    if ns.pixelBorders or (ns.pixelPerfect == true and plate) then
+        pixel = PixelSize(anchor) or false
     end
     local fade = not inside and Faded(self)
     self.cornersOn = fade
@@ -382,6 +386,12 @@ function ns.RoundLayout(frame)
     RoundTree(frame, ns.pixelPerfect == true)
 end
 
+local repixelHooks = {}
+
+function ns.OnRepixel(callback)
+    repixelHooks[#repixelHooks + 1] = callback
+end
+
 function ns.RepixelPlate(plate)
     local set = plate.pixelSet
     if not set or not ns.pixelPerfect then return end
@@ -395,6 +405,9 @@ function ns.RepixelPlate(plate)
         border:Layout(args[1], args[2], args[3])
     end
     ns.pixelBorders = previous
+    for i = 1, #repixelHooks do
+        repixelHooks[i](plate)
+    end
 end
 
 function Border:SetColor(r, g, b, a)
