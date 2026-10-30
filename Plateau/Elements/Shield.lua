@@ -57,19 +57,8 @@ local function SetAlertFill(fill, config, c)
     return true
 end
 
-local ENRAGE_REMOVERS = { 2908, 19801, 5938 }
-local MAGIC_REMOVERS = { 370, 378773, 528, 278326, 30449, 19801 }
-local PET_MAGIC_REMOVERS = { 19505 }
-local canRemove = { enrage = false, magic = false }
-
-local function KnowsAny(list, bank)
-    for i = 1, #list do
-        if ns.FindKnownSpell(list[i], bank) then
-            return true
-        end
-    end
-    return false
-end
+local MAGIC, ENRAGE = 1, 2
+local canDispel = ns.Elements.Auras.canDispel
 
 local DEFAULT_ORDER = { "important", "defensive", "enrage", "magic" }
 local orders = {}
@@ -228,9 +217,9 @@ function Shield:SlotWanted(config, key)
     elseif key == "defensive" then
         return config.alertDefensive == true
     elseif key == "enrage" then
-        return config.alertEnrage == true and (canRemove.enrage or not config.alertOnlyMine)
+        return config.alertEnrage == true and (canDispel[ENRAGE] or not config.alertOnlyMine)
     elseif key == "magic" then
-        return config.alertMagic == true and (canRemove.magic or not config.alertOnlyMine)
+        return config.alertMagic == true and (canDispel[MAGIC] or not config.alertOnlyMine)
     end
     return false
 end
@@ -426,22 +415,6 @@ function Shield:Preview(plate, state)
     plate.shieldPreview:Show()
     plate.shieldPreviewFill:SetShown(SetAlertFill(plate.shieldPreviewFill, config, c))
 end
-
-local abilities = CreateFrame("Frame")
-abilities:RegisterEvent("PLAYER_LOGIN")
-abilities:RegisterEvent("SPELLS_CHANGED")
-abilities:RegisterUnitEvent("UNIT_PET", "player")
-abilities:SetScript("OnEvent", function()
-    if ns.disabled then return end
-    local enrage = KnowsAny(ENRAGE_REMOVERS, Enum.SpellBookSpellBank.Player)
-    local magic = KnowsAny(MAGIC_REMOVERS, Enum.SpellBookSpellBank.Player) or KnowsAny(PET_MAGIC_REMOVERS, Enum.SpellBookSpellBank.Pet)
-    if enrage ~= canRemove.enrage or magic ~= canRemove.magic then
-        canRemove.enrage, canRemove.magic = enrage, magic
-        if configs.enemy then
-            ns.Driver:RequestRestyle(true)
-        end
-    end
-end)
 
 local watcher = CreateFrame("Frame")
 watcher:RegisterEvent("PLAYER_REGEN_ENABLED")
