@@ -96,10 +96,11 @@ local function ApplyHitTest(plate)
             base:ClearAllHitTestPoints()
         else
             local click = plate.clickArea
-            base:SetHitTestPoints({
+            click.hitPoints = click.hitPoints or {
                 { point = "TOPLEFT", relativeTo = click, relativePoint = "TOPLEFT", offsetX = 0, offsetY = 0 },
                 { point = "BOTTOMRIGHT", relativeTo = click.edge, relativePoint = "BOTTOMRIGHT", offsetX = 0, offsetY = 0 },
-            })
+            }
+            base:SetHitTestPoints(click.hitPoints)
         end
         plate.clickArea.changed = false
     else
