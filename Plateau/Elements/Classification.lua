@@ -34,10 +34,7 @@ function Classification:Configure(db, state)
 end
 
 function Classification:Style(plate, db)
-    local icon = plate.classification
-    ns.SizeIcon(icon, db.size)
-    icon:SetAlpha(db.alpha)
-    ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+    ns.StyleIcon(plate.classification, plate, db)
 end
 
 function Classification:Enable(plate, unit)

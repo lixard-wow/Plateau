@@ -74,10 +74,7 @@ local function ShowRing(plate, index)
 end
 
 function RaidMarker:Style(plate, db)
-    local icon = plate.raidMarker
-    ns.SizeIcon(icon, db.size)
-    icon:SetAlpha(db.alpha)
-    ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+    ns.StyleIcon(plate.raidMarker, plate, db)
     plate.markerRingBase = { db.tintSize, ns.HealthBorderOffset(ns.DB.views[plate.state]) }
     plate.markerRingOffset = nil
     LayoutRing(plate)

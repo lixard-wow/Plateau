@@ -143,6 +143,12 @@ function ns.AtlasExists(atlas)
     return exists
 end
 
+function ns.StyleIcon(icon, plate, db)
+    ns.SizeIcon(icon, db.size)
+    icon:SetAlpha(db.alpha)
+    ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+end
+
 function ns.CreateText(parent)
     local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     text:SetWordWrap(false)
