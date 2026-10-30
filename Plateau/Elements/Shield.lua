@@ -105,7 +105,13 @@ local function SlotColor(config, key)
     return config[SLOT_COLORS[key] or "alertColor"] or config.alertColor
 end
 
+local slots
+
 local function StyleSlot(button)
+    if button:IsForbidden() then
+        slots:Mark(button)
+        return
+    end
     local plate = button.plate
     local config = configs[plate.state]
     button:SetSize(1, 1)
@@ -125,7 +131,7 @@ local function StyleSlot(button)
     end
 end
 
-local slots = ns.Zone.RestyleQueue(StyleSlot, function(button) return button.plate.active end, function() return configs.enemy end)
+slots = ns.Zone.RestyleQueue(StyleSlot, function(button) return button.plate.active end, function() return configs.enemy end)
 
 local function SlotInitializer(plate, slotKey)
     return function(button)

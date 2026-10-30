@@ -119,13 +119,24 @@ local function StyleButton(button, group, container)
     end
 end
 
+local restyle
+
 local function StyleContainerButtons(container)
+    local locked = false
     for i = 1, #container.buttons do
-        StyleButton(container.buttons[i], container.group, container)
+        local button = container.buttons[i]
+        if button:IsForbidden() then
+            locked = true
+        else
+            StyleButton(button, container.group, container)
+        end
+    end
+    if locked then
+        restyle:Mark(container)
     end
 end
 
-local restyle = ns.Zone.RestyleQueue(StyleContainerButtons, function(container) return container.plate and container.plate.active end, function() return configs.enemy end)
+restyle = ns.Zone.RestyleQueue(StyleContainerButtons, function(container) return container.plate and container.plate.active end, function() return configs.enemy end)
 
 local function Initializer(container, group)
     return function(button)
