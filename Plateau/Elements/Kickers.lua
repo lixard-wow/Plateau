@@ -284,7 +284,7 @@ local function PaintIcon(icon, seg, slot, entry, size, plate)
     Picture(icon.art, entry, look and look.iconStyle)
     icon.plate, icon.kicked = plate, entry.kicked
     Countdown(icon, plate)
-    local class = look and look.borderClassColor ~= false and entry.class and C_ClassColor and C_ClassColor.GetClassColor(entry.class)
+    local class = look and look.borderClassColor ~= false and ns.ClassColor(entry.class)
     icon.classColor = icon.classColor or {}
     local color = look and look.borderColor or BLACK
     if class then

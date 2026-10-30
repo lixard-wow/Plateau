@@ -104,13 +104,10 @@ local function SyncCenteredPair(bar)
 end
 
 local function TargetTextColor(s, unit)
-    if s.targetClassColor and RAID_CLASS_COLORS then
-        local classFilename = UnitSpellTargetClass(unit)
-        if not issecretvalue(classFilename) and classFilename then
-            local color = RAID_CLASS_COLORS[classFilename]
-            if color then
-                return color.r, color.g, color.b, s.targetColor[4]
-            end
+    if s.targetClassColor then
+        local color = ns.ClassColor(UnitSpellTargetClass(unit))
+        if color then
+            return color.r, color.g, color.b, s.targetColor[4]
         end
     end
     return s.targetColor[1], s.targetColor[2], s.targetColor[3], s.targetColor[4]
@@ -661,7 +658,7 @@ local function ClassFromGUID(guid)
 end
 
 local function ColoredName(name, class, s)
-    local color = s.interruptClassColor and not issecretvalue(class) and class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
+    local color = s.interruptClassColor and ns.ClassColor(class)
     if color then
         return color:WrapTextInColorCode(name)
     end
@@ -677,13 +674,9 @@ local function WriteInterrupter(text, s, name)
 end
 
 local function SecretClassColor(guid)
-    if not (C_ClassColor and C_ClassColor.GetClassColor) then return nil end
     local ok, class = pcall(ClassFromGUID, guid)
-    if not ok or (not issecretvalue(class) and class == nil) then return nil end
-    local found, color = pcall(C_ClassColor.GetClassColor, class)
-    if found and color then
-        return color
-    end
+    if not ok then return nil end
+    return ns.ClassColor(class, true)
 end
 
 local function WriteSecretInterrupter(text, s, name, guid)

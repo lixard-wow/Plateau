@@ -5,6 +5,7 @@ function ns.ApplyFont() end
 function ns.ApplyShadow() end
 function ns.PlaceText() end
 function ns.CleanName(n) return n end
+function ns.ClassColor(class) return RAID_CLASS_COLORS and class and RAID_CLASS_COLORS[class] end
 local blizzardSize = "3"
 C_CVar = { GetCVarBool = function() return true end, GetCVar = function(name) if name == "nameplateSize" then return blizzardSize end end }
 
@@ -104,6 +105,7 @@ do
     function ns2.ApplyShadow() end
     function ns2.PlaceText() end
     function ns2.CleanName(n) return n end
+    ns2.ClassColor = ns.ClassColor
 
     function UnitName() return "Zephyrus", "Lost" end
     function UnitIsPlayer() return true end

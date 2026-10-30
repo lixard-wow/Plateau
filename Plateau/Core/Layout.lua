@@ -104,6 +104,16 @@ function ns.CleanName(name)
     return name
 end
 
+function ns.ClassColor(class, allowSecret)
+    if class == nil then return nil end
+    if not issecretvalue(class) then
+        return RAID_CLASS_COLORS and RAID_CLASS_COLORS[class] or nil
+    end
+    if not allowSecret or not (C_ClassColor and C_ClassColor.GetClassColor) then return nil end
+    local ok, color = pcall(C_ClassColor.GetClassColor, class)
+    return ok and color or nil
+end
+
 function ns.MarkerLayer(plate)
     local layer = plate.markerLayer
     if not layer then

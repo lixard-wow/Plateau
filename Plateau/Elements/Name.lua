@@ -368,14 +368,13 @@ cvarWatcher:SetScript("OnEvent", function(_, event, name)
 end)
 
 local function ClassColor(class)
-    if issecretvalue(class) or not class then return nil end
-    return RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
+    return ns.ClassColor(class)
 end
 
 local function ApplySecretClass(text, class)
-    if not issecretvalue(class) or not (C_ClassColor and C_ClassColor.GetClassColor) then return false end
-    local ok, color = pcall(C_ClassColor.GetClassColor, class)
-    if ok and color then
+    if not issecretvalue(class) then return false end
+    local color = ns.ClassColor(class, true)
+    if color then
         text:SetTextColor(color.r, color.g, color.b, 1)
         return true
     end

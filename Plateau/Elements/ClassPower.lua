@@ -123,8 +123,7 @@ end
 local function Colors(db)
     local color = db.color
     if db.classColor then
-        local class = UnitClassBase("player")
-        local swatch = not issecretvalue(class) and class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
+        local swatch = ns.ClassColor(UnitClassBase("player"))
         if swatch then
             return swatch.r, swatch.g, swatch.b
         end

@@ -74,11 +74,9 @@ function EnemyTarget:OnEvent(plate, _, unit)
 end
 
 local function BaseColor(s, class)
-    if s.classColors and class and RAID_CLASS_COLORS then
-        local classColor = RAID_CLASS_COLORS[class]
-        if classColor then
-            return classColor.r, classColor.g, classColor.b, 1
-        end
+    local classColor = s.classColors and ns.ClassColor(class)
+    if classColor then
+        return classColor.r, classColor.g, classColor.b, 1
     end
     local color = s.color
     return color[1], color[2], color[3], color[4]
