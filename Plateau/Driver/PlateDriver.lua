@@ -74,6 +74,9 @@ local styleOf = {}
 local sampleLooks = {}
 local sampleStale = {}
 local registered = {}
+local unitEvents = {}
+local globalEvents = {}
+local eventsDirty = true
 local styleVersion = 0
 local gates = {}
 local showClickPreview = false
@@ -215,6 +218,7 @@ end
 
 function Driver:RegisterElement(element)
     elements[#elements + 1] = element
+    eventsDirty = true
     element.enabledIn = {}
     if element.Update then
         element.Enable = element.Enable or element.Update
@@ -662,6 +666,45 @@ local function UpdateEmphasis()
     end
 end
 
+local function BuildEventLists()
+    for k in pairs(registered) do
+        registered[k] = nil
+    end
+    for i = #unitEvents, 1, -1 do
+        unitEvents[i] = nil
+    end
+    for i = #globalEvents, 1, -1 do
+        globalEvents[i] = nil
+    end
+    for i = 1, #elements do
+        local element = elements[i]
+        if element.enabled then
+            local events, gated = element.events or NO_EVENTS, element.gatedEvents
+            for j = 1, #events do
+                local event = events[j]
+                if not registered[event] and not (gated and gated[event] and not gates[gated[event]]) then
+                    unitEvents[#unitEvents + 1] = event
+                    registered[event] = true
+                end
+            end
+            local own = element.globalEvents
+            if own then
+                for j = 1, #own do
+                    local event = own[j]
+                    if not registered[event] then
+                        globalEvents[#globalEvents + 1] = event
+                        registered[event] = true
+                    end
+                end
+            end
+        end
+    end
+    if not registered.UNIT_FACTION then
+        unitEvents[#unitEvents + 1] = "UNIT_FACTION"
+    end
+    eventsDirty = false
+end
+
 local function Claim(plate, unit)
     local base = plate.base
     HideBlizzardPlate(base)
@@ -671,35 +714,14 @@ local function Claim(plate, unit)
     plate:UnregisterAllEvents()
     plate.active = true
 
-    for k in pairs(registered) do
-        registered[k] = nil
+    if eventsDirty then
+        BuildEventLists()
     end
-    for i = 1, #elements do
-        local element = elements[i]
-        if element.enabled then
-            local events, gated = element.events or NO_EVENTS, element.gatedEvents
-            for j = 1, #events do
-                local event = events[j]
-                if not registered[event] and not (gated and gated[event] and not gates[gated[event]]) then
-                    plate:RegisterUnitEvent(event, unit)
-                    registered[event] = true
-                end
-            end
-            local globalEvents = element.globalEvents
-            if globalEvents then
-                for j = 1, #globalEvents do
-                    local event = globalEvents[j]
-                    if not registered[event] then
-                        plate:RegisterEvent(event)
-                        registered[event] = true
-                    end
-                end
-            end
-        end
+    for i = 1, #unitEvents do
+        plate:RegisterUnitEvent(unitEvents[i], unit)
     end
-
-    if not registered.UNIT_FACTION then
-        plate:RegisterUnitEvent("UNIT_FACTION", unit)
+    for i = 1, #globalEvents do
+        plate:RegisterEvent(globalEvents[i])
     end
     plate.isPlayer = UnitIsPlayer(unit) == true
     plate.isFriendly = not UnitCanAttack("player", unit)
@@ -1294,6 +1316,7 @@ function Driver:Restyle()
         gates.threat = threat
         toggled = true
     end
+    eventsDirty = true
     for i = 1, #configuredElements do
         configuredElements[i]:Configured()
     end
