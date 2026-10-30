@@ -410,7 +410,9 @@ end
 function Style.OutlineEdges(frame, color)
     local edges = {}
     for i = 1, 4 do
-        edges[i] = Style.Snap(frame:CreateTexture(nil, "BORDER"))
+        edges[i] = frame:CreateTexture(nil, "BORDER")
+        edges[i]:SetSnapToPixelGrid(false)
+        edges[i]:SetTexelSnappingBias(0)
         if color then
             Style.Paint(edges[i], color, 1)
         else
