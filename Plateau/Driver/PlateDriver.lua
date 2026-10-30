@@ -343,6 +343,18 @@ function Driver:CastChanged(plate)
     UpdateReach(plate)
 end
 
+local function BeginPixel(plate)
+    local wasPixel, wasPlate = ns.pixelBorders, ns.pixelPlate
+    if ns.pixelPerfect then
+        ns.pixelBorders, ns.pixelPlate = true, plate
+    end
+    return wasPixel, wasPlate
+end
+
+local function EndPixel(wasPixel, wasPlate)
+    ns.pixelBorders, ns.pixelPlate = wasPixel, wasPlate
+end
+
 local function StylePlate(plate)
     BuildMissing(plate)
     local look = views[plate.state]
@@ -355,19 +367,15 @@ local function StylePlate(plate)
     click.border:Layout(1)
     click.border:SetColor(0.27, 0.82, 0.76, 0.9)
     UpdateClickArea(plate)
-    local pixel = ns.pixelPerfect
-    local wasPixel = ns.pixelBorders
-    if pixel then
-        ns.pixelBorders, ns.pixelPlate = true, plate
-    end
+    local wasPixel, wasPlate = BeginPixel(plate)
     for i = 1, #elements do
         local element = elements[i]
         if plate.built[element] and element.enabledIn[plate.state] then
             element:Style(plate, look[element.key])
         end
     end
-    if pixel then
-        ns.pixelBorders, ns.pixelPlate = wasPixel, nil
+    EndPixel(wasPixel, wasPlate)
+    if ns.pixelPerfect then
         plate.pixelScale = plate:GetEffectiveScale()
     end
 end
@@ -426,20 +434,14 @@ end
 function Driver:ResizeNow(plate)
     local look = views[plate.state]
     SizePlate(plate, look)
+    local wasPixel, wasPlate = BeginPixel(plate)
     for i = 1, #elements do
         local element = elements[i]
         if element.sizeDependent and plate.built[element] and element.enabledIn[plate.state] then
-            local pixel = ns.pixelPerfect
-            local wasPixel, wasPlate = ns.pixelBorders, ns.pixelPlate
-            if pixel then
-                ns.pixelBorders, ns.pixelPlate = true, plate
-            end
             element:Style(plate, look[element.key])
-            if pixel then
-                ns.pixelBorders, ns.pixelPlate = wasPixel, wasPlate
-            end
         end
     end
+    EndPixel(wasPixel, wasPlate)
 end
 
 local function ApplyHidden(plate, field, hide)
@@ -1129,7 +1131,7 @@ end
 local ConfigureState
 
 local function DrawPreview(plate)
-    ns.pixelBorders = ns.pixelPerfect == true
+    local wasPixel, wasPlate = BeginPixel(plate)
     local state = plate.state
     if sampleStale[state] and sampleLooks[state] then
         sampleStale[state] = nil
@@ -1138,7 +1140,7 @@ local function DrawPreview(plate)
     StylePlate(plate)
     RenderPreview(plate)
     ns.RoundLayout(plate)
-    ns.pixelBorders = false
+    EndPixel(wasPixel, wasPlate)
 end
 
 function Driver:CreatePreview(parent, state, sample)
