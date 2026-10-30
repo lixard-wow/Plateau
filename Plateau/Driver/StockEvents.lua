@@ -30,9 +30,16 @@ StockEvents.KNOWN = {
     "UNIT_SPELLCAST_INTERRUPTIBLE", "UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "UNIT_SPELLCAST_SUCCEEDED",
 }
 
+local validity = {}
+
 local function Valid(event)
-    local check = C_EventUtils and C_EventUtils.IsEventValid
-    return not check or check(event)
+    local known = validity[event]
+    if known == nil then
+        local check = C_EventUtils and C_EventUtils.IsEventValid
+        known = not check or check(event) == true
+        validity[event] = known
+    end
+    return known
 end
 
 function StockEvents.Snapshot(frame)
@@ -66,7 +73,8 @@ function StockEvents.Replay(frame, saved, fallback)
         end
         return
     end
-    for _, event in ipairs(fallback or {}) do
+    if not fallback then return end
+    for _, event in ipairs(fallback) do
         if Valid(event) then
             local ok, registered = pcall(frame.IsEventRegistered, frame, event)
             if not (ok and registered) then
