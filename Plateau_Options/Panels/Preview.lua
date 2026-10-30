@@ -815,7 +815,7 @@ crossWatch:SetScript("OnUpdate", function()
     crossH:ClearAllPoints()
     crossH:SetPoint("LEFT", rulerLeft, "TOPLEFT", 0, -y)
     crossH:SetPoint("RIGHT", panel, "TOPRIGHT", 0, -y)
-    SetTag(tagX, (x - math.floor(panel:GetWidth() / 2)) / PLATE_SCALE)
+    SetTag(tagX, (x - (math.floor(panel:GetWidth() / 2) - layout.centerShift)) / PLATE_SCALE)
     tagX:ClearAllPoints()
     tagX:SetPoint("CENTER", rulerTop, "TOPLEFT", x, -rulerTop:GetHeight() / 2)
     SetTag(tagY, (math.floor(panel:GetHeight() / 2) - y) / PLATE_SCALE)
@@ -1018,12 +1018,21 @@ for _, item in ipairs(TRAY) do
     item.tile = MakeTile(item)
 end
 
+local function CenterPlate()
+    local shift = tray:IsShown() and math.floor((TRAY_WIDTH + 8) / 2) or 0
+    holder:ClearAllPoints()
+    holder:SetPoint("CENTER", -shift / PLATE_SCALE, 0)
+    layout.SetCenterShift(shift)
+end
+
 function RefreshTray()
     if here.friendly then
         tray:Hide()
+        CenterPlate()
         return
     end
     tray:Show()
+    CenterPlate()
     local off = {}
     for _, item in ipairs(TRAY) do
         local available = not (item.retail and Plateau.flavor == "forever")

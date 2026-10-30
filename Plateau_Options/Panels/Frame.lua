@@ -27,6 +27,7 @@ local MARK_ROOM = 10
 ns.layout = {
     width = WIDTH, title = TOP, preview = TABLE - RULER_X - TOOLS, pad = PAD, rail = RAIL, content = CONTENT_WIDTH, column = COLUMN,
     plateScale = 1.5, previewTop = TOP + RULER_X, previewLeft = RAIL + 1 + RULER_Y, previewRight = 1,
+    centerShift = 0,
 }
 
 local Logic = ns.PageLogic
@@ -201,7 +202,7 @@ local function Ruler(vertical)
     ruler:SetScript("OnSizeChanged", function(self, width, height)
         local length = vertical and height or width
         if issecretvalue(length) then return end
-        local origin = math.floor((vertical and length - TOOLS or length) / 2)
+        local origin = vertical and math.floor((length - TOOLS) / 2) or math.floor(length / 2) - ns.layout.centerShift
         local step = TICK * ns.layout.plateScale
         local first, last = -math.floor(origin / step), math.floor((length - origin) / step)
         local n, shown = 0, 0
@@ -285,6 +286,18 @@ Style.PaintVertex(dots, C.border, 0.9)
 local anchorMark = CreateFrame("Frame", nil, previewStage)
 anchorMark:SetSize(9, 9)
 anchorMark:SetPoint("CENTER")
+
+function ns.layout.SetCenterShift(shift)
+    if shift == ns.layout.centerShift then return end
+    ns.layout.centerShift = shift
+    anchorMark:ClearAllPoints()
+    anchorMark:SetPoint("CENTER", -shift, 0)
+    local ruler = ns.layout.rulerTop
+    local width, height = ruler:GetSize()
+    if width and width > 0 then
+        ruler:GetScript("OnSizeChanged")(ruler, width, height)
+    end
+end
 for _, vertical in ipairs({ true, false }) do
     local stroke = anchorMark:CreateTexture(nil, "BACKGROUND")
     Style.Paint(stroke, C.faint, 1)
