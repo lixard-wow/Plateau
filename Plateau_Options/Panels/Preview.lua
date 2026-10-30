@@ -888,16 +888,12 @@ local function CrossTag()
 end
 local tagX, tagY = CrossTag(), CrossTag()
 
-local function PaintCross()
-    Style.Paint(crossV, C.accent, 0.35)
-    Style.Paint(crossH, C.accent, 0.35)
-    Style.Paint(tagX.fill, C.accent, 1)
-    Style.Paint(tagY.fill, C.accent, 1)
-    Style.PaintText(tagX.text, C.primaryText)
-    Style.PaintText(tagY.text, C.primaryText)
-end
-PaintCross()
-Style.OnTheme(PaintCross)
+Style.Paint(crossV, C.accent, 0.35)
+Style.Paint(crossH, C.accent, 0.35)
+Style.Paint(tagX.fill, C.accent, 1)
+Style.Paint(tagY.fill, C.accent, 1)
+Style.PaintText(tagX.text, C.primaryText)
+Style.PaintText(tagY.text, C.primaryText)
 
 local function MoverCenter(spec)
     local mover = spec.Mover and spec.Mover()

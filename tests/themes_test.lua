@@ -14,9 +14,10 @@ local function Same(a, b)
 end
 
 local retail = Load("mainline")
-check(retail.ThemeKey() == "survey", "retail uses the survey look")
-check(Load("forever").ThemeKey() == "survey", "WoW Forever uses the same look")
-check(Load("mainline", "classic").ThemeKey() == "survey", "an old saved theme choice falls back to the survey look")
+local forever, oldChoice = Load("forever"), Load("mainline", "classic")
+check(Same(forever.colors.accent, retail.colors.accent) and Same(oldChoice.colors.window, retail.colors.window), "every flavor and any old saved theme choice get the same survey look")
+check(retail.SetTheme == nil and retail.ThemeKey == nil and retail.THEMES == nil, "there is no theme switching left")
+check(retail.colors.accent ~= retail.colors.primary, "each palette color is its own table")
 check(retail.RADIUS == 0 and retail.BUTTON_RADIUS == 0, "corners are square")
 local accent = retail.colors.accent
 check(math.abs(accent[1] - 0xd0 / 255) < 1e-9 and math.abs(accent[2] - 0x7a / 255) < 1e-9 and math.abs(accent[3] - 0x3c / 255) < 1e-9, "the accent is mesa ochre")

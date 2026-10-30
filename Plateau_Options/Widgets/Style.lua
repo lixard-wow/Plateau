@@ -19,8 +19,6 @@ local PLEX = FONTS .. "IBMPlexSansCondensed-Medium.ttf"
 local PLEX_SEMI = FONTS .. "IBMPlexSansCondensed-SemiBold.ttf"
 local ALEGREYA = FONTS .. "AlegreyaSC-Bold.ttf"
 
-Style.THEME_ORDER = { "survey" }
-
 local function Mix(color, toward, amount)
     return {
         color[1] + (toward - color[1]) * amount,
@@ -43,44 +41,37 @@ local OCHRE_HI = Hex("#f0a86a")
 local OCHRE_INK = Hex("#1a0f06")
 local DANGER = Hex("#c4553a")
 
-Style.THEMES = {
-    survey = {
-        name = "Survey",
-        desc = "Stone, a measured table, and mesa ochre on what you can move.",
-        colors = {
-            window = STONE,
-            rail = STONE,
-            header = TABLE,
-            surface = TABLE,
-            surfaceBorder = EDGE,
-            field = TABLE,
-            hover = STONE_UP,
-            border = SLATE,
-            line = SLATE,
-            edge = EDGE,
-            accent = OCHRE,
-            accentHi = OCHRE_HI,
-            text = BONE,
-            title = BONE,
-            heading = MUTED,
-            muted = MUTED,
-            faint = FAINT,
-            warn = DANGER,
-            button = STONE_UP,
-            buttonBorder = EDGE,
-            buttonHover = Mix(STONE_UP, 1, 0.07),
-            buttonText = BONE,
-            primary = OCHRE,
-            primaryBorder = EDGE,
-            primaryHover = OCHRE_HI,
-            primaryText = OCHRE_INK,
-            iconButton = STONE_UP,
-            iconButtonBorder = EDGE,
-            icon = MUTED,
-            iconHover = BONE,
-        },
-        groups = { look = FAINT, casts = FAINT, highlights = FAINT, setup = FAINT },
-    },
+local PALETTE = {
+    window = STONE,
+    rail = STONE,
+    header = TABLE,
+    surface = TABLE,
+    surfaceBorder = EDGE,
+    field = TABLE,
+    hover = STONE_UP,
+    border = SLATE,
+    line = SLATE,
+    edge = EDGE,
+    accent = OCHRE,
+    accentHi = OCHRE_HI,
+    text = BONE,
+    title = BONE,
+    heading = MUTED,
+    muted = MUTED,
+    faint = FAINT,
+    warn = DANGER,
+    button = STONE_UP,
+    buttonBorder = EDGE,
+    buttonHover = Mix(STONE_UP, 1, 0.07),
+    buttonText = BONE,
+    primary = OCHRE,
+    primaryBorder = EDGE,
+    primaryHover = OCHRE_HI,
+    primaryText = OCHRE_INK,
+    iconButton = STONE_UP,
+    iconButtonBorder = EDGE,
+    icon = MUTED,
+    iconHover = BONE,
 }
 
 Style.SHAPE = {
@@ -95,53 +86,11 @@ Style.SHAPE = {
 
 local NON_LATIN = { ruRU = true, koKR = true, zhCN = true, zhTW = true }
 
-local function ChosenTheme()
-    local saved = Plateau.DB and Plateau.DB.saved and Plateau.DB.saved.global.optionsTheme
-    if Style.THEMES[saved] then
-        return saved
-    end
-    return "survey"
-end
-
-function Style.ThemeKey()
-    return ChosenTheme()
-end
-
 Style.theme = Style.SHAPE
 Style.colors = {}
-Style.groupColors = {}
-
-local themeTables = {}
-local painted = {}
-local themeListeners = {}
-
-local function CopyInto(target, source)
-    target[1], target[2], target[3], target[4] = source[1], source[2], source[3], source[4] or 1
+for name, color in pairs(PALETTE) do
+    Style.colors[name] = { color[1], color[2], color[3], color[4] or 1 }
 end
-
-local function LoadPalette(key)
-    local theme = Style.THEMES[key] or Style.THEMES.survey
-    for name, color in pairs(theme.colors) do
-        local slot = Style.colors[name]
-        if not slot then
-            slot = {}
-            Style.colors[name] = slot
-            themeTables[slot] = true
-        end
-        CopyInto(slot, color)
-    end
-    for name, color in pairs(theme.groups) do
-        local slot = Style.groupColors[name]
-        if not slot then
-            slot = {}
-            Style.groupColors[name] = slot
-            themeTables[slot] = true
-        end
-        CopyInto(slot, color)
-    end
-end
-
-LoadPalette(ChosenTheme())
 
 local function ApplyColor(region, kind, color, alpha, scale)
     scale = scale or 1
@@ -155,53 +104,16 @@ local function ApplyColor(region, kind, color, alpha, scale)
     end
 end
 
-local function ApplyPaint(region, entry)
-    ApplyColor(region, entry.kind, entry.color, entry.alpha, entry.scale)
-end
-
-local function Paint(region, kind, color, alpha, scale)
-    if themeTables[color] then
-        local entry = painted[region]
-        if not entry then
-            entry = {}
-            painted[region] = entry
-        end
-        entry.kind, entry.color, entry.alpha, entry.scale = kind, color, alpha, scale
-        ApplyPaint(region, entry)
-        return
-    end
-    painted[region] = nil
-    ApplyColor(region, kind, color, alpha, scale)
-end
-
 function Style.Paint(texture, color, alpha, scale)
-    Paint(texture, "texture", color, alpha, scale)
+    ApplyColor(texture, "texture", color, alpha, scale)
 end
 
 function Style.PaintVertex(texture, color, alpha, scale)
-    Paint(texture, "vertex", color, alpha, scale)
+    ApplyColor(texture, "vertex", color, alpha, scale)
 end
 
 function Style.PaintText(fontString, color, alpha)
-    Paint(fontString, "text", color, alpha)
-end
-
-function Style.OnTheme(callback)
-    themeListeners[#themeListeners + 1] = callback
-end
-
-function Style.SetTheme(key)
-    if not Style.THEMES[key] then return end
-    if Plateau.DB and Plateau.DB.saved then
-        Plateau.DB.saved.global.optionsTheme = key
-    end
-    LoadPalette(key)
-    for region, entry in pairs(painted) do
-        ApplyPaint(region, entry)
-    end
-    for i = 1, #themeListeners do
-        themeListeners[i](key)
-    end
+    ApplyColor(fontString, "text", color, alpha)
 end
 
 Style.RADIUS = Style.theme.radius
