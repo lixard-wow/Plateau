@@ -55,7 +55,7 @@ local function KeepOnScreen()
     local fixedLeft = math.max(OFFSCREEN_KEEP - width, math.min(left, screenWidth - OFFSCREEN_KEEP))
     local fixedTop = math.max(TITLE, math.min(top, screenHeight))
     frame:ClearAllPoints()
-    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", math.floor(fixedLeft + 0.5), math.floor(fixedTop + 0.5))
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", Style.PixelRound(frame, fixedLeft), Style.PixelRound(frame, fixedTop))
 end
 
 local function LooseClamp()
@@ -212,17 +212,17 @@ local function Ruler(vertical)
             local major = k % (MAJOR / TICK) == 0
             local tick = ticks[n]
             if not tick then
-                tick = self:CreateTexture(nil, "ARTWORK")
+                tick = Style.Snap(self:CreateTexture(nil, "ARTWORK"))
                 ticks[n] = tick
             end
             Style.Paint(tick, (k == 0 and C.accent) or (major and C.faint) or C.border, 1)
             tick:ClearAllPoints()
             if vertical then
                 tick:SetPoint("TOPRIGHT", 0, -pos)
-                tick:SetSize(major and 8 or 4, 1)
+                tick:SetSize(major and 8 or 4, Style.PixelUnit(self))
             else
                 tick:SetPoint("BOTTOMLEFT", pos, 0)
-                tick:SetSize(1, major and 8 or 4)
+                tick:SetSize(Style.PixelUnit(self), major and 8 or 4)
             end
             tick:Show()
             if major and pos > 6 and pos < length - 6 then
@@ -299,10 +299,12 @@ function ns.layout.SetCenterShift(shift)
     end
 end
 for _, vertical in ipairs({ true, false }) do
-    local stroke = anchorMark:CreateTexture(nil, "BACKGROUND")
+    local stroke = Style.Snap(anchorMark:CreateTexture(nil, "BACKGROUND"))
     Style.Paint(stroke, C.faint, 1)
     stroke:SetPoint("CENTER")
-    stroke:SetSize(vertical and 1 or 9, vertical and 9 or 1)
+    Style.OnPixels(anchorMark, function(px)
+        stroke:SetSize(vertical and px or 9, vertical and 9 or px)
+    end)
 end
 
 local previewBar = CreateFrame("Frame", nil, tableFrame)

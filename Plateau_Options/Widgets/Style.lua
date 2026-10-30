@@ -242,11 +242,16 @@ function Style.PixelScale()
     return wanted * factor / base
 end
 
+function Style.PixelRound(frame, value)
+    local unit = Style.PixelUnit(frame)
+    return math.floor(value / unit + 0.5) * unit
+end
+
 function Style.SnapWindow(frame)
     local left, top = frame:GetLeft(), frame:GetTop()
     if not left or not top then return end
     frame:ClearAllPoints()
-    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", math.floor(left + 0.5), math.floor(top + 0.5))
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", Style.PixelRound(frame, left), Style.PixelRound(frame, top))
 end
 
 local windowDrag
