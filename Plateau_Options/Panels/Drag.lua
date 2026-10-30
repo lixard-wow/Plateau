@@ -230,7 +230,7 @@ local function Targets(spec, mover)
                 skip = true
             end
         end
-        if not skip and target:IsVisible() and target:GetLeft() and target:GetWidth() > 0 and target:GetHeight() > 0 then
+        if not skip and target:IsVisible() and target:GetEffectiveAlpha() > 0 and target:GetLeft() and target:GetWidth() > 0 and target:GetHeight() > 0 then
             list[#list + 1] = target
         end
     end
@@ -980,6 +980,7 @@ function Drag.EnemyPowerSpec(plate)
     local spec = {
         name = path,
         paths = { positionPath, xPath, yPath },
+        keepSize = true,
         Nudge = OffsetNudge(xPath, yPath),
         Readout = function() return { { "x", xPath }, { "y", yPath } } end,
     }

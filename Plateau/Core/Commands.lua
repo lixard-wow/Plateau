@@ -464,6 +464,11 @@ Plateau = {
     HealthBorderOuter = function(health)
         return ns.HealthBorderOuter(health)
     end,
+    RepixelPlate = function(plate)
+        if ns.RepixelPlate then
+            ns.RepixelPlate(plate)
+        end
+    end,
     textPositions = ns.textPositions,
     AuraPlacement = function(db)
         return ns.AuraPlacement(db)

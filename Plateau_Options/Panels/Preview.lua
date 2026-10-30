@@ -69,7 +69,7 @@ end
 
 local function Sample()
     return {
-        health = 1,
+        health = 0.84,
         maxHealth = 72700,
         name = "Wastelander Phaseblade",
         levelOffset = 1,
@@ -562,10 +562,10 @@ local function UpdateHotspots()
         local visible = region:IsVisible() and region:GetAlpha() > 0
         spot:SetShown(visible)
     end
-    UpdateEditing()
     if RefreshTray then
         RefreshTray()
     end
+    UpdateEditing()
 end
 
 local holder = CreateFrame("Frame", nil, panel)
@@ -574,6 +574,14 @@ holder:SetScale(PLATE_SCALE)
 holder:SetPoint("CENTER", 0, 0)
 
 local plate = Plateau.CreatePreview(holder, sample)
+
+function ns.OnWindowScale()
+    plate.pixelScale = nil
+    if Plateau.RepixelPlate then
+        Plateau.RepixelPlate(plate)
+    end
+    UpdateEditing()
+end
 plate:SetPoint("CENTER")
 ns.Drag.SetDotParent(panel)
 ns.Drag.SetTargets(SnapTargets)
@@ -852,10 +860,13 @@ end
 
 local crossWatch = CreateFrame("Frame", nil, panel)
 local dragging = false
+local panelLeft, panelTop
 crossWatch:SetScript("OnUpdate", function()
     local spec = ns.Drag.Active()
-    if (spec ~= nil) ~= dragging then
+    local left, top = panel:GetLeft(), panel:GetTop()
+    if (spec ~= nil) ~= dragging or left ~= panelLeft or top ~= panelTop then
         dragging = spec ~= nil
+        panelLeft, panelTop = left, top
         UpdateEditing()
     end
     local x, y

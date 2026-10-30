@@ -26,6 +26,7 @@ function Frame:GetWidth() return self.r - self.l end
 function Frame:GetHeight() return self.t - self.b end
 function Frame:GetParent() return self.parent end
 function Frame:IsVisible() return self.shown end
+function Frame:GetEffectiveAlpha() return self.alpha or 1 end
 function Frame:IsShown() return self.shown end
 function Frame:Show() self.shown = true end
 function Frame:Hide() self.shown = false end

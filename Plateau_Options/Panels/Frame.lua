@@ -1257,6 +1257,9 @@ function ns.ApplyScale()
     frame:SetScale(new)
     Style.RefreshPixels()
     FitHeight()
+    if ns.OnWindowScale then
+        ns.OnWindowScale()
+    end
     if left and right and top then
         local ratio = old / new
         frame:ClearAllPoints()
