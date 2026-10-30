@@ -372,14 +372,17 @@ local function StylePlate(plate)
     end
 end
 
+local function SyncElement(element, plate, unit)
+    if Runs(element, plate) then
+        element:Enable(plate, unit)
+    else
+        DisableElement(element, plate)
+    end
+end
+
 local function EnableElements(plate, unit)
     for i = 1, #elements do
-        local element = elements[i]
-        if Runs(element, plate) then
-            element:Enable(plate, unit)
-        else
-            DisableElement(element, plate)
-        end
+        SyncElement(elements[i], plate, unit)
     end
 end
 
@@ -394,6 +397,7 @@ local function ApplyEmphasis(plate)
     plate.isTarget = plate.active and plate == targetPlate
     plate.isFocus = plate.active and plate == focusPlate
     if not plate.active then return end
+    plate.emphasized = true
 
     local state = StateFor(plate)
     if plate.state ~= state then
@@ -447,11 +451,7 @@ local function ApplyHidden(plate, field, hide)
         local element = elements[i]
         local key = element.key
         if ((old and old[key]) or false) ~= ((hide and hide[key]) or false) then
-            if Runs(element, plate) then
-                element:Enable(plate, unit)
-            else
-                DisableElement(element, plate)
-            end
+            SyncElement(element, plate, unit)
         end
     end
 end
@@ -693,26 +693,19 @@ local function Claim(plate, unit)
     plate.isPlayer = UnitIsPlayer(unit) == true
     plate.isFriendly = not UnitCanAttack("player", unit)
     ApplyHitTest(plate)
-    local baseState = plate.isFriendly and "friendly" or "enemy"
-    if plate.state ~= baseState then
-        plate.state = baseState
-    end
-    if plate.styledAs ~= styleOf[baseState] or plate.styleVersion ~= styleVersion then
+    plate.state = StateFor(plate)
+    if plate.styledAs ~= styleOf[plate.state] or plate.styleVersion ~= styleVersion then
         StylePlate(plate)
     end
-    for i = 1, #elements do
-        local element = elements[i]
-        if Runs(element, plate) then
-            element:Enable(plate, unit)
-        else
-            DisableElement(element, plate)
-        end
-    end
+    EnableElements(plate, unit)
     ns.Scaling:Apply(plate)
     UpdateClickArea(plate)
     plate:Show()
+    plate.emphasized = false
     UpdateEmphasis()
-    ApplyEmphasis(plate)
+    if not plate.emphasized then
+        ApplyEmphasis(plate)
+    end
     ns.Fire("PLATE_ADDED", unit, plate)
 end
 
