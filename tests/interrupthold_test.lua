@@ -61,20 +61,20 @@ local shownWith, showCount = nil, 0
 local realShow = Castbar.ShowInterrupted
 function Castbar:ShowInterrupted(_, interruptedBy) shownWith, showCount = interruptedBy, showCount + 1 end
 local live = { state = "enemy", castbar = { IsShown = function() return true end } }
-Castbar:OnEvent(live, "UNIT_SPELLCAST_INTERRUPTED", "nameplate1", "cast-guid", 12345, "Player-1-ABC", 7)
+Castbar:OnEvent(live, "UNIT_SPELLCAST_INTERRUPTED", "nameplate1", "nameplate1", "cast-guid", 12345, "Player-1-ABC", 7)
 check(shownWith == "Player-1-ABC", "an interrupted cast reads who kicked from the interruptedBy slot, not castBarID")
 showCount = 0
-Castbar:OnEvent(live, "UNIT_SPELLCAST_CHANNEL_STOP", "nameplate1", "cast-guid", 12345, nil, 7)
+Castbar:OnEvent(live, "UNIT_SPELLCAST_CHANNEL_STOP", "nameplate1", "nameplate1", "cast-guid", 12345, nil, 7)
 check(showCount == 0, "a channel that ends on its own is not shown as interrupted")
-Castbar:OnEvent(live, "UNIT_SPELLCAST_CHANNEL_STOP", "nameplate1", "cast-guid", 12345, "Player-1-ABC", 7)
+Castbar:OnEvent(live, "UNIT_SPELLCAST_CHANNEL_STOP", "nameplate1", "nameplate1", "cast-guid", 12345, "Player-1-ABC", 7)
 check(showCount == 1 and shownWith == "Player-1-ABC", "a kicked channel shows who kicked it")
 Castbar.ShowInterrupted = realShow
 
 function Castbar:ShowInterrupted(_, interruptedBy) shownWith, showCount = interruptedBy, showCount + 1 end
 local held = { state = "enemy", castbar = { holding = true, IsShown = function() return true end } }
 shownWith, showCount = "Player-1-ABC", 0
-Castbar:OnEvent(held, "UNIT_SPELLCAST_INTERRUPTED", "nameplate1", "cast-guid", 12345, nil, 7)
+Castbar:OnEvent(held, "UNIT_SPELLCAST_INTERRUPTED", "nameplate1", "nameplate1", "cast-guid", 12345, nil, 7)
 check(showCount == 0 and shownWith == "Player-1-ABC", "a second interrupt report without a kicker keeps the kicker's name")
-Castbar:OnEvent(held, "UNIT_SPELLCAST_INTERRUPTED", "nameplate1", "cast-guid", 12345, "Player-2-DEF", 7)
+Castbar:OnEvent(held, "UNIT_SPELLCAST_INTERRUPTED", "nameplate1", "nameplate1", "cast-guid", 12345, "Player-2-DEF", 7)
 check(showCount == 1 and shownWith == "Player-2-DEF", "a held bar still takes a report that names the kicker")
 Castbar.ShowInterrupted = realShow
