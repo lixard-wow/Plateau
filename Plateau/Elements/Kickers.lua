@@ -265,6 +265,9 @@ local function Countdown(icon, plate)
     if text then
         local view = ns.DB.views[plate.state] or ns.DB.views.enemy
         ns.ApplyFont(text, view.name.font, look.countdownSize, "OUTLINE")
+        text:ClearAllPoints()
+        text:SetPoint("CENTER", icon, "CENTER", 0, 0)
+        text:SetJustifyV("MIDDLE")
     end
 end
 
@@ -342,6 +345,10 @@ local function Sync(plate, specs, kicked)
         plate.kickSegs[index]:Hide()
     end
     plate.kickHolder:SetSize(math.max(widest * size + (widest - 1) * ns.WholePixels(plate.kickHolder, GAP), 1), size)
+    local look = plate.kickLook
+    if look then
+        ns.PlaceIcon(plate.kickHolder, plate, look.position, look.gap, look.offsetX, look.offsetY)
+    end
     return widest > 0
 end
 

@@ -36,15 +36,33 @@ ns.textPositions = {
     OUTSIDERIGHT = { "LEFT", "RIGHT", 1, 0, "LEFT" },
 }
 
+local function Pixels(size, pixel)
+    if type(size) ~= "number" or issecretvalue(size) then return 0 end
+    return math.floor(size / pixel + 0.5)
+end
+
+local function HalfPixel(region, anchor, point, relative)
+    if not ns.pixelPerfect or region.GetStringWidth then return 0, 0 end
+    local pixel = ns.PixelUnit(region)
+    local across, down = 0, 0
+    if not (point:find("LEFT") or point:find("RIGHT")) then across = across + Pixels(region:GetWidth(), pixel) end
+    if not (relative:find("LEFT") or relative:find("RIGHT")) then across = across + Pixels(anchor:GetWidth(), pixel) end
+    if not (point:find("TOP") or point:find("BOTTOM")) then down = down + Pixels(region:GetHeight(), pixel) end
+    if not (relative:find("TOP") or relative:find("BOTTOM")) then down = down + Pixels(anchor:GetHeight(), pixel) end
+    return across % 2 == 1 and -pixel / 2 or 0, down % 2 == 1 and -pixel / 2 or 0
+end
+
 function ns.PlaceIcon(region, anchor, key, gap, x, y)
+    local position = ns.iconPositions[key] or ns.iconPositions.LEFT
+    local nudgeX, nudgeY = HalfPixel(region, anchor, position[1], position[2])
     if region.plPlaceAnchor == anchor and region.plPlaceKey == key and region.plPlaceGap == gap
-        and region.plPlaceX == x and region.plPlaceY == y then
+        and region.plPlaceX == x and region.plPlaceY == y and region.plNudgeX == nudgeX and region.plNudgeY == nudgeY then
         return
     end
     region.plPlaceAnchor, region.plPlaceKey, region.plPlaceGap, region.plPlaceX, region.plPlaceY = anchor, key, gap, x, y
-    local position = ns.iconPositions[key] or ns.iconPositions.LEFT
+    region.plNudgeX, region.plNudgeY = nudgeX, nudgeY
     region:ClearAllPoints()
-    region:SetPoint(position[1], anchor, position[2], position[3] * gap + x, position[4] * gap + y)
+    region:SetPoint(position[1], anchor, position[2], position[3] * gap + x + nudgeX, position[4] * gap + y + nudgeY)
 end
 
 function ns.PlaceText(text, anchor, key, gap, x, y)
