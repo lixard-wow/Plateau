@@ -16,10 +16,7 @@ ns.Elements = ns.Elements or {}
 ns.Elements.ThreatText = ThreatText
 
 function ThreatText:Create(plate)
-    local text = plate.overlay:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    text:SetWordWrap(false)
-    text:Hide()
-    plate.threatText = text
+    plate.threatText = ns.CreateText(plate.overlay)
 end
 
 function ThreatText:Configure(db, state)
@@ -27,12 +24,7 @@ function ThreatText:Configure(db, state)
 end
 
 function ThreatText:Style(plate, db)
-    local text = plate.threatText
-    ns.ApplyFont(text, db.font, db.size, db.outline)
-    ns.ApplyShadow(text, db.shadow)
-    text:SetTextColor(db.color[1], db.color[2], db.color[3], db.color[4])
-    text:SetAlpha(db.alpha)
-    ns.PlaceIcon(text, plate, db.position, db.gap, db.offsetX, db.offsetY)
+    ns.StyleText(plate.threatText, db, plate)
 end
 
 function ThreatText:Enable(plate, unit)

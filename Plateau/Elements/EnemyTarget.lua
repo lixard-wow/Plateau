@@ -29,10 +29,7 @@ local function Token(unit)
 end
 
 function EnemyTarget:Create(plate)
-    local text = plate.overlay:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    text:SetWordWrap(false)
-    text:Hide()
-    plate.enemyTarget = text
+    plate.enemyTarget = ns.CreateText(plate.overlay)
 end
 
 function EnemyTarget:Configure(db, state)
@@ -46,8 +43,7 @@ end
 
 function EnemyTarget:Style(plate, db)
     local text = plate.enemyTarget
-    ns.ApplyFont(text, db.font, db.size, db.outline)
-    ns.ApplyShadow(text, db.shadow)
+    ns.FontText(text, db)
     ns.PlaceText(text, plate.health, db.anchor, 3, db.offsetX, db.offsetY)
 end
 

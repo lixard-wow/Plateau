@@ -34,10 +34,7 @@ ns.Elements = ns.Elements or {}
 ns.Elements.Level = Level
 
 function Level:Create(plate)
-    local text = plate.overlay:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    text:SetWordWrap(false)
-    text:Hide()
-    plate.level = text
+    plate.level = ns.CreateText(plate.overlay)
 end
 
 function Level:Configure(db, state)
@@ -56,8 +53,7 @@ end
 
 function Level:Style(plate, db)
     local text = plate.level
-    ns.ApplyFont(text, db.font, db.size, db.outline)
-    ns.ApplyShadow(text, db.shadow)
+    ns.FontText(text, db)
     if db.anchor == "NAME" then
         text.plPlaceAnchor = nil
         text:ClearAllPoints()

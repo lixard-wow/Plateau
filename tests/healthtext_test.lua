@@ -15,6 +15,16 @@ function AbbreviateNumbers(value, abbreviate)
 end
 function ns.ApplyFont() end
 function ns.ApplyShadow() end
+function ns.CreateText(parent)
+    local text = parent:CreateFontString()
+    text:SetWordWrap(false)
+    text:Hide()
+    return text
+end
+function ns.FontText(text, db)
+    ns.ApplyFont(text, db.font, db.size, db.outline)
+    ns.ApplyShadow(text, db.shadow)
+end
 function ns.PlaceText() end
 
 local function FakeText()

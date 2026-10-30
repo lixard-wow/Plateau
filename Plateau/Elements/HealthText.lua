@@ -118,10 +118,7 @@ local function CurveKey(db, executeOn, threshold)
 end
 
 function HealthText:Create(plate)
-    local text = plate.overlay:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    text:SetWordWrap(false)
-    text:Hide()
-    plate.healthText = text
+    plate.healthText = ns.CreateText(plate.overlay)
 end
 
 function HealthText:Configure(db, state)
@@ -156,8 +153,7 @@ end
 
 function HealthText:Style(plate, db)
     local text = plate.healthText
-    ns.ApplyFont(text, db.font, db.size, db.outline)
-    ns.ApplyShadow(text, db.shadow)
+    ns.FontText(text, db)
     text:SetTextColor(db.color[1], db.color[2], db.color[3], db.color[4])
     ns.PlaceText(text, plate.health, db.anchor, 3, db.offsetX, db.offsetY)
 end

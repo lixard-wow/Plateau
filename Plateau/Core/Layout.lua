@@ -104,6 +104,25 @@ function ns.CleanName(name)
     return name
 end
 
+function ns.CreateText(parent)
+    local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    text:SetWordWrap(false)
+    text:Hide()
+    return text
+end
+
+function ns.FontText(text, db)
+    ns.ApplyFont(text, db.font, db.size, db.outline)
+    ns.ApplyShadow(text, db.shadow)
+end
+
+function ns.StyleText(text, db, anchor)
+    ns.FontText(text, db)
+    text:SetTextColor(db.color[1], db.color[2], db.color[3], db.color[4])
+    text:SetAlpha(db.alpha)
+    ns.PlaceIcon(text, anchor, db.position, db.gap, db.offsetX, db.offsetY)
+end
+
 function ns.ClassColor(class, allowSecret)
     if class == nil then return nil end
     if not issecretvalue(class) then
