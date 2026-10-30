@@ -805,7 +805,7 @@ local STACK_SPACES = {
     { value = "all", label = "Everything, including auras" },
 }
 
-local STACK_CVARS = { "nameplateOverlapV", "nameplateOverlapH" }
+local STACK_CVARS = { "nameplateOverlapV", "nameplateOverlapH", "nameplateMotionSpeed" }
 
 local function Near(name, value)
     local current = tonumber(CVars:Get(name))
@@ -818,97 +818,26 @@ local function StackPreset(key, label, tooltip, values)
         label = label,
         tooltip = tooltip,
         isActive = function()
-            if not values then
-                return not CVars:IsManaged("nameplateOverlapV") and not CVars:IsManaged("nameplateOverlapH")
+            for i, name in ipairs(STACK_CVARS) do
+                if not Near(name, values[i]) then
+                    return false
+                end
             end
-            return Near("nameplateOverlapV", values[1]) and Near("nameplateOverlapH", values[2])
+            return true
         end,
         apply = function()
             for i, name in ipairs(STACK_CVARS) do
-                if values then
-                    CVars:Set(name, values[i])
-                else
-                    CVars:Release(name)
-                end
+                CVars:Set(name, values[i])
             end
         end,
     }
 end
 
 local STACK_PRESETS = {
-    StackPreset("tight", "Tight", "Nameplates sit close together, so big pulls fit on screen.", { "0.8", "0.7" }),
-    StackPreset("balanced", "Balanced", "Restores your spacing from before Plateau changed it."),
-    StackPreset("spread", "Spread out", "More room between nameplates, so they overlap less. Big pulls take more of the screen.", { "1.5", "1.1" }),
+    StackPreset("tight", "Tight", "Nameplates sit close together, so big pulls fit on screen.", { "0.8", "0.7", "0.025" }),
+    StackPreset("balanced", "Balanced", "The game's standard spacing.", { "1.1", "0.8", "0.025" }),
+    StackPreset("spread", "Spread out", "More room between nameplates, so they overlap less. Big pulls take more of the screen.", { "1.5", "1.1", "0.025" }),
 }
-
-local MOTION = { cvar = "nameplateMotionSpeed", default = 0.025, max = 0.15, fastest = "0.2" }
-
-local function Instant()
-    return Near(MOTION.cvar, MOTION.fastest)
-end
-
-local function SlideSpeed()
-    local saved = tonumber(Plateau.DB.saved.global.slideSpeed)
-    if saved and saved > 0 and saved <= MOTION.max then return saved end
-    local current = tonumber(CVars:Get(MOTION.cvar))
-    if current and current > 0 and current <= MOTION.max then return current end
-    return MOTION.default
-end
-
-local function InstantMovement()
-    return {
-        type = "Toggle",
-        label = "Fastest movement",
-        tooltip = "Nameplates slide to their new spot as fast as they can while staying smooth. Turning it off goes back to your Slide speed.",
-        get = Instant,
-        set = function(value)
-            if value then
-                Plateau.DB.saved.global.slideSpeed = SlideSpeed()
-                CVars:Set(MOTION.cvar, MOTION.fastest)
-            else
-                CVars:Set(MOTION.cvar, tostring(SlideSpeed()))
-            end
-        end,
-        reset = function()
-            Plateau.DB.saved.global.slideSpeed = nil
-            CVars:Release(MOTION.cvar)
-        end,
-        resetLabel = "Right-click to reset to what it was before Plateau changed it.",
-    }
-end
-
-local function SlideSpeedSlider(enabled)
-    return {
-        type = "Slider",
-        label = "Slide speed",
-        path = "cvar." .. MOTION.cvar,
-        gameSetting = true,
-        min = 0.005, max = MOTION.max, step = 0.005,
-        tooltip = "How much of the way to its stacked spot a nameplate moves each frame. The game's default is 0.025. Low values glide slowly; high values settle faster.",
-        get = function()
-            if Instant() then return SlideSpeed() end
-            local current = tonumber(CVars:Get(MOTION.cvar))
-            if current and current <= MOTION.max then return current end
-            return SlideSpeed()
-        end,
-        set = function(value)
-            Plateau.DB.saved.global.slideSpeed = value
-            if not Instant() then
-                CVars:Set(MOTION.cvar, tostring(value))
-            end
-        end,
-        reset = function()
-            Plateau.DB.saved.global.slideSpeed = nil
-            CVars:Release(MOTION.cvar)
-        end,
-        resetLabel = "Right-click to reset to what it was before Plateau changed it.",
-        enabledIf = function() return enabled() and not Instant() end,
-        disabledReason = function()
-            if not enabled() then return "Turn on Stack enemy nameplates or Stack friendly nameplates to use this." end
-            return "Turn off Fastest movement to use this."
-        end,
-    }
-end
 
 local function BaseSpec(spec)
     spec.get = function() return Plateau.DB:Get(spec.path) end
@@ -1649,8 +1578,8 @@ ns.sections = {
         { type = "Header", label = "Stacking", first = true },
         CVarBitToggle("nameplateStackingTypes", STACK.Enemy, "Stack enemy nameplates", "Enemy nameplates move apart instead of overlapping."),
         CVarBitToggle("nameplateStackingTypes", STACK.Friendly, "Stack friendly nameplates", "Friendly nameplates move apart instead of overlapping."),
-        Gate({ type = "Presets", presets = STACK_PRESETS, instant = true, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack",
-          tooltip = "Ready-made spacing between stacked nameplates." }, StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
+        Gate({ type = "Presets", presets = STACK_PRESETS, instant = true, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack movement speed slide jumping",
+          tooltip = "Ready-made spacing between stacked nameplates. Each one also sets the game's standard slide speed, so nameplates glide into place instead of jumping." }, StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
         { type = "Note", label = "Click a preset to apply it. The underlined preset is in use.", height = 24 },
         Gate({ type = "Toggle", label = "Show stacking boxes",
           get = function() return ns.stackBoxesOn == true end,
@@ -1680,10 +1609,6 @@ ns.sections = {
               return space == "cast" or space == "barcast" or space == "all"
           end,
           label = "These bounds keep room for a cast bar on every nameplate, so big pulls stack much higher. Health bar only or Health bar and name keep pulls tighter." },
-
-        { type = "Header", label = "Movement" },
-        InstantMovement(),
-        SlideSpeedSlider(StackingOn),
 
         { type = "Header", label = "Position" },
         BaseSpec({ type = "Slider", path = "look.plate.offsetY", label = "Nameplate vertical offset", min = -60, max = 60,
