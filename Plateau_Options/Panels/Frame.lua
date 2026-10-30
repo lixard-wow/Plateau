@@ -1358,7 +1358,7 @@ function ns.SelectSection(key)
     end
 end
 
-frame:SetScript("OnShow", function()
+local function OpenWindow()
     ns.ApplyScale()
     KeepOnScreen()
     Style.RefreshPixels()
@@ -1374,13 +1374,13 @@ frame:SetScript("OnShow", function()
         end
     end
     Plateau.RefreshDirtyPreviews()
-end)
+end
 
-frame:SetScript("OnHide", function()
+local function CloseWindow()
     ns.HideDropdownList()
     ns.clickAreasOn = false
     ns.UpdateClickAreas()
-end)
+end
 
 function frame:Toggle()
     self:SetShown(not self:IsShown())
@@ -1668,15 +1668,15 @@ box:SetScript("OnArrowPressed", function(_, key)
     end
 end)
 
-frame:HookScript("OnHide", function()
+local function SaveScroll()
     results:Hide()
     box:ClearFocus()
     ns.Widgets.HidePrompts()
     local global = Plateau.DB.saved.global
     global.lastScroll = shown and { key = shown.key, offset = math.floor(Offset(scroll) + 0.5) } or nil
-end)
+end
 
-frame:HookScript("OnShow", function()
+local function RestoreScroll()
     local saved = Plateau.DB.saved.global.lastScroll
     if not (saved and shown and saved.key == shown.key and saved.offset and saved.offset > 0) then return end
     C_Timer.After(0, function()
@@ -1685,7 +1685,7 @@ frame:HookScript("OnShow", function()
             UpdateThumb()
         end
     end)
-end)
+end
 
 local SHORTCUTS = {
     Z = function() ns.Undo.Undo(1) end,
@@ -1717,5 +1717,13 @@ shortcuts:SetScript("OnEvent", function(_, event)
         ArmShortcuts(frame:IsShown())
     end
 end)
-frame:HookScript("OnShow", function() ArmShortcuts(true) end)
-frame:HookScript("OnHide", function() ArmShortcuts(false) end)
+frame:SetScript("OnShow", function()
+    OpenWindow()
+    RestoreScroll()
+    ArmShortcuts(true)
+end)
+frame:SetScript("OnHide", function()
+    CloseWindow()
+    SaveScroll()
+    ArmShortcuts(false)
+end)
