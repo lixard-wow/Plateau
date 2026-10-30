@@ -25,9 +25,7 @@ local SCROLL_TOP = TOP + TABLE + PAGE_HEAD
 local MARK_ROOM = 10
 
 ns.layout = {
-    width = WIDTH, title = TOP, preview = TABLE - RULER_X - TOOLS, pad = PAD, rail = RAIL, content = CONTENT_WIDTH, column = COLUMN,
-    plateScale = 1.5, previewTop = TOP + RULER_X, previewLeft = RAIL + 1 + RULER_Y, previewRight = 1,
-    centerShift = 0,
+    pad = PAD, content = CONTENT_WIDTH, column = COLUMN, plateScale = 1.5, centerShift = 0,
 }
 
 local Logic = ns.PageLogic

@@ -851,7 +851,6 @@ function ns.SetPreviewSection(key, parts, title)
 end
 
 
-ns.RefreshPreviewEditing = UpdateHotspots
 
 local waiting = CreateFrame("Frame", nil, panel)
 waiting:SetFrameLevel(panel:GetFrameLevel() + 240)
@@ -1042,7 +1041,6 @@ local TRAY = {
     { label = "Enemy buffs", section = "auraPurge", aura = "purge", paths = { "look.auras.enabled", "look.auras.purge.enabled" }, texture = "Interface\\Icons\\Spell_Holy_PowerWordShield" },
     { label = "Important", section = "auraImportant", aura = "important", paths = { "look.auras.enabled", "look.auras.important.enabled" }, texture = "Interface\\Icons\\Spell_Nature_LightningShield" },
 }
-ns.previewTray = TRAY
 
 local function TrayRegion(item)
     if item.aura then

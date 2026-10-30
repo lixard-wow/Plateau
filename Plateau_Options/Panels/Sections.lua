@@ -2851,6 +2851,3 @@ if Plateau.SetImportRanges then
     Plateau.SetImportRanges(sliderRanges)
 end
 
-ns.CVarToggle = CVarToggle
-ns.CVarBitToggle = CVarBitToggle
-ns.stackTypes = STACK
