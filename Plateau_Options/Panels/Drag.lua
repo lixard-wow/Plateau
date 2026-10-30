@@ -349,6 +349,30 @@ local function AllCandidates(spec)
     return Dedupe(list)
 end
 
+local function Measure(list, mover)
+    for _, candidate in ipairs(list) do
+        if candidate.mx then
+            local px, py = PointXY(mover, candidate.point or "CENTER")
+            if px then
+                candidate.mdx, candidate.mdy = candidate.mx - px, candidate.my - py
+            end
+        end
+    end
+    return list
+end
+
+local function Remeasure(list, mover)
+    for _, candidate in ipairs(list) do
+        if candidate.mdx then
+            local px, py = PointXY(mover, candidate.point or "CENTER")
+            if px then
+                candidate.mx, candidate.my = px + candidate.mdx, py + candidate.mdy
+            end
+        end
+    end
+    return list
+end
+
 local function OnUpdate()
     if pressed and not active then
         if not IsMouseButtonDown("LeftButton") then
@@ -377,7 +401,8 @@ local function OnUpdate()
     local moverX, moverY = KeepInside(spec, mover, x - spec.grabX, y - spec.grabY)
     mover:ClearAllPoints()
     mover:SetPoint("CENTER", UIParent, "BOTTOMLEFT", moverX, moverY)
-    local candidates = AllCandidates(spec)
+    local candidates = spec.cached and Remeasure(spec.cached, mover) or Measure(AllCandidates(spec), mover)
+    spec.cached = candidates
     local candidate, dx, dy = Nearest(candidates)
     if candidate and candidate.point and Snapping() then
         local sx, sy = Offsets(dx, dy)
@@ -445,6 +470,7 @@ function Start(spec)
     end
     spec.grabX = x - (left + right) / 2
     spec.grabY = y - (top + bottom) / 2
+    spec.cached = nil
     active = spec
     if UpdateReadout then
         UpdateReadout()
@@ -459,6 +485,7 @@ function Stop(spec)
     pressed = nil
     driver:Hide()
     snapCandidates = {}
+    spec.cached = nil
 
     local off = Drag.TrayDrop(spec)
     if off then
@@ -503,6 +530,7 @@ function Drag.Cancel()
     active = nil
     driver:Hide()
     snapCandidates = {}
+    spec.cached = nil
     Apply({})
     Settle(spec)
 end
