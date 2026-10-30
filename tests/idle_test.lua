@@ -12,6 +12,7 @@ local ns = {
         ResizeNow = function() calls.style = calls.style + 1 end,
     },
 }
+ns.Zone = { inInstance = false }
 assert(loadfile("Plateau/Features/Idle.lua"))("Plateau", ns)
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 

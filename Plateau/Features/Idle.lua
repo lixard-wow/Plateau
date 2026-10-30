@@ -1,6 +1,7 @@
 local _, ns = ...
 
 local UnitAffectingCombat = UnitAffectingCombat
+local Zone = ns.Zone
 
 local settings = {}
 local version = 0
@@ -17,7 +18,7 @@ local function IsIdle(plate)
     local s = settings[plate.state]
     return s ~= nil
         and Idle.enabledIn[plate.state]
-        and (not s.instancesOnly or IsInInstance() == true)
+        and (not s.instancesOnly or Zone.inInstance)
         and plate.unit ~= nil
         and not plate.isFriendly
         and not plate.isPlayer
