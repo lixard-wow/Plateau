@@ -1,7 +1,6 @@
 local _, ns = ...
 
 local BlizzardSize = CreateFrame("Frame")
-ns.BlizzardSize = BlizzardSize
 
 local gameWidth, gameHeight
 local applied = false

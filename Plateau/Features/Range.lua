@@ -11,7 +11,6 @@ local Range = {
     key = "range",
     events = {},
 }
-ns.Range = Range
 
 function Range:Create(plate)
     plate.rangeAlpha = 1
