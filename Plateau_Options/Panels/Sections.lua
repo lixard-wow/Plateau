@@ -104,18 +104,9 @@ local BRACKET_STYLES = {
     { value = "claim", label = "Thin corners" },
 }
 
-local AURA_SIDES = {
-    { value = "TOP", label = "Above" },
-    { value = "BOTTOM", label = "Below" },
-    { value = "LEFT", label = "Left" },
-    { value = "RIGHT", label = "Right" },
-}
+local AURA_SIDES = { SIDES[1], SIDES[2], SIDES[3], SIDES[4] }
 
-local AURA_ALIGN = {
-    { value = "LEFT", label = "Left" },
-    { value = "CENTER", label = "Center" },
-    { value = "RIGHT", label = "Right" },
-}
+local AURA_ALIGN = ALIGN
 
 local HEALTH_FORMATS = {
     { value = "percent", label = "Percentage  (87%)" },
@@ -419,11 +410,7 @@ local POWER_TEXT_FORMATS = {
     { value = "both", label = "Both  (45.2K | 60%)" },
 }
 
-local POWER_TEXT_ANCHORS = {
-    { value = "LEFT", label = "Left" },
-    { value = "CENTER", label = "Center" },
-    { value = "RIGHT", label = "Right" },
-}
+local POWER_TEXT_ANCHORS = ALIGN
 
 local ENEMY_POWER_POSITIONS = {
     { value = "inside", label = "Inside the bottom of health bar" },
