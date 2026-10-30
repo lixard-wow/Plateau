@@ -854,6 +854,13 @@ local function On(path)
     return function() return ns.Get(path) == true end
 end
 
+local function Chosen(path)
+    return function()
+        local value = ns.Get(path)
+        return value ~= nil and value ~= "" and value ~= "none"
+    end
+end
+
 local function Off(path)
     return function() return ns.Get(path) ~= true end
 end
@@ -941,10 +948,7 @@ local function FriendlyRaidMarkerReason()
     return "Turn on Separate friendly position to use this."
 end
 
-local function BorderOn()
-    local style = ns.Get("look.health.borderStyle")
-    return style ~= nil and style ~= "" and style ~= "none"
-end
+local BorderOn = Chosen("look.health.borderStyle")
 
 local function GateList(test, reason, ...)
     local specs = { ... }
@@ -957,9 +961,7 @@ end
 local PERCENT_FORMATS = { percent = true, both = true, paren = true, percentFirst = true, missingPercent = true }
 local TEXT_ON = "Turn on Show health text to use this."
 
-local function HealthTextOn()
-    return ns.Get("look.healthText.enabled") == true
-end
+local HealthTextOn = On("look.healthText.enabled")
 
 local function HealthTextPercent()
     return HealthTextOn() and PERCENT_FORMATS[ns.Get("look.healthText.format")] == true
@@ -983,30 +985,17 @@ local NAME_ON = "Turn on Show names to use this."
 local ENEMY_TARGET_ON = "Turn on Show enemy target name to use this."
 local LEVEL_ON = "Turn on Show level to use this."
 
-local function NameOn()
-    return ns.Get("look.name.enabled") == true
-end
-
-local function EnemyTargetOn()
-    return ns.Get("look.enemyTarget.enabled") == true
-end
-
-local function LevelOn()
-    return ns.Get("look.level.enabled") == true
-end
+local NameOn = On("look.name.enabled")
+local EnemyTargetOn = On("look.enemyTarget.enabled")
+local LevelOn = On("look.level.enabled")
 
 local RETAIL_NAME_NOTE = Plateau.flavor ~= "forever" and " In dungeons, raids and Mythic+ names always show in full." or ""
 
-local function CastBorderOn()
-    local style = ns.Get("look.castbar.borderStyle")
-    return style ~= nil and style ~= "" and style ~= "none"
-end
+local CastBorderOn = Chosen("look.castbar.borderStyle")
 
 local POWER_ON = "Turn on Show enemy power bar to use this."
 
-local function PowerOn()
-    return ns.Get("look.enemyPower.enabled") == true
-end
+local PowerOn = On("look.enemyPower.enabled")
 
 local function PowerText()
     return PowerOn() and ns.Get("look.enemyPower.showText") == true
@@ -1029,9 +1018,7 @@ end
 
 local HOVER_ON = "Turn on Enable mouseover highlight to use this."
 
-local function HoverOn()
-    return ns.Get("look.mouseover.enabled") == true
-end
+local HoverOn = On("look.mouseover.enabled")
 
 local function HoverGlowOn()
     return HoverOn() and ns.Get("look.mouseover.glow") == true
@@ -1203,12 +1190,6 @@ local function DescribeLines(text)
     return Plateau.T("Lines at %s"):format(table.concat(values, ", "))
 end
 
-local function Chosen(path)
-    return function()
-        local value = ns.Get(path)
-        return value ~= nil and value ~= "" and value ~= "none"
-    end
-end
 
 local AURA_SHAPES = {
     { value = "square", label = "Square" },
