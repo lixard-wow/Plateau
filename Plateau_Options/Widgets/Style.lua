@@ -551,9 +551,21 @@ function Style.PixelUnit(region)
     return PixelUtil.GetPixelToUIUnitFactor() / scale
 end
 
+local EDGE_POINTS = {
+    top = { "TOPLEFT", 0, 0, "TOPRIGHT", 0, -1 },
+    bottom = { "BOTTOMLEFT", 0, 1, "BOTTOMRIGHT", 0, 0 },
+    left = { "TOPLEFT", 0, 0, "BOTTOMLEFT", 1, 0 },
+    right = { "TOPRIGHT", -1, 0, "BOTTOMRIGHT", 0, 0 },
+}
+
 local function ApplyPixel(region, how)
     local unit = Style.PixelUnit(region)
-    if how == "width" then
+    if type(how) == "table" and how.edge then
+        local p = EDGE_POINTS[how.edge]
+        region:ClearAllPoints()
+        region:SetPoint("TOPLEFT", how.frame, p[1], p[2] * unit, p[3] * unit)
+        region:SetPoint("BOTTOMRIGHT", how.frame, p[4], p[5] * unit, p[6] * unit)
+    elseif how == "width" then
         region:SetWidth(unit)
     elseif how == "height" then
         region:SetHeight(unit)
@@ -579,6 +591,15 @@ function Style.PixelHeight(region)
     end
     pixelSized[region] = "height"
     ApplyPixel(region, "height")
+end
+
+function Style.PixelEdge(region, frame, edge)
+    if region.SetSnapToPixelGrid then
+        Snap(region)
+    end
+    local how = { edge = edge, frame = frame }
+    pixelSized[region] = how
+    ApplyPixel(region, how)
 end
 
 function Style.PixelInset(region, parent, pixels)
@@ -715,18 +736,10 @@ function Style.Border(frame, color)
     for i = 1, 4 do
         edges[i] = Snap(frame:CreateTexture(nil, "BORDER"))
     end
-    edges[1]:SetPoint("TOPLEFT")
-    edges[1]:SetPoint("TOPRIGHT")
-    Style.PixelHeight(edges[1])
-    edges[2]:SetPoint("BOTTOMLEFT")
-    edges[2]:SetPoint("BOTTOMRIGHT")
-    Style.PixelHeight(edges[2])
-    edges[3]:SetPoint("TOPLEFT")
-    edges[3]:SetPoint("BOTTOMLEFT")
-    Style.PixelWidth(edges[3])
-    edges[4]:SetPoint("TOPRIGHT")
-    edges[4]:SetPoint("BOTTOMRIGHT")
-    Style.PixelWidth(edges[4])
+    Style.PixelEdge(edges[1], frame, "top")
+    Style.PixelEdge(edges[2], frame, "bottom")
+    Style.PixelEdge(edges[3], frame, "left")
+    Style.PixelEdge(edges[4], frame, "right")
     frame.borderEdges = edges
     Style.SetBorderColor(frame, color)
 end
