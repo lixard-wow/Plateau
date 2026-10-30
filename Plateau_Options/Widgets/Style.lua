@@ -402,6 +402,20 @@ function Style.Themed(texture, alpha)
     Style.Paint(texture, color, alpha or 1)
 end
 
+function Style.OutlineEdges(frame, color)
+    local edges = {}
+    for i = 1, 4 do
+        edges[i] = Style.Snap(frame:CreateTexture(nil, "BORDER"))
+        if color then
+            Style.Paint(edges[i], color, 1)
+        else
+            Style.Themed(edges[i], 1)
+        end
+    end
+    frame.outlineEdges = edges
+    return frame
+end
+
 function Style.ThemedBorder(frame)
     local roundEdge = rawget(frame, "roundEdge")
     if roundEdge then

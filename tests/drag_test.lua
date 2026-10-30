@@ -98,7 +98,7 @@ Plateau = {
     },
 }
 
-local ns = { Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintVertex = function(t, c, a, s) s = s or 1 t:SetVertexColor((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintText = function(t, c, a) t:SetTextColor(c[1] or 0, c[2] or 0, c[3] or 0, a or c[4] or 1) end, PixelInset = function() end, PixelWidth = function() end, PixelHeight = function() end, RefreshPixels = function() end, 
+local ns = { Style = { Paint = function(t, c, a, s) s = s or 1 t:SetColorTexture((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintVertex = function(t, c, a, s) s = s or 1 t:SetVertexColor((c[1] or 0) * s, (c[2] or 0) * s, (c[3] or 0) * s, a or c[4] or 1) end, PaintText = function(t, c, a) t:SetTextColor(c[1] or 0, c[2] or 0, c[3] or 0, a or c[4] or 1) end, PixelInset = function() end, OutlineEdges = function(f) return f end, PixelWidth = function() end, PixelHeight = function() end, RefreshPixels = function() end, 
     colors = { muted = { 0.5, 0.5, 0.5 }, accent = { 1, 1, 1 }, primaryText = { 0, 0, 0 }, window = { 0, 0, 0 } },
     Text = function(parent) local text = NewFrame(parent) text.GetStringWidth = function() return 10 end return text end,
     Fill = function(frame) return frame:CreateTexture() end,

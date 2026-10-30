@@ -53,7 +53,7 @@ hint:SetText(Hint())
 
 local outline = CreateFrame("Frame", nil, panel)
 outline:SetFrameLevel(panel:GetFrameLevel() + 200)
-Style.Border(outline, C.text)
+Style.OutlineEdges(outline, C.text)
 outline:SetAlpha(0.55)
 outline:Hide()
 
@@ -224,12 +224,26 @@ local function PixelBox(spot)
     return l * toPx - ring, r * toPx + ring, t * toPx + ring, b * toPx - ring
 end
 
+local function Put(texture, back, x1, y1, x2, y2)
+    texture:ClearAllPoints()
+    texture:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x1 * back, y1 * back)
+    texture:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", x2 * back, y2 * back)
+end
+
 local function FrameAround(frame, l, r, t, b)
     local grow = OUTLINE_GAP + 1
     local back = PixelFactor() / frame:GetEffectiveScale()
+    l, r, t, b = l - grow, r + grow, t + grow, b - grow
     frame:ClearAllPoints()
-    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", (l - grow) * back, (t + grow) * back)
-    frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", (r + grow) * back, (b - grow) * back)
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l * back, t * back)
+    frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", r * back, b * back)
+    local edges = frame.outlineEdges
+    if edges then
+        Put(edges[1], back, l, t, r, t - 1)
+        Put(edges[2], back, l, b + 1, r, b)
+        Put(edges[3], back, l, t - 1, l + 1, b + 1)
+        Put(edges[4], back, r - 1, t - 1, r, b + 1)
+    end
 end
 
 function ns.OutlineSpot(frame, spot)
@@ -481,8 +495,7 @@ local function EditOutline(index)
     if not frame then
         frame = CreateFrame("Frame", nil, panel)
         frame:SetFrameLevel(outline:GetFrameLevel() - 1)
-        Style.Border(frame, C.accent)
-        Style.ThemedBorder(frame)
+        Style.OutlineEdges(frame)
         frame:SetAlpha(0.6)
         editOutlines[index] = frame
     end
