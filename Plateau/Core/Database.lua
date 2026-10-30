@@ -112,6 +112,17 @@ local function ForEachLook(db, fix)
     end
 end
 
+local function ForEachCustomSection(db, key, fix)
+    for name, profile in pairs(db.profiles or {}) do
+        if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then
+            profile.look = type(profile.look) == "table" and profile.look or {}
+            local section = type(profile.look[key]) == "table" and profile.look[key] or {}
+            profile.look[key] = section
+            fix(section)
+        end
+    end
+end
+
 local migrations = {
     [30] = function(db)
         local seeded = db.global and db.global.builtins or {}
@@ -157,13 +168,12 @@ local migrations = {
         ForEachLook(db, Clear)
     end,
     [26] = function(db)
-        for _, profile in pairs(db.profiles or {}) do
-            local look = type(profile) == "table" and profile.look
+        ForEachLook(db, function(look)
             local quest = type(look) == "table" and look.quest
             if type(quest) == "table" and RETIRED_QUEST_ICONS[quest.style] then
                 quest.style = RETIRED_QUEST_ICONS[quest.style]
             end
-        end
+        end)
     end,
     [25] = function(db)
         local function Reset(look)
@@ -183,28 +193,18 @@ local migrations = {
         end
     end,
     [23] = function(db)
-        for name, profile in pairs(db.profiles or {}) do
-            if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then
-                profile.look = type(profile.look) == "table" and profile.look or {}
-                local classPower = type(profile.look.classPower) == "table" and profile.look.classPower or {}
-                profile.look.classPower = classPower
-                if classPower.position == nil then classPower.position = "BOTTOM" end
-                if classPower.gap == nil then classPower.gap = 22 end
-                if classPower.offsetY == nil then classPower.offsetY = 0 end
-            end
-        end
+        ForEachCustomSection(db, "classPower", function(classPower)
+            if classPower.position == nil then classPower.position = "BOTTOM" end
+            if classPower.gap == nil then classPower.gap = 22 end
+            if classPower.offsetY == nil then classPower.offsetY = 0 end
+        end)
     end,
     [22] = function(db)
-        for name, profile in pairs(db.profiles or {}) do
-            if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then
-                profile.look = type(profile.look) == "table" and profile.look or {}
-                local castbar = type(profile.look.castbar) == "table" and profile.look.castbar or {}
-                profile.look.castbar = castbar
-                if castbar.uninterruptible == nil then
-                    castbar.uninterruptible = { 0.6039, 0.6275, 0.7059, 0.6 }
-                end
+        ForEachCustomSection(db, "castbar", function(castbar)
+            if castbar.uninterruptible == nil then
+                castbar.uninterruptible = { 0.6039, 0.6275, 0.7059, 0.6 }
             end
-        end
+        end)
     end,
     [21] = function(db)
         local function Clear(look)
@@ -216,18 +216,13 @@ local migrations = {
         ForEachLook(db, Clear)
     end,
     [19] = function(db)
-        for name, profile in pairs(db.profiles or {}) do
-            if type(profile) == "table" and not (ns.Builtins and ns.Builtins.ByName(name)) then
-                profile.look = type(profile.look) == "table" and profile.look or {}
-                for _, key in ipairs({ "classPower", "enemyPower" }) do
-                    local element = type(profile.look[key]) == "table" and profile.look[key] or {}
-                    profile.look[key] = element
-                    if element.enabled == nil then
-                        element.enabled = true
-                    end
-                end
+        local function TurnOn(element)
+            if element.enabled == nil then
+                element.enabled = true
             end
         end
+        ForEachCustomSection(db, "classPower", TurnOn)
+        ForEachCustomSection(db, "enemyPower", TurnOn)
     end,
     [17] = function(db)
         if type(db.global) == "table" then
