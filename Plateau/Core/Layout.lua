@@ -12,6 +12,10 @@ ns.iconPositions = {
     BOTTOMRIGHT = { "TOPRIGHT", "BOTTOMRIGHT", 0, -1 },
     INSIDELEFT = { "LEFT", "LEFT", 1, 0 },
     INSIDERIGHT = { "RIGHT", "RIGHT", -1, 0 },
+    LEFTTOP = { "TOPRIGHT", "TOPLEFT", -1, 0 },
+    LEFTBOTTOM = { "BOTTOMRIGHT", "BOTTOMLEFT", -1, 0 },
+    RIGHTTOP = { "TOPLEFT", "TOPRIGHT", 1, 0 },
+    RIGHTBOTTOM = { "BOTTOMLEFT", "BOTTOMRIGHT", 1, 0 },
 }
 
 ns.textPositions = {
