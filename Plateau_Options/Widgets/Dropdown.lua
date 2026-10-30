@@ -145,6 +145,7 @@ local function EnsureList()
     catcher:SetScript("OnClick", HideList)
 
     list = CreateFrame("Frame", nil, catcher)
+    list:SetClampedToScreen(true)
     list:SetFrameLevel(catcher:GetFrameLevel() + 10)
     list:EnableMouse(true)
     list:EnableMouseWheel(true)
@@ -271,6 +272,18 @@ local function ShowList(owner, options, current, onPick, opts)
         list:SetPoint("TOPLEFT", owner, "BOTTOMLEFT", 0, -2)
     end
     list:SetHeight((listRows + (listPinned and 1 or 0)) * ITEM_HEIGHT + 2 + LIST_PAD * 2)
+    local ownerBottom = owner:GetBottom()
+    if not opts.up and ownerBottom then
+        local room = ownerBottom * owner:GetEffectiveScale()
+        if room < list:GetHeight() * list:GetEffectiveScale() + 4 then
+            list:ClearAllPoints()
+            if opts.alignRight then
+                list:SetPoint("BOTTOMRIGHT", owner, "TOPRIGHT", 0, 2)
+            else
+                list:SetPoint("BOTTOMLEFT", owner, "TOPLEFT", 0, 2)
+            end
+        end
+    end
     Render()
     list:SetWidth(opts.width or FitWidth(owner:GetWidth()))
     catcher:Show()

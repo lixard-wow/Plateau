@@ -4,6 +4,7 @@ local Style = ns.Style
 local C = Style.colors
 
 local BAR_HEIGHT = 12
+local BOX_WIDTH = 44
 
 function ns.Widgets.Slider(parent, spec)
     local min, max, step = spec.min, spec.max, spec.step or 1
@@ -21,13 +22,16 @@ function ns.Widgets.Slider(parent, spec)
     local box = CreateFrame("EditBox", nil, track)
     box:SetPoint("TOPRIGHT", -1, -1)
     box:SetPoint("BOTTOMRIGHT", -1, 1)
-    box:SetWidth(44)
+    box:SetWidth(BOX_WIDTH)
     box:SetFrameLevel(track:GetFrameLevel() + 2)
     box:SetAutoFocus(false)
     Style.SetFont(box, Style.buttonFont, 10, "OUTLINE")
     Style.PaintText(box, C.text)
     box:SetJustifyH("RIGHT")
     box:SetTextInsets(2, 3, 0, 0)
+    local measure = track:CreateFontString(nil, "OVERLAY")
+    Style.SetFont(measure, Style.buttonFont, 10, "OUTLINE")
+    measure:Hide()
     local typing = box:CreateTexture(nil, "BACKGROUND")
     typing:SetAllPoints()
     Style.Paint(typing, C.field, 1)
@@ -50,7 +54,13 @@ function ns.Widgets.Slider(parent, spec)
     local function SetDisplay(value)
         currentValue = value
         PositionThumb(value)
-        box:SetText(pattern:format(value))
+        local text = pattern:format(value)
+        box:SetText(text)
+        measure:SetText(text)
+        local width = measure:GetStringWidth()
+        if type(width) == "number" and width > 0 then
+            box:SetHitRectInsets(math.max(0, BOX_WIDTH - math.ceil(width) - 8), 0, 0, 0)
+        end
     end
 
     local function Apply(value)

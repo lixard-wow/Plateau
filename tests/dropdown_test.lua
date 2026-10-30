@@ -11,6 +11,8 @@ function Frame:SetHeight() end
 function Frame:SetWidth() end
 function Frame:SetFrameStrata() end
 function Frame:SetFrameLevel() end
+function Frame:SetClampedToScreen() end
+function Frame:GetBottom() return 500 end
 function Frame:GetFrameLevel() return 0 end
 function Frame:GetWidth() return 100 end
 function Frame:GetHeight() return 100 end

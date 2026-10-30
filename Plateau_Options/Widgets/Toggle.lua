@@ -57,6 +57,11 @@ local function MakeToggle(parent, spec)
     row.label = label
     row.track = track
     row:SetScript("OnClick", DoToggle)
+    row:SetScript("OnSizeChanged", function(self, width)
+        if type(width) == "number" and not issecretvalue(width) then
+            self:SetHitRectInsets(0, math.max(0, width - Style.CONTROL_X - BOX - 6), 0, 0)
+        end
+    end)
     row:HookScript("OnEnter", function() UpdateHover(true) end)
     row:HookScript("OnLeave", function() UpdateHover(false) end)
 

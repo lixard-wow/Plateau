@@ -21,6 +21,10 @@ function Frame:AddMaskTexture() end
 function Frame:SetTexture() end
 function Frame:ClearAllPoints() end
 function Frame:CreateTexture() return setmetatable({}, Frame) end
+function Frame:CreateFontString() return setmetatable({}, Frame) end
+function Frame:SetText(text) self.text = text end
+function Frame:GetStringWidth() return 10 end
+function Frame:SetHitRectInsets() end
 function Frame:CreateMaskTexture() return setmetatable({}, Frame) end
 function Frame:GetWidth() return self.width end
 function Frame:GetLeft() return self.left end
