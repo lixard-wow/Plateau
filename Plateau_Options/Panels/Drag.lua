@@ -44,21 +44,26 @@ local function Get(path)
     return (Plateau.DB:Get(path))
 end
 
+local DIR = setmetatable({}, { __index = function(cache, point)
+    local direction = {
+        point:find("LEFT") and -1 or point:find("RIGHT") and 1 or 0,
+        point:find("TOP") and 1 or point:find("BOTTOM") and -1 or 0,
+    }
+    cache[point] = direction
+    return direction
+end })
+
+local function EdgeXY(left, right, top, bottom, point)
+    local direction = DIR[point]
+    local x = direction[1] < 0 and left or direction[1] > 0 and right or (left + right) / 2
+    local y = direction[2] > 0 and top or direction[2] < 0 and bottom or (top + bottom) / 2
+    return x, y
+end
+
 local function PointXY(frame, point)
     local left, right, top, bottom = frame:GetLeft(), frame:GetRight(), frame:GetTop(), frame:GetBottom()
     if not left then return nil end
-    local x, y = (left + right) / 2, (top + bottom) / 2
-    if point:find("LEFT") then
-        x = left
-    elseif point:find("RIGHT") then
-        x = right
-    end
-    if point:find("TOP") then
-        y = top
-    elseif point:find("BOTTOM") then
-        y = bottom
-    end
-    return x, y
+    return EdgeXY(left, right, top, bottom, point)
 end
 
 local function Clamp(value, low, high)
@@ -162,9 +167,8 @@ local EDGES = {
 }
 
 local function FromCenter(point, width, height)
-    local x = point:find("LEFT") and -width / 2 or point:find("RIGHT") and width / 2 or 0
-    local y = point:find("TOP") and height / 2 or point:find("BOTTOM") and -height / 2 or 0
-    return x, y
+    local direction = DIR[point]
+    return direction[1] * width / 2, direction[2] * height / 2
 end
 
 local function Within(region, frame)
@@ -225,18 +229,7 @@ local function Box(region)
 end
 
 local function BoxPoint(box, point)
-    local x, y = (box[1] + box[2]) / 2, (box[3] + box[4]) / 2
-    if point:find("LEFT") then
-        x = box[1]
-    elseif point:find("RIGHT") then
-        x = box[2]
-    end
-    if point:find("TOP") then
-        y = box[3]
-    elseif point:find("BOTTOM") then
-        y = box[4]
-    end
-    return x, y
+    return EdgeXY(box[1], box[2], box[3], box[4], point)
 end
 
 local function Inside(box, other)
@@ -717,8 +710,7 @@ function Drag.AuraSpec(plate, key)
         local clear = Clearance()
         for i, spot in ipairs(AURA_SPOTS) do
             local _, relative, _, _, _, point = Plateau.AuraPlacement({ side = spot.side, align = spot.align or currentAlign, grow = grow })
-            local mx = point:find("LEFT") and left or point:find("RIGHT") and right or (left + right) / 2
-            local my = point:find("TOP") and top or point:find("BOTTOM") and bottom or (top + bottom) / 2
+            local mx, my = EdgeXY(left, right, top, bottom, point)
             local sx = spot.side == "LEFT" and -clear or spot.side == "RIGHT" and clear or 0
             local sy = spot.side == "TOP" and clear or spot.side == "BOTTOM" and -clear or 0
             list[#list + 1] = {
