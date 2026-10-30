@@ -340,8 +340,8 @@ function Castbar:Create(plate)
     mustStop.fill:SetAlpha(0)
     bar.mustStop = mustStop
 
-    bar.icon = ns.SnapTexture(bar:CreateTexture(nil, "ARTWORK"))
-    bar.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    bar.icon = ns.CreateIcon(bar)
+    ns.SetIconBorder(bar.icon, 0)
 
     bar.shieldIcon = textLayer:CreateTexture(nil, "OVERLAY", nil, 3)
     bar.shieldIcon:SetTexture("Interface\\CastingBar\\UI-CastingBar-Small-Shield")
@@ -481,14 +481,14 @@ function Castbar:Style(plate, db)
     bar.icon:ClearAllPoints()
     if span then
         local tall = ns.DB.views[plate.state].plate.height + drop + height
-        bar.icon:SetSize(tall, tall)
+        ns.SizeIcon(bar.icon, tall)
         if iconRight then
             bar.icon:SetPoint("TOPLEFT", plate, "TOPRIGHT", gap, 0)
         else
             bar.icon:SetPoint("TOPRIGHT", plate, "TOPLEFT", -gap, 0)
         end
     else
-        bar.icon:SetSize(height, height)
+        ns.SizeIcon(bar.icon, height)
         if iconRight then
             bar.icon:SetPoint("LEFT", bar, "RIGHT", gap, 0)
         else
@@ -501,9 +501,9 @@ function Castbar:Style(plate, db)
     local spark = db.sparkColor
     bar.spark:SetVertexColor(spark[1], spark[2], spark[3], spark[4])
     if db.cropIcon == false then
-        bar.icon:SetTexCoord(0, 1, 0, 1)
+        bar.icon.art:SetTexCoord(0, 1, 0, 1)
     else
-        bar.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        bar.icon.art:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     end
     local shieldSize = height + 8
     bar.shieldIcon:ClearAllPoints()
@@ -871,7 +871,7 @@ function Castbar:Refresh(plate, unit, ending)
         bar.target:Hide()
     end
 
-    bar.icon:SetTexture(texture)
+    bar.icon.art:SetTexture(texture)
     if s.showSpellName then
         bar.text:SetText(name)
     else
@@ -960,7 +960,7 @@ function Castbar:Preview(plate, state)
     plate.casting = true
     ns.Scaling:Apply(plate)
     bar.spark:SetShown(s.showSpark)
-    bar.icon:SetTexture(cast.icon)
+    bar.icon.art:SetTexture(cast.icon)
     bar.text:SetText(s.showSpellName and cast.name or "")
     bar.timer:SetText(cast.timer)
     bar.timer:SetShown(s.showTimer and not interrupted)

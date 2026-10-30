@@ -19,7 +19,7 @@ ns.Elements = ns.Elements or {}
 ns.Elements.Classification = Classification
 
 function Classification:Create(plate)
-    local icon = plate.overlay:CreateTexture(nil, "OVERLAY")
+    local icon = ns.CreateIcon(plate.overlay, true)
     icon:Hide()
     plate.classification = icon
 end
@@ -35,7 +35,7 @@ end
 
 function Classification:Style(plate, db)
     local icon = plate.classification
-    icon:SetSize(db.size, db.size)
+    ns.SizeIcon(icon, db.size)
     icon:SetAlpha(db.alpha)
     ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
 end
@@ -70,7 +70,7 @@ function Classification:Render(plate, classification)
     if plate.classificationAtlas == atlas then return end
     plate.classificationAtlas = atlas
     if atlas then
-        icon:SetAtlas(atlas)
+        icon.art:SetAtlas(atlas)
         icon:Show()
     else
         icon:Hide()

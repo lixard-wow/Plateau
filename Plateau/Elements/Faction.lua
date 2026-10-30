@@ -27,7 +27,7 @@ ns.Elements = ns.Elements or {}
 ns.Elements.Faction = Faction
 
 function Faction:Create(plate)
-    local icon = plate.overlay:CreateTexture(nil, "OVERLAY")
+    local icon = ns.CreateIcon(plate.overlay, true)
     icon:Hide()
     plate.faction = icon
 end
@@ -50,7 +50,7 @@ end
 
 function Faction:Style(plate, db)
     local icon = plate.faction
-    icon:SetSize(db.size, db.size)
+    ns.SizeIcon(icon, db.size)
     icon:SetAlpha(db.alpha)
     plate.factionPlace = db
     Place(plate)
@@ -103,9 +103,9 @@ function Faction:Render(plate, group)
         return
     end
     if hasAtlases then
-        icon:SetAtlas(ATLASES[group])
+        icon.art:SetAtlas(ATLASES[group])
     else
-        icon:SetTexture(FILES[group])
+        icon.art:SetTexture(FILES[group])
     end
     icon:Show()
 end

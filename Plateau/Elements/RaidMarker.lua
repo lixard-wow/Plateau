@@ -24,8 +24,8 @@ function RaidMarker:Create(plate)
     local layer = CreateFrame("Frame", nil, plate.overlay)
     layer:SetAllPoints()
     layer:SetFrameLevel(plate.overlay:GetFrameLevel() + 5)
-    local icon = layer:CreateTexture(nil, "OVERLAY")
-    icon:SetTexture(ICON_TEXTURE)
+    local icon = ns.CreateIcon(layer, true)
+    icon.art:SetTexture(ICON_TEXTURE)
     icon:Hide()
     plate.raidMarker = icon
     plate.markerRing = ns.CreateBorder(plate, plate, "BACKGROUND", -6)
@@ -75,7 +75,7 @@ end
 
 function RaidMarker:Style(plate, db)
     local icon = plate.raidMarker
-    icon:SetSize(db.size, db.size)
+    ns.SizeIcon(icon, db.size)
     icon:SetAlpha(db.alpha)
     ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
     plate.markerRingBase = { db.tintSize, ns.HealthBorderOffset(ns.DB.views[plate.state]) }
@@ -110,7 +110,7 @@ function RaidMarker:Update(plate, unit)
         plate.markerRing:Hide()
         return
     end
-    icon:SetSpriteSheetCell(index, ROWS, COLUMNS)
+    icon.art:SetSpriteSheetCell(index, ROWS, COLUMNS)
     icon:Show()
     ShowRing(plate, index)
 end
@@ -118,7 +118,7 @@ end
 function RaidMarker:Preview(plate, state)
     local icon = plate.raidMarker
     if state.raidMarker then
-        icon:SetSpriteSheetCell(state.raidMarker, ROWS, COLUMNS)
+        icon.art:SetSpriteSheetCell(state.raidMarker, ROWS, COLUMNS)
         icon:Show()
     else
         icon:Hide()

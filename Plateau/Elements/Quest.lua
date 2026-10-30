@@ -26,7 +26,7 @@ ns.Elements = ns.Elements or {}
 ns.Elements.Quest = Quest
 
 function Quest:Create(plate)
-    local icon = plate.overlay:CreateTexture(nil, "OVERLAY")
+    local icon = ns.CreateIcon(plate.overlay, true)
     icon:Hide()
     plate.quest = icon
     local text = plate.overlay:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -56,8 +56,8 @@ end
 
 function Quest:Style(plate, db)
     local icon = plate.quest
-    icon:SetAtlas(AtlasValid(db.style) and db.style or "QuestNormal")
-    icon:SetSize(db.size, db.size)
+    icon.art:SetAtlas(AtlasValid(db.style) and db.style or "QuestNormal")
+    ns.SizeIcon(icon, db.size)
     ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
     local place = db.progress
     ns.PlaceText(plate.questProgress, plate, place.position, place.gap, place.offsetX, place.offsetY)
@@ -86,7 +86,7 @@ function Quest:Update(plate, unit)
         return
     end
     local related = UnitIsRelatedToActiveQuest(unit)
-    icon:SetAlphaFromBoolean(related, alphas[plate.state], 0)
+    icon.art:SetAlphaFromBoolean(related, alphas[plate.state], 0)
     icon:Show()
     local text = progress[plate.state] and not issecretvalue(related) and related and Progress(unit)
     if text then
@@ -99,7 +99,7 @@ end
 
 function Quest:Preview(plate, state)
     local icon = plate.quest
-    icon:SetAlpha(alphas[plate.state])
+    icon.art:SetAlpha(alphas[plate.state])
     local excluded = ns.DB.views[plate.state].colors.questExcludeBoss and state.mobType == "boss"
     icon:SetShown(state.quest == true and not excluded)
     plate.questProgress:SetText("3/8")

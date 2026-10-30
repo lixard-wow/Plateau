@@ -136,11 +136,18 @@ local function Layout(plate, db, count)
     local holder = plate.classPower
     local width = db.pipWidth
     local height = db.pipHeight
-    local spacing = db.spacing
+    local spacing = ns.WholePixels(holder, db.spacing)
+    height = ns.WholePixels(holder, height, 1)
     if not width or width <= 0 then
         local view = ns.DB.views[plate.state]
         local total = view.plate.width * (plate.idleW or 1) * (plate.simplifiedSize or 1)
+        local pixel = ns.pixelPerfect and ns.PixelUnit(holder) or nil
         width = math.max(1, (total - (count - 1) * spacing) / count)
+        if pixel then
+            width = math.max(1, math.floor(width / pixel)) * pixel
+        end
+    else
+        width = ns.WholePixels(holder, width, 1)
     end
     holder:SetSize(count * width + (count - 1) * spacing, height)
     ns.PlaceIcon(holder, plate, db.position, db.gap, db.offsetX, db.offsetY)

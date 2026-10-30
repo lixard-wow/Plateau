@@ -32,6 +32,13 @@ function CreateFrame()
     return frame
 end
 
+function ns.CreateIcon()
+    local icon = CreateFrame()
+    icon.art = FakeRegion()
+    return icon
+end
+function ns.SizeIcon() end
+
 local classification, level = "elite", 79
 function UnitClassification() return classification end
 function UnitEffectiveLevel() return level end

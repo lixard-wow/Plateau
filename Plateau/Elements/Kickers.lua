@@ -280,7 +280,7 @@ local function PaintIcon(icon, seg, slot, entry, size, plate)
     local margin = ns.WholePixels(seg, Margin(look))
     icon:ClearAllPoints()
     icon:SetPoint("TOPLEFT", seg, "TOPLEFT", margin + (slot - 1) * (size + ns.WholePixels(seg, GAP)), -margin)
-    icon:SetSize(size, size)
+    ns.SizeIcon(icon, size)
     Picture(icon.art, entry, look and look.iconStyle)
     icon.plate, icon.kicked = plate, entry.kicked
     Countdown(icon, plate)

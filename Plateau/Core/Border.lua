@@ -145,17 +145,28 @@ function Ring:IsDrawn()
     return self.shown ~= false and not self.empty
 end
 
-function ns.DecorateIcon(frame)
+function ns.DecorateIcon(frame, glyph)
     local art = ns.SnapTexture(frame:CreateTexture(nil, "ARTWORK"))
     art:SetAllPoints()
-    art:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    if glyph then
+        art:SetTexCoord(0, 1, 0, 1)
+    else
+        art:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    end
     frame.art = art
     frame.border = ns.CreateRing(frame, 0)
+    if glyph then
+        ns.SetIconBorder(frame, 0)
+    end
     return frame
 end
 
-function ns.CreateIcon(parent)
-    return ns.DecorateIcon(CreateFrame("Frame", nil, parent))
+function ns.CreateIcon(parent, glyph)
+    return ns.DecorateIcon(CreateFrame("Frame", nil, parent), glyph)
+end
+
+function ns.SizeIcon(icon, width, height)
+    icon:SetSize(ns.WholePixels(icon, width, 1), ns.WholePixels(icon, height or width, 1))
 end
 
 function ns.CreateBorder(owner, anchor, layer, sublevel)
