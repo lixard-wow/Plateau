@@ -179,10 +179,7 @@ end
 function ns.CreateBorder(owner, anchor, layer, sublevel)
     local border = setmetatable({ owner = owner, anchor = anchor, edges = {} }, Border)
     for i = 1, 4 do
-        local edge = owner:CreateTexture(nil, layer or "BACKGROUND", nil, sublevel or 0)
-        edge:SetSnapToPixelGrid(true)
-        edge:SetTexelSnappingBias(0)
-        border.edges[i] = edge
+        border.edges[i] = ns.SnapTexture(owner:CreateTexture(nil, layer or "BACKGROUND", nil, sublevel or 0))
     end
     return border
 end
@@ -526,9 +523,7 @@ local function ApplyFade(self, r, g, b, a)
         local layer, sublevel = top:GetDrawLayer()
         self.corners = {}
         for i, info in ipairs(CORNERS) do
-            local corner = self.owner:CreateTexture(nil, layer, nil, sublevel)
-            corner:SetSnapToPixelGrid(true)
-            corner:SetTexelSnappingBias(0)
+            local corner = ns.SnapTexture(self.owner:CreateTexture(nil, layer, nil, sublevel))
             corner:SetTexture(CORNER)
             corner:SetTexCoord(info.coords[1], info.coords[2], info.coords[3], info.coords[4])
             corner:Hide()
