@@ -111,6 +111,24 @@ function ns.ResolveConflict(entry)
     end
 end
 
+local function WithOptions(name, method, failText, brokenText, ...)
+    ns.WarmThemeFonts()
+    local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
+    local target = loaded and _G[name]
+    if target and target[method] then
+        target[method](target, ...)
+        return true
+    end
+    if loaded then
+        if brokenText then
+            Say(brokenText)
+        end
+    elseif failText then
+        Say(failText:format(tostring(reason)))
+    end
+    return false
+end
+
 local function OpenConflicts(onDone)
     local ignored = ns.DB.saved.global.conflictsIgnored or {}
     local pending = {}
@@ -122,13 +140,7 @@ local function OpenConflicts(onDone)
     if #pending == 0 or InCombatLockdown() then
         return false
     end
-    ns.WarmThemeFonts()
-    local loaded = C_AddOns.LoadAddOn("Plateau_Options")
-    if loaded and PlateauConflicts and PlateauConflicts.Open then
-        PlateauConflicts:Open(pending, onDone)
-        return true
-    end
-    return false
+    return WithOptions("PlateauConflicts", "Open", nil, nil, pending, onDone)
 end
 
 local setupWatcher = CreateFrame("Frame")
@@ -139,13 +151,7 @@ local function OpenSetup()
         return
     end
     setupWatcher:UnregisterEvent("PLAYER_REGEN_ENABLED")
-    ns.WarmThemeFonts()
-    local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
-    if loaded and PlateauSetup and PlateauSetup.Open then
-        PlateauSetup:Open()
-    elseif not loaded then
-        Say(L["Couldn't open setup: %s"]:format(tostring(reason)))
-    end
+    WithOptions("PlateauSetup", "Open", L["Couldn't open setup: %s"])
 end
 
 local function OpenLocalePicker()
@@ -153,23 +159,11 @@ local function OpenLocalePicker()
         Say(L["The translation check opens out of combat."])
         return
     end
-    ns.WarmThemeFonts()
-    local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
-    if loaded and PlateauLocalePicker and PlateauLocalePicker.Open then
-        PlateauLocalePicker:Open()
-    elseif not loaded then
-        Say(L["Couldn't open the translation check: %s"]:format(tostring(reason)))
-    end
+    WithOptions("PlateauLocalePicker", "Open", L["Couldn't open the translation check: %s"])
 end
 
 local function OpenWhatsNew()
-    ns.WarmThemeFonts()
-    local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
-    if loaded and PlateauOptions and PlateauOptions.OpenSection then
-        PlateauOptions:OpenSection("help")
-    elseif not loaded then
-        Say(L["Couldn't open settings: %s"]:format(tostring(reason)))
-    end
+    WithOptions("PlateauOptions", "OpenSection", L["Couldn't open settings: %s"], nil, "help")
 end
 
 local function CheckWhatsNew()
@@ -230,15 +224,7 @@ local function Help()
 end
 
 local function OpenOptions()
-    ns.WarmThemeFonts()
-    local loaded, reason = C_AddOns.LoadAddOn("Plateau_Options")
-    if loaded and PlateauOptions and PlateauOptions.Toggle then
-        PlateauOptions:Toggle()
-    elseif loaded then
-        Say(L["Settings failed to load. Check the first Lua error."])
-    else
-        Say(L["Couldn't open settings: %s"]:format(tostring(reason)))
-    end
+    WithOptions("PlateauOptions", "Toggle", L["Couldn't open settings: %s"], L["Settings failed to load. Check the first Lua error."])
 end
 ns.OpenOptions = OpenOptions
 
