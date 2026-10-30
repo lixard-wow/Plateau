@@ -62,7 +62,7 @@ function EnemyTarget:RefreshShown(plate)
 end
 
 local function BaseColor(s, class)
-    local classColor = s.classColors and ns.ClassColor(class)
+    local classColor = s.classColors and ns.ClassColor(class, true)
     if classColor then
         return classColor.r, classColor.g, classColor.b, 1
     end
@@ -95,10 +95,7 @@ function EnemyTarget:Update(plate, unit)
     end
     local s = settings[plate.state]
     local isPlayer = UnitIsPlayer(token)
-    local class = (not issecretvalue(isPlayer) and isPlayer) and ns.UnitColors:PlayerClass(token) or nil
-    if issecretvalue(class) then
-        class = nil
-    end
+    local class = (not issecretvalue(isPlayer) and isPlayer) and (ns.UnitColors:PlayerClass(token) or UnitClassBase(token)) or nil
     local isMe
     if s.meColor then
         local ok, result = pcall(UnitIsUnit, token, "player")

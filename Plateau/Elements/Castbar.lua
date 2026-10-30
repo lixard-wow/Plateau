@@ -95,7 +95,7 @@ end
 
 local function TargetTextColor(s, unit)
     if s.targetClassColor then
-        local color = ns.ClassColor(UnitSpellTargetClass(unit))
+        local color = ns.ClassColor(UnitSpellTargetClass(unit), true)
         if color then
             return color.r, color.g, color.b, s.targetColor[4]
         end
