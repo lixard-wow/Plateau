@@ -3,7 +3,6 @@ local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 local said = {}
 local frames = {}
 local inCombat = false
-local registered = {}
 
 function GetLocale() return "enUS" end
 function date() return "12:00:00 " end
@@ -25,10 +24,7 @@ function CreateFrame()
     return frame
 end
 
-Plateau = {
-    RegisterCallback = function(owner, event) registered[event] = owner end,
-    UnregisterAllCallbacks = function() registered = {} end,
-}
+Plateau = {}
 
 local ns = {}
 PlateauDB = { global = { setupDone = true } }
@@ -40,7 +36,7 @@ C_AddOns = { LoadAddOn = function() return false end }
 frames[1].scripts.OnEvent(frames[1], "ADDON_LOADED", "Plateau")
 
 check(#frames == 1, "loading the debug file makes only its loader frame")
-check(next(registered) == nil, "nothing is hooked until a debug feature is turned on")
+check(ns.Fire == nil, "nothing is hooked until a debug feature is turned on")
 
 ns.Debug("ignored")
 ns.RunDebug("showlog")
@@ -65,15 +61,16 @@ check(PlateauDB.global.listed == nil, "toggles never touch the real settings")
 ns.RunDebug("listed")
 check(PlateauDB.debug.listed == nil and ns.DebugListed() == false, "a toggle switches back off")
 
+local quiet = ns.Fire
 ns.RunDebug("log")
-check(registered.PLATE_ADDED ~= nil and registered.CAST_START ~= nil, "turning the log on hooks plate and cast events")
+check(ns.Fire ~= quiet, "turning the log on hooks plate and cast events")
 local logFrame = frames[#frames]
 check(logFrame.events.PLAYER_REGEN_DISABLED == true, "turning the log on listens for combat")
 for i = 1, 250 do
     ns.Debug("line", i)
 end
 ns.RunDebug("log")
-check(next(registered) == nil and next(logFrame.events) == nil, "turning the log off removes every hook")
+check(next(logFrame.events) == nil, "turning the log off removes every hook")
 
 UISpecialFrames, CLOSE = {}, "Close"
 function tinsert(t, v) t[#t + 1] = v end
@@ -98,6 +95,16 @@ ns.RunDebug("clearlog")
 said = {}
 ns.RunDebug("showlog")
 check(box.text == "Nothing recorded. Turn on Event log first.", "clear log forgets every line")
+
+ns.RunDebug("log")
+ns.Fire("PLATE_ADDED", "nameplate4", { state = "enemy", mobType = "boss" })
+ns.Fire("CAST_START", "nameplate4", {})
+ns.Fire("PLATE_REMOVED", "nameplate4", {})
+ns.RunDebug("log")
+ns.Fire("PLATE_ADDED", "nameplate5", { state = "enemy" })
+ns.RunDebug("showlog")
+check(box.text == "12:00:00 plate added nameplate4 enemy boss\n12:00:00 cast start nameplate4\n12:00:00 plate removed nameplate4", "the log records plate and cast events while on, and nothing after it is turned off")
+ns.RunDebug("clearlog")
 
 PlateauDB.debug.echo = true
 said = {}

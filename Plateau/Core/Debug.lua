@@ -125,7 +125,6 @@ end
 
 local log, logNext, logCount = nil, 1, 0
 local logging = false
-local logOwner = {}
 local logFrame
 
 function ns.Debug(...)
@@ -153,20 +152,24 @@ local function LogLines()
     return lines
 end
 
+local function Quiet() end
+
+local function LogFire(event, unit, plate)
+    if event == "PLATE_ADDED" then
+        ns.Debug("plate added", unit, plate.state, plate.mobType)
+    elseif event == "PLATE_REMOVED" then
+        ns.Debug("plate removed", unit)
+    elseif event == "CAST_START" then
+        ns.Debug("cast start", unit)
+    end
+end
+
 local function SetLogging(on)
     if on == logging then return end
     logging = on
     if on then
         log = log or {}
-        Plateau.RegisterCallback(logOwner, "PLATE_ADDED", function(_, unit, plate)
-            ns.Debug("plate added", unit, plate.state, plate.mobType)
-        end)
-        Plateau.RegisterCallback(logOwner, "PLATE_REMOVED", function(_, unit)
-            ns.Debug("plate removed", unit)
-        end)
-        Plateau.RegisterCallback(logOwner, "CAST_START", function(_, unit)
-            ns.Debug("cast start", unit)
-        end)
+        ns.Fire = LogFire
         if not logFrame then
             logFrame = CreateFrame("Frame")
             logFrame:SetScript("OnEvent", function(_, event, ...)
@@ -177,7 +180,7 @@ local function SetLogging(on)
             pcall(logFrame.RegisterEvent, logFrame, event)
         end
     else
-        Plateau.UnregisterAllCallbacks(logOwner)
+        ns.Fire = Quiet
         if logFrame then
             logFrame:UnregisterAllEvents()
         end

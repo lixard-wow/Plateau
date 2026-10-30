@@ -414,9 +414,3 @@ Plateau = {
         return ns.Driver:GetPlate(unit)
     end,
 }
-
-Plateau.callbacks = LibStub("CallbackHandler-1.0"):New(Plateau)
-
-function ns.Fire(event, ...)
-    Plateau.callbacks:Fire(event, ...)
-end

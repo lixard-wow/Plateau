@@ -50,6 +50,7 @@ function ns.Say(message, continued)
 end
 
 ns.Debug = ns.Debug or function() end
+ns.Fire = ns.Fire or function() end
 
 function ns.ReportDisabled()
     local message = "|cffff5555" .. ns.L["Plateau couldn't start:"] .. "|r " .. ns.disabled
