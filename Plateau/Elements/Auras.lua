@@ -856,7 +856,7 @@ local function FakeGroup(plate, key)
     for i = 1, 6 do
         local icon = ns.CreateIcon(fake)
         icon.texture = icon.art
-        icon.dispel = ns.CreateBorder(icon, icon, "OVERLAY", 2)
+        icon.dispel = ns.CreateRing(icon, 1)
         icon.timer = icon:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         icon.timer:SetPoint("CENTER")
         icon.stacks = icon:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")

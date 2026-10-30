@@ -57,6 +57,44 @@ function ns.SnapTexture(texture)
     return texture
 end
 
+local Ring = {}
+Ring.__index = Ring
+
+function ns.CreateRing(owner, sublevel)
+    local texture = ns.SnapTexture(owner:CreateTexture(nil, "BACKGROUND", nil, sublevel or 0))
+    return setmetatable({ owner = owner, texture = texture, shown = true }, Ring)
+end
+
+function Ring:Layout(size)
+    local owner, texture = self.owner, self.texture
+    local scale = owner:GetEffectiveScale()
+    local pixel = PixelUtil and PixelUtil.GetPixelToUIUnitFactor and scale and scale > 0
+        and PixelUtil.GetPixelToUIUnitFactor() / scale or 1
+    local reach = math.max(0, math.floor((size or 0) + 0.5)) * pixel
+    self.empty = reach <= 0
+    texture:ClearAllPoints()
+    texture:SetPoint("TOPLEFT", owner, "TOPLEFT", -reach, reach)
+    texture:SetPoint("BOTTOMRIGHT", owner, "BOTTOMRIGHT", reach, -reach)
+    texture:SetShown(self.shown and not self.empty)
+end
+
+function Ring:SetColor(r, g, b, a)
+    self.texture:SetColorTexture(r, g, b, a or 1)
+end
+
+function Ring:SetShown(shown)
+    self.shown = shown ~= false
+    self.texture:SetShown(self.shown and not self.empty)
+end
+
+function Ring:Show()
+    self:SetShown(true)
+end
+
+function Ring:Hide()
+    self:SetShown(false)
+end
+
 function ns.SetIconBorder(icon, size, color)
     size = size or 0
     icon.border:Layout(size)
@@ -71,7 +109,7 @@ function ns.DecorateIcon(frame)
     art:SetAllPoints()
     art:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     frame.art = art
-    frame.border = ns.CreateBorder(frame, frame, "OVERLAY", 1)
+    frame.border = ns.CreateRing(frame, 0)
     return frame
 end
 
