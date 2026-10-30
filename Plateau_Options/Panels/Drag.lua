@@ -350,9 +350,12 @@ local function OnUpdate()
     mover:SetPoint("CENTER", UIParent, "BOTTOMLEFT", moverX, moverY)
     local candidates = AllCandidates(spec)
     local candidate, dx, dy = Nearest(candidates)
-    if candidate and candidate.point and Snapping() and dx * dx + dy * dy <= SNAP * SNAP then
-        mover:ClearAllPoints()
-        mover:SetPoint(candidate.point, candidate.anchor, candidate.relPoint, candidate.ox or 0, candidate.oy or 0)
+    if candidate and candidate.point and Snapping() then
+        local sx, sy = Offsets(dx, dy)
+        if sx ~= dx or sy ~= dy then
+            mover:ClearAllPoints()
+            mover:SetPoint(candidate.point, candidate.anchor, candidate.relPoint, (candidate.ox or 0) + sx, (candidate.oy or 0) + sy)
+        end
     end
     snapCandidates = candidates
 end
