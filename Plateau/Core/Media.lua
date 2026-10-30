@@ -72,29 +72,53 @@ if ns.media then
     end
 end
 
-local function EnsurePattern(bar)
-    local clip = bar.patternClip
-    if clip then return clip end
-    clip = CreateFrame("Frame", nil, bar)
-    clip:SetClipsChildren(true)
-    local texture = clip:CreateTexture(nil, "ARTWORK")
+local TILE = 64
+
+local function SpanBar(clip, bar, layer, sublevel)
+    local texture = clip:CreateTexture(nil, layer, nil, sublevel)
     texture:SetPoint("TOPLEFT", bar, "TOPLEFT")
     texture:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT")
+    return texture
+end
+
+local function NewClip(bar, field, layer, makeMirror)
+    local clip = CreateFrame("Frame", nil, bar)
+    clip:SetClipsChildren(true)
+    local texture = SpanBar(clip, bar, layer)
     clip.texture = texture
-    bar.patternClip = clip
+    bar[field] = clip
     bar:HookScript("OnSizeChanged", function(_, width, height)
         if clip.tile and not issecretvalue(width) and not issecretvalue(height) then
             texture:SetTexCoord(0, math.max(width, 1) / clip.tile, 0, math.max(height, 1) / clip.tile)
         end
     end)
-    local function Mirror(_, ...)
+    local mirror = makeMirror(clip, bar)
+    hooksecurefunc(bar, "SetStatusBarColor", mirror)
+    hooksecurefunc(bar:GetStatusBarTexture(), "SetVertexColor", mirror)
+    return clip
+end
+
+local function TileCoords(bar, texture, tile, widthKey, heightKey)
+    local width, height = bar:GetSize()
+    if issecretvalue(width) or issecretvalue(height) then
+        width, height = bar[widthKey] or 128, bar[heightKey] or 16
+    else
+        bar[widthKey], bar[heightKey] = width, height
+    end
+    texture:SetTexCoord(0, math.max(width, 1) / tile, 0, math.max(height, 1) / tile)
+end
+
+local function PatternMirror(clip)
+    local texture = clip.texture
+    return function(_, ...)
         if clip.mirror then
             texture:SetVertexColor(...)
         end
     end
-    hooksecurefunc(bar, "SetStatusBarColor", Mirror)
-    hooksecurefunc(bar:GetStatusBarTexture(), "SetVertexColor", Mirror)
-    return clip
+end
+
+local function EnsurePattern(bar)
+    return bar.patternClip or NewClip(bar, "patternClip", "ARTWORK", PatternMirror)
 end
 
 function ns.SetBarPattern(bar, path, tile, mirror, r, g, b, a)
@@ -112,13 +136,7 @@ function ns.SetBarPattern(bar, path, tile, mirror, r, g, b, a)
     clip:SetAllPoints(fill)
     clip.tile, clip.mirror = tile, mirror == true
     clip.texture:SetTexture(path, "REPEAT", "REPEAT")
-    local width, height = bar:GetSize()
-    if issecretvalue(width) or issecretvalue(height) then
-        width, height = bar.patternWidth or 128, bar.patternHeight or 16
-    else
-        bar.patternWidth, bar.patternHeight = width, height
-    end
-    clip.texture:SetTexCoord(0, math.max(width, 1) / tile, 0, math.max(height, 1) / tile)
+    TileCoords(bar, clip.texture, tile, "patternWidth", "patternHeight")
     if clip.mirror then
         clip.texture:SetVertexColor(fill:GetVertexColor())
     else
@@ -129,27 +147,12 @@ end
 
 local OVERLAY_MID = 178.5 / 255
 
-local function EnsureOverlay(bar)
-    local clip = bar.overlayClip
-    if clip then return clip end
-    clip = CreateFrame("Frame", nil, bar)
-    clip:SetClipsChildren(true)
-    local veil = clip:CreateTexture(nil, "OVERLAY", nil, -1)
-    veil:SetPoint("TOPLEFT", bar, "TOPLEFT")
-    veil:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT")
+local function OverlayMirror(clip, bar)
+    local texture = clip.texture
+    local veil = SpanBar(clip, bar, "OVERLAY", -1)
     veil:SetTexture(FLAT)
     clip.veil = veil
-    local texture = clip:CreateTexture(nil, "OVERLAY")
-    texture:SetPoint("TOPLEFT", bar, "TOPLEFT")
-    texture:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT")
-    clip.texture = texture
-    bar.overlayClip = clip
-    bar:HookScript("OnSizeChanged", function(_, width, height)
-        if clip.tile and not issecretvalue(width) and not issecretvalue(height) then
-            texture:SetTexCoord(0, math.max(width, 1) / clip.tile, 0, math.max(height, 1) / clip.tile)
-        end
-    end)
-    local function Mirror(_, r, g, b, a)
+    return function(_, r, g, b, a)
         if clip.alpha then
             a = a or 1
             if issecretvalue(r) or issecretvalue(g) or issecretvalue(b) or issecretvalue(a) then
@@ -161,9 +164,10 @@ local function EnsureOverlay(bar)
             veil:SetVertexColor(r * OVERLAY_MID, g * OVERLAY_MID, b * OVERLAY_MID, a)
         end
     end
-    hooksecurefunc(bar, "SetStatusBarColor", Mirror)
-    hooksecurefunc(bar:GetStatusBarTexture(), "SetVertexColor", Mirror)
-    return clip
+end
+
+local function EnsureOverlay(bar)
+    return bar.overlayClip or NewClip(bar, "overlayClip", "OVERLAY", OverlayMirror)
 end
 
 function ns.SetBarOverlay(bar, path, alpha, contrast)
@@ -184,15 +188,8 @@ function ns.SetBarOverlay(bar, path, alpha, contrast)
     clip.texture:SetTexture(path, "REPEAT", "REPEAT")
     clip.contrast = contrast
     if TILED[path] then
-        local tile = 64
-        clip.tile, clip.alpha = tile, alpha
-        local width, height = bar:GetSize()
-        if issecretvalue(width) or issecretvalue(height) then
-            width, height = bar.overlayWidth or 128, bar.overlayHeight or 16
-        else
-            bar.overlayWidth, bar.overlayHeight = width, height
-        end
-        clip.texture:SetTexCoord(0, math.max(width, 1) / tile, 0, math.max(height, 1) / tile)
+        clip.tile, clip.alpha = TILE, alpha
+        TileCoords(bar, clip.texture, TILE, "overlayWidth", "overlayHeight")
     else
         clip.tile, clip.alpha = nil, alpha
         clip.texture:SetTexCoord(0, 1, 0, 1)
@@ -213,7 +210,7 @@ function ns.SetBarTexture(bar, value)
     if TILED[value] then
         bar:SetStatusBarTexture(FLAT)
         bar:GetStatusBarTexture():SetAlpha(0)
-        ns.SetBarPattern(bar, value, 64, true)
+        ns.SetBarPattern(bar, value, TILE, true)
         return
     end
     if value:sub(1, #ATLAS_PREFIX) == ATLAS_PREFIX then
