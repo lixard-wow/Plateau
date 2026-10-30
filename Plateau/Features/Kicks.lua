@@ -354,9 +354,9 @@ local function TryPair()
 end
 
 local function OnStop(unit, interruptedBy)
-    if type(unit) ~= "string" or not unit:find("^nameplate") then return end
     local secret = issecretvalue(interruptedBy)
     if not secret and (interruptedBy == nil or interruptedBy == "") then return end
+    if type(unit) ~= "string" or not unit:find("^nameplate") then return end
     local plate = ns.Driver:GetPlate(unit)
     if not plate then return end
     local me = Kicks.me or Me()
