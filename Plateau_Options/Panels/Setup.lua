@@ -51,15 +51,7 @@ function Widgets.SetupImport(parent)
         local ok, name, state, reload = Plateau.DB:ImportProfile(nil, edit:GetText(), true)
         if ok then
             Style.PaintText(message, C.muted)
-            if state == "deferred" then
-                message:SetText(T("Imported as %s. It becomes active when combat ends."):format(name))
-            else
-                message:SetText(T("Imported as %s and now active."):format(name))
-            end
-            local missing = Plateau.DB:MissingMedia(name)
-            if #missing > 0 then
-                message:SetText(message:GetText() .. " " .. T("Some fonts or textures come from addons not installed here, so defaults are used: %s."):format(table.concat(missing, ", ")))
-            end
+            message:SetText(ns.ImportedText(name, state, true))
             edit:SetText("")
             edit:ClearFocus()
             if ns.RefreshAll then

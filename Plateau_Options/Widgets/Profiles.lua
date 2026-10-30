@@ -678,6 +678,24 @@ local function NameTaken(reason)
     return reason:find("^" .. pattern .. "$") ~= nil
 end
 
+function ns.ImportedText(name, state, activate)
+    local text
+    if not activate then
+        text = T("Imported as %s. It is saved but not active."):format(name)
+    elseif state == "deferred" then
+        text = T("Imported as %s. It becomes active when combat ends."):format(name)
+    elseif Plateau.DB.profileName == name then
+        text = T("Imported as %s and now active."):format(name)
+    else
+        text = T("Imported as %s. It is your default profile, but an automatic rule keeps %s active."):format(name, Plateau.DB.profileName)
+    end
+    local missing = Plateau.DB:MissingMedia(name)
+    if #missing > 0 then
+        text = text .. " " .. T("Some fonts or textures come from addons not installed here, so defaults are used: %s."):format(table.concat(missing, ", "))
+    end
+    return text
+end
+
 function ns.Widgets.TextArea(parent, editWidth)
     local box = CreateFrame("ScrollFrame", nil, parent)
     Style.Field(box, C.field, C.border)
@@ -791,21 +809,8 @@ function ns.Widgets.ShareProfile(parent)
     local import = ns.Widgets.Button(frame, "Import profile", SHARE_BUTTON, function()
         local ok, name, state, reload = Plateau.DB:ImportProfile(nameBox:GetText(), importEdit:GetText(), activate)
         if ok then
-            local color = C.muted
-            Style.PaintText(importMessage, color)
-            if not activate then
-                importMessage:SetText(T("Imported as %s. It is saved but not active."):format(name))
-            elseif state == "deferred" then
-                importMessage:SetText(T("Imported as %s. It becomes active when combat ends."):format(name))
-            elseif Plateau.DB.profileName == name then
-                importMessage:SetText(T("Imported as %s and now active."):format(name))
-            else
-                importMessage:SetText(T("Imported as %s. It is your default profile, but an automatic rule keeps %s active."):format(name, Plateau.DB.profileName))
-            end
-            local missing = Plateau.DB:MissingMedia(name)
-            if #missing > 0 then
-                importMessage:SetText(importMessage:GetText() .. " " .. T("Some fonts or textures come from addons not installed here, so defaults are used: %s."):format(table.concat(missing, ", ")))
-            end
+            Style.PaintText(importMessage, C.muted)
+            importMessage:SetText(ns.ImportedText(name, state, activate))
             nameBox:SetText("")
             importEdit:SetText("")
             Refreshed()
