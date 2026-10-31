@@ -307,6 +307,21 @@ local function RestoreOverrides(forget)
     end
 end
 
+local STACKING = "nameplateStackingTypes"
+
+local function StackEnemiesOnce()
+    local global = ns.DB and ns.DB.saved and ns.DB.saved.global
+    local index = Enum and Enum.NamePlateStackType and Enum.NamePlateStackType.Enemy
+    if not (global and index) or global.enemyStackingOn then return end
+    local live = GetCVar(STACKING)
+    if live == nil or live == "" then return end
+    global.enemyStackingOn = true
+    local current = CVars:Get(STACKING)
+    if not CVars.HasBit(current, index) then
+        CVars:Set(STACKING, CVars.WithBit(current, index, true))
+    end
+end
+
 CVars:RegisterEvent("PLAYER_LOGIN")
 CVars:RegisterEvent("PLAYER_LOGOUT")
 CVars:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -323,6 +338,7 @@ CVars:SetScript("OnEvent", function(self, event, name)
     end
     if event == "PLAYER_LOGIN" then
         RestoreOverrides(true)
+        StackEnemiesOnce()
     end
     if event == "PLAYER_LOGIN" or pending then
         self:Apply()

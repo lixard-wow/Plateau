@@ -123,3 +123,21 @@ ns.DB.saved.global.cvars = nil
 game.nameplateMotionSpeed = "0.9"
 CVars:Apply()
 check(game.nameplateMotionSpeed == "0.025", "a too-fast slide speed left over from before is fixed on login")
+
+Enum = { NamePlateStackType = { Enemy = 1, Friendly = 2 } }
+ns.DB.saved.global = {}
+game.nameplateStackingTypes = "@B"
+inCombat = false
+onEvent(CVars, "PLAYER_LOGIN")
+check(CVars.HasBit(game.nameplateStackingTypes, 1) and ns.DB.saved.global.enemyStackingOn == true, "enemy stacking is turned on once for players who had it off")
+check(CVars.HasBit(game.nameplateStackingTypes, 2), "friendly stacking is left as it was")
+game.nameplateStackingTypes = "@B"
+CVars:Release("nameplateStackingTypes")
+game.nameplateStackingTypes = "@B"
+onEvent(CVars, "PLAYER_LOGIN")
+check(not CVars.HasBit(game.nameplateStackingTypes, 1), "turning it off again sticks: it is only turned on the first time")
+
+ns.DB.saved.global = {}
+game.nameplateStackingTypes = "@C"
+onEvent(CVars, "PLAYER_LOGIN")
+check(game.nameplateStackingTypes == "@C" and not CVars:IsManaged("nameplateStackingTypes"), "players who already stack enemies are not touched")

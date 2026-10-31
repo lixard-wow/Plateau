@@ -17,6 +17,7 @@
 
 ### Fixed
 - No more "attempt to compare a secret number" error from the cast bar timer after combat.
+- Enemy nameplates stack by default. If you had enemy stacking off, this update turns it on once; turn it off again on the Stacking page and it stays off.
 - Instant movement is back on the Stacking page: nameplates jump straight to their new spot instead of sliding. The spacing presets keep it on.
 - Include name in clickable area: clicking an enemy's name targets it, like Blizzard's nameplates. On by default.
 - The whole clickable area works now, padding and cast bar included. The game only takes clicks inside its own nameplate box, so Plateau makes that box big enough for your clickable area. Out of combat only.
