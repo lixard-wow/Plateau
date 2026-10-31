@@ -755,6 +755,7 @@ L["Keeps nameplates out of the top of the screen. 0.10 is 10% of the screen heig
 L["Keeps the spell name and shows the interrupted message in its own position."] = "Keeps the spell name and shows the interrupted message in its own position."
 L["Kick tracker"] = "Kick tracker"
 L["Kicker icons"] = "Kicker icons"
+L["Kicker icons sit right next to the nameplate when more kickers are assigned to other raid markers, instead of leaving empty slots between."] = "Kicker icons sit right next to the nameplate when more kickers are assigned to other raid markers, instead of leaving empty slots between."
 L["Kickers"] = "Kickers"
 L["KuiNameplates"] = "KuiNameplates"
 L["Last word only  (Dawnsong)"] = "Last word only  (Dawnsong)"

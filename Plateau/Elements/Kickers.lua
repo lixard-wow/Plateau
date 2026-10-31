@@ -255,11 +255,29 @@ local function Margin(look)
     return ((look and look.borderSize) or 1) + 1
 end
 
-local function PaintIcon(icon, seg, slot, entry, size, plate)
+local function Align(look)
+    local position = look and ns.iconPositions[look.position]
+    local point = position and position[1] or "LEFT"
+    if point:find("RIGHT") then return "TOPRIGHT", -1 end
+    if point:find("LEFT") then return "TOPLEFT", 1 end
+    return "TOP", 0
+end
+
+local function PaintIcon(icon, seg, slot, count, entry, size, plate)
     local look = plate.kickLook
     local margin = ns.WholePixels(seg, Margin(look))
+    local step = size + ns.WholePixels(seg, GAP)
+    local corner, direction = Align(look)
+    local x
+    if direction > 0 then
+        x = margin + (slot - 1) * step
+    elseif direction < 0 then
+        x = -(margin + (count - slot) * step)
+    else
+        x = ns.WholePixels(seg, (slot - 1 - (count - 1) / 2) * step)
+    end
     icon:ClearAllPoints()
-    icon:SetPoint("TOPLEFT", seg, "TOPLEFT", margin + (slot - 1) * (size + ns.WholePixels(seg, GAP)), -margin)
+    icon:SetPoint(corner, seg, corner, x, -margin)
     ns.SizeIcon(icon, size)
     Picture(icon.art, entry, look and look.iconStyle)
     icon.plate, icon.kicked = plate, entry.kicked
@@ -310,7 +328,7 @@ local function Sync(plate, specs, kicked)
             seg.open:SetMinMaxValues(spec.low - 1, spec.low)
             seg.shut:SetMinMaxValues(spec.high, spec.high + 1)
             for slot, entry in ipairs(entries) do
-                PaintIcon(Icon(seg, slot), seg, slot, entry, size, plate)
+                PaintIcon(Icon(seg, slot), seg, slot, #entries, entry, size, plate)
             end
             for slot = #entries + 1, #seg.icons do
                 seg.icons[slot]:Hide()
