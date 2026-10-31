@@ -12,6 +12,7 @@ ns.changelog = {
                     "On/off switches are rounded and slide when clicked, and checkboxes in lists are rounded with a check mark.",
                     "What's new: the first time you log in after an update, Plateau shows what changed. Pick Don't show again to turn it off, or open it any time with /plt whatsnew.",
                     "New characters start with the profile you picked in setup, and the Profiles page shows which profile new characters use.",
+                    "Raid, elite, quest and faction icons placed on the same spot now line up side by side when more than one shows, instead of covering each other.",
                 },
             },
             {
