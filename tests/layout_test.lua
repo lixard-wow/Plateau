@@ -364,7 +364,7 @@ check(labelsOf(byKey.layering)["Stacking bounds"] == true, "Stacking bounds is o
 for _, path in ipairs({ "look.scaling.castFront", "look.scaling.importantFront", "look.scaling.mouseoverFront" }) do
     check(not hasPath("layering", path), path .. " is gone")
 end
-for _, path in ipairs({ "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickOffsetY" }) do
+for _, path in ipairs({ "look.plate.clickX", "look.plate.clickY", "look.plate.clickName", "look.plate.clickCastBar", "look.plate.clickOffsetY" }) do
     check(hasPath("clicking", path), path .. " is on Clickable area")
 end
 for _, path in ipairs({ "look.idle.enabled", "look.idle.alpha", "look.idle.instancesOnly" }) do

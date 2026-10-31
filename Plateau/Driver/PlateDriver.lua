@@ -347,28 +347,40 @@ local function UpdateReach(plate)
     click.reach:SetValue(casting and 1 or 1 - (click.castShare or 0))
 end
 
+local function NameReach(size, look)
+    if not size.clickName or not look.name.enabled then return 0, 0 end
+    local reach = look.name.size + look.name.gap
+    if look.name.position == "TOP" then return reach, 0 end
+    if look.name.position == "BOTTOM" then return 0, reach end
+    return 0, 0
+end
+
 local function PlaceClick(plate)
     local click, size, look = plate.clickArea, views.enemy.plate, views[plate.state]
     local shift = size.clickOffsetY
+    local above, below = 0, 0
     if plate.nameOnly then
         shift = shift + (views.enemy.friendly.nameOffsetY or 0)
+    else
+        above, below = NameReach(size, look)
     end
     local cast = look.castbar
     local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
     local extra = size.clickCastBar and (castHeight + ns.CastbarGap(look) + cast.borderSize * 2) or 0
-    local total = (plate:GetHeight() or look.plate.height) + size.clickY * 2 + extra
+    local total = (plate:GetHeight() or look.plate.height) + size.clickY * 2 + extra + above + below
     click.castShare = (size.clickCastBar and size.clickCastOnly and total > 0) and math.min(0.9, extra / total) or 0
     UpdateReach(plate)
-    if click.x == size.clickX and click.y == size.clickY and click.shift == shift and click.extra == extra then return false end
+    if click.x == size.clickX and click.y == size.clickY and click.shift == shift and click.extra == extra
+        and click.above == above and click.below == below then return false end
     if InCombatLockdown() and click.IsAnchoringRestricted and click:IsAnchoringRestricted() then
         hitTestPending = true
         return false
     end
-    click.x, click.y, click.shift, click.extra = size.clickX, size.clickY, shift, extra
+    click.x, click.y, click.shift, click.extra, click.above, click.below = size.clickX, size.clickY, shift, extra, above, below
     click.changed = true
     click:ClearAllPoints()
-    click:SetPoint("TOPLEFT", plate, "TOPLEFT", -size.clickX, size.clickY + shift)
-    click:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", size.clickX, -size.clickY + shift - extra)
+    click:SetPoint("TOPLEFT", plate, "TOPLEFT", -size.clickX, size.clickY + shift + above)
+    click:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", size.clickX, -size.clickY + shift - extra - below)
     return true
 end
 
@@ -380,7 +392,8 @@ function Driver:ClickReach()
     local extra = size.clickCastBar and (castHeight + ns.CastbarGap(look) + cast.borderSize * 2) or 0
     local half = look.plate.height / 2 + size.clickY
     local shift = size.clickOffsetY + plateOffsetY
-    return look.plate.width / 2 + size.clickX, half + shift, half - shift + extra
+    local above, below = NameReach(size, look)
+    return look.plate.width / 2 + size.clickX, half + shift + above, half - shift + extra + below
 end
 
 function Driver:CastChanged(plate)

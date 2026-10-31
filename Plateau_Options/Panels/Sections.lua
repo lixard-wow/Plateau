@@ -1414,7 +1414,7 @@ local CLICK_CAST = {
     { value = "always", label = "Always" },
     { value = "casting", label = "While casting" },
 }
-local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickCastBar", "look.plate.clickCastOnly", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
+local CLICK_PATHS = { "look.plate.clickX", "look.plate.clickY", "look.plate.clickName", "look.plate.clickCastBar", "look.plate.clickCastOnly", "look.plate.clickOffsetY", "look.plate.clickThroughFriendly" }
 local COMBAT_PATHS = { "look.idle" }
 local TARGET_LOOK = {}
 for _, key in ipairs({ "ring", "ringColor", "ringSize", "colorBar", "barColor", "texture", "overlayPattern", "overlayAlpha",
@@ -1591,6 +1591,8 @@ ns.sections = {
           tooltip = "Makes the clickable area taller without enlarging the nameplate." }),
         BaseSpec({ type = "Slider", path = "look.plate.clickOffsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Moves the clickable area up or down without changing its size." }),
+        BaseSpec({ type = "Toggle", path = "look.plate.clickName", label = "Include name in clickable area",
+          tooltip = "Clicking an enemy's name also targets it, like Blizzard's nameplates. Works when the name sits above or below the health bar." }),
         { type = "Dropdown", path = "look.plate.clickCastBar", label = "Include cast bar in clickable area", options = CLICK_CAST,
           paths = { "look.plate.clickCastBar", "look.plate.clickCastOnly" },
           get = function()

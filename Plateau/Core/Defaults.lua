@@ -39,6 +39,7 @@ ns.defaults = {
             clickOffsetY = 0,
             clickCastBar = false,
             clickCastOnly = false,
+            clickName = true,
             followBlizzardSize = false,
             stackSpace = "name",
             stackX = 0,
