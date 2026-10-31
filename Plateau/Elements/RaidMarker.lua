@@ -83,6 +83,7 @@ function RaidMarker:Disable(plate)
     plate.raidMarker:Hide()
     plate.markerRing:Hide()
     plate.markerIndex = nil
+    ns.PackIcons(plate)
 end
 
 function RaidMarker:UpdateEmphasis(plate)
@@ -96,11 +97,13 @@ function RaidMarker:Update(plate, unit)
     if type(index) == "nil" then
         icon:Hide()
         plate.markerRing:Hide()
+        ns.PackIcons(plate)
         return
     end
     icon.art:SetSpriteSheetCell(index, ROWS, COLUMNS)
     icon:Show()
     ShowRing(plate, index)
+    ns.PackIcons(plate)
 end
 
 function RaidMarker:Preview(plate, state)
@@ -111,6 +114,7 @@ function RaidMarker:Preview(plate, state)
     else
         icon:Hide()
     end
+    ns.PackIcons(plate)
     plate.markerIndex = state.raidMarker
     ShowRing(plate, state.raidMarker)
 end

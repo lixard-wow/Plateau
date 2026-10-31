@@ -41,10 +41,11 @@ local function Place(plate)
     if not db then return end
     if plate.nameOnly then
         icon.plPlaceAnchor = nil
+        icon.plBase = nil
         icon:ClearAllPoints()
         icon:SetPoint("RIGHT", plate.name, "LEFT", -2, 0)
     else
-        ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+        ns.HoldIcon(plate, icon, db)
     end
 end
 
@@ -64,6 +65,7 @@ end
 function Faction:Disable(plate)
     plate.factionShown = nil
     plate.faction:Hide()
+    ns.PackIcons(plate)
 end
 
 local Readable = ns.Readable
@@ -93,6 +95,7 @@ function Faction:Render(plate, group)
     plate.factionShown = group
     if not group then
         icon:Hide()
+        ns.PackIcons(plate)
         return
     end
     if hasAtlases then
@@ -101,6 +104,7 @@ function Faction:Render(plate, group)
         icon.art:SetTexture(FILES[group])
     end
     icon:Show()
+    ns.PackIcons(plate)
 end
 
 ns.Driver:RegisterElement(Faction)

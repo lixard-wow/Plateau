@@ -40,6 +40,7 @@ end
 function Classification:Disable(plate)
     plate.classificationAtlas = nil
     plate.classification:Hide()
+    ns.PackIcons(plate)
 end
 
 function Classification:Update(plate, unit)
@@ -64,6 +65,7 @@ function Classification:Render(plate, classification)
     else
         icon:Hide()
     end
+    ns.PackIcons(plate)
 end
 
 ns.Driver:RegisterElement(Classification)

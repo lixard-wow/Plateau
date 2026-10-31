@@ -146,7 +146,99 @@ end
 function ns.StyleIcon(icon, plate, db)
     ns.SizeIcon(icon, db.size)
     icon:SetAlpha(db.alpha)
-    ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+    ns.HoldIcon(plate, icon, db)
+end
+
+local PACK_SPACING = 2
+local PACKED = { "raidMarker", "classification", "quest", "faction" }
+local groups = {}
+
+local function BaseCenter(icon, plateWidth, plateHeight)
+    local base = icon.plBase
+    if not base then return nil end
+    local width, height = Size(icon)
+    if not width then return nil end
+    local position = ns.iconPositions[base[1]] or ns.iconPositions.LEFT
+    local x = Across(position[2], plateWidth) + position[3] * base[2] + base[3] - Across(position[1], width) + width / 2
+    local y = Down(position[2], plateHeight) + position[4] * base[2] + base[4] - Down(position[1], height) - height / 2
+    return x, y, width, height
+end
+
+local function Direction(icon)
+    local point = (ns.iconPositions[icon.plBase[1]] or ns.iconPositions.LEFT)[1]
+    if point:find("RIGHT") then return -1 end
+    if point:find("LEFT") then return 1 end
+    return 0
+end
+
+local function PackGroup(plate, group)
+    local leader, total, shown = nil, 0, 0
+    for i = 1, group.n do
+        local icon = group[i]
+        if icon:IsShown() then
+            leader = leader or icon
+            shown = shown + 1
+            total = total + (Size(icon))
+        end
+    end
+    total = total + PACK_SPACING * math.max(0, shown - 1)
+    local direction = leader and Direction(leader) or 0
+    local cursor = direction == 0 and -total / 2 or 0
+    for i = 1, group.n do
+        local icon = group[i]
+        if leader and icon:IsShown() then
+            local width = (Size(icon))
+            local shift = direction > 0 and cursor or direction < 0 and -cursor or cursor + width / 2
+            cursor = cursor + width + PACK_SPACING
+            local base = leader.plBase
+            ns.PlaceIcon(icon, plate, base[1], base[2], base[3] + shift, base[4])
+        else
+            local base = icon.plBase
+            ns.PlaceIcon(icon, plate, base[1], base[2], base[3], base[4])
+        end
+    end
+end
+
+function ns.PackIcons(plate)
+    local plateWidth, plateHeight = Size(plate)
+    plateWidth, plateHeight = plateWidth or plate.rawWidth, plateHeight or plate.rawHeight
+    if not plateWidth then return end
+    local count = 0
+    for _, key in ipairs(PACKED) do
+        local icon = plate[key]
+        local x, y, width, height
+        if icon then
+            x, y, width, height = BaseCenter(icon, plateWidth, plateHeight)
+        end
+        if x then
+            local group
+            for i = 1, count do
+                local other = groups[i]
+                if math.abs(other.x - x) <= math.min(other.width, width) / 2 and math.abs(other.y - y) <= math.min(other.height, height) / 2 then
+                    group = other
+                    break
+                end
+            end
+            if not group then
+                count = count + 1
+                group = groups[count] or {}
+                groups[count] = group
+                group.x, group.y, group.width, group.height, group.n = x, y, width, height, 0
+            end
+            group.n = group.n + 1
+            group[group.n] = icon
+        end
+    end
+    for i = 1, count do
+        PackGroup(plate, groups[i])
+    end
+end
+
+function ns.HoldIcon(plate, icon, db)
+    local base = icon.plBase or {}
+    icon.plBase = base
+    base[1], base[2], base[3], base[4] = db.position, db.gap, db.offsetX, db.offsetY
+    ns.PackIcons(plate)
 end
 
 local Evaluate = C_CurveUtil and C_CurveUtil.EvaluateColorValueFromBoolean

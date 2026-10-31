@@ -49,7 +49,7 @@ function Quest:Style(plate, db)
     local icon = plate.quest
     icon.art:SetAtlas(ns.AtlasExists(db.style) and db.style or "QuestNormal")
     ns.SizeIcon(icon, db.size)
-    ns.PlaceIcon(icon, plate, db.position, db.gap, db.offsetX, db.offsetY)
+    ns.HoldIcon(plate, icon, db)
     local place = db.progress
     ns.PlaceText(plate.questProgress, plate, place.position, place.gap, place.offsetX, place.offsetY)
     ns.ApplyFont(plate.questProgress, STANDARD_TEXT_FONT, math.max(8, math.floor(db.size * 0.55)), "OUTLINE")
@@ -58,6 +58,7 @@ end
 function Quest:Disable(plate)
     plate.quest:Hide()
     plate.questProgress:Hide()
+    ns.PackIcons(plate)
 end
 
 function Quest:Update(plate, unit)
@@ -66,11 +67,13 @@ function Quest:Update(plate, unit)
         or (ns.DB.views[plate.state].colors.questExcludeBoss and plate.mobType == "boss") then
         icon:Hide()
         plate.questProgress:Hide()
+        ns.PackIcons(plate)
         return
     end
     local related = UnitIsRelatedToActiveQuest(unit)
     icon.art:SetAlphaFromBoolean(related, alphas[plate.state], 0)
-    icon:Show()
+    icon:SetShown(issecretvalue(related) or related == true)
+    ns.PackIcons(plate)
     local text = progress[plate.state] and not issecretvalue(related) and related and Progress(unit)
     if text then
         plate.questProgress:SetText(text)
@@ -87,6 +90,7 @@ function Quest:Preview(plate, state)
     icon:SetShown(state.quest == true and not excluded)
     plate.questProgress:SetText("3/8")
     plate.questProgress:SetShown(progress[plate.state] and state.quest == true and not excluded)
+    ns.PackIcons(plate)
 end
 
 ns.Driver:RegisterElement(Quest)

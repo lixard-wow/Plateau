@@ -20,6 +20,8 @@ function ns.FontText(text, db)
 end
 function ns.PlaceText() end
 function ns.PlaceIcon() end
+function ns.HoldIcon() end
+function ns.PackIcons() end
 
 local function FakeRegion()
     local region = { shown = true }
