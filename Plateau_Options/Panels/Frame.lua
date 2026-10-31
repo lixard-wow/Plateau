@@ -8,7 +8,7 @@ local T = Style.T
 local WIDTH, HEIGHT = 1100, 800
 local RAIL = 176
 local PAD = 20
-local TITLE = 30
+local TITLE = 38
 local TOP = TITLE + 1
 local TABLE = 248
 local RULER_X, RULER_Y = 14, 28
@@ -85,8 +85,8 @@ Style.PixelHeight(titleLine)
 
 local mark = titleBar:CreateTexture(nil, "ARTWORK")
 mark:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\mesa")
-mark:SetSize(22, 22)
-mark:SetPoint("LEFT", 10, 0)
+mark:SetSize(24, 24)
+mark:SetPoint("LEFT", 12, 0)
 Style.PaintVertex(mark, C.accent)
 
 local titleName = Style.Text(titleBar, 17, C.title)
@@ -114,8 +114,8 @@ local function TextButton(parent, text, onClick)
 end
 ns.TextButton = TextButton
 
-local closeX = Style.IconButton(titleBar, "icon_close", 20, function() frame:Hide() end, "Close")
-closeX:SetPoint("RIGHT", -6, 0)
+local closeX = Style.IconButton(titleBar, "icon_close", 26, function() frame:Hide() end, "Close")
+closeX:SetPoint("RIGHT", -8, 0)
 
 local function ShowProfileList(owner, alignRight)
     local options = {}
