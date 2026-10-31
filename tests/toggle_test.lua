@@ -5,6 +5,7 @@ Frame.__index = Frame
 function Frame:EnableMouse() end
 function Frame:SetPoint() end
 function Frame:SetSize() end
+function Frame:SetWidth(w) self.width = w end
 function Frame:SetTexture() end
 function Frame:SetShown(v) self.shown = v and true or false end
 function Frame:SetColorTexture(r, g, b, a) self.color = { r, g, b, a } end
@@ -118,7 +119,7 @@ check(db[spec.path] == false, "left-clicking the label text still toggles the va
 row:Fire("OnClick")
 check(db[spec.path] == true, "clicking elsewhere on the row (native Button click) still toggles the value too")
 
-check(track.mark.shown == true, "a checked box shows its check mark")
+check(track.knob.vertex and track.knob.vertex[1] == 0.9, "a switch that is on shows a bright knob")
 track:Fire("OnEnter")
 check(track.fill.vertex and track.fill.vertex[1] == 0.6, "hovering a checked box brightens its fill")
 track:Fire("OnLeave")
@@ -164,3 +165,20 @@ end
 local customSwatchSpec = TooltipSpecFor(customSwatch)
 check(customSwatchSpec ~= nil and customSwatchSpec.label == "Custom swatch label" and customSwatchSpec.tooltip == "Custom swatch tooltip.",
     "swatchLabel/swatchTooltip let a ToggleColor swatch show its own distinct tooltip")
+
+local slideSpec = { path = "look.test.slide", label = "Slide" }
+db[slideSpec.path] = false
+local slideRow = ns.Widgets.Toggle({}, slideSpec)
+slideRow:Refresh()
+local slideTrack = slideRow.track
+check(slideTrack.fill.shown == false, "a switch that is off has no ochre fill")
+db[slideSpec.path] = true
+slideRow:Refresh()
+local ticker
+for _, entry in ipairs(created) do
+    if entry.frame.parent == slideTrack and entry.frame.scripts.OnUpdate then ticker = entry.frame end
+end
+check(ticker and ticker:IsShown(), "turning a switch on slides the knob instead of jumping")
+ticker.scripts.OnUpdate(ticker, 1)
+check(slideTrack.fill.shown == true and slideTrack.fill.width == 30 - 2 - 10 - 2, "after the slide the ochre fill reaches the knob on the right")
+check(not ticker:IsShown(), "the slide stops when the knob arrives")

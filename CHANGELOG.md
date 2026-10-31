@@ -5,7 +5,7 @@
 ### New
 - A redesigned settings window: a header with search, theme buttons, your profile and Undo/Redo; side menu categories that open as you need them; a short description on every page; settings grouped in cards; and a framed live preview.
 - Settings window themes only change colors now and switch instantly, without a reload. All five themes share the same fonts and shapes.
-- On/off switches are rounded and slide when clicked, and checkboxes in lists are rounded with a check mark.
+- On/off switches are small bars with a knob that slides across when clicked, filling ochre when on. Checkboxes in lists are rounded with a check mark.
 - What's new: the first time you log in after an update, Plateau shows what changed. Pick Don't show again to turn it off, or open it any time with /plt whatsnew.
 - New characters start with the profile you picked in setup, and the Profiles page shows which profile new characters use.
 - Raid, elite, quest and faction icons placed on the same spot now line up side by side when more than one shows, instead of covering each other.
