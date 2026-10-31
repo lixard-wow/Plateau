@@ -68,6 +68,7 @@ local platesByUnit = {}
 local targetPlate, focusPlate
 local dimAlpha = 1
 local views
+local plateOffsetY = 0
 local previews = {}
 local restyleListeners = {}
 local styleOf = {}
@@ -949,8 +950,6 @@ function Driver:SetStackBoxes(on)
         ApplyStackBox(plate)
     end
 end
-
-local plateOffsetY = 0
 
 local function AnchorPlate(plate, base)
     plate:ClearAllPoints()
