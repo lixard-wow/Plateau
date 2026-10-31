@@ -379,7 +379,11 @@ layer:SetScript("OnMouseUp", function(_, button)
     pressedSpot = nil
     local drag = DragOf(spot)
     local dragged = drag and ns.Drag.Release()
-    if dragged or not spot then return end
+    if dragged then return end
+    if not spot then
+        ns.Drag.Select(nil)
+        return
+    end
     if drag then
         drag.spot = spot
     end
