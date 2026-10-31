@@ -1958,9 +1958,9 @@ ns.sections = {
           tooltip = "Sets the width and height of every nameplate the game draws, like Plater and other addons do. Plateau's own nameplates keep their look. Applies out of combat." },
         GateList(On("look.friendly.blizzardSize"), "Turn on Set their size to use this.",
             { type = "Slider", path = "look.friendly.blizzardWidth", label = "Width", min = 40, max = 250,
-              tooltip = "Width of the nameplates the game draws, which is also their clickable width." },
+              tooltip = "Width of the nameplates the game draws, which is also their clickable width. Plateau widens it when its own clickable area needs more room." },
             { type = "Slider", path = "look.friendly.blizzardHeight", label = "Height", min = 10, max = 80,
-              tooltip = "Height of the clickable area of the nameplates the game draws." })
+              tooltip = "Height of the clickable area of the nameplates the game draws. Plateau raises it when its own clickable area needs more room." })
     ), BlizzardDrawn(true), BlizzardDrawn())),
 
     Section("healthText", "Health text", "look.healthText", Join(List(

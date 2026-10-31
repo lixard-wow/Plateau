@@ -372,6 +372,17 @@ local function PlaceClick(plate)
     return true
 end
 
+function Driver:ClickReach()
+    if not views then return 0, 0, 0 end
+    local size, look = views.enemy.plate, views.enemy
+    local cast = look.castbar
+    local castHeight = (cast.height and cast.height > 0) and cast.height or look.plate.height
+    local extra = size.clickCastBar and (castHeight + ns.CastbarGap(look) + cast.borderSize * 2) or 0
+    local half = look.plate.height / 2 + size.clickY
+    local shift = size.clickOffsetY + plateOffsetY
+    return look.plate.width / 2 + size.clickX, half + shift, half - shift + extra
+end
+
 function Driver:CastChanged(plate)
     local size = views.enemy.plate
     if not plate.active or not (size.clickCastBar and size.clickCastOnly) then return end

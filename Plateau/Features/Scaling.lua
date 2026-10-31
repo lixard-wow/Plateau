@@ -213,6 +213,27 @@ function Scaling:Preview(plate)
     self:Apply(plate)
 end
 
+local MOB_TYPES = { "boss", "lieutenant", "higher", "caster", "elite", "trivial" }
+
+function Scaling:Largest()
+    local largest = 1
+    for _, s in pairs(settings) do
+        local scale = 1
+        for _, key in ipairs(MOB_TYPES) do
+            if (s[key] or 1) > scale then scale = s[key] end
+        end
+        if s.combatEnabled then
+            scale = scale * math.max(s.combatScale or 1, s.idleScale or 1)
+        end
+        scale = math.max(scale, targetScale)
+        if s.focusGrow then scale = math.max(scale, s.focusScale or 1) end
+        if s.castPop then scale = math.max(scale, s.castScale or 1) end
+        if s.mouseoverGrow then scale = math.max(scale, s.mouseoverScale or 1) end
+        largest = math.max(largest, scale * (follow and sizeFactor or 1), sizeFactor * (s.friendlyScale or 1))
+    end
+    return largest
+end
+
 function Scaling:Configured()
     follow = ns.DB.views.enemy.plate.followBlizzardSize == true
 end
