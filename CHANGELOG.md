@@ -17,6 +17,7 @@
 
 ### Fixed
 - No more "attempt to compare a secret number" error from the cast bar timer after combat.
+- Right-click reset works on the clickable area, stacking box and nameplate offset sliders, and on Include cast bar in clickable area. These rows also show change marks now.
 - Kicker icons sit right next to the nameplate when more kickers are assigned to other raid markers, instead of leaving empty slots between.
 - The interrupt ready marker could disappear when its thickness was set to 1.
 - A newer interrupt message could be hidden early by an older interrupt's timer.

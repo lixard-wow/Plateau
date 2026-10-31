@@ -451,3 +451,18 @@ for _, section in ipairs(sections) do
     end
 end
 check(#missingSwitch == 0, "every switch a dimmed setting points to exists" .. (#missingSwitch > 0 and (": " .. table.concat(missingSwitch, "; ")) or ""))
+
+local unresettable = {}
+for _, section in ipairs(sections) do
+    for _, spec in ipairs(section.controls) do
+        if spec.path and spec.get and not spec.reset and #nsOpt.SpecPaths(spec) == 0 then
+            unresettable[#unresettable + 1] = spec.path
+        end
+    end
+end
+check(#unresettable == 0, "every setting with a saved path can be reset with a right-click" .. (#unresettable > 0 and (": " .. table.concat(unresettable, ", ")) or ""))
+local clickX
+for _, spec in ipairs(byKey.clicking.controls) do
+    if spec.path == "look.plate.clickX" then clickX = spec end
+end
+check(clickX and nsOpt.SpecPaths(clickX)[1] == "look.plate.clickX", "Horizontal padding resets look.plate.clickX")

@@ -833,6 +833,7 @@ local STACK_PRESETS = {
 local function BaseSpec(spec)
     spec.get = function() return Plateau.DB:Get(spec.path) end
     spec.set = function(value) Plateau.DB:Set(spec.path, value) end
+    spec.paths = { spec.path }
     return spec
 end
 
@@ -1591,6 +1592,7 @@ ns.sections = {
         BaseSpec({ type = "Slider", path = "look.plate.clickOffsetY", label = "Vertical offset", min = -30, max = 30,
           tooltip = "Moves the clickable area up or down without changing its size." }),
         { type = "Dropdown", path = "look.plate.clickCastBar", label = "Include cast bar in clickable area", options = CLICK_CAST,
+          paths = { "look.plate.clickCastBar", "look.plate.clickCastOnly" },
           get = function()
               if not Plateau.DB:Get("look.plate.clickCastBar") then return "off" end
               return Plateau.DB:Get("look.plate.clickCastOnly") and "casting" or "always"
