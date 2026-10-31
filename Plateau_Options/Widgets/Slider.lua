@@ -72,7 +72,7 @@ function ns.Widgets.Slider(parent, spec)
     local function SetDisplay(value)
         currentValue = value
         PositionThumb(value)
-        local text = pattern:format(step >= 1 and math.floor(value + 0.5) or value)
+        local text = pattern:format(step >= 1 and math.floor(value + 0.5) or value) .. (spec.unit or "")
         box:SetText(text)
         measure:SetText(text)
         local width = measure:GetStringWidth()
@@ -147,7 +147,7 @@ function ns.Widgets.Slider(parent, spec)
     end)
 
     box:SetScript("OnEnterPressed", function(self)
-        local value = tonumber(self:GetText())
+        local value = tonumber((self:GetText():gsub("[^%d%.%-]", "")))
         if value then
             Apply(Clean(value))
         else

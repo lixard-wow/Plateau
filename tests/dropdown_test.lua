@@ -145,3 +145,23 @@ for _, entry in ipairs(created) do
     end
 end
 check(firstShown ~= nil, "a list with no current value and section titles opens scrolled to the top, not the last title")
+
+local longSpec = {
+    path = "look.test.long",
+    label = "Long dropdown",
+    options = { { value = "after", label = "After health (Blizzard style)" }, { value = "short", label = "Short" } },
+}
+db[longSpec.path] = "after"
+local savedWidth = Frame.GetUnboundedStringWidth
+Frame.GetUnboundedStringWidth = function(self) return #(self.text or "") * 7 end
+local longRow = ns.Widgets.Dropdown({}, longSpec)
+longRow:Refresh()
+local longTip
+for _, t in ipairs(tooltips) do
+    if t.spec.label == "Long dropdown" and t.spec.current then longTip = t.spec end
+end
+check(longRow.fullText == "After health (Blizzard style)" and longTip and longTip.current() == "After health (Blizzard style)", "a value too long for the box keeps its full text in the box's tooltip")
+db[longSpec.path] = "short"
+longRow:Refresh()
+check(longRow.fullText == nil and longTip.current() == nil, "a value that fits has no extra tooltip line")
+Frame.GetUnboundedStringWidth = savedWidth

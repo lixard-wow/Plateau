@@ -1116,6 +1116,7 @@ L["Settings saved by a newer version of Plateau are kept safe instead of being r
 L["Settings window"] = "Settings window"
 L["Settings window scale"] = "Settings window scale"
 L["Settings window themes only change colors now and switch instantly, without a reload. All five themes share the same fonts and shapes."] = "Settings window themes only change colors now and switch instantly, without a reload. All five themes share the same fonts and shapes."
+L["Settings window: dropdown values too long for the box drop their bracketed detail, and the full value shows in the tooltip. Percent and seconds sliders show their unit. Changed only has a check box that shows when it's on. The preview ruler reads 0 instead of -0."] = "Settings window: dropdown values too long for the box drop their bracketed detail, and the full value shows in the tooltip. Percent and seconds sliders show their unit. Changed only has a check box that shows when it's on. The preview ruler reads 0 instead of -0."
 L["Several settings"] = "Several settings"
 L["Shaded bar with a thick border."] = "Shaded bar with a thick border."
 L["Shadow Bolt"] = "Shadow Bolt"

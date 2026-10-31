@@ -231,7 +231,7 @@ local function Ruler(vertical)
                 label:ClearAllPoints()
                 if vertical then
                     label:SetPoint("TOPRIGHT", -10, -pos + 5)
-                    label:SetText(-k * TICK)
+                    label:SetText(k == 0 and 0 or -k * TICK)
                 else
                     label:SetPoint("BOTTOMLEFT", pos + 3, 5)
                     label:SetText(k * TICK)
@@ -1160,9 +1160,29 @@ resetSection:HookScript("OnClick", function(self) self:Fit() end)
 local changedButton = TextButton(pageHead, "Changed only")
 changedButton:SetPoint("RIGHT", resetSection, "LEFT", -12, 0)
 Style.Tooltip(changedButton, { label = "Changed only", tooltip = "Shows only the settings that differ from Plateau's defaults. A mark sits beside each one; right-click a setting to reset it." })
+local CHANGED_BOX = 12
+local changedBox = CreateFrame("Frame", nil, changedButton)
+changedBox:SetSize(CHANGED_BOX, CHANGED_BOX)
+changedBox:SetPoint("LEFT", 4, 0)
+local changedFill, changedEdge = Style.Panel(changedBox, C.field, C.edge, nil, C.border)
+local changedMark = changedBox:CreateTexture(nil, "ARTWORK")
+changedMark:SetTexture("Interface\\AddOns\\Plateau_Options\\Art\\Icons\\icon_check")
+changedMark:SetSize(CHANGED_BOX - 2, CHANGED_BOX - 2)
+changedMark:SetPoint("CENTER")
+Style.PaintVertex(changedMark, C.primaryText)
+changedButton.label:ClearAllPoints()
+changedButton.label:SetPoint("LEFT", changedBox, "RIGHT", 5, 0)
+function changedButton:Fit()
+    self:SetWidth(4 + CHANGED_BOX + 5 + self.label:GetStringWidth() + 4)
+end
+changedButton:Fit()
 local function PaintChanged()
-    changedButton.restColor = ns.changedOnly and C.accent or nil
-    Style.PaintText(changedButton.label, ns.changedOnly and C.accent or C.muted)
+    local on = ns.changedOnly == true
+    changedButton.restColor = on and C.accent or nil
+    Style.PaintText(changedButton.label, on and C.accent or C.muted)
+    changedMark:SetShown(on)
+    Style.PaintVertex(changedFill, on and C.accent or C.field)
+    Style.PaintVertex(changedEdge, C.edge)
 end
 changedButton:SetScript("OnClick", function()
     ns.changedOnly = not ns.changedOnly or nil

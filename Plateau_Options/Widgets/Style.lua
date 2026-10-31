@@ -809,8 +809,13 @@ function Style.Tooltip(owner, spec)
     owner:HookScript("OnEnter", function(self)
         local explain = spec.tooltip and Plateau.DB.saved.global.tooltipsEnabled ~= false
         local hint = ChangeHint(spec, explain)
-        if not explain and not hint and not spec.limited then return end
+        local current = spec.current and spec.current()
+        if not explain and not hint and not spec.limited and not current then return end
         Style.TipTitle(self, "ANCHOR_RIGHT", T(spec.label) or "")
+        if current then
+            local accent = Style.colors.accent
+            GameTooltip:AddLine(current, accent[1], accent[2], accent[3], true)
+        end
         if explain then
             GameTooltip:AddLine(T(spec.tooltip), 1, 1, 1, true)
             if spec.gameSetting then

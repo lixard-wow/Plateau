@@ -338,8 +338,21 @@ function ns.Widgets.Dropdown(parent, spec)
                 icon = option.icon
             end
         end
-        PlaceText(current, currentIcon, SetIcon(currentIcon, icon), 24)
+        local hasIcon = SetIcon(currentIcon, icon)
+        PlaceText(current, currentIcon, hasIcon, 24)
         current:SetText(text)
+        row.fullText = nil
+        local room = Style.CONTROL_WIDTH - 24 - (hasIcon and (8 + ICON_SIZE + 6) or 8)
+        local width = current:GetUnboundedStringWidth()
+        if type(width) == "number" and width > room then
+            local shown = current:GetText() or ""
+            local short = shown:gsub("%s*%b()%s*$", "")
+            if short ~= "" and short ~= shown then
+                local setText = current.RawSetText or current.SetText
+                setText(current, short)
+            end
+            row.fullText = shown
+        end
         Style.OverrideLabel(label, spec)
     end
 
@@ -360,6 +373,6 @@ function ns.Widgets.Dropdown(parent, spec)
 
     Style.HoverBorder(button, button)
     Style.Tooltip(labelHit, spec)
-    Style.Tooltip(button, { label = spec.label, tooltip = spec.tooltip, limited = spec.limited })
+    Style.Tooltip(button, { label = spec.label, tooltip = spec.tooltip, limited = spec.limited, current = function() return row.fullText end })
     return row
 end

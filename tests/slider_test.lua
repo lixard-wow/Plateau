@@ -180,3 +180,18 @@ track:Fire("OnMouseUp", "LeftButton")
 mouseDown = false
 RunTimers()
 check(db[spec.path] == 45, "left-click still works normally right after a no-op right-click")
+
+local unitSpec = { path = "look.test.percent", min = 0, max = 99, unit = "%" }
+db[unitSpec.path] = 35
+local before = #created
+local unitRow = ns.Widgets.Slider({}, unitSpec)
+unitRow:Refresh()
+local unitBox
+for i = before + 1, #created do
+    if created[i].kind == "EditBox" then unitBox = created[i].frame end
+end
+check(unitBox and unitBox.text == "35%", "a slider with a unit shows it after the value")
+unitBox.text = "42%"
+unitBox.ClearFocus = function() end
+unitBox.scripts.OnEnterPressed(unitBox)
+check(db[unitSpec.path] == 42, "typing a value with its unit still sets the number")
