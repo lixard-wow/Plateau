@@ -671,10 +671,13 @@ function Border:SetHighlight(color)
     if self.highlight == color then return end
     self.highlight = color
     PaintBorder(self, color)
+    if self.showOnHighlight then
+        self:SetShown(color ~= nil)
+    end
 end
 
 function Border:IsDrawn()
-    return self.shown ~= false and not self.empty
+    return (self.shown ~= false or self.showOnHighlight == true) and not self.empty
 end
 
 local function KeepHighlight(method)

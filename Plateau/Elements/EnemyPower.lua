@@ -92,14 +92,11 @@ function EnemyPower:Style(plate, db)
     bar.text:SetPoint(anchor, bar, anchor, anchor == "LEFT" and 2 or anchor == "RIGHT" and -2 or 0, 0)
     bar.text:SetJustifyH(anchor)
     bar.text:SetShown(db.showText)
-    if db.border then
-        bar.border:SetStyle("pixel", bar)
-        bar.border:SetColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
-        bar.border:Layout(1, 0, false)
-        bar.border:Show()
-    else
-        bar.border:Hide()
-    end
+    bar.border:SetStyle("pixel", bar)
+    bar.border:SetColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
+    bar.border:Layout(1, 0, false)
+    bar.border.showOnHighlight = not db.border
+    bar.border:SetShown(db.border or bar.border.highlight ~= nil)
     bar:SetAlpha(db.alpha)
 end
 

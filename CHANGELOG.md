@@ -16,6 +16,7 @@
 - Restyling is lighter: borders, auras, health colors and pixel rounding skip work that hasn't changed.
 
 ### Fixed
+- The enemy power bar in the preview now lights up its own edge when hovered or selected, like the health and cast bars, instead of drawing a separate box around it.
 - No more "attempt to compare a secret number" error from the cast bar timer after combat.
 - Settings window: dropdown values too long for the box drop their bracketed detail, and the full value shows in the tooltip. Percent and seconds sliders show their unit. Changed only has a check box that shows when it's on. The preview ruler reads 0 instead of -0.
 - The enemy power bar shows on bosses only, so regular mobs no longer get an empty bar. The Show on choice is gone.
