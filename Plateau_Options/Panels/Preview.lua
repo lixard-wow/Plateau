@@ -961,20 +961,19 @@ local function CrossTick()
     cross:Show()
 end
 
-local TRAY_WIDTH, TILE_HEIGHT, TILE_GAP, TRAY_PAD, TRAY_HEAD = 164, 18, 3, 6, 16
+local TILE_HEIGHT, TILE_GAP, TRAY_PAD, TRAY_HEAD = 18, 3, 8, 18
 local SKULL = { 0.75, 1, 0.25, 0.5 }
 
-local tray = CreateFrame("Frame", nil, panel)
-tray:SetPoint("TOPRIGHT", -8, -8)
-tray:SetPoint("BOTTOMRIGHT", -8, 8)
-tray:SetWidth(TRAY_WIDTH)
-tray:SetFrameLevel(panel:GetFrameLevel() + 185)
+local tray = CreateFrame("Frame", nil, layout.trayColumn)
+tray:SetAllPoints()
 tray:EnableMouse(true)
-local trayFill = Style.Fill(tray, C.window)
-Style.Paint(trayFill, C.window, 0.85)
+local TRAY_WIDTH = layout.trayColumn:GetWidth()
+local trayGlow = Style.Fill(tray, C.hover)
+trayGlow:Hide()
 local trayBorder = CreateFrame("Frame", nil, tray)
 trayBorder:SetAllPoints()
-Style.Border(trayBorder, C.edge)
+Style.Border(trayBorder, C.accent)
+trayBorder:Hide()
 tray.title = Style.Text(tray, 10, C.muted)
 tray.title:SetPoint("TOPLEFT", TRAY_PAD, -TRAY_PAD)
 tray.title:SetPoint("TOPRIGHT", -TRAY_PAD, -TRAY_PAD)
@@ -987,9 +986,6 @@ tray.empty:SetText("Everything is on the plate. Drag a part here to turn it off.
 Style.Tooltip(tray, { label = "Turned off", tooltip = "Parts that are turned off wait here. Drag one onto the plate to turn it on, or drag a part from the plate here to turn it off. Click one to open its settings." })
 ns.Drag.SetDropZone(tray)
 
-hint:ClearAllPoints()
-hint:SetPoint("BOTTOMLEFT", layout.pad, 10)
-hint:SetPoint("BOTTOMRIGHT", -(TRAY_WIDTH + 16), 10)
 
 local TRAY = {
     { label = "Name", section = "name", region = plate.name, paths = { "look.name.enabled" }, text = "Name" },
@@ -1141,7 +1137,7 @@ for _, item in ipairs(TRAY) do
 end
 
 local function CenterPlate()
-    local shift = tray:IsShown() and math.floor((TRAY_WIDTH + 8) / 2) or 0
+    local shift = 0
     holderX = -shift / PLATE_SCALE
     ns.PinPreview()
     layout.SetCenterShift(shift)
@@ -1204,8 +1200,8 @@ local function TrayTick()
     local over = ns.Drag.OverTray(ns.Drag.Active())
     if over ~= tray.over then
         tray.over = over
-        Style.Paint(trayFill, over and C.hover or C.window, 0.85)
-        Style.SetBorderColor(trayBorder, over and C.accent or C.edge)
+        trayGlow:SetShown(over == true)
+        trayBorder:SetShown(over == true)
     end
 end
 
