@@ -23,12 +23,12 @@ local function ValuesEqual(a, b)
 end
 
 local LIMITS = {
-    nameplateMotionSpeed = { max = 0.2, fallback = "0.025" },
+    nameplateMotionSpeed = { max = 0.2, fallback = "0.025", instant = 1 },
 }
 
 local function Within(name, value)
     local limit, number = LIMITS[name], tonumber(value)
-    if limit and number and number > limit.max then
+    if limit and number and number > limit.max and number ~= limit.instant then
         return limit.fallback
     end
     return value

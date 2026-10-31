@@ -803,6 +803,12 @@ local function Near(name, value)
     return current ~= nil and math.abs(current - tonumber(value)) < 0.001
 end
 
+local MOTION, INSTANT, SLIDE = "nameplateMotionSpeed", "1", "0.025"
+
+local function Instant()
+    return Near(MOTION, INSTANT)
+end
+
 local function StackPreset(key, label, tooltip, values)
     return {
         key = key,
@@ -810,7 +816,7 @@ local function StackPreset(key, label, tooltip, values)
         tooltip = tooltip,
         isActive = function()
             for i, name in ipairs(STACK_CVARS) do
-                if not Near(name, values[i]) then
+                if not (name == MOTION and Instant()) and not Near(name, values[i]) then
                     return false
                 end
             end
@@ -818,7 +824,9 @@ local function StackPreset(key, label, tooltip, values)
         end,
         apply = function()
             for i, name in ipairs(STACK_CVARS) do
-                CVars:Set(name, values[i])
+                if not (name == MOTION and Instant()) then
+                    CVars:Set(name, values[i])
+                end
             end
         end,
     }
@@ -1540,8 +1548,14 @@ ns.sections = {
         CVarBitToggle("nameplateStackingTypes", STACK.Enemy, "Stack enemy nameplates", "Enemy nameplates move apart instead of overlapping."),
         CVarBitToggle("nameplateStackingTypes", STACK.Friendly, "Stack friendly nameplates", "Friendly nameplates move apart instead of overlapping."),
         Gate({ type = "Presets", presets = STACK_PRESETS, instant = true, wide = true, label = "Stacking presets", keywords = "tight balanced spread out spacing overlap crowded stack movement speed slide jumping",
-          tooltip = "Ready-made spacing between stacked nameplates. Each one also sets the game's standard slide speed, so nameplates glide into place instead of jumping." }, StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
+          tooltip = "Ready-made spacing between stacked nameplates. Each one also sets the game's standard slide speed, unless Instant movement is on." }, StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
         { type = "Note", label = "Click a preset to apply it. The underlined preset is in use.", height = 24 },
+        Gate({ type = "Toggle", label = "Instant movement", keywords = "speed slide motion jump snap",
+          get = Instant,
+          set = function(value) CVars:Set(MOTION, value and INSTANT or SLIDE) end,
+          reset = function() CVars:Release(MOTION) end,
+          resetLabel = "Right-click to reset to what it was before Plateau changed it.",
+          tooltip = "Nameplates jump straight to their new spot instead of sliding there. Off uses the game's standard slide." }, StackingOn, "Turn on Stack enemy nameplates or Stack friendly nameplates to use this."),
         Gate({ type = "Toggle", label = "Show stacking boxes",
           get = function() return ns.stackBoxesOn == true end,
           set = function(value)

@@ -102,8 +102,10 @@ check(game.nameplateOccludedAlphaMult == "0.8" and not CVars:IsOverridden("namep
 
 ns.DB.saved.global.cvars = nil
 game.nameplateMotionSpeed = "0.025"
-CVars:Set("nameplateMotionSpeed", 1)
+CVars:Set("nameplateMotionSpeed", 0.5)
 check(game.nameplateMotionSpeed == "0.025" and not CVars:IsManaged("nameplateMotionSpeed"), "a slide speed too fast to stay smooth is not used")
+CVars:Set("nameplateMotionSpeed", 1)
+check(game.nameplateMotionSpeed == "1" and CVars:IsManaged("nameplateMotionSpeed"), "instant movement is allowed")
 CVars:Set("nameplateMotionSpeed", 0.2)
 check(game.nameplateMotionSpeed == "0.2", "the fastest smooth slide speed is allowed")
 
@@ -115,7 +117,7 @@ check(game.nameplateMotionSpeed == "0.025" and not CVars:IsManaged("nameplateMot
 ns.DB.saved.global.cvars = { managed = { nameplateMotionSpeed = "1" }, original = { nameplateMotionSpeed = "0.05" }, restore = {}, override = {} }
 game.nameplateMotionSpeed = "1"
 CVars:Apply()
-check(game.nameplateMotionSpeed == "0.025", "old instant movement becomes a smooth slide on login")
+check(game.nameplateMotionSpeed == "1", "instant movement stays on after login")
 
 ns.DB.saved.global.cvars = nil
 game.nameplateMotionSpeed = "0.9"

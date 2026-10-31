@@ -17,6 +17,7 @@
 
 ### Fixed
 - No more "attempt to compare a secret number" error from the cast bar timer after combat.
+- Instant movement is back on the Stacking page: nameplates jump straight to their new spot instead of sliding. The spacing presets keep it on.
 - Include name in clickable area: clicking an enemy's name targets it, like Blizzard's nameplates. On by default.
 - The whole clickable area works now, padding and cast bar included. The game only takes clicks inside its own nameplate box, so Plateau makes that box big enough for your clickable area. Out of combat only.
 - Right-click reset works on the clickable area, stacking box and nameplate offset sliders, and on Include cast bar in clickable area. These rows also show change marks now.
