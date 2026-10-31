@@ -90,13 +90,32 @@ end
 
 local hitTestPending = false
 local clickThroughFriendly = false
+local applyingHit = false
+local hitHooked = setmetatable({}, { __mode = "k" })
+
+local function GameHitChanged(base)
+    if applyingHit then return end
+    local plate = platesByBase[base]
+    ns.Debug("hit test replaced", plate and plate.unit, (debugstack(3, 2, 0):gsub("Interface/AddOns/", ""):gsub("\n", " | ")))
+end
+
+local function WatchHit(base)
+    if hitHooked[base] or not base.SetHitTestPoints then return end
+    hitHooked[base] = true
+    hooksecurefunc(base, "SetHitTestPoints", GameHitChanged)
+    if base.ClearAllHitTestPoints then
+        hooksecurefunc(base, "ClearAllHitTestPoints", GameHitChanged)
+    end
+end
 
 local function ApplyHitTest(plate)
     local base = plate.base
     if not base or not base.CanChangeHitTestPoints then return end
     if base:CanChangeHitTestPoints() then
+        applyingHit = true
         if clickThroughFriendly and plate.isFriendly and base.ClearAllHitTestPoints then
             base:ClearAllHitTestPoints()
+            ns.Debug("hit test cleared", plate.unit)
         else
             local click = plate.clickArea
             click.hitPoints = click.hitPoints or {
@@ -104,10 +123,13 @@ local function ApplyHitTest(plate)
                 { point = "BOTTOMRIGHT", relativeTo = click.edge, relativePoint = "BOTTOMRIGHT", offsetX = 0, offsetY = 0 },
             }
             base:SetHitTestPoints(click.hitPoints)
+            ns.Debug("hit test set", plate.unit)
         end
+        applyingHit = false
         plate.clickArea.changed = false
     else
         hitTestPending = true
+        ns.Debug("hit test waits for combat end", plate.unit)
     end
 end
 
@@ -965,6 +987,7 @@ local function AssignBase(plate, base)
     plate:SetParent(base)
     AnchorPlate(plate, base)
     plate.base = base
+    WatchHit(base)
     ns.Scaling:Attach(plate)
     if ns.RepixelPlate and not plate.preview then
         ns.RepixelPlate(plate)
