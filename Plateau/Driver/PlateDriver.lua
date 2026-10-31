@@ -20,9 +20,7 @@ local Driver = CreateFrame("Frame")
 ns.Driver = Driver
 
 local function AddOverlay(plate)
-    plate:SetFlattensRenderLayers(true)
     local overlay = CreateFrame("Frame", nil, plate)
-    overlay:SetFlattensRenderLayers(true)
     overlay:SetAllPoints()
     overlay:SetFrameLevel(plate:GetFrameLevel() + OVERLAY_LEVEL)
     plate.overlay = overlay
