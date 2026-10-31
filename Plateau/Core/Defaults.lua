@@ -217,7 +217,6 @@ ns.defaults = {
         },
         enemyPower = {
             enabled = false,
-            show = "bosses",
             position = "below",
             height = 5,
             width = 0,

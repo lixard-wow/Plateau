@@ -103,18 +103,8 @@ function EnemyPower:Style(plate, db)
     bar:SetAlpha(db.alpha)
 end
 
-local function Wanted(plate, db)
-    if plate.isFriendly or plate.isPlayer then
-        return false
-    end
-    if db.show == "all" then
-        return true
-    elseif db.show == "target" then
-        return plate.isTarget == true
-    elseif db.show == "bossesCasters" then
-        return plate.mobType == "boss" or (plate.mobFlags and plate.mobFlags.caster == true)
-    end
-    return plate.mobType == "boss"
+local function Wanted(plate)
+    return not plate.isFriendly and not plate.isPlayer and plate.mobType == "boss"
 end
 
 local function SetCastShift(plate, shift)
@@ -135,7 +125,7 @@ end
 function EnemyPower:Update(plate, unit, snap)
     local bar = plate.enemyPowerBar
     local db = settings[plate.state]
-    if not (unit and db and Wanted(plate, db)) then
+    if not (unit and db and Wanted(plate)) then
         HideBar(plate)
         return
     end

@@ -18,6 +18,7 @@
 ### Fixed
 - No more "attempt to compare a secret number" error from the cast bar timer after combat.
 - Settings window: dropdown values too long for the box drop their bracketed detail, and the full value shows in the tooltip. Percent and seconds sliders show their unit. Changed only has a check box that shows when it's on. The preview ruler reads 0 instead of -0.
+- The enemy power bar shows on bosses only, so regular mobs no longer get an empty bar. The Show on choice is gone.
 - Enemy nameplates stack by default. If you had enemy stacking off, this update turns it on once; turn it off again on the Stacking page and it stays off.
 - Instant movement is back on the Stacking page: nameplates jump straight to their new spot instead of sliding. The spacing presets keep it on.
 - Include name in clickable area: clicking an enemy's name targets it, like Blizzard's nameplates. On by default.

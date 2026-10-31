@@ -397,13 +397,6 @@ local THREAT_DISPLAY = {
     { value = "both", label = "Both" },
 }
 
-local ENEMY_POWER_SHOW = {
-    { value = "bosses", label = "Bosses only" },
-    { value = "bossesCasters", label = "Bosses and casters" },
-    { value = "all", label = "Every enemy" },
-    { value = "target", label = "My target only" },
-}
-
 local POWER_TEXT_FORMATS = {
     { value = "percent", label = "Percent  (60%)" },
     { value = "value", label = "Value  (45.2K)" },
@@ -2573,12 +2566,10 @@ ns.sections = {
 
     Section("enemyPower", "Enemy power bar", "look.enemyPower", Join(List(
         { type = "Header", label = "Display", first = true },
-        { type = "Note", label = "Shows an enemy's mana, rage, energy or other power. Some enemies and encounters don't provide it.", height = 32 },
+        { type = "Note", label = "Shows a boss's mana, rage, energy or other power. Some bosses and encounters don't provide it.", height = 32 },
         { type = "Toggle", path = "look.enemyPower.enabled", label = "Show enemy power bar",
-          tooltip = "Adds a thin bar for the enemy's power to its nameplate." }
+          tooltip = "Adds a thin bar for a boss's power to its nameplate. Bosses are the same enemies as the Bosses health bar color." }
     ), GateList(PowerOn, POWER_ON,
-        { type = "Dropdown", path = "look.enemyPower.show", label = "Show on", options = ENEMY_POWER_SHOW,
-          tooltip = "Which enemies get a power bar. Bosses are the same enemies as the Bosses health bar color." },
         { type = "Toggle", path = "look.enemyPower.hideFull", label = "Hide at full power",
           tooltip = "Hides the power bar while the enemy's power is full." }
     ), List(
