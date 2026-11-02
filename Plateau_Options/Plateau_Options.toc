@@ -2,7 +2,7 @@
 ## Title: |cffd07a3cPlateau Nameplates Options|r
 ## Notes: Settings for Plateau Nameplates. Loads only when opened.
 ## Author: lixard-wow
-## Version: 0.1.3
+## Version: 0.1.4
 ## Dependencies: Plateau
 ## LoadOnDemand: 1
 ## X-Curse-Project-ID: 1749349

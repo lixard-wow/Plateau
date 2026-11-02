@@ -17,7 +17,7 @@ ns.helpTopics = {
         category = "Good to know",
         title = "Why a nameplate has its color",
         keywords = "colors color wrong priority order threat class type boss caster elite reaction tapped quest target focus",
-        text = "Health bar colors are checked in order: target or focus, tapped, threat, quest enemies, enemy type or class, then reaction. The first one that applies wins.\n\nTarget an enemy and type /plt debug to see which color it got and why.",
+        text = "Health bar colors are checked in order: target or focus, tapped, threat, quest enemies, enemy type or class, then reaction. The first one that applies wins.",
     },
     {
         category = "Good to know",
@@ -40,8 +40,8 @@ ns.helpTopics = {
     {
         category = "Commands",
         title = "Slash commands",
-        keywords = "slash commands plt debug setup reset cvars whatsnew minimap",
-        text = "/plt opens the settings window.\n/plt setup shows the list of looks.\n/plt whatsnew opens What's new.\n/plt minimap shows or hides the minimap button.\n/plt debug prints details for a bug report.\n/plt reset resets the active profile.\n/plt cvars restore puts back every game nameplate setting Plateau changed.",
+        keywords = "slash commands plt setup reset cvars whatsnew minimap",
+        text = "/plt opens the settings window.\n/plt setup shows the list of looks.\n/plt whatsnew opens What's new.\n/plt minimap shows or hides the minimap button.\n/plt reset resets the active profile.\n/plt cvars restore puts back every game nameplate setting Plateau changed.",
     },
 }
 

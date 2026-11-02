@@ -95,7 +95,7 @@ ns.DB:Init()
 local Any
 Any = setmetatable({}, { __index = function() return Any end, __call = function() return Any end })
 Plateau = setmetatable({
-    DB = ns.DB, Builtins = ns.Builtins, AutoProfile = ns.AutoProfile, CONTENT_TYPES = ns.CONTENT_TYPES, version = "0.1.3",
+    DB = ns.DB, Builtins = ns.Builtins, AutoProfile = ns.AutoProfile, CONTENT_TYPES = ns.CONTENT_TYPES, version = "0.1.4",
     presets = ns.presets, overlayPatterns = ns.overlayPatterns, barTextures = ns.barTextures, arrowStyles = ns.arrowStyles,
     iconPositions = ns.iconPositions, textPositions = ns.textPositions, LANGUAGES = ns.LANGUAGES, bossPhaseList = {},
     defaults = ns.defaults, L = ns.L, Builtins = ns.Builtins,

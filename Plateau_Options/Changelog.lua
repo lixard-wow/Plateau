@@ -2,6 +2,57 @@ local _, ns = ...
 
 ns.changelog = {
     {
+        version = "0.1.4",
+        sections = {
+            {
+                title = "New",
+                items = {
+                    "Kick tracker: a party member's class icon shows on the enemy they are marked to kick and on the one they last kicked, with their interrupt's cooldown. Pick what the icon shows, its size, countdown numbers, dungeons only, and whether icons stay after the interrupt is ready. In keys a kick only shows when Plateau can tell who it was.",
+                    "Turned off tray in the preview: drag a part into it to turn it off, drag it out to turn it on.",
+                    "Drag parts on the preview to place them. They snap to the bar when dropped near it; hold Shift or turn Snap off to place them anywhere. The arrow keys nudge the selected part, and clicking the offset readout lets you type an exact value. Rulers and a crosshair follow the part you drag.",
+                    "Hovering a setting outlines its part on the preview.",
+                    "Settings changed from the default are marked, and Changed only shows just those.",
+                    "Ctrl+Z undoes, Ctrl+Y redoes and Ctrl+F jumps to search. The window reopens at the spot you last scrolled to.",
+                    "Disable Plateau for this character only.",
+                    "Setup and import show a look before you apply it.",
+                    "Friendly page: set the width and height of every nameplate the game draws. Plateau's own nameplates keep their look.",
+                    "Stacking box width, height and offset sliders.",
+                    "The clickable area can include the cast bar, or only while a cast is up. Include name in clickable area lets you click an enemy's name to target it, on by default.",
+                    "Export carries every Blizzard nameplate setting Plateau shows, and import names any missing media addons.",
+                    "Names in other alphabets use Blizzard's fonts for that alphabet behind your chosen font.",
+                    "Raid, elite, quest and faction icons placed on the same spot line up side by side when more than one shows.",
+                },
+            },
+            {
+                title = "Changed",
+                items = {
+                    "A new settings window: a title strip, a preview with rulers, a flat side menu and sections without cards. Pages are regrouped into fewer, with tabs for auras and for target, focus and mouseover. Window themes, the brand color and the window font settings are gone.",
+                    "All nameplate text shares one font, outline and shadow.",
+                    "The offset sliders are gone; move parts on the preview instead. Help keeps What's new and the topics the settings can't show; the tour is gone.",
+                    "The built-in looks share one layout; only the bars differ.",
+                    "Stacking presets set overlap and the game's slide speed together. Instant movement stays on the Stacking page.",
+                    "Enemy nameplates stack by default. If you had enemy stacking off, this update turns it on once; turn it off again on the Stacking page and it stays off.",
+                    "The enemy power bar shows on bosses only. The Show on choice is gone.",
+                    "On/off switches are small bars with a knob that slides across when clicked.",
+                    "Every dimmed setting names the switch that turns it on.",
+                },
+            },
+            {
+                title = "Fixed",
+                items = {
+                    "Health, cast and enemy power bars, borders and icons line up to the exact pixel at any UI scale. Plates no longer merge their layers before drawing, which shifted some parts by a pixel.",
+                    "The whole clickable area works, padding and cast bar included. The game only takes clicks inside its own nameplate box, so Plateau makes that box big enough. Out of combat only.",
+                    "Spell target and enemy target names keep their class color when the game hides the class.",
+                    "No more \"attempt to compare a secret number\" error from the cast bar timer after combat.",
+                    "Locked aura and shield buttons are skipped while restyling and finished when the game allows it.",
+                    "Right-click reset and change marks work on the clickable area, stacking box and nameplate offset sliders.",
+                    "Long spell names on the cast bar stop before the timer.",
+                    "Dropdown values too long for the box drop their bracketed detail, and the full value shows in the tooltip. Percent and seconds sliders show their unit.",
+                },
+            },
+        },
+    },
+    {
         version = "0.1.3",
         sections = {
             {
@@ -9,10 +60,9 @@ ns.changelog = {
                 items = {
                     "A redesigned settings window: a header with search, theme buttons, your profile and Undo/Redo; side menu categories that open as you need them; a short description on every page; settings grouped in cards; and a framed live preview.",
                     "Settings window themes only change colors now and switch instantly, without a reload. All five themes share the same fonts and shapes.",
-                    "On/off switches are small bars with a knob that slides across when clicked, filling ochre when on. Checkboxes in lists are rounded with a check mark.",
+                    "On/off switches are rounded and slide when clicked, and checkboxes in lists are rounded with a check mark.",
                     "What's new: the first time you log in after an update, Plateau shows what changed. Pick Don't show again to turn it off, or open it any time with /plt whatsnew.",
                     "New characters start with the profile you picked in setup, and the Profiles page shows which profile new characters use.",
-                    "Raid, elite, quest and faction icons placed on the same spot now line up side by side when more than one shows, instead of covering each other.",
                 },
             },
             {
@@ -26,17 +76,6 @@ ns.changelog = {
             {
                 title = "Fixed",
                 items = {
-                    "The enemy power bar in the preview now lights up its own edge when hovered or selected, like the health and cast bars, instead of drawing a separate box around it.",
-                    "Health, cast and enemy power bars line up to the exact pixel. Plates no longer merge their layers before drawing, which shifted some parts by a pixel.",
-                    "No more \"attempt to compare a secret number\" error from the cast bar timer after combat.",
-                    "Settings window: dropdown values too long for the box drop their bracketed detail, and the full value shows in the tooltip. Percent and seconds sliders show their unit. Changed only has a check box that shows when it's on. The preview ruler reads 0 instead of -0.",
-                    "The enemy power bar shows on bosses only, so regular mobs no longer get an empty bar. The Show on choice is gone.",
-                    "Enemy nameplates stack by default. If you had enemy stacking off, this update turns it on once; turn it off again on the Stacking page and it stays off.",
-                    "Instant movement is back on the Stacking page: nameplates jump straight to their new spot instead of sliding. The spacing presets keep it on.",
-                    "Include name in clickable area: clicking an enemy's name targets it, like Blizzard's nameplates. On by default.",
-                    "The whole clickable area works now, padding and cast bar included. The game only takes clicks inside its own nameplate box, so Plateau makes that box big enough for your clickable area. Out of combat only.",
-                    "Right-click reset works on the clickable area, stacking box and nameplate offset sliders, and on Include cast bar in clickable area. These rows also show change marks now.",
-                    "Kicker icons sit right next to the nameplate when more kickers are assigned to other raid markers, instead of leaving empty slots between.",
                     "The interrupt ready marker could disappear when its thickness was set to 1.",
                     "A newer interrupt message could be hidden early by an older interrupt's timer.",
                     "The settings window jumped away from the cursor when you started dragging it.",
