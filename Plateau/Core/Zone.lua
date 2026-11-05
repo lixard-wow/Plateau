@@ -19,7 +19,7 @@ function Zone.Read()
     Zone.inInstance = inside == true
     Zone.type = kind or "none"
     Zone.content = CONTENT[Zone.type] or "world"
-    Zone.inDelve = C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress() == true or false
+    Zone.inDelve = Zone.inInstance and C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress() == true or false
     return Zone
 end
 

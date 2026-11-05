@@ -28,7 +28,7 @@ for _, k in ipairs({ "none", "party", "raid", "scenario", "delve", "pvp", "arena
             local pets = z.inInstance and PETS[z.content] == true
             local oldPets = i == true and (k == "party" or k == "raid")
             local colors = (z.inInstance and z.type ~= "pvp" and z.type ~= "arena") or z.inDelve
-            local oldColors = (i == true and k ~= "pvp" and k ~= "arena") or d == true or false
+            local oldColors = (i == true and k ~= "pvp" and k ~= "arena") or (i == true and d == true) or false
             local raid = z.inInstance and z.type == "raid"
             local oldRaid = i == true and k == "raid"
             local same = fade == oldFade and pets == oldPets and colors == oldColors and raid == oldRaid
@@ -42,6 +42,9 @@ for _, k in ipairs({ "none", "party", "raid", "scenario", "delve", "pvp", "arena
     end
 end
 check(bad == 0, "the shared zone read answers every place the way its old copy did")
+
+inside, kind, delve = false, "none", true
+check(Zone.Read().inDelve == false, "a delve flag in the open world (Forever) does not count as a delve")
 
 inside, kind = nil, nil
 local z = Zone.Read()
