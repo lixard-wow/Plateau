@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5
+
+### Fixed
+- Forever: dungeon-only colors (enemy type colors set to Only in dungeons, raids and delves) no longer show in the open world. The game reported a delve in progress outside, so Plateau now needs you to be in an instance too.
+- Corpses no longer get an empty nameplate after you loot or skin them, and a plate goes away as soon as its unit dies.
+
 ## 0.1.4
 
 ### New
