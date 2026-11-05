@@ -159,6 +159,10 @@ local function IsMinion(unit)
 end
 
 local function Claimable(unit)
+    local dead = UnitIsDead(unit)
+    if not issecretvalue(dead) and dead then
+        return false, true
+    end
     if UnitCanAttack("player", unit) then
         return true
     end
