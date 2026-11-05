@@ -813,9 +813,19 @@ end
 local watcher = CreateFrame("Frame")
 watcher:RegisterEvent("UNIT_FACTION")
 watcher:RegisterEvent("UNIT_FLAGS")
-watcher:SetScript("OnEvent", function(_, _, unit)
-    if ns.disabled then return end
-    if unit and watched[unit] and Claimable(unit) then
+watcher:RegisterEvent("UNIT_HEALTH")
+watcher:SetScript("OnEvent", function(_, event, unit)
+    if ns.disabled or not unit then return end
+    local plate = platesByUnit[unit]
+    if plate and plate.active then
+        local dead = UnitIsDead(unit)
+        if not issecretvalue(dead) and dead then
+            OnUnitRemoved(unit)
+            OnUnitAdded(unit)
+        end
+        return
+    end
+    if event ~= "UNIT_HEALTH" and watched[unit] and Claimable(unit) then
         OnUnitAdded(unit)
     end
 end)
