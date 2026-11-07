@@ -7,6 +7,7 @@ function UnitReaction() return 2 end
 function IsInInstance() return true, "raid" end
 function IsInRaid() return true end
 function GetNumGroupMembers() return 3 end
+function UnitClass() return "Warrior", "WARRIOR" end
 Enum = { PowerType = { Mana = 0 } }
 C_SpecializationInfo = {
     GetSpecialization = function() return 1 end,

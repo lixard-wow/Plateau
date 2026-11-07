@@ -47,7 +47,7 @@ read_globals = {
     "RegisterStateDriver", "ReloadUI", "SOUNDKIT", "SPELL_INTERRUPTED_BY", "STANDARD_TEXT_FONT", "Settings",
     "TooltipUtil", "UIParent", "UISpecialFrames", "UNIT_NAME_FONT", "UnitAffectingCombat", "UnitAura",
     "UnitBuff", "UnitCanAttack", "UnitCastingDuration", "UnitCastingInfo", "UnitChannelDuration",
-    "UnitChannelInfo", "UnitClass", "UnitClassBase", "UnitClassFromGUID", "UnitClassification",
+    "GetShapeshiftFormID", "UnitChannelInfo", "UnitClass", "UnitClassBase", "UnitClassFromGUID", "UnitClassification",
     "UnitCreatureFamily", "UnitCreatureType", "UnitDebuff", "UnitEffectiveLevel",
     "UnitEmpoweredChannelDuration", "UnitExists", "UnitFrameUtil", "UnitGUID",
     "UnitGetDetailedHealPrediction", "UnitGetTotalAbsorbs", "UnitGroupRolesAssigned", "UnitHasPowerType",

@@ -446,10 +446,41 @@ function UnitColors:ResolvePreview(state, plateState)
     return 1, 0, 0, 1
 end
 
+local TANK_FORMS = { [5] = true, [8] = true, [18] = true }
+local RIGHTEOUS_FURY = 25780
+local playerClass = UnitClass and select(2, UnitClass("player"))
+local hasSpecRole = false
+
+local function TankStance()
+    local form = GetShapeshiftFormID and GetShapeshiftFormID()
+    if form and not issecretvalue(form) and TANK_FORMS[form] then return true end
+    if playerClass == "PALADIN" and C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID then
+        local ok, aura = pcall(C_UnitAuras.GetPlayerAuraBySpellID, RIGHTEOUS_FURY)
+        if ok and issecretvalue(aura) then return isTank end
+        if ok and aura ~= nil then return true end
+    end
+    local role = UnitGroupRolesAssigned("player")
+    return not issecretvalue(role) and role == "TANK"
+end
+
 local function UpdateRole()
     local specIndex = C_SpecializationInfo.GetSpecialization()
     local role = specIndex and specIndex > 0 and select(5, C_SpecializationInfo.GetSpecializationInfo(specIndex))
-    isTank = role == "TANK"
+    hasSpecRole = role == "TANK" or role == "HEALER" or role == "DAMAGER"
+    if hasSpecRole then
+        isTank = role == "TANK"
+    else
+        isTank = TankStance()
+    end
+end
+
+local function StanceChanged()
+    if hasSpecRole then return end
+    local wasTank = isTank
+    isTank = TankStance()
+    if cfgs.enemy and wasTank ~= isTank then
+        ns.Driver:RequestRestyle(true)
+    end
 end
 
 local function ReadInstance()
@@ -478,10 +509,19 @@ UnitColors:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 UnitColors:RegisterEvent("PLAYER_LEVEL_UP")
 UnitColors:RegisterEvent("GROUP_ROSTER_UPDATE")
 UnitColors:RegisterEvent("PLAYER_ROLES_ASSIGNED")
+UnitColors:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+if playerClass == "PALADIN" then
+    UnitColors:RegisterUnitEvent("UNIT_AURA", "player")
+end
 UnitColors:SetScript("OnEvent", function(_, event)
     if ns.disabled then return end
+    if event == "UPDATE_SHAPESHIFT_FORM" or event == "UNIT_AURA" then
+        StanceChanged()
+        return
+    end
     if event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ROLES_ASSIGNED" then
         UpdateTanks()
+        StanceChanged()
         return
     end
     if event == "PLAYER_LEVEL_UP" then
