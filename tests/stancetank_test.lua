@@ -81,3 +81,13 @@ lfgRole = "TANK"
 script(nil, "PLAYER_ROLES_ASSIGNED")
 r, g = Color()
 check(r == 0 and g == 1, "a tank role from the group finder counts as tank")
+
+ns.flavor = "forever"
+C_SpecializationInfo.GetSpecialization = function() return 1 end
+C_SpecializationInfo.GetSpecializationInfo = function() return nil, nil, nil, nil, "DAMAGER" end
+lfgRole = "NONE"
+form = 5
+script(nil, "PLAYER_SPECIALIZATION_CHANGED")
+status = 3
+r, g = Color()
+check(r == 0 and g == 1, "on Forever, Bear Form counts as tank even when the spec says damage")

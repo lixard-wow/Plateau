@@ -470,7 +470,7 @@ end
 local function UpdateRole()
     local specIndex = C_SpecializationInfo.GetSpecialization()
     local role = specIndex and specIndex > 0 and select(5, C_SpecializationInfo.GetSpecializationInfo(specIndex))
-    hasSpecRole = role == "TANK" or role == "HEALER" or role == "DAMAGER"
+    hasSpecRole = ns.flavor ~= "forever" and (role == "TANK" or role == "HEALER" or role == "DAMAGER")
     if hasSpecRole then
         isTank = role == "TANK"
     else
