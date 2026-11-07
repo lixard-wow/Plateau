@@ -280,6 +280,10 @@ function UnitColors:ClassColor(cfg, unit, soft)
     end
 end
 
+function UnitColors:IsTank()
+    return isTank
+end
+
 function UnitColors:Threat(cfg, unit)
     local color = ThreatColor(cfg, unit)
     if color then
