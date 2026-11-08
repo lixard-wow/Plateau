@@ -98,7 +98,8 @@ local function StyleButton(button, group, container)
     end
 
     ns.SetIconBorder(button, db.borderSize, db.borderColor)
-    local reach = button.border.reach or 1
+    local reach = button.border.reach
+    if not reach or reach <= 0 then reach = 1 end
     button.dispel:ClearAllPoints()
     button.dispel:SetPoint("TOPLEFT", button, "TOPLEFT", -reach, reach)
     button.dispel:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", reach, -reach)
@@ -163,7 +164,9 @@ local function Initializer(container, group)
         button.stacks = cooldown:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         button.stacks:SetPoint("BOTTOMRIGHT", 2, -1)
 
-        local dispel = cooldown:CreateTexture(nil, "OVERLAY", nil, 7)
+        local tinted = DispelStyle.PreserveAsset ~= nil
+        local dispel = tinted and ns.SnapTexture(button:CreateTexture(nil, "BACKGROUND", nil, 1)) or cooldown:CreateTexture(nil, "OVERLAY", nil, 7)
+        if tinted then dispel:SetColorTexture(1, 1, 1, 1) end
         dispel:SetPoint("TOPLEFT", button, "TOPLEFT", -1, 1)
         dispel:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, -1)
         button.dispel = dispel
@@ -174,7 +177,7 @@ local function Initializer(container, group)
         button:AddDispelTypeTexture(dispel, {
             showWhenHarmful = group.harmful or false,
             showWhenHelpful = group.helpful or false,
-            style = DispelStyle.Border,
+            style = tinted and DispelStyle.PreserveAsset or DispelStyle.Border,
         })
 
         if group.pandemic and button.AddPandemicRegion then
