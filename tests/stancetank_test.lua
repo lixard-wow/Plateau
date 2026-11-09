@@ -91,3 +91,19 @@ script(nil, "PLAYER_SPECIALIZATION_CHANGED")
 status = 3
 r, g = Color()
 check(r == 0 and g == 1, "on Forever, Bear Form counts as tank even when the spec says damage")
+
+lfgRole = "DAMAGER"
+script(nil, "PLAYER_ROLES_ASSIGNED")
+r, g = Color()
+check(r == 1 and g == 0, "on Forever, a picked DPS role wins over Bear Form")
+
+lfgRole = "TANK"
+form = nil
+script(nil, "PLAYER_ROLES_ASSIGNED")
+r, g = Color()
+check(r == 0 and g == 1, "on Forever, a picked tank role counts as tank without a form")
+
+lfgRole = "HEALER"
+script(nil, "PLAYER_ROLES_ASSIGNED")
+r, g = Color()
+check(r == 1 and g == 0, "on Forever, a picked healer role uses the damage and healer colors")

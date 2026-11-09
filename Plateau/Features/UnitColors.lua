@@ -467,6 +467,20 @@ local function TankStance()
     return not issecretvalue(role) and role == "TANK"
 end
 
+local function PickedRole()
+    if ns.flavor ~= "forever" then return nil end
+    local role = UnitGroupRolesAssigned("player")
+    if issecretvalue(role) then return nil end
+    if role == "TANK" or role == "HEALER" or role == "DAMAGER" then return role end
+    return nil
+end
+
+local function TankNow()
+    local picked = PickedRole()
+    if picked then return picked == "TANK" end
+    return TankStance()
+end
+
 local function UpdateRole()
     local specIndex = C_SpecializationInfo.GetSpecialization()
     local role = specIndex and specIndex > 0 and select(5, C_SpecializationInfo.GetSpecializationInfo(specIndex))
@@ -474,14 +488,14 @@ local function UpdateRole()
     if hasSpecRole then
         isTank = role == "TANK"
     else
-        isTank = TankStance()
+        isTank = TankNow()
     end
 end
 
 local function StanceChanged()
     if hasSpecRole then return end
     local wasTank = isTank
-    isTank = TankStance()
+    isTank = TankNow()
     if cfgs.enemy and wasTank ~= isTank then
         ns.Driver:RequestRestyle(true)
     end
