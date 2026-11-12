@@ -2491,6 +2491,8 @@ ns.sections = {
         { type = "Toggle", path = "look.colors.questExcludeBoss", label = "Exclude bosses",
           tooltip = "Bosses never get the quest icon or quest color." },
         GateList(On("look.quest.enabled"), "Turn on Show quest icon to use this.",
+            { type = "Toggle", path = "look.quest.showIcon", label = "Show the icon",
+              tooltip = "Turn off to keep only the objective progress count. The count has its own spot and can be moved or turned off apart from the icon." },
             { type = "Dropdown", path = "look.quest.style", label = "Icon style", options = QUEST_ICONS,
               tooltip = "The quest icon's artwork." },
             { type = "Slider", path = "look.quest.size", label = "Icon size", min = 8, max = 40,

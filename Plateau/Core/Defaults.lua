@@ -179,6 +179,7 @@ ns.defaults = {
             offsetX = 0,
             offsetY = 0,
             alpha = 1,
+            showIcon = true,
             showProgress = false,
             progress = {
                 position = "TOPRIGHT",

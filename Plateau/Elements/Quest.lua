@@ -8,6 +8,7 @@ local OBJECTIVE = Enum.TooltipDataLineType and Enum.TooltipDataLineType.QuestObj
 
 local alphas = {}
 local progress = {}
+local icons = {}
 
 local Quest = {
     key = "quest",
@@ -43,6 +44,7 @@ end
 function Quest:Configure(db, state)
     alphas[state] = db.alpha
     progress[state] = db.showProgress == true
+    icons[state] = db.showIcon ~= false
 end
 
 function Quest:Style(plate, db)
@@ -72,7 +74,7 @@ function Quest:Update(plate, unit)
     end
     local related = UnitIsRelatedToActiveQuest(unit)
     icon.art:SetAlphaFromBoolean(related, alphas[plate.state], 0)
-    icon:SetShown(issecretvalue(related) or related == true)
+    icon:SetShown(icons[plate.state] and (issecretvalue(related) or related == true))
     ns.PackIcons(plate)
     local text = progress[plate.state] and not issecretvalue(related) and related and Progress(unit)
     if text then
@@ -87,7 +89,7 @@ function Quest:Preview(plate, state)
     local icon = plate.quest
     icon.art:SetAlpha(alphas[plate.state])
     local excluded = ns.DB.views[plate.state].colors.questExcludeBoss and state.mobType == "boss"
-    icon:SetShown(state.quest == true and not excluded)
+    icon:SetShown(icons[plate.state] and state.quest == true and not excluded)
     plate.questProgress:SetText("3/8")
     plate.questProgress:SetShown(progress[plate.state] and state.quest == true and not excluded)
     ns.PackIcons(plate)

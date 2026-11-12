@@ -999,7 +999,7 @@ local TRAY = {
     { label = "Threat", section = "threatText", region = plate.threatText, paths = { "look.threatText.enabled" }, text = "99" },
     { label = "Raid icon", section = "raidMarker", region = plate.raidMarker, paths = { "look.raidMarker.enabled" }, texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons", coords = SKULL },
     { label = "Elite icon", section = "classification", region = plate.classification, paths = { "look.classification.enabled" }, atlas = "nameplates-icon-elite-gold" },
-    { label = "Quest icon", section = "quest", region = plate.quest, paths = { "look.quest.enabled" }, atlas = "QuestNormal" },
+    { label = "Quest icon", section = "quest", region = plate.quest, paths = { "look.quest.enabled", "look.quest.showIcon" }, atlas = "QuestNormal" },
     { label = "Quest count", section = "quest", region = plate.questProgress, paths = { "look.quest.enabled", "look.quest.showProgress" }, text = "3/8" },
     { label = "Faction", section = "faction", region = plate.faction, paths = { "look.faction.enabled" }, atlas = "UI-HUD-UnitFrame-Player-PVP-AllianceIcon" },
     { label = "Kickers", section = "kickers", region = plate.kickHolder, paths = { "look.kickers.enabled" }, texture = "Interface\\Icons\\Ability_Kick" },
