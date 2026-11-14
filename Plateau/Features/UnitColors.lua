@@ -13,6 +13,7 @@ local UnitReaction = UnitReaction
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitThreatSituation = UnitThreatSituation
 local issecretvalue = issecretvalue
+local UnitGroupRolesAssigned, GetPartyAssignment = UnitGroupRolesAssigned, GetPartyAssignment
 local UnitInParty, UnitInRaid, pcall = UnitInParty, UnitInRaid, pcall
 
 local MANA = Enum.PowerType.Mana
@@ -21,6 +22,7 @@ local UnitColors = CreateFrame("Frame")
 ns.UnitColors = UnitColors
 
 local cfgs = {}
+local isTank = false
 local inInstance = false
 local inRaid = false
 
@@ -101,6 +103,43 @@ local targetTokens = setmetatable({}, { __index = function(tokens, unit)
     return token
 end })
 
+local otherTanks = {}
+
+local function IsTank(token)
+    local role = UnitGroupRolesAssigned(token)
+    if not issecretvalue(role) and role == "TANK" then return true end
+    if GetPartyAssignment then
+        local assigned = GetPartyAssignment("MAINTANK", token)
+        return not issecretvalue(assigned) and assigned == true
+    end
+    return false
+end
+
+local function UpdateTanks()
+    wipe(otherTanks)
+    local prefix = IsInRaid() and "raid" or "party"
+    for i = 1, GetNumGroupMembers() do
+        local token = prefix .. i
+        local exists, mine = UnitExists(token), UnitIsUnit(token, "player")
+        if not issecretvalue(exists) and exists and not issecretvalue(mine) and not mine and IsTank(token) then
+            otherTanks[#otherTanks + 1] = token
+        end
+    end
+end
+
+local function HeldByOtherTank(unit)
+    for i = 1, #otherTanks do
+        local status = UnitThreatSituation(otherTanks[i], unit)
+        if not issecretvalue(status) and status == 3 then
+            return true
+        end
+    end
+    local target = targetTokens[unit]
+    if not IsTank(target) then return false end
+    local mine = UnitIsUnit(target, "player")
+    return not issecretvalue(mine) and not mine
+end
+
 local function LooseOnGroupMember(unit)
     local target = targetTokens[unit]
     local exists = UnitExists(target)
@@ -112,7 +151,14 @@ local function LooseOnGroupMember(unit)
     return inParty == true or inRaid ~= nil
 end
 
-local function ThreatColor(cfg, unit)
+local function OffTankColor(cfg)
+    if cfg.showOffTank then
+        return cfg.offTankColor
+    end
+    return cfg.showThreatGood and cfg.threatGood or nil
+end
+
+local function ThreatOnlyColor(cfg, unit)
     local status = UnitThreatSituation("player", unit)
     if issecretvalue(status) then return nil end
     if status == 3 then
@@ -123,6 +169,45 @@ local function ThreatColor(cfg, unit)
         return cfg.threatBad
     end
     return nil
+end
+
+local function RoleThreatColor(cfg, unit)
+    local status = UnitThreatSituation("player", unit)
+    if issecretvalue(status) then return nil end
+    if isTank then
+        if status == nil then
+            if HeldByOtherTank(unit) then
+                return cfg.showOffTank and cfg.offTankColor or nil
+            end
+            if LooseOnGroupMember(unit) then
+                return cfg.threatBad
+            end
+            return nil
+        end
+        if status == 3 then
+            return cfg.showThreatGood and cfg.threatGood or nil
+        end
+        if HeldByOtherTank(unit) then
+            return OffTankColor(cfg)
+        end
+        if status == 1 or status == 2 then
+            return cfg.showThreatWarning and cfg.threatWarning or nil
+        end
+        return cfg.threatBad
+    end
+    if status == 3 then
+        return cfg.threatBad
+    elseif status == 1 or status == 2 then
+        return cfg.showThreatWarning and cfg.threatWarning or nil
+    end
+    return cfg.showThreatGood and cfg.threatGood or nil
+end
+
+local function ThreatColor(cfg, unit)
+    if ns.flavor == "forever" then
+        return ThreatOnlyColor(cfg, unit)
+    end
+    return RoleThreatColor(cfg, unit)
 end
 
 local COLOR_KEYS = {}
@@ -213,6 +298,10 @@ function UnitColors:ClassColor(cfg, unit, soft)
     if color then
         return color.r, color.g, color.b, 1, soft
     end
+end
+
+function UnitColors:IsTank()
+    return isTank
 end
 
 function UnitColors:Threat(cfg, unit)
@@ -381,6 +470,47 @@ function UnitColors:ResolvePreview(state, plateState)
     return 1, 0, 0, 1
 end
 
+local TANK_FORMS = { [5] = true, [8] = true, [18] = true }
+local RIGHTEOUS_FURY = 25780
+local playerClass = UnitClass and select(2, UnitClass("player"))
+local hasSpecRole = false
+
+local function TankStance()
+    local form = GetShapeshiftFormID and GetShapeshiftFormID()
+    if form and not issecretvalue(form) and TANK_FORMS[form] then return true end
+    if playerClass == "PALADIN" and C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID then
+        local ok, aura = pcall(C_UnitAuras.GetPlayerAuraBySpellID, RIGHTEOUS_FURY)
+        if ok and issecretvalue(aura) then return isTank end
+        if ok and aura ~= nil then return true end
+    end
+    local role = UnitGroupRolesAssigned("player")
+    return not issecretvalue(role) and role == "TANK"
+end
+
+local function UpdateRole()
+    if ns.flavor == "forever" then
+        isTank = false
+        return
+    end
+    local specIndex = C_SpecializationInfo.GetSpecialization()
+    local role = specIndex and specIndex > 0 and select(5, C_SpecializationInfo.GetSpecializationInfo(specIndex))
+    hasSpecRole = role == "TANK" or role == "HEALER" or role == "DAMAGER"
+    if hasSpecRole then
+        isTank = role == "TANK"
+    else
+        isTank = TankStance()
+    end
+end
+
+local function StanceChanged()
+    if hasSpecRole or ns.flavor == "forever" then return end
+    local wasTank = isTank
+    isTank = TankStance()
+    if cfgs.enemy and wasTank ~= isTank then
+        ns.Driver:RequestRestyle(true)
+    end
+end
+
 local function ReadInstance()
     local zone = ns.Zone.Read()
     inInstance = (zone.inInstance and zone.type ~= "pvp" and zone.type ~= "arena") or zone.inDelve
@@ -388,9 +518,10 @@ local function ReadInstance()
 end
 
 local function Refresh()
-    local wasInInstance, wasInRaid = inInstance, inRaid
+    local wasTank, wasInInstance, wasInRaid = isTank, inInstance, inRaid
+    UpdateRole()
     ReadInstance()
-    if cfgs.enemy and (wasInInstance ~= inInstance or wasInRaid ~= inRaid) then
+    if cfgs.enemy and (wasTank ~= isTank or wasInInstance ~= inInstance or wasInRaid ~= inRaid) then
         ns.Driver:RequestRestyle(true)
     end
 end
@@ -403,8 +534,26 @@ if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventVali
     UnitColors:RegisterEvent("SCENARIO_UPDATE")
 end
 UnitColors:RegisterEvent("PLAYER_LEVEL_UP")
+if ns.flavor ~= "forever" then
+    UnitColors:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
+    UnitColors:RegisterEvent("GROUP_ROSTER_UPDATE")
+    UnitColors:RegisterEvent("PLAYER_ROLES_ASSIGNED")
+    UnitColors:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+    if playerClass == "PALADIN" then
+        UnitColors:RegisterUnitEvent("UNIT_AURA", "player")
+    end
+end
 UnitColors:SetScript("OnEvent", function(_, event)
     if ns.disabled then return end
+    if event == "UPDATE_SHAPESHIFT_FORM" or event == "UNIT_AURA" then
+        StanceChanged()
+        return
+    end
+    if event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ROLES_ASSIGNED" then
+        UpdateTanks()
+        StanceChanged()
+        return
+    end
     if event == "PLAYER_LEVEL_UP" then
         if cfgs.enemy then
             ns.Driver:RequestRestyle(true)
@@ -412,6 +561,9 @@ UnitColors:SetScript("OnEvent", function(_, event)
         return
     end
     Refresh()
+    if event == "PLAYER_ENTERING_WORLD" then
+        UpdateTanks()
+    end
     if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
         for i = 1, #LATE_CHECKS do
             C_Timer.After(LATE_CHECKS[i], Refresh)
