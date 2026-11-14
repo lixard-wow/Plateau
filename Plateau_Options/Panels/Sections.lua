@@ -2510,7 +2510,9 @@ ns.sections = {
             { type = "Dropdown", path = "look.quest.progress.position", label = "Progress position", options = TEXT_POSITIONS,
               tooltip = "Where the progress count sits on the nameplate. Drag it in the preview to move it freely." },
             { type = "Slider", path = "look.quest.progress.gap", label = "Progress distance", min = 0, max = 20,
-              tooltip = "Space between the progress count and the edge of the health bar." }),
+              tooltip = "Space between the progress count and the edge of the health bar." },
+            { type = "Color", path = "look.quest.progress.color", label = "Progress color",
+              tooltip = "Color of the progress count." }),
         List(
         { type = "Header", label = "Quest enemy color" },
         { type = "ToggleColor", path = "look.colors.quest", colorPath = "look.colors.questColor", label = "Color quest enemies",

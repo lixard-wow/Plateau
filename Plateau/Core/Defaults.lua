@@ -186,6 +186,7 @@ ns.defaults = {
                 gap = 2,
                 offsetX = 18,
                 offsetY = 0,
+                color = { 1, 0.82, 0, 1 },
             },
         },
         threatText = {

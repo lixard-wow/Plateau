@@ -55,6 +55,8 @@ function Quest:Style(plate, db)
     local place = db.progress
     ns.PlaceText(plate.questProgress, plate, place.position, place.gap, place.offsetX, place.offsetY)
     ns.ApplyFont(plate.questProgress, STANDARD_TEXT_FONT, math.max(8, math.floor(db.size * 0.55)), "OUTLINE")
+    local color = place.color
+    plate.questProgress:SetTextColor(color[1], color[2], color[3], color[4])
 end
 
 function Quest:Disable(plate)
