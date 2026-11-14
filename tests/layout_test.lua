@@ -81,7 +81,7 @@ for _, path in ipairs({ "look.colors.bossColor", "look.colors.casterColor", "loo
     check(onColors[path] and not onHealth[path], path .. " is on Health bar colors")
 end
 local onThreat = paths(byKey.threatColors)
-for _, path in ipairs({ "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.threatGood" }) do
+for _, path in ipairs({ "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.threatGood", "look.colors.offTankColor" }) do
     check(onThreat[path] and not onHealth[path] and not onColors[path], path .. " is on Threat colors")
 end
 for _, path in ipairs({ "look.colors.quest", "look.colors.questColor", "look.colors.questExcludeBoss" }) do

@@ -33,7 +33,7 @@ end
 
 local function check(c, m) print((c and "PASS " or "FAIL ") .. m) end
 
-local ns = { Driver = { RequestRestyle = function() end } }
+local ns = { flavor = "forever", Driver = { RequestRestyle = function() end } }
 assert(loadfile("Plateau/Core/Locale.lua"))("Plateau", ns)
 C_EventUtils = C_EventUtils or { IsEventValid = function() return true end }
 assert(loadfile("Plateau/Core/Zone.lua"))("Plateau", ns)
@@ -81,4 +81,4 @@ check(Threat() == "none", "mob not fighting your group: no threat color")
 status = "secret"
 check(Threat() == "none", "hidden threat: no threat color")
 
-check(ns.UnitColors.IsTank == nil, "no role rules left")
+check(ns.UnitColors:IsTank() == false, "on Forever, role rules are off")
