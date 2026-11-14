@@ -82,10 +82,3 @@ script(nil, "PLAYER_ROLES_ASSIGNED")
 r, g = Color()
 check(r == 0 and g == 1, "a tank role from the group finder counts as tank")
 
-restyles = 0
-ns.flavor = "forever"
-lfgRole = "TANK"
-form = 5
-script(nil, "PLAYER_SPECIALIZATION_CHANGED")
-script(nil, "UPDATE_SHAPESHIFT_FORM")
-check(ns.UnitColors:IsTank() == false, "on Forever, role, stance and form are ignored")

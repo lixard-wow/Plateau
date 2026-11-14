@@ -50,7 +50,7 @@ read_globals = {
     "GetShapeshiftFormID", "UnitChannelInfo", "UnitClass", "UnitClassBase", "UnitClassFromGUID", "UnitClassification",
     "UnitCreatureFamily", "UnitCreatureType", "UnitDebuff", "UnitEffectiveLevel",
     "UnitEmpoweredChannelDuration", "UnitExists", "UnitFrameUtil", "UnitGUID",
-    "UnitGetDetailedHealPrediction", "UnitGetTotalAbsorbs", "UnitGroupRolesAssigned", "UnitHasPowerType",
+    "UnitGetDetailedHealPrediction", "UnitGetTotalAbsorbs", "UnitGroupRolesAssigned", "UnitHasEffectivelyTankAura", "UnitHasPowerType",
     "UnitHealth", "UnitHealthMax", "UnitHealthPercent", "UnitInParty", "UnitIsBossMob", "UnitIsLieutenant",
     "UnitIsFriend", "UnitIsPlayer", "UnitIsTapDenied", "UnitIsUnit", "UnitLevel", "UnitName", "UnitNameFromGUID",
     "UnitPlayerControlled", "UnitPower", "UnitPowerDisplayMod", "UnitPowerMax", "UnitPowerMissing",

@@ -104,8 +104,29 @@ local targetTokens = setmetatable({}, { __index = function(tokens, unit)
 end })
 
 local otherTanks = {}
+local TANK_CLASSES = { WARRIOR = true, DRUID = true, PALADIN = true }
+local UnitClass = UnitClass
+
+local function TankClass(token)
+    local _, class = UnitClass(token)
+    return not issecretvalue(class) and TANK_CLASSES[class] == true
+end
+
+local function TankAura(token)
+    if not UnitHasEffectivelyTankAura then return nil end
+    local ok, has = pcall(UnitHasEffectivelyTankAura, token)
+    if not ok or issecretvalue(has) then return nil end
+    return has == true
+end
+
+local function ForeverTank(token)
+    return TankClass(token) and TankAura(token) == true
+end
 
 local function IsTank(token)
+    if ns.flavor == "forever" then
+        return ForeverTank(token)
+    end
     local role = UnitGroupRolesAssigned(token)
     if not issecretvalue(role) and role == "TANK" then return true end
     if GetPartyAssignment then
@@ -115,22 +136,31 @@ local function IsTank(token)
     return false
 end
 
+local function TankCandidate(token)
+    if ns.flavor == "forever" then
+        return TankClass(token)
+    end
+    return IsTank(token)
+end
+
 local function UpdateTanks()
     wipe(otherTanks)
     local prefix = IsInRaid() and "raid" or "party"
     for i = 1, GetNumGroupMembers() do
         local token = prefix .. i
         local exists, mine = UnitExists(token), UnitIsUnit(token, "player")
-        if not issecretvalue(exists) and exists and not issecretvalue(mine) and not mine and IsTank(token) then
+        if not issecretvalue(exists) and exists and not issecretvalue(mine) and not mine and TankCandidate(token) then
             otherTanks[#otherTanks + 1] = token
         end
     end
 end
 
 local function HeldByOtherTank(unit)
+    local live = ns.flavor == "forever"
     for i = 1, #otherTanks do
-        local status = UnitThreatSituation(otherTanks[i], unit)
-        if not issecretvalue(status) and status == 3 then
+        local token = otherTanks[i]
+        local status = UnitThreatSituation(token, unit)
+        if not issecretvalue(status) and status == 3 and (not live or IsTank(token)) then
             return true
         end
     end
@@ -158,20 +188,7 @@ local function OffTankColor(cfg)
     return cfg.showThreatGood and cfg.threatGood or nil
 end
 
-local function ThreatOnlyColor(cfg, unit)
-    local status = UnitThreatSituation("player", unit)
-    if issecretvalue(status) then return nil end
-    if status == 3 then
-        return cfg.showThreatGood and cfg.threatGood or nil
-    elseif status == 1 or status == 2 then
-        return cfg.showThreatWarning and cfg.threatWarning or nil
-    elseif status == 0 or LooseOnGroupMember(unit) then
-        return cfg.threatBad
-    end
-    return nil
-end
-
-local function RoleThreatColor(cfg, unit)
+local function ThreatColor(cfg, unit)
     local status = UnitThreatSituation("player", unit)
     if issecretvalue(status) then return nil end
     if isTank then
@@ -201,13 +218,6 @@ local function RoleThreatColor(cfg, unit)
         return cfg.showThreatWarning and cfg.threatWarning or nil
     end
     return cfg.showThreatGood and cfg.threatGood or nil
-end
-
-local function ThreatColor(cfg, unit)
-    if ns.flavor == "forever" then
-        return ThreatOnlyColor(cfg, unit)
-    end
-    return RoleThreatColor(cfg, unit)
 end
 
 local COLOR_KEYS = {}
@@ -302,6 +312,10 @@ end
 
 function UnitColors:IsTank()
     return isTank
+end
+
+function UnitColors:TankAura()
+    return TankAura("player")
 end
 
 function UnitColors:Threat(cfg, unit)
@@ -489,7 +503,8 @@ end
 
 local function UpdateRole()
     if ns.flavor == "forever" then
-        isTank = false
+        hasSpecRole = false
+        isTank = ForeverTank("player")
         return
     end
     local specIndex = C_SpecializationInfo.GetSpecialization()
@@ -503,9 +518,13 @@ local function UpdateRole()
 end
 
 local function StanceChanged()
-    if hasSpecRole or ns.flavor == "forever" then return end
+    if hasSpecRole then return end
     local wasTank = isTank
-    isTank = TankStance()
+    if ns.flavor == "forever" then
+        isTank = ForeverTank("player")
+    else
+        isTank = TankStance()
+    end
     if cfgs.enemy and wasTank ~= isTank then
         ns.Driver:RequestRestyle(true)
     end
@@ -534,14 +553,14 @@ if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventVali
     UnitColors:RegisterEvent("SCENARIO_UPDATE")
 end
 UnitColors:RegisterEvent("PLAYER_LEVEL_UP")
+UnitColors:RegisterEvent("GROUP_ROSTER_UPDATE")
+UnitColors:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
 if ns.flavor ~= "forever" then
     UnitColors:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
-    UnitColors:RegisterEvent("GROUP_ROSTER_UPDATE")
     UnitColors:RegisterEvent("PLAYER_ROLES_ASSIGNED")
-    UnitColors:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-    if playerClass == "PALADIN" then
-        UnitColors:RegisterUnitEvent("UNIT_AURA", "player")
-    end
+end
+if playerClass == "PALADIN" or (ns.flavor == "forever" and TANK_CLASSES[playerClass]) then
+    UnitColors:RegisterUnitEvent("UNIT_AURA", "player")
 end
 UnitColors:SetScript("OnEvent", function(_, event)
     if ns.disabled then return end

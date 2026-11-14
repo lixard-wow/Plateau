@@ -193,8 +193,10 @@ local function ClearLog()
 end
 
 local function ColorLines(lines)
-    if ns.flavor ~= "forever" then
-        lines[#lines + 1] = ns.UnitColors:IsTank() and L["Threat colors use the tank rules"] or L["Threat colors use the damage and healer rules"]
+    lines[#lines + 1] = ns.UnitColors:IsTank() and L["Threat colors use the tank rules"] or L["Threat colors use the damage and healer rules"]
+    if ns.flavor == "forever" then
+        local aura = ns.UnitColors:TankAura()
+        lines[#lines + 1] = aura == nil and L["Tank aura: the game doesn't say"] or aura and L["Tank aura: yes"] or L["Tank aura: no"]
     end
     for _, unit in ipairs({ "target", "focus" }) do
         local shown = ns.Driver:GetPlate(unit)

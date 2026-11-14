@@ -1094,12 +1094,7 @@ local PREVIEW_ENEMIES = {
     { value = "tapped", label = "Tapped by another player" },
 }
 
-local PREVIEW_THREAT = Plateau.flavor == "forever" and {
-    { value = "none", label = "No threat color" },
-    { value = "bad", label = "No threat" },
-    { value = "warning", label = "Threat changing" },
-    { value = "good", label = "You have threat" },
-} or {
+local PREVIEW_THREAT = {
     { value = "none", label = "No threat color" },
     { value = "bad", label = "Has aggro" },
     { value = "warning", label = "Losing aggro" },
@@ -2542,18 +2537,15 @@ ns.sections = {
     Section("threatColors", "Threat colors", { "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.showThreatWarning", "look.colors.threatWarning", "look.colors.showThreatGood", "look.colors.threatGood", "look.colors.showOffTank", "look.colors.offTankColor" }, List(
             { type = "Header", label = "Threat colors", first = true },
             { type = "ToggleColor", path = "look.colors.threat", colorPath = "look.colors.threatBad", label = "Threat colors",
-              tooltip = Plateau.flavor == "forever" and "Colors enemies by your threat in combat, the same for every role. This color shows on enemies you don't have threat on."
-                  or "Colors enemies by threat in combat. This color means threat is wrong: a tank lost aggro, or anyone else has it." },
+              tooltip = "Colors enemies by threat in combat. This color means threat is wrong: a tank lost aggro, or anyone else has it." },
             GateList(On("look.colors.threat"), "Turn on Threat colors to use this.",
                 { type = "Dropdown", path = "look.colors.threatDisplay", label = "Show threat on", options = THREAT_DISPLAY,
                   tooltip = "Shows threat on the health bar, its border, or both." },
                 { type = "ToggleColor", path = "look.colors.showThreatWarning", colorPath = "look.colors.threatWarning", label = "Threat warning color",
-                  tooltip = Plateau.flavor == "forever" and "Used when you are about to gain or lose threat." or "Used when threat is about to change hands." },
-                { type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood",
-                  label = Plateau.flavor == "forever" and "Color when you have threat" or "Threat safe color",
-                  tooltip = Plateau.flavor == "forever" and "Off: enemies you have threat on keep their normal color." or "Used when threat is where it should be." },
+                  tooltip = "Used when threat is about to change hands." },
+                { type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood", label = "Threat safe color",
+                  tooltip = "Used when threat is where it should be." },
                 { type = "ToggleColor", path = "look.colors.showOffTank", colorPath = "look.colors.offTankColor", label = "Off-tank color",
-                  visibleIf = function() return Plateau.flavor ~= "forever" end,
                   tooltip = "Tanks only. Used for enemies held by another tank in your group." })
     )),
 
