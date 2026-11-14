@@ -193,7 +193,6 @@ local function ClearLog()
 end
 
 local function ColorLines(lines)
-    lines[#lines + 1] = ns.UnitColors:IsTank() and L["Threat colors use the tank rules"] or L["Threat colors use the damage and healer rules"]
     for _, unit in ipairs({ "target", "focus" }) do
         local shown = ns.Driver:GetPlate(unit)
         if shown then

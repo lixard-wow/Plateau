@@ -1096,9 +1096,9 @@ local PREVIEW_ENEMIES = {
 
 local PREVIEW_THREAT = {
     { value = "none", label = "No threat color" },
-    { value = "bad", label = "Has aggro" },
-    { value = "warning", label = "Losing aggro" },
-    { value = "good", label = "Safe threat" },
+    { value = "bad", label = "No threat" },
+    { value = "warning", label = "Threat changing" },
+    { value = "good", label = "You have threat" },
 }
 
 local PREVIEW_BADGES = {
@@ -2534,19 +2534,17 @@ ns.sections = {
         GateList(On("look.forces.enabled"), "Turn on Show enemy forces to use this.", FontControls("look.forces"))
     )),
 
-    Section("threatColors", "Threat colors", { "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.showThreatWarning", "look.colors.threatWarning", "look.colors.showThreatGood", "look.colors.threatGood", "look.colors.showOffTank", "look.colors.offTankColor" }, List(
+    Section("threatColors", "Threat colors", { "look.colors.threat", "look.colors.threatBad", "look.colors.threatDisplay", "look.colors.showThreatWarning", "look.colors.threatWarning", "look.colors.showThreatGood", "look.colors.threatGood" }, List(
             { type = "Header", label = "Threat colors", first = true },
             { type = "ToggleColor", path = "look.colors.threat", colorPath = "look.colors.threatBad", label = "Threat colors",
-              tooltip = "Colors enemies by threat in combat. This color means threat is wrong: a tank lost aggro, or anyone else has it." },
+              tooltip = "Colors enemies by your threat in combat, the same for every role. This color shows on enemies you don't have threat on." },
             GateList(On("look.colors.threat"), "Turn on Threat colors to use this.",
                 { type = "Dropdown", path = "look.colors.threatDisplay", label = "Show threat on", options = THREAT_DISPLAY,
                   tooltip = "Shows threat on the health bar, its border, or both." },
                 { type = "ToggleColor", path = "look.colors.showThreatWarning", colorPath = "look.colors.threatWarning", label = "Threat warning color",
-                  tooltip = "Used when threat is about to change hands." },
-                { type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood", label = "Threat safe color",
-                  tooltip = "Used when threat is where it should be." },
-                { type = "ToggleColor", path = "look.colors.showOffTank", colorPath = "look.colors.offTankColor", label = "Off-tank color",
-                  tooltip = "Tanks only. Used for enemies held by another tank in your group." })
+                  tooltip = "Used when you are about to gain or lose threat." },
+                { type = "ToggleColor", path = "look.colors.showThreatGood", colorPath = "look.colors.threatGood", label = "Color when you have threat",
+                  tooltip = "Off: enemies you have threat on keep their normal color." })
     )),
 
     Section("threatText", "Threat percent", "look.threatText", Join(
