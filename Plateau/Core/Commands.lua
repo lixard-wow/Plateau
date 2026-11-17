@@ -225,10 +225,17 @@ end
 local function HookGameMenu()
     local button = CreateFrame("Button", "PlateauGameMenuButton", GameMenuFrame, "MainMenuFrameButtonTemplate")
     local SetFlat = BuildFlatLook(button)
+    button.SetFlat = SetFlat
     button:SetText(ns.Brand:Text("Plateau"))
+    local function Label()
+        if button.skinnedBy then
+            return "Plateau"
+        end
+        return ns.Brand:Text("Plateau")
+    end
     ns.Brand:OnChange(function()
         if button:IsShown() then
-            button:SetText(ns.Brand:Text("Plateau"))
+            button:SetText(Label())
         end
     end)
     local fontString = button:GetFontString()
@@ -259,7 +266,9 @@ local function HookGameMenu()
         end
         local width, height = addOns:GetSize()
         local extra = height + 4
-        SetFlat(addOns.Left ~= nil and addOns.Left:GetAlpha() == 0)
+        if not button.skinnedBy then
+            SetFlat(addOns.Left ~= nil and addOns.Left:GetAlpha() == 0)
+        end
         button:SetSize(width, height)
         button:ClearAllPoints()
         local point, relative, relativePoint, x, y = addOns:GetPoint(1)
@@ -269,7 +278,7 @@ local function HookGameMenu()
         end
         ShiftDown(addOns:GetTop(), extra)
         button:SetPoint(point, relative, relativePoint, x, y)
-        button:SetText(ns.Brand:Text("Plateau"))
+        button:SetText(Label())
         button:Show()
         GameMenuFrame:SetHeight(GameMenuFrame:GetHeight() + extra)
     end
