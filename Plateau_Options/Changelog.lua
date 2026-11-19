@@ -2,6 +2,26 @@ local _, ns = ...
 
 ns.changelog = {
     {
+        version = "0.1.6",
+        sections = {
+            {
+                title = "New",
+                items = {
+                    "Quest progress count has its own color, quest gold by default.",
+                    "Preview: the quest icon and the quest count turn on and off separately.",
+                },
+            },
+            {
+                title = "Fixed",
+                items = {
+                    "Forever: warriors, druids and paladins who are tanking (Defensive Stance, Bear Form, Righteous Fury) get tank threat colors instead of red on mobs they hold.",
+                    "Aura dispel color now sits on the border outside the icon, not inside it.",
+                    "The game menu button lets a skinning addon take over its look.",
+                },
+            },
+        },
+    },
+    {
         version = "0.1.5",
         sections = {
             {
